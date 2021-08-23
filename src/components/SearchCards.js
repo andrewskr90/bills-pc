@@ -13,16 +13,21 @@ const initialQueryState = {
 const SearchCards = () => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [queryState, setQueryState] = useState(initialQueryState)
+    const [cardArray, setCardArray] = useState([])
 
     const queryKeyName= '?q=name:'
     const queryKeySetId = '?q=set.id:'
 
-    const handleChange = (e) => {
-        setFormValues({
-            ...formValues,
-            [e.target.name]: `${e.target.value}`
-        })
-        if(e.target.value) {
+    const chooseQuery = (e) => {
+        if(formValues.setName) {
+            console.log('it exists')
+            console.log(queryKeySetId)
+            setQueryState({
+                ...queryState,
+                key: queryKeySetId
+            })
+            console.log(queryState)
+        } if(e.target.name== 'pokemonName') {
             setQueryState({
                 ...queryState,
                 key: queryKeyName
@@ -35,10 +40,25 @@ const SearchCards = () => {
         }
     }
 
+    const handleChange = (e) => {
+        setFormValues({
+            ...formValues,
+            [e.target.name]: `${e.target.value}`
+        })
+         chooseQuery(e)
+    }
+
+
+    console.log(formValues)
+    console.log(queryState)
+
     const handleSubmit = (e) => {
         e.preventDefault()
+        if(formValues.setName){
+            console.log('it exists')
+        }
             // axios.get(`https://api.pokemontcg.io/v2/cards${queryState.key}${formValues.pokemonName}`)
-            axios.get(`https://api.pokemontcg.io/v2/cards${queryKeySetId}gym2`)
+            axios.get(`https://api.pokemontcg.io/v2/cards${queryState}`)
             .then(res=>{
             console.log(res)
             })
@@ -58,12 +78,14 @@ const SearchCards = () => {
                     />
                 </label>
                 <label>Set
-                    <input
+                    <select
                         name='setName'
-                        type='text'
-                        value={formValues.setName}
                         onChange={handleChange}
-                    />
+                    >
+                        <option value=''>--select--</option>
+                        <option value='swsh4'>Vivid Voltage</option>
+                        <option value='swsh3'>Darkness Ablaze</option>
+                        </select>
                 </label>
                 <button>Search</button>
             </form>
