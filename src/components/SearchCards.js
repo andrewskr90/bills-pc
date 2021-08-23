@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 
+import SearchedCard from './SearchedCard'
+
 const initialFormValues = {
     pokemonName:'',
     setName:'',
@@ -18,50 +20,25 @@ const SearchCards = () => {
     const queryKeyName= '?q=name:'
     const queryKeySetId = '?q=set.id:'
 
-    const chooseQuery = (e) => {
-        // if(formValues.setName == true) {
-        //     setQueryState({
-        //         ...queryState,
-        //         key: queryKeySetId
-        //     })
-        // } if(e.target.name== 'pokemonName') {
-        //     setQueryState({
-        //         ...queryState,
-        //         key: queryKeyName
-        //     })
-        // } else {
-        //     setQueryState({
-        //         ...queryState,
-        //         key: ''
-        //     })
-        // }
-    }
-
     const handleChange = (e) => {
         setFormValues({
             ...formValues,
             [e.target.name]: `${e.target.value}`
         })
-         chooseQuery(e)
     }
-
-    // const filteredArray = (array) => {
-        // array.filter(obj => obj.name = 'pikachu')
-    // }
 
     const handleSubmit = (e) => {
         e.preventDefault()
         formValues.setName ? (
             axios.get(`https://api.pokemontcg.io/v2/cards${queryKeySetId}${formValues.setName}`)
                 .then(res=>{
-                console.log(res.data.data[0].name)
-                const result = res.data.data.filter(obj => obj.name === 'weedle')
-                console.log(result)
+                    const result = res.data.data.filter(obj => obj.name.includes(formValues.pokemonName.charAt(0).toUpperCase()) )
+                    setCardArray(result)
                 })
                 .catch(err=>console.log(err))
         ) : formValues.pokemonName ? (
             axios.get(`https://api.pokemontcg.io/v2/cards${queryKeyName}${formValues.pokemonName}`)
-                .then(res => console.log(res))
+                .then(res => {setCardArray(res.data.data); console.log(cardArray)})
                 .catch(err => console.log(err))
         ) : (
             axios.get(`https://api.pokemontcg.io/v2/cards`)
@@ -69,7 +46,7 @@ const SearchCards = () => {
                 .catch(err => console.log(err))
         )
     }
-
+    console.log(cardArray)
     return(
         <div>
             <form onSubmit={handleSubmit}>
@@ -94,6 +71,11 @@ const SearchCards = () => {
                 </label>
                 <button>Search</button>
             </form>
+            <div style={{display:'flex', flexWrap:'wrap'}}>
+                {cardArray.map(obj=> {return <SearchedCard key={obj.id} imgLink={obj.images.small} 
+                // prices={obj.tcgplayer.prices}
+                />})}
+            </div>
         </div>
     )
 }

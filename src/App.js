@@ -1,6 +1,7 @@
 import React from 'react'
 import SearchCards from './components/SearchCards'
 import MyCollection from './components/MyCollection'
+import './App.css'
 
 function App() {
   
