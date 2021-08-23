@@ -19,25 +19,22 @@ const SearchCards = () => {
     const queryKeySetId = '?q=set.id:'
 
     const chooseQuery = (e) => {
-        if(formValues.setName) {
-            console.log('it exists')
-            console.log(queryKeySetId)
-            setQueryState({
-                ...queryState,
-                key: queryKeySetId
-            })
-            console.log(queryState)
-        } if(e.target.name== 'pokemonName') {
-            setQueryState({
-                ...queryState,
-                key: queryKeyName
-            })
-        } else {
-            setQueryState({
-                ...queryState,
-                key: ''
-            })
-        }
+        // if(formValues.setName == true) {
+        //     setQueryState({
+        //         ...queryState,
+        //         key: queryKeySetId
+        //     })
+        // } if(e.target.name== 'pokemonName') {
+        //     setQueryState({
+        //         ...queryState,
+        //         key: queryKeyName
+        //     })
+        // } else {
+        //     setQueryState({
+        //         ...queryState,
+        //         key: ''
+        //     })
+        // }
     }
 
     const handleChange = (e) => {
@@ -48,22 +45,29 @@ const SearchCards = () => {
          chooseQuery(e)
     }
 
-
-    console.log(formValues)
-    console.log(queryState)
+    // const filteredArray = (array) => {
+        // array.filter(obj => obj.name = 'pikachu')
+    // }
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        if(formValues.setName){
-            console.log('it exists')
-        }
-            // axios.get(`https://api.pokemontcg.io/v2/cards${queryState.key}${formValues.pokemonName}`)
-            axios.get(`https://api.pokemontcg.io/v2/cards${queryState}`)
-            .then(res=>{
-            console.log(res)
-            })
-            .catch(err=>console.log(err))
-        
+        formValues.setName ? (
+            axios.get(`https://api.pokemontcg.io/v2/cards${queryKeySetId}${formValues.setName}`)
+                .then(res=>{
+                console.log(res.data.data[0].name)
+                const result = res.data.data.filter(obj => obj.name === 'weedle')
+                console.log(result)
+                })
+                .catch(err=>console.log(err))
+        ) : formValues.pokemonName ? (
+            axios.get(`https://api.pokemontcg.io/v2/cards${queryKeyName}${formValues.pokemonName}`)
+                .then(res => console.log(res))
+                .catch(err => console.log(err))
+        ) : (
+            axios.get(`https://api.pokemontcg.io/v2/cards`)
+                .then(res => console.log(res))
+                .catch(err => console.log(err))
+        )
     }
 
     return(
@@ -81,6 +85,7 @@ const SearchCards = () => {
                     <select
                         name='setName'
                         onChange={handleChange}
+                        value={formValues.setName}
                     >
                         <option value=''>--select--</option>
                         <option value='swsh4'>Vivid Voltage</option>
