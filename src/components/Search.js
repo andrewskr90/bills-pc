@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 
-import SearchedCard from './SearchedCard'
+import SearchResults from './SearchResults';
 
 const initialFormValues = {
     pokemonName:'',
@@ -12,7 +12,7 @@ const initialQueryState = {
     key:''
 }
 
-const SearchCards = () => {
+const Search = () => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [queryState, setQueryState] = useState(initialQueryState)
     const [cardArray, setCardArray] = useState([])
@@ -71,13 +71,9 @@ const SearchCards = () => {
                 </label>
                 <button>Search</button>
             </form>
-            <div style={{display:'flex', flexWrap:'wrap'}}>
-                {cardArray.map(obj=> {return <SearchedCard key={obj.id} imgLink={obj.images.small} 
-                // prices={obj.tcgplayer.prices}
-                />})}
-            </div>
+            <SearchResults cardArray={cardArray} />
         </div>
     )
 }
 
-export default SearchCards
+export default Search

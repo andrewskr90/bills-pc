@@ -1,9 +1,8 @@
 import React from 'react'
 
-const SearchedCard = (props) => {
-    const { imgLink, 
-        // prices 
-    } = props
+const Card = (props) => {
+    const { imgLink, card, price} = props
+
     const handleClick = () => {
 
     }
@@ -21,9 +20,9 @@ const SearchedCard = (props) => {
                     width:'100px'
                 }}
             />
-            {/* <p>TCG Player Market Price:{prices}</p> */}
+            <p>Market Price:{price.market}</p>
         </div>
     )
 }
 
-export default SearchedCard
+export default Card
