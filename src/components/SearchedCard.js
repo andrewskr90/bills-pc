@@ -1,10 +1,10 @@
 import React from 'react'
 
-const Card = (props) => {
-    const { imgLink, card, price} = props
+const SearchedCard = (props) => {
+    const { imgLink, price, setSearchedCardSelect, cardObj} = props
 
     const handleClick = () => {
-
+        setSearchedCardSelect(cardObj)
     }
 
     return (
@@ -25,4 +25,4 @@ const Card = (props) => {
     )
 }
 
-export default Card
+export default SearchedCard

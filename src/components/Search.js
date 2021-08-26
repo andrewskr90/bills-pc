@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 
 import SearchResults from './SearchResults';
+import SearchedCardPage from './SearchedCardPage';
 
 const initialFormValues = {
     pokemonName:'',
@@ -12,10 +13,13 @@ const initialQueryState = {
     key:''
 }
 
-const Search = () => {
+const Search = (props) => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [queryState, setQueryState] = useState(initialQueryState)
     const [cardArray, setCardArray] = useState([])
+    const [searchedCardSelect, setSearchedCardSelect] = useState({})
+
+    const { setMyCollectionArray, myCollectionArray } = props
 
     const queryKeyName= '?q=name:'
     const queryKeySetId = '?q=set.id:'
@@ -46,7 +50,7 @@ const Search = () => {
                 .catch(err => console.log(err))
         )
     }
-    console.log(cardArray)
+
     return(
         <div>
             <form onSubmit={handleSubmit}>
@@ -71,7 +75,8 @@ const Search = () => {
                 </label>
                 <button>Search</button>
             </form>
-            <SearchResults cardArray={cardArray} />
+            <SearchResults setSearchedCardSelect={setSearchedCardSelect} cardArray={cardArray} />
+            <SearchedCardPage myCollectionArray={myCollectionArray} setMyCollectionArray={setMyCollectionArray} searchedCardSelect={searchedCardSelect} />
         </div>
     )
 }

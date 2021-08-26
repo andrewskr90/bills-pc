@@ -1,13 +1,18 @@
 import React from 'react'
-import Card from './Card'
+import SearchedCard from './SearchedCard'
 
 const SearchResults = (props) => {
-    const { cardArray } = props
+    const { cardArray, setSearchedCardSelect } = props
 
     return (
         <div style={{display:'flex', flexWrap:'wrap'}}>
             {cardArray.map(card=> {
-                return <Card key={card.id} imgLink={card.images.small} card={card} price={card.tcgplayer.prices.normal || card.tcgplayer.prices.holofoil} />
+                return <SearchedCard 
+                        key={card.id} 
+                        imgLink={card.images.small} 
+                        cardObj={card} 
+                        price={card.tcgplayer.prices.normal || card.tcgplayer.prices.holofoil} 
+                        setSearchedCardSelect={setSearchedCardSelect}/>
             })}
         </div>
     )

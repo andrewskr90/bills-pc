@@ -1,9 +1,18 @@
 import React from 'react'
+import CollectedCard from './CollectedCard'
 
-const MyCollection = () => {
+const MyCollection = (props) => {
+    const { myCollectionArray } = props
 
+    const filteredCollectionArray = (array) => {
+        return array
+    }
     return(
-        <div></div>
+        <div>
+            {filteredCollectionArray(myCollectionArray).map(cardObj => {
+                return <CollectedCard cardObj={cardObj} />
+            })}
+        </div>
     )
 }
 
