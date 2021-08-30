@@ -76,7 +76,7 @@ const Search = (props) => {
                 <button>Search</button>
             </form>
             <SearchResults setSearchedCardSelect={setSearchedCardSelect} cardArray={cardArray} />
-            <SearchedCardPage myCollectionArray={myCollectionArray} setMyCollectionArray={setMyCollectionArray} searchedCardSelect={searchedCardSelect} />
+            {/* <SearchedCardPage myCollectionArray={myCollectionArray} setMyCollectionArray={setMyCollectionArray} searchedCardSelect={searchedCardSelect} /> */}
         </div>
     )
 }

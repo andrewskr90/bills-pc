@@ -3,6 +3,7 @@ import Search from './components/Search'
 import MyCollection from './components/MyCollection'
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import './App.css'
+import RipForm from './components/RipForm'
 
 function App() {
   const [myCollectionArray, setMyCollectionArray] = useState([])
@@ -16,6 +17,7 @@ function App() {
           <a href='/collection'>Collection</a>
         </nav>
       </header>
+      <RipForm/>
       <Router>
       <Switch>
       <Route path='/collection'>
