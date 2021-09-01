@@ -5,6 +5,62 @@ const initialFormValues = {
     set:'',
     price:''
 }
+
+const spendingHistory = [
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        individualCost:'4',
+        quantity: '5',
+        totalCost: '20',
+        date: '08312021',
+        seller: 'shanes',
+        transactionId:'001'
+    }
+]
+
+const mySealedProducts = [
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    }
+]
 // id: 82720211,
     // date: 8/27/2021,
 //         {OT:trainerId, id: 827202111, name:'Espeon VMAX', rarity:'ultra rare', set:'Evolving Skies', number:65},
@@ -63,7 +119,7 @@ const productBoosters = (setName, type, ripId) => {
                 status:'sealed'
             }
         ]
-    }
+    } else if(type === 'booster pack')
 }
 
 const RipForm = () => {
@@ -90,6 +146,7 @@ const RipForm = () => {
         let includedPacks = productBoosters(formValues.set, formValues.type, ripId)
         let newRippedObject = {
             ...formValues,
+            OT: 'Ronhaar'
             id:ripId,
             assets: includedPacks
         }
