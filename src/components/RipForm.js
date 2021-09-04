@@ -1,68 +1,16 @@
 import React, { useState } from 'react'
-
+import { etb, hanger } from '../data/productAssets'
 const initialFormValues = {   
     type: '',
     set:'',
     price:''
 }
-// id: 82720211,
-    // date: 8/27/2021,
-//         {OT:trainerId, id: 827202111, name:'Espeon VMAX', rarity:'ultra rare', set:'Evolving Skies', number:65},
-//         {OT:trainerId, id: 827202112, name:'Glaceon V', rarity:'full art', set:'Evolving Skies', number:174},
-//         {name:'bulk', reverseHolos:8, reverseHoloRares: 1, holoRares:0, nonHoloRares:6}
 
 const productBoosters = (setName, type, ripId) => {
     if(type === 'etb') {
-        return [
-            {
-                id:`${ripId}-1`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-2`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-3`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-4`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-5`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-6`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-7`,
-                set: setName,
-                status:'sealed'
-            },
-            {
-                id:`${ripId}-8`,
-                set: setName,
-                status:'sealed'
-            }
-        ]
+        return etb
     } else if(type === 'hanger') {
-        return [
-            {
-                id:`${ripId}-1`,
-                set: setName,
-                status:'sealed'
-            }
-        ]
+        return hanger
     }
 }
 
