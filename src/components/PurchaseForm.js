@@ -1,29 +1,37 @@
 import React, { useState } from 'react'
-import { etb, hanger } from '../data/productAssets'
+import { purchases } from '../data/purchases'
+import { productCatalogue as catalogue, productCatalogue } from '../data/productCatalogue'
 const initialFormValues = {   
     type: '',
     set:'',
     price:''
 }
 
-const productBoosters = (setName, type, ripId) => {
-    if(type === 'etb') {
-        return etb
-    } else if(type === 'hanger') {
-        return hanger
-    }
-}
+const initialPurchaseCounter = purchases.length
 
-const RipForm = () => {
+const PurchaseForm = () => {
     const [formValues, setFormValues] = useState(initialFormValues)
-    const [todaysRipCount, setTodaysRipCount] = useState(0)
-    const [rippedObjects, setRippedObjects] = useState([])
-    const [subRipCount, setSubRipCount] = useState(0)
+    const [purchaseCounter, setPurchaseCounter] = useState(initialPurchaseCounter)
+    const [purchases, setPurchases] = useState([])
+    const [productCatalogue, setProductCatalogue] = useState(catalogue) 
 
     let today = new Date()
     let dd = String(today.getDate()).padStart(2,'0')
     let mm = String(today.getMonth()+1).padStart(2,'0')
     let yyyy = String(today.getFullYear())
+
+    const filterProductAssets = (setName, inputType, newId) => {
+        let filteredSet = productCatalogue.filter(setObject => setObject.set === setName)
+        let filteredProduct = filteredSet[0].products.filter(product => {
+            return product.type === inputType
+        })
+        return ({
+            purchase_id: newId,
+            ...filteredProduct[0].assets,
+            
+        })
+    }
+    console.log(purchases)
     
     const onChange = (e) => {
         setFormValues({
@@ -34,24 +42,26 @@ const RipForm = () => {
 
     const onSubmit = (e) => {
         e.preventDefault()
-        let ripId = `${mm}${dd}${yyyy}-${todaysRipCount}`
-        let includedPacks = productBoosters(formValues.set, formValues.type, ripId)
-        let newRippedObject = {
+        let newId = `${purchaseCounter}`
+        let dateToday = `${mm}${dd}${yyyy}`
+        let productAssets = filterProductAssets(formValues.set, formValues.type, newId)
+        let newPurchasedObject = {
             ...formValues,
             OT: 'Ronhaar',
-            id:ripId,
-            assets: includedPacks
+            id: newId,
+            date: dateToday,
+            assets: productAssets
         }
-        setRippedObjects([
-            ...rippedObjects,
-            newRippedObject
+        setPurchases([
+            ...purchases,
+            newPurchasedObject
         ])
-        setTodaysRipCount(todaysRipCount+1)
+        setPurchaseCounter(purchaseCounter+1)
     }
-    console.log(rippedObjects)
 
     return (
         <div>
+            <h2>Purchase Form</h2>
             <form onSubmit={onSubmit}>
                 <label>Set Name
                     <select
@@ -90,6 +100,12 @@ const RipForm = () => {
                         onChange={onChange}
                     >
                         <option
+                            id='select'
+                            value=''
+                        >
+                            --Select One--
+                        </option>
+                        <option
                             id='etb'
                             value='etb'
                         >
@@ -114,7 +130,7 @@ const RipForm = () => {
                 </label>
                 <button>Rip</button>
             </form>
-            <div>
+            {/* <div>
                 {rippedObjects.map(product => {
                     return(
                         <div>
@@ -130,9 +146,9 @@ const RipForm = () => {
                         </div>
                     )
                 })}
-            </div>
+            </div> */}
         </div>
     )
 }
 
-export default RipForm
+export default PurchaseForm

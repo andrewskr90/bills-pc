@@ -53,6 +53,7 @@ const Search = (props) => {
 
     return(
         <div>
+            <h2>Search</h2>
             <form onSubmit={handleSubmit}>
                 <label>Pokemon Name
                     <input

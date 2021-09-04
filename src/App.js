@@ -4,6 +4,7 @@ import MyCollection from './components/MyCollection'
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import './App.css'
 import RipForm from './components/RipForm'
+import PurchaseForm from './components/PurchaseForm'
 
 function App() {
   const [myCollectionArray, setMyCollectionArray] = useState([])
@@ -17,7 +18,8 @@ function App() {
           <a href='/collection'>Collection</a>
         </nav>
       </header>
-      <RipForm/>
+      {/* <RipForm/> */}
+      <PurchaseForm />
       <Router>
       <Switch>
       <Route path='/collection'>
