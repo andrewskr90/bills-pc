@@ -5,13 +5,88 @@ const initialFormValues = {
     set:'',
     price:''
 }
+<<<<<<< HEAD
+=======
+
+const spendingHistory = [
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        individualCost:'4',
+        quantity: '5',
+        totalCost: '20',
+        date: '08312021',
+        seller: 'shanes',
+        transactionId:'001'
+    }
+]
+
+const mySealedProducts = [
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    },
+    {
+        type: 'booster pack',
+        set: 'evolving skies',
+        originalCost: '4',
+        originalSeller: 'shanes',
+        datePurchased: '08312021',
+        transactionId: '001'
+    }
+]
+// id: 82720211,
+    // date: 8/27/2021,
+//         {OT:trainerId, id: 827202111, name:'Espeon VMAX', rarity:'ultra rare', set:'Evolving Skies', number:65},
+//         {OT:trainerId, id: 827202112, name:'Glaceon V', rarity:'full art', set:'Evolving Skies', number:174},
+//         {name:'bulk', reverseHolos:8, reverseHoloRares: 1, holoRares:0, nonHoloRares:6}
+>>>>>>> 59faf4d9fdf5da5f16ddf8cfe33e5ef51f6784e0
 
 const productBoosters = (setName, type, ripId) => {
     if(type === 'etb') {
         return etb
     } else if(type === 'hanger') {
+<<<<<<< HEAD
         return hanger
     }
+=======
+        return [
+            {
+                id:`${ripId}-1`,
+                set: setName,
+                status:'sealed'
+            }
+        ]
+    } else if(type === 'booster pack')
+>>>>>>> 59faf4d9fdf5da5f16ddf8cfe33e5ef51f6784e0
 }
 
 const RipForm = () => {
@@ -38,6 +113,7 @@ const RipForm = () => {
         let includedPacks = productBoosters(formValues.set, formValues.type, ripId)
         let newRippedObject = {
             ...formValues,
+            OT: 'Ronhaar'
             id:ripId,
             assets: includedPacks
         }
