@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import { purchases } from '../data/purchases'
 import { productCatalogue as catalogue, productCatalogue } from '../data/productCatalogue'
+import { sellers } from '../data/sellers'
+
 const initialFormValues = {   
     type: '',
     set:'',
-    price:''
+    price:'',
+    seller:'',
+    sellerLocation:''
 }
 
 const initialPurchaseCounter = purchases.length
@@ -13,7 +17,7 @@ const PurchaseForm = () => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [purchaseCounter, setPurchaseCounter] = useState(initialPurchaseCounter)
     const [purchases, setPurchases] = useState([])
-    const [productCatalogue, setProductCatalogue] = useState(catalogue) 
+    const [productCatalogue, setProductCatalogue] = useState(catalogue)
 
     let today = new Date()
     let dd = String(today.getDate()).padStart(2,'0')
@@ -27,8 +31,7 @@ const PurchaseForm = () => {
         })
         return ({
             purchase_id: newId,
-            ...filteredProduct[0].assets,
-            
+            ...filteredProduct[0].assets
         })
     }
     console.log(purchases)
@@ -100,23 +103,40 @@ const PurchaseForm = () => {
                         onChange={onChange}
                     >
                         <option
-                            id='select'
                             value=''
                         >
                             --Select One--
                         </option>
                         <option
-                            id='etb'
                             value='etb'
                         >
                             Elite Trainer Box
                         </option>
                         <option
-                            id='hanger'
                             value='hanger'
                         >
                             Hanger Booster Pack
                         </option>
+                    </select>
+                </label>
+                <label>Seller
+                    <select
+                        id='seller'
+                        name='seller'
+                        onChange={onChange}
+                    >
+                        <option
+                            value=''
+                        >--Select Seller--</option>
+                        {sellers.map(sellerValue => {
+                            return (<>
+                                <option
+                                    value={sellerValue.id}
+                                >
+                                    {sellerValue.name}
+                                </option>
+                            </>)
+                        })}
                     </select>
                 </label>
                 <label>Price
