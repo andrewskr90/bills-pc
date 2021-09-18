@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import './App.css'
 import RipForm from './components/RipForm'
 import PurchaseForm from './components/PurchaseForm'
+import SearchedCardPage from './components/SearchedCardPage'
 
 function App() {
   const [myCollectionArray, setMyCollectionArray] = useState([])
@@ -22,6 +23,9 @@ function App() {
       <PurchaseForm />
       <Router>
       <Switch>
+      <Route path='/searchCard'>
+        <SearchedCardPage/>
+      </Route>
       <Route path='/collection'>
         <MyCollection myCollectionArray={myCollectionArray} />
       </Route>
