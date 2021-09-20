@@ -1,10 +1,14 @@
 import React from 'react'
+import { useHistory } from 'react-router-dom'
 
-const Card = (props) => {
-    const { imgLink, card, price} = props
+const SearchedCard = (props) => {
+    const { imgLink, price, setSearchedCardSelect, cardObj} = props
+
+    const { push } = useHistory()
 
     const handleClick = () => {
-
+        setSearchedCardSelect(cardObj)
+        push('/searchedCard')
     }
 
     return (
@@ -25,4 +29,4 @@ const Card = (props) => {
     )
 }
 
-export default Card
+export default SearchedCard
