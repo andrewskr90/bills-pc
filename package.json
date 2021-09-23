@@ -4,14 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "server": "nodemon index.js",
-    "migrate -u": "knex migrate:up",
-    "migrate -d": "knex migrate:down",
-    "migrate -l": "knex migrate:latest",
-    "migrare -r": "knex migrate:rollback",
-    "seed -r": "knex seed:run"
+    "migrate": "knex migrate:latest",
+    "rollback": "knex migrate:rollback",
+    "seed": "knex seed:run",
+    "migrateh": "heroku run knex migrate:latest -a bills-pc",
+    "rollbackh": "heroku run knex migrate:rollback -a bills-pc",
+    "databaseh": "heroku pg:psql -a bills-pc",
+    "seedh": "heroku run knex seed:run -a bills-pc",
+    "test": "cross-env NODE_ENV=testing jest --watchAll --verbose --runInBand",
+    "deploy": "git push heroku main"
+  },
+  "engines": {
+    "node": "14.16.0",
+    "npm": "6.14.11"
   },
   "keywords": [],
   "author": "",
