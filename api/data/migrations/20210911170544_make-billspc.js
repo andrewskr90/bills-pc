@@ -8,6 +8,10 @@ exports.up = async function(knex) {
             .notNullable()
         table.string('password')
             .notNullable()
+        table.string('email')
+            .notNullable()
+        table.integer('favoriteGen')
+            .notNullable()
     })
     .createTable('sets', table => {
         table.increments('set_id')
