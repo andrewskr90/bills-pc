@@ -1,13 +1,41 @@
 
 exports.seed = function(knex) {
-  // Deletes ALL existing entries
-  return knex('table_name').del()
-    .then(function () {
-      // Inserts seed entries
-      return knex('table_name').insert([
-        {id: 1, colName: 'rowValue1'},
-        {id: 2, colName: 'rowValue2'},
-        {id: 3, colName: 'rowValue3'}
-      ]);
-    });
+  return knex('sets').insert([
+    {
+      set_name: 'Celebrations'
+    },
+    {
+      set_name: 'evolving skies'
+    },
+    {
+      set_name: 'chilling reign'
+    },
+    {
+      set_name: 'battle styles'
+    },
+    {
+      set_name: 'shining fates'
+    },
+    {
+      set_name: 'vivid voltage'
+    },
+    {
+      set_name: 'champions path'
+    },
+    {
+      set_name: 'darkness ablaze'
+    },
+    {
+      set_name: 'rebel clash'
+    },
+    {
+      set_name: 'sword and shield base set'
+    },
+    {
+      set_name: 'hidden fates'
+    },
+    {
+      set_name: 'SM Promos'
+    }
+  ]);
 };

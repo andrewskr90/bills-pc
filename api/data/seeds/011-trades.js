@@ -1,13 +1,16 @@
-
 exports.seed = function(knex) {
-  // Deletes ALL existing entries
-  return knex('table_name').del()
-    .then(function () {
-      // Inserts seed entries
-      return knex('table_name').insert([
-        {id: 1, colName: 'rowValue1'},
-        {id: 2, colName: 'rowValue2'},
-        {id: 3, colName: 'rowValue3'}
-      ]);
-    });
+  return knex('trades').insert([
+    {
+      transaction_id: 3,
+      trade_partner_username: "frokusblakah",
+      trade_partner_user_id: 2,
+      user_id: 1
+    },
+    {
+      transaction_id: 4,
+      trade_partner_username: "ronhaar",
+      trade_partner_user_id: 1,
+      user_id: 2
+    }
+  ]);
 };

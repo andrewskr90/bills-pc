@@ -1,14 +1,7 @@
 exports.seed = function(knex) {
-  // Deletes ALL existing entries
-  return knex('sold_cards')
-    .then(function () {
-      // Inserts seed entries
-      return knex('sold_cards').insert([
-        {
-          sale_id: 1,
-          collected_card_id: 1,
-          user_id: 1
-        }
-      ]);
-    });
+  return knex('table_name').insert([
+    {id: 1, colName: 'rowValue1'},
+    {id: 2, colName: 'rowValue2'},
+    {id: 3, colName: 'rowValue3'}
+  ]);
 };
