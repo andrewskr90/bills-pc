@@ -11,19 +11,21 @@ function App() {
   const [myCollectionArray, setMyCollectionArray] = useState([])
   
   return (
-    <div>
-      <header style={{display:'flex'}}>
+    <>
+      <div>
+      <header>Bill's PC</header>
+      {/* <header style={{display:'flex'}}>
         <p>Pokemon Card App</p>
         <nav style={{display:'flex', alignItems:'center', padding:'0 5vw 0 5vw'}}>
           <a href='/search'>Search Cards</a>
           <a href='/collection'>Collection</a>
         </nav>
-      </header>
+      </header> */}
       {/* <RipForm/> */}
-      <PurchaseForm />
-      <Router>
-      <Switch>
-      <Route path='/searchCard'>
+      {/* <PurchaseForm /> */}
+      {/* <Router>
+      <Switch> */}
+      {/* <Route path='/searchCard'>
         <SearchedCardPage/>
       </Route>
       <Route path='/collection'>
@@ -34,10 +36,11 @@ function App() {
       </Route>
       <Route path='/'>
         <Search myCollectionArray={myCollectionArray} setMyCollectionArray={setMyCollectionArray} />
-      </Route>
-      </Switch>
-      </Router>
+      </Route> */}
+      {/* </Switch>
+      </Router> */}
     </div>
+    </>
   );
 }
 

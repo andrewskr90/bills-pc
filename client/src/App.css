@@ -2,3 +2,8 @@
     border: 1px solid black;
     margin:0;
 }
+
+.navBar {
+    height: 10vw;
+    background-color: red;
+}
