@@ -34,7 +34,6 @@ const PurchaseForm = () => {
             ...filteredProduct[0].assets
         })
     }
-    console.log(purchases)
     
     const onChange = (e) => {
         setFormValues({

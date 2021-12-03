@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+// import App from './App';
 import App2 from './App2';
 import reportWebVitals from './reportWebVitals';
 
@@ -18,7 +18,7 @@ const store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk, lo
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      {/* <App /> */}
       <App2 />
     </Provider>
   </React.StrictMode>,
