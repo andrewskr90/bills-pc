@@ -9,7 +9,7 @@ import SearchedCardPage from './components/SearchedCardPage'
 
 function App() {
   const [myCollectionArray, setMyCollectionArray] = useState([])
-  
+  console.log(myCollectionArray)
   return (
     <>
       <div>
