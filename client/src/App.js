@@ -8,12 +8,10 @@ import PurchaseForm from './components/PurchaseForm'
 import SearchedCardPage from './components/SearchedCardPage'
 
 function App() {
-  const [myCollectionArray, setMyCollectionArray] = useState([])
-  console.log(myCollectionArray)
   return (
     <>
       <div>
-      <header>Bill's PC</header>
+      <header class='home-nav-bar'>Bill's PC</header>
       {/* <header style={{display:'flex'}}>
         <p>Pokemon Card App</p>
         <nav style={{display:'flex', alignItems:'center', padding:'0 5vw 0 5vw'}}>

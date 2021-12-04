@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-// import App from './App';
-import App2 from './App2';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import { createStore, applyMiddleware } from 'redux';
@@ -18,8 +17,7 @@ const store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk, lo
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      {/* <App /> */}
-      <App2 />
+      <App />
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
