@@ -2,16 +2,21 @@ import React, { useState } from 'react'
 import Search from './components/Search'
 import MyCollection from './components/MyCollection'
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
-import './App.css'
+import './App.css';
 import RipForm from './components/RipForm'
 import PurchaseForm from './components/PurchaseForm'
 import SearchedCardPage from './components/SearchedCardPage'
+import HomeNavBar from './HomeNavBar';
 
 function App() {
   return (
     <>
-      <div>
-      <header class='home-nav-bar'>Bill's PC</header>
+      <HomeNavBar />
+      <section class='my-collection'>
+        <div class='container'>
+
+        </div>
+      </section>
       {/* <header style={{display:'flex'}}>
         <p>Pokemon Card App</p>
         <nav style={{display:'flex', alignItems:'center', padding:'0 5vw 0 5vw'}}>
@@ -37,7 +42,6 @@ function App() {
       </Route> */}
       {/* </Switch>
       </Router> */}
-    </div>
     </>
   );
 }
