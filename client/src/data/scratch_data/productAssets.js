@@ -39,7 +39,7 @@ export const etb = [
         set: '',
         status:'sealed'
     }
-]
+];
 
 export const hanger = [
     {
@@ -47,4 +47,4 @@ export const hanger = [
         set: '',
         status:'sealed'
     }
-]
+];

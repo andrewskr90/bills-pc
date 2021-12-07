@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { etb, hanger } from '../data/productAssets'
+import { etb, hanger } from '../data/scratch_data/productAssets'
 const initialFormValues = {   
     type: '',
     set:'',
