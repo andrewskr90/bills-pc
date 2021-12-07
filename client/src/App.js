@@ -8,6 +8,19 @@ import PurchaseForm from './components/PurchaseForm'
 import SearchedCardPage from './components/SearchedCardPage'
 import HomeNavBar from './HomeNavBar';
 
+const dummyCollection = [
+  {
+    product_id: 1,
+    product_name: 'Hidden Fates Elite Trainer Box',
+    product_type: 'Elite Trainer Box',
+    product_retail_price: 49.99,
+    product_release_date: '2019-10-02',
+    product_description: 'hidden fates etb, including shiny charizard gx',
+    set_id: 11,
+    set_name: 'hidden fates'
+  }
+]
+
 function App() {
   return (
     <>
