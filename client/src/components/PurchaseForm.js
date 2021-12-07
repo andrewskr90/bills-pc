@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { purchases } from '../data/purchases'
-import { productCatalogue as catalogue, productCatalogue } from '../data/productCatalogue'
-import { sellers } from '../data/sellers'
+import { purchases } from '../data/scratch_data/purchases';
+import { productCatalogue as catalogue, productCatalogue } from '../data/scratch_data/productCatalogue';
+import { sellers } from '../data/scratch_data/sellers';
 
 const initialFormValues = {   
     type: '',
@@ -34,7 +34,6 @@ const PurchaseForm = () => {
             ...filteredProduct[0].assets
         })
     }
-    console.log(purchases)
     
     const onChange = (e) => {
         setFormValues({
