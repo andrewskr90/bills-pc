@@ -10,6 +10,8 @@ exports.up = async function(knex) {
             .notNullable()
         table.string('email')
             .notNullable()
+        table.string('role')
+            .notNullable()
         table.integer('favoriteGen')
             .notNullable()
     })
