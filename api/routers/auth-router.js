@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const { registerVerification, checkEmailFormat } = require('../middlewares/register-middleware')
 
+const User = require('../models/user-model')
+
 router.post('/register', registerVerification, checkEmailFormat, (req, res, next) => {
     
 })
