@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 
 const authRouter = require('../api/routers/auth-router')
+const userRouter = require('../api/routers/user-router')
 
 const server = express()
 
@@ -10,6 +11,7 @@ server.use(express.json())
 server.use(cors())
 
 server.use('/api/auth', authRouter)
+server.use('/api/users', userRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
@@ -17,7 +19,7 @@ server.get('/api', (req, res) => {
 
 server.use((err, req, res, next) => { //eslint-disable-line
     res.status( err.status || 500 ).json({
-        errorStatus: err.status,
+        error_status: err.status,
         message: err.message,
     })
   })
