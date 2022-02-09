@@ -28,7 +28,7 @@ exports.up = async function(knex) {
         table.integer('set_number')
             .unique()
             .notNullable()
-        table.integer('set_card_amount')
+        table.integer('set_card_amount_denominator')
             .notNullable()
     }) 
     .createTable('cards', table => {
