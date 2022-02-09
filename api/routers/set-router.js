@@ -1,9 +1,9 @@
 const router = require('express').Router()
 const SetModel = require('../models/set-model')
 const { verifySet } = require('../middlewares/set-middleware')
-const { sanitizeObjectValues } = require('../middlewares/universal-middleware')
+const { sanitizeObjectStrings } = require('../middlewares/universal-middleware')
 
-router.post('/', sanitizeObjectValues, verifySet, async (req, res, next) => {
+router.post('/', sanitizeObjectStrings, verifySet, async (req, res, next) => {
     try {
         const addedSet = await SetModel.add(req.body)
         res.status(201).json(addedSet)

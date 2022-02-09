@@ -1,4 +1,4 @@
-const sanitizeObjectValues = (req, res, next) => {
+const sanitizeObjectStrings = (req, res, next) => {
     const objectToSanitize = req.body
     const objectKeysArray = Object.keys(objectToSanitize)
     objectKeysArray.map(key => {
@@ -30,12 +30,6 @@ const sanitizeObjectValues = (req, res, next) => {
             })
             const sanitizedString = stringSplitCapitalized.join(' ')
             objectToSanitize[key] = sanitizedString
-        } else if (typeof objectToSanitize[key] === 'number') {
-            console.log('number')
-        } else if (typeof objectToSanitize[key] === 'boolean') {
-            console.log('boolean')
-        } else if (typeof objectToSanitize[key] === 'undefined') {
-            console.log('undefined')
         }
     })
     req.body = objectToSanitize
@@ -43,5 +37,5 @@ const sanitizeObjectValues = (req, res, next) => {
 }
 
 module.exports = {
-    sanitizeObjectValues
+    sanitizeObjectStrings
 }
