@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const SetModel = require('../models/set-model')
-const { verifySet, removeExtraSpaces } = require('../middlewares/set-middleware')
+const { verifySet } = require('../middlewares/set-middleware')
+const { sanitizeObjectValues } = require('../middlewares/universal-middleware')
 
-router.post('/', removeExtraSpaces, verifySet, async (req, res, next) => {
+router.post('/', sanitizeObjectValues, verifySet, async (req, res, next) => {
     try {
         const addedSet = await SetModel.add(req.body)
         res.status(201).json(addedSet)
@@ -12,6 +13,7 @@ router.post('/', removeExtraSpaces, verifySet, async (req, res, next) => {
 })
 
 router.get('/', async (req, res, next) => {
+    console.log(req.body)
     try {
         const sets = await SetModel.find()
         res.status(200).json(sets)
