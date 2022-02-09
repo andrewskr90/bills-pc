@@ -1,5 +1,9 @@
 const db = require('../data/dbconfig')
 
+const find = () => {
+    return db('users')
+}
+
 const findById = (user_id) => {
     return db('users').where({ user_id }).first()
 }
@@ -13,8 +17,21 @@ const add = async (user) => {
     return findById(user_id)
 }
 
+const update = async (user_id, changes) => {
+    const [updated_user] = await db('users').where({ user_id }).update(changes, '*')
+    return updated_user
+}
+
+const remove = async (user_id) => {
+    const [deleted_user] = await db('users').delete().where({ user_id }).returning(['user_id','username'])
+    return deleted_user
+}
+
 module.exports = {
+    find,
     findById,
     findBy,
-    add
+    add, 
+    update,
+    remove
 }

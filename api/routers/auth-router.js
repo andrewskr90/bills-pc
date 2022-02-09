@@ -1,10 +1,12 @@
 const router = require('express').Router()
-const { registerVerification, checkEmailFormat } = require('../middlewares/register-middleware')
-const { hashPassword } = require('../middlewares/restricted-middleware')
-
+const bcrypt = require('bcryptjs')
 const User = require('../models/user-model')
+const { sanitizeUsername, registerVerification, checkEmailFormat } = require('../middlewares/register-middleware')
+const { hashPassword } = require('../middlewares/restricted-middleware')
+const { tokenBuilder } = require('../jwt')
 
 router.post('/register', 
+    sanitizeUsername,
     registerVerification, 
     checkEmailFormat, 
     hashPassword, 
@@ -18,13 +20,31 @@ router.post('/register',
         }
 })
 
-router.post('/login', (req, res, next) => {
-
-})
-
-router.use((err, req, res, next) => { //eslint-disable-line
-    res.status( err.status || 500 )
-        .json(err)
+router.post('/login', sanitizeUsername, async (req, res, next) => {
+    const { username, password } = req.body
+    try {
+        const [existingUser] = await User.findBy({ username })
+        if (existingUser && bcrypt.compareSync(password, existingUser.password)) {
+            const token = tokenBuilder(existingUser)
+            res.status(200).json({
+                user_id: existingUser.user_id,
+                username: existingUser.username,
+                favoriteGen: existingUser.favoriteGen,
+                role: existingUser.role,
+                message: `Welcome, ${existingUser.username}!`,
+                token
+            })
+        } else {
+            next({
+                status: 401,
+                message: `Invalid password for username, ${existingUser.username}`
+            })
+        }
+    } catch (err) {
+        err.message = 'Username does not exist.'
+        err.status = 404
+        next(err)
+    }
 })
 
 module.exports = router
