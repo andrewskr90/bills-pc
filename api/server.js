@@ -4,6 +4,7 @@ const cors = require('cors')
 const authRouter = require('../api/routers/auth-router')
 const userRouter = require('../api/routers/user-router')
 const setRouter = require('../api/routers/set-router')
+const cardRouter = require('../api/routers/card-router')
 
 const server = express()
 
@@ -14,7 +15,7 @@ server.use(cors())
 server.use('/api/auth', authRouter)
 server.use('/api/users', userRouter)
 server.use('/api/sets', setRouter)
-
+server.use('/api/cards', cardRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
