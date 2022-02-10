@@ -23,7 +23,7 @@ const update = async (user_id, changes) => {
 }
 
 const remove = async (user_id) => {
-    const [deleted_user] = await db('users').delete().where({ user_id }).returning(['user_id','username'])
+    const [deleted_user] = await db('users').delete().where({ user_id }).returning(['user_id','user_name'])
     return deleted_user
 }
 

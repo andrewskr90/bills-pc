@@ -1,8 +1,8 @@
 
 function sanitizeUsername(req, res, next) {
     //capitalize username
-    if (req.body.username) {
-        let username = req.body.username
+    if (req.body.user_name) {
+        let username = req.body.user_name
         let capitalizedUsername = "";
         for (let i = 0; i < username.length; i++) {
             if (i === 0) {
@@ -11,24 +11,24 @@ function sanitizeUsername(req, res, next) {
             capitalizedUsername += username[i].toLowerCase();
             }
         }
-        req.body.username = capitalizedUsername
+        req.body.user_name = capitalizedUsername
     }
     next()
 }
 
 function updateVerification(req, res, next) {
-    if (req.body.role) {
-        if (req.body.role !== 'Trainer') {
+    if (req.body.user_role) {
+        if (req.body.user_role !== 'Trainer') {
             next({ 
                 status: 422, 
-                message: 'user role must be equal to trainer' 
+                message: 'user_role must be equal to trainer' 
             })
         }
-    } if (req.body.username) {
-        if(req.body.username.length < 4) {
+    } if (req.body.user_name) {
+        if(req.body.user_name.length < 4) {
             next({ 
                 status: 422, 
-                message: 'Username must be at least 4 characters in length' 
+                message: 'user_name must be at least 4 characters in length' 
             })
         }
     }
@@ -36,11 +36,11 @@ function updateVerification(req, res, next) {
 }
 
 function checkEmailFormat(req, res, next) {
-    let email = req.body.email
+    let email = req.body.user_email
     let containsAtSign = email.search('@')
     let containsDotCom = email.search('.')
     if (containsAtSign == -1 || containsDotCom == -1) {
-        next({ status: 400, message: 'Email is not in the proper format' })
+        next({ status: 400, message: 'user_email is not in the proper format' })
     } else {
         next()
     }

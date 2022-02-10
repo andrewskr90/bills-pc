@@ -1,16 +1,16 @@
 exports.seed = function(knex) {
   return knex('users').insert([
     {
-      username: 'ronhaar',
-      password: '1234',
-      email: 'andrewskr90@gmail.com',
-      favoriteGen: '1'
+      user_name: 'ronhaar',
+      user_password: '1234',
+      user_email: 'andrewskr90@gmail.com',
+      user_favorite_gen: '1'
     },
     {
-      username: 'frokusblakah',
-      password: '1234',
-      email: 'rsandre@uw.edu',
-      favoriteGen: '1'
+      user_name: 'frokusblakah',
+      user_password: '1234',
+      user_email: 'rsandre@uw.edu',
+      user_favorite_gen: '1'
     }
   ]);
 };
