@@ -1,7 +1,7 @@
 
 function sanitizeUsername(req, res, next) {
     //remove extra spaces, letter casing uneffected
-    let trimmedUsername = req.body.username.trim()
+    let trimmedUsername = req.body.user_name.trim()
     let charArray = trimmedUsername.split('')
     let singleSpacesUsername = ''
     for (let i=0; i< charArray.length; i++) {
@@ -12,26 +12,26 @@ function sanitizeUsername(req, res, next) {
         }
         singleSpacesUsername += charArray[i]
     }
-    req.body.username = singleSpacesUsername
+    req.body.user_name = singleSpacesUsername
     next()
 }
 
 function registerVerification(req, res, next) {
-    if(!req.body.username || !req.body.password || !req.body.email || !req.body.favoriteGen){
+    if(!req.body.user_name || !req.body.user_password || !req.body.user_email || !req.body.user_favorite_gen){
         next({ status: 422, message: 'all form fields required' })
-    } else if (req.body.role !== 'Trainer') {
-        next({ status: 422, message: 'user role must be equal to Trainer' })
-    } else if(req.body.username.length < 4) {
-        next({ status: 422, message: 'Username must be at least 4 characters in length' })
-    } else if(req.body.password.length < 7) {
-        next({ status: 422, message: 'Password must be at least 7 characters in length' })
+    } else if (req.body.user_role !== 'Trainer') {
+        next({ status: 422, message: 'user_role must be equal to Trainer' })
+    } else if(req.body.user_name.length < 4) {
+        next({ status: 422, message: 'user_name must be at least 4 characters in length' })
+    } else if(req.body.user_password.length < 7) {
+        next({ status: 422, message: 'user_password must be at least 7 characters in length' })
     } else {
         next()
     }
 }
 
 function checkEmailFormat(req, res, next) {
-    let email = req.body.email
+    let email = req.body.user_email
     let containsAtSign = email.search('@')
     let containsDotCom = email.search('.')
     if (containsAtSign == -1 || containsDotCom == -1) {

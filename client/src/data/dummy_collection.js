@@ -1,7 +1,7 @@
 export const dummy_collection = [
     {
       user_id: 1,
-      username: 'ronhaar',
+      user_name: 'ronhaar',
       product_id: 1,
       product_name: 'Hidden Fates Elite Trainer Box',
       product_type: 'Elite Trainer Box',
@@ -29,7 +29,7 @@ export const dummy_collection = [
     },
     {
       user_id: 1,
-      username: 'ronhaar',
+      user_name: 'ronhaar',
       product_id: 3,
       product_name: 'Darkness Ablaze Booster Box',
       product_type: 'Booster Box',
@@ -58,7 +58,7 @@ export const dummy_collection = [
     },
     {
       user_id: 2,
-      username: 'frokusblakah',
+      user_name: 'frokusblakah',
       product_id: 3,
       product_name: 'Darkness Ablaze Booster Box',
       product_type: 'Booster Box',

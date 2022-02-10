@@ -21,27 +21,27 @@ router.post('/register',
 })
 
 router.post('/login', sanitizeUsername, async (req, res, next) => {
-    const { username, password } = req.body
+    const { user_name, user_password } = req.body
     try {
-        const [existingUser] = await User.findBy({ username })
-        if (existingUser && bcrypt.compareSync(password, existingUser.password)) {
+        const [existingUser] = await User.findBy({ user_name })
+        if (existingUser && bcrypt.compareSync(user_password, existingUser.user_password)) {
             const token = tokenBuilder(existingUser)
             res.status(200).json({
                 user_id: existingUser.user_id,
-                username: existingUser.username,
-                favoriteGen: existingUser.favoriteGen,
-                role: existingUser.role,
-                message: `Welcome, ${existingUser.username}!`,
+                user_name: existingUser.user_name,
+                user_favorite_gen: existingUser.user_favorite_gen,
+                user_role: existingUser.user_role,
+                message: `Welcome, ${existingUser.user_name}!`,
                 token
             })
         } else {
             next({
                 status: 401,
-                message: `Invalid password for username, ${existingUser.username}`
+                message: `Invalid user_password for user_name, ${existingUser.user_name}`
             })
         }
     } catch (err) {
-        err.message = 'Username does not exist.'
+        err.message = 'user_name does not exist.'
         err.status = 404
         next(err)
     }

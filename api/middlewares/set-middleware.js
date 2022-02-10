@@ -14,7 +14,7 @@ function verifySet(req, res, next) {
     } else if (!set_release_date) {
         next({
             status: 400,
-            message: 'Must include set data type date, release_date'
+            message: 'Must include set data type date, set_release_date'
         })
     } else if (!set_logo) {
         next({

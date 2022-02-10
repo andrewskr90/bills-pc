@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 const hashPassword = (req, res, next) => {
-    const password = req.body.password
+    const password = req.body.user_password
     const hash = bcrypt.hashSync(password, 8)
-    req.body.password = hash
+    req.body.user_password = hash
     next()
 }
 
