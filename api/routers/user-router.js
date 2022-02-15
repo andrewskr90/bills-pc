@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const User = require('../models/user-model')
-const { sanitizeUsername, updateVerification, checkEmailFormat } = require('../middlewares/user-middleware')
+const { sanitizeUsername, userObjectVerification } = require('../middlewares/user-middleware')
 
 router.get('/', async (req, res, next) => {
     try {
@@ -11,7 +11,7 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.put('/:id', updateVerification, sanitizeUsername, checkEmailFormat, async (req, res, next) => {
+router.put('/:id', userObjectVerification, sanitizeUsername, async (req, res, next) => {
     const user_id = req.params.id
     const changes = req.body
     try {

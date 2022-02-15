@@ -1,14 +1,16 @@
 const router = require('express').Router()
 const bcrypt = require('bcryptjs')
 const User = require('../models/user-model')
-const { sanitizeUsername, registerVerification, checkEmailFormat } = require('../middlewares/register-middleware')
+const { 
+    userObjectVerification, 
+    sanitizeUsername 
+    } = require('../middlewares/user-middleware')
 const { hashPassword } = require('../middlewares/restricted-middleware')
 const { tokenBuilder } = require('../jwt')
 
 router.post('/register', 
     sanitizeUsername,
-    registerVerification, 
-    checkEmailFormat, 
+    userObjectVerification, 
     hashPassword, 
     async (req, res, next) => {
         const newUser = req.body
