@@ -19,7 +19,7 @@ function verifySet(req, res, next) {
     } else if (!set_logo) {
         next({
             status: 400,
-            message: 'Must include data type int, set_logo'
+            message: 'Must include data type string, set_logo'
         })
     } else if (!set_number) {
         next({

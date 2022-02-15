@@ -4,7 +4,7 @@ function verifyCard(req, res, next) {
         card_number, 
         card_rarity, 
         card_image_url, 
-        card_card_amount_denominator 
+        set_id 
     } = req.body
     if (!card_name) {
         next({
@@ -14,22 +14,22 @@ function verifyCard(req, res, next) {
     } else if (!card_number) {
         next({
             status: 400,
-            message: 'Must include set data type date, card_number'
+            message: 'Must include set data type int, card_number'
         })
     } else if (!card_rarity) {
         next({
             status: 400,
-            message: 'Must include data type int, card_rarity'
+            message: 'Must include data type string, card_rarity'
         })
     } else if (!card_image_url) {
         next({
             status: 400,
             message: 'Must include data type string, card_image_url'
         })
-    } else if (!card_card_amount_denominator) {
+    } else if (!set_id) {
         next({
             status: 400,
-            message: 'Must include data type int, card_card_amount_denominator'
+            message: 'Must include foreign key, set_id'
         })
     }
     next()
