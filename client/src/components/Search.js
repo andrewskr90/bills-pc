@@ -36,6 +36,7 @@ const Search = (props) => {
         formValues.setName ? (
             axios.get(`https://api.pokemontcg.io/v2/cards${queryKeySetId}${formValues.setName}`)
                 .then(res=>{
+                    console.log(res)
                     const result = res.data.data.filter(obj => obj.name.includes(formValues.pokemonName.charAt(0).toUpperCase()) )
                     setCardArray(result)
                 })

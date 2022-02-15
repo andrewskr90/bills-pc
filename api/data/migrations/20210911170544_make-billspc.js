@@ -85,6 +85,8 @@ exports.up = async function(knex) {
             .inTable('cards')
             .onDelete('RESTRICT')
             .onUpdate('RESTRICT')
+        table.integer('child_card_connection_quantity')
+            .unsigned()
     })
     .createTable('transactions', table => {
         table.increments('transaction_id')

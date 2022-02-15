@@ -61,8 +61,12 @@ h1 {
     font-size: 10vw;
 }
 
+h2 {
+  font-size: 3vw;
+}
+
 header.home-nav-bar nav {
-  width: 35%;
+  width: 25%;
   display:flex;
   justify-content: space-evenly;
 }
@@ -89,6 +93,17 @@ header.home-nav-bar {
   width: 100%;
   height: auto;
   border: solid dodgerblue 0.4vw;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  width: 100%;
+  margin: auto;
+  border: black 1px solid;
 }
 
 
