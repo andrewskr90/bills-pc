@@ -5,12 +5,14 @@ const {
     userObjectVerification, 
     sanitizeUsername 
     } = require('../middlewares/user-middleware')
+const { sanitizeObjectStrings } = require('../middlewares/universal-middleware')
 const { hashPassword } = require('../middlewares/restricted-middleware')
 const { tokenBuilder } = require('../jwt')
 
 router.post('/register', 
     sanitizeUsername,
-    userObjectVerification, 
+    userObjectVerification,
+    sanitizeObjectStrings,
     hashPassword, 
     async (req, res, next) => {
         const newUser = req.body
