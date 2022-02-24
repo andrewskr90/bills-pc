@@ -72,6 +72,7 @@ exports.up = async function(knex) {
         .createTable('rip_sessions', table => {
             table.increments('rip_session_id')
             table.date('rip_session_date')
+                .notNullable()
             table.string('rip_session_name')
             table.string('rip_session_notes')
             table.timestamps(true,true)
@@ -79,6 +80,7 @@ exports.up = async function(knex) {
         .createTable('sets', table => {
             table.increments('set_id')
             table.string('set_name')
+                .notNullable()
             table.date('set_release_date')
             table.string('set_language')
             table.integer('set_number')
@@ -95,15 +97,16 @@ exports.up = async function(knex) {
             table.increments('product_id')
             table.integer('product_set_id')
                 .unsigned()
-                .notNullable()
                 .references('set_id')
                 .inTable('sets')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
             table.string('product_name')
+                .notNullable()
             table.string('product_image')
             table.string('product_type')
             table.date('product_release_date')
+            table.decimal('product_retail_price')
             table.string('product_description')
         })
         .createTable('collected_products', table => {
