@@ -1,15 +1,26 @@
 function userObjectVerification(req, res, next) {
-    if (!req.body.user_name || !req.body.user_password || !req.body.user_email || !req.body.user_favorite_gen){
-        next({ status: 422, message: 'all form fields required' })
-    } 
-    if (req.body.user_role !== 'Gym_Leader') {
-        next({ status: 422, message: 'user_role must be equal to Trainer' })
-    } 
+    if (!req.body.user_role) {
+        next({ status:422, message: 'user_role required' })
+    }
+    if (!req.body.user_name){
+        next({ status: 422, message: 'user_name required.' })
+    }
+    if (req.body.user_role !== 'Trainer' || req.body.role !== 'Vendor') {
+        next({ status: 422, message: 'user_role must be equal to Trainer or Vendor' })
+    }
     if(req.body.user_name.length < 4) {
         next({ status: 422, message: 'user_name must be at least 4 characters in length' })
-    } 
-    if(req.body.user_password.length < 7) {
-        next({ status: 422, message: 'user_password must be at least 7 characters in length' })
+    }
+    if (req.body.user_role === 'Trainer') {
+        if (!req.body.password) {
+            next ({ status:422, message: 'user_password required' })
+        }
+        if(req.body.user_password.length < 7) {
+            next({ status: 422, message: 'user_password must be at least 7 characters in length' })
+        }
+        if (!req.body.user_email){
+            next({ status: 422, message: 'user_email required.' })
+        }
     }
     let email = req.body.user_email
     let containsAtSign = email.search('@')
