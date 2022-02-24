@@ -1,9 +1,9 @@
 const router = require('express').Router()
 const SetModel = require('../models/set-model')
 const { verifySet } = require('../middlewares/set-middleware')
-const { sanitizeObjectStrings } = require('../middlewares/universal-middleware')
+const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
-router.post('/', sanitizeObjectStrings, verifySet, async (req, res, next) => {
+router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, verifySet, async (req, res, next) => {
     try {
         const addedSet = await SetModel.add(req.body)
         res.status(201).json(addedSet)
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', verifySet, async (req, res, next) => {
+router.put('/:id', gymLeaderAuthorized, verifySet, async (req, res, next) => {
     const set_id = req.params.id
     const changes = req.body
     try {
@@ -44,7 +44,7 @@ router.put('/:id', verifySet, async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const set_id = req.params.id
     try {
         const deletedSet = await SetModel.remove(set_id)

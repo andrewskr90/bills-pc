@@ -30,7 +30,7 @@ exports.up = async function(knex) {
             .notNullable()
         table.integer('set_card_amount_denominator')
             .notNullable()
-    }) 
+    })
     .createTable('cards', table => {
         table.increments('card_id')
         table.string('card_name', 100)

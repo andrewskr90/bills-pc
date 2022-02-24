@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const User = require('../models/user-model')
 const { sanitizeUsername, userObjectVerification } = require('../middlewares/user-middleware')
+const { gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
 router.get('/', async (req, res, next) => {
     try {
@@ -11,7 +12,7 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.put('/:id', userObjectVerification, sanitizeUsername, async (req, res, next) => {
+router.put('/:id', gymLeaderAuthorized, userObjectVerification, sanitizeUsername, async (req, res, next) => {
     const user_id = req.params.id
     const changes = req.body
     try {
@@ -24,7 +25,7 @@ router.put('/:id', userObjectVerification, sanitizeUsername, async (req, res, ne
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const user_id = req.params.id
     try {
         const deletedUser = await User.remove(user_id)

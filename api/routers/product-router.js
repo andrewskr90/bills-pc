@@ -1,9 +1,9 @@
 const router = require('express').Router()
 const ProductModel = require('../models/product-model')
 const { verifyProduct } = require('../middlewares/product-middleware')
-const { sanitizeObjectStrings } = require('../middlewares/universal-middleware')
+const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
-router.post('/', sanitizeObjectStrings, verifyProduct, async (req, res, next) => {
+router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, verifyProduct, async (req, res, next) => {
     try {
         const addedProduct = await ProductModel.add(req.body)
         res.status(201).json(addedProduct)
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', verifyProduct, async (req, res, next) => {
+router.put('/:id', gymLeaderAuthorized, verifyProduct, async (req, res, next) => {
     const product_id = req.params.id
     const changes = req.body
     try {
@@ -44,7 +44,7 @@ router.put('/:id', verifyProduct, async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const product_id = req.params.id
     try {
         const deletedProduct = await ProductModel.remove(product_id)
