@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const CollectedProduct = require('../models/collectedProduct-model')
+const CollectedProduct = require('../models/collected-product-model')
 const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
 router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, next) => {

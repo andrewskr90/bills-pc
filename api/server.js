@@ -10,6 +10,7 @@ const ripSessionRouter = require('../api/routers/rip-session-router')
 const setRouter = require('../api/routers/set-router')
 const productRouter = require('../api/routers/product-router')
 const collectedProductRouter = require('../api/routers/collected-product-router')
+const ripRouter = require('../api/routers/rip-router')
 const cardRouter = require('../api/routers/card-router')
 
 const server = express()
@@ -27,6 +28,7 @@ server.use('/api/rip-sessions', ripSessionRouter)
 server.use('/api/sets', setRouter)
 server.use('/api/products', productRouter)
 server.use('/api/collected-products', collectedProductRouter)
+server.use('/api/rips', ripRouter)
 server.use('/api/cards', cardRouter)
 
 server.get('/api', (req, res) => {
