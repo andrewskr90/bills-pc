@@ -1,11 +1,11 @@
 const router = require('express').Router()
-const ProductModel = require('../models/product-model')
+const Product = require('../models/product-model')
 const { verifyProduct } = require('../middlewares/product-middleware')
 const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
 router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, verifyProduct, async (req, res, next) => {
     try {
-        const addedProduct = await ProductModel.add(req.body)
+        const addedProduct = await Product.add(req.body)
         res.status(201).json(addedProduct)
     } catch (err) {
         next(err)
@@ -14,7 +14,7 @@ router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, verifyProduct, asyn
 
 router.get('/', async (req, res, next) => {
     try {
-        const products = await ProductModel.find()
+        const products = await Product.find()
         res.status(200).json(products)
     } catch (err) {
         next(err)
@@ -24,7 +24,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     const product_id = req.params.id
     try {
-        const product = await ProductModel.findById(product_id)
+        const product = await Product.findById(product_id)
         res.status(200).json(product)
     } catch (err) {
         next(err)
@@ -35,7 +35,7 @@ router.put('/:id', gymLeaderAuthorized, verifyProduct, async (req, res, next) =>
     const product_id = req.params.id
     const changes = req.body
     try {
-        const updatedProduct = await ProductModel.update(product_id, changes)
+        const updatedProduct = await Product.update(product_id, changes)
         res.status(200).json(
             updatedProduct
         )
@@ -47,7 +47,7 @@ router.put('/:id', gymLeaderAuthorized, verifyProduct, async (req, res, next) =>
 router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const product_id = req.params.id
     try {
-        const deletedProduct = await ProductModel.remove(product_id)
+        const deletedProduct = await Product.remove(product_id)
         res.status(200).json(deletedProduct)
     } catch (err) {
         next(err)
