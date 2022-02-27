@@ -12,6 +12,7 @@ const productRouter = require('../api/routers/product-router')
 const collectedProductRouter = require('../api/routers/collected-product-router')
 const ripRouter = require('../api/routers/rip-router')
 const cardRouter = require('../api/routers/card-router')
+const productConnectionRouter = require('../api/routers/product-connection-router')
 
 const server = express()
 
@@ -30,6 +31,7 @@ server.use('/api/products', productRouter)
 server.use('/api/collected-products', collectedProductRouter)
 server.use('/api/rips', ripRouter)
 server.use('/api/cards', cardRouter)
+server.use('/api/product-connections', productConnectionRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
