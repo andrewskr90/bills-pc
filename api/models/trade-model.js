@@ -23,7 +23,7 @@ const update = async (trade_id, changes) => {
 }
 
 const remove = async (trade_id) => {
-    const [deleted_trade] = await db('trades').delete().where({ trade_id }).returning(['trade_id','trade_name'])
+    const [deleted_trade] = await db('trades').delete().where({ trade_id }).returning(['trade_id','trade_date'])
     return deleted_trade
 }
 

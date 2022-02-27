@@ -23,7 +23,7 @@ const update = async (rip_session_id, changes) => {
 }
 
 const remove = async (rip_session_id) => {
-    const [deleted_rip_session] = await db('rip_sessions').delete().where({ rip_session_id }).returning(['rip_session_id','rip_session_name'])
+    const [deleted_rip_session] = await db('rip_sessions').delete().where({ rip_session_id }).returning(['rip_session_id','rip_session_date'])
     return deleted_rip_session
 }
 

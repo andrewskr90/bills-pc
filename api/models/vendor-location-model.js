@@ -23,7 +23,7 @@ const update = async (vendor_location_id, changes) => {
 }
 
 const remove = async (vendor_location_id) => {
-    const [deleted_vendor_location] = await db('vendor_locations').delete().where({ vendor_location_id }).returning(['vendor_location_id','vendor_location_name'])
+    const [deleted_vendor_location] = await db('vendor_locations').delete().where({ vendor_location_id }).returning(['vendor_location_id','vendor_location_user_id'])
     return deleted_vendor_location
 }
 

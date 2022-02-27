@@ -23,7 +23,7 @@ const update = async (sale_id, changes) => {
 }
 
 const remove = async (sale_id) => {
-    const [deleted_sale] = await db('sales').delete().where({ sale_id }).returning(['sale_id','sale_name'])
+    const [deleted_sale] = await db('sales').delete().where({ sale_id }).returning(['sale_id','sale_date'])
     return deleted_sale
 }
 
