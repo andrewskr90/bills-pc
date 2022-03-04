@@ -18,6 +18,7 @@ const collectedCardEventRouter = require('../api/routers/collected-card-event-ro
 const collectedProductEventRouter = require('../api/routers/collected-product-event-router')
 const saleCardRouter = require('../api/routers/sale-card-router')
 const saleProductRouter = require('../api/routers/sale-product-router')
+const tradeCardRouter = require('../api/routers/trade-card-router')
 
 const server = express()
 
@@ -42,6 +43,7 @@ server.use('/api/collected-card-events', collectedCardEventRouter)
 server.use('/api/collected-product-events', collectedProductEventRouter)
 server.use('/api/sale-cards', saleCardRouter)
 server.use('/api/sale-products', saleProductRouter)
+server.use('/api/trade-cards', tradeCardRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
