@@ -23,7 +23,7 @@ const update = async (trade_card_id, changes) => {
 }
 
 const remove = async (trade_card_id) => {
-    const [deleted_trade_card] = await db('trade_cards').delete().where({ trade_card_id }).returning(['trade_card_id','trade_card_trade_id','trade_card_card_id'])
+    const [deleted_trade_card] = await db('trade_cards').delete().where({ trade_card_id }).returning(['trade_card_id','trade_card_trade_id','trade_card_card_id', 'trade_card_trader_color'])
     return deleted_trade_card
 }
 
