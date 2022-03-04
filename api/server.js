@@ -21,6 +21,7 @@ const saleProductRouter = require('../api/routers/sale-product-router')
 const tradeCardRouter = require('../api/routers/trade-card-router')
 const tradeProductRouter = require('../api/routers/trade-product-router')
 const ripCardRouter = require('../api/routers/rip-card-router')
+const ripProductRouter = require('../api/routers/rip-product-router')
 
 const server = express()
 
@@ -48,6 +49,7 @@ server.use('/api/sale-products', saleProductRouter)
 server.use('/api/trade-cards', tradeCardRouter)
 server.use('/api/trade-products', tradeProductRouter)
 server.use('/api/rip-cards', ripCardRouter)
+server.use('/api/rip-products', ripProductRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
