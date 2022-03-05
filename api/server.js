@@ -16,6 +16,7 @@ const productConnectionRouter = require('../api/routers/product-connection-route
 const collectedCardRouter = require('../api/routers/collected-card-router')
 const collectedCardEventRouter = require('../api/routers/collected-card-event-router')
 const collectedProductEventRouter = require('../api/routers/collected-product-event-router')
+const saleCardRouter = require('../api/routers/sale-card-router')
 const saleProductRouter = require('../api/routers/sale-product-router')
 
 const server = express()
@@ -39,6 +40,7 @@ server.use('/api/product-connections', productConnectionRouter)
 server.use('/api/collected-cards', collectedCardRouter)
 server.use('/api/collected-card-events', collectedCardEventRouter)
 server.use('/api/collected-product-events', collectedProductEventRouter)
+server.use('/api/sale-cards', saleCardRouter)
 server.use('/api/sale-products', saleProductRouter)
 
 server.get('/api', (req, res) => {
