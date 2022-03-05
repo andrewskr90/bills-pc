@@ -23,7 +23,7 @@ const update = async (rip_id, changes) => {
 }
 
 const remove = async (rip_id) => {
-    const [deleted_rip] = await db('rips').delete().where({ rip_id }).returning(['rip_id','rip_name'])
+    const [deleted_rip] = await db('rips').delete().where({ rip_id }).returning(['rip_id','rip_collected_product_id'])
     return deleted_rip
 }
 
