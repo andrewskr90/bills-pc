@@ -34,4 +34,6 @@ router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
         next(err)
     }
 })
+
  module.exports = router
+ 
