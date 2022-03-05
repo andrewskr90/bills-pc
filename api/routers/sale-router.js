@@ -1,10 +1,10 @@
 const router = require('express').Router()
-const SaleModel = require('../models/sale-model')
+const Sale = require('../models/sale-model')
 const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
 router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, next) => {
     try {
-        const addedSale = await SaleModel.add(req.body)
+        const addedSale = await Sale.add(req.body)
         res.status(201).json(addedSale)
     } catch (err) {
         next(err)
@@ -13,7 +13,7 @@ router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, ne
 
 router.get('/', async (req, res, next) => {
     try {
-        const sales = await SaleModel.find()
+        const sales = await Sale.find()
         res.status(200).json(sales)
     } catch (err) {
         next(err)
@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     const sale_id = req.params.id
     try {
-        const sale = await SaleModel.findById(sale_id)
+        const sale = await Sale.findById(sale_id)
         res.status(200).json(sale)
     } catch (err) {
         next(err)
@@ -34,7 +34,7 @@ router.put('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const sale_id = req.params.id
     const changes = req.body
     try {
-        const updatedSale = await SaleModel.update(sale_id, changes)
+        const updatedSale = await Sale.update(sale_id, changes)
         res.status(200).json(
             updatedSale
         )
@@ -46,7 +46,7 @@ router.put('/:id', gymLeaderAuthorized, async (req, res, next) => {
 router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const sale_id = req.params.id
     try {
-        const deletedSale = await SaleModel.remove(sale_id)
+        const deletedSale = await Sale.remove(sale_id)
         res.status(200).json(deletedSale)
     } catch (err) {
         next(err)

@@ -1,10 +1,10 @@
 const router = require('express').Router()
-const VendorLocationModel = require('../models/vendor-location-model')
+const VendorLocation = require('../models/vendor-location-model')
 const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
 
 router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, next) => {
     try {
-        const addedVendorLocation = await VendorLocationModel.add(req.body)
+        const addedVendorLocation = await VendorLocation.add(req.body)
         res.status(201).json(addedVendorLocation)
     } catch (err) {
         next(err)
@@ -13,7 +13,7 @@ router.post('/', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, ne
 
 router.get('/', async (req, res, next) => {
     try {
-        const vendorLocations = await VendorLocationModel.find()
+        const vendorLocations = await VendorLocation.find()
         res.status(200).json(vendorLocations)
     } catch (err) {
         next(err)
@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     const vendorLocation_id = req.params.id
     try {
-        const vendorLocation = await VendorLocationModel.findById(vendorLocation_id)
+        const vendorLocation = await VendorLocation.findById(vendorLocation_id)
         res.status(200).json(vendorLocation)
     } catch (err) {
         next(err)
@@ -34,7 +34,7 @@ router.put('/:id', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, 
     const vendorLocation_id = req.params.id
     const changes = req.body
     try {
-        const updatedVendorLocation = await VendorLocationModel.update(vendorLocation_id, changes)
+        const updatedVendorLocation = await VendorLocation.update(vendorLocation_id, changes)
         res.status(200).json(
             updatedVendorLocation
         )
@@ -46,7 +46,7 @@ router.put('/:id', gymLeaderAuthorized, sanitizeObjectStrings, async (req, res, 
 router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
     const vendorLocation_id = req.params.id
     try {
-        const deletedVendorLocation = await VendorLocationModel.remove(vendorLocation_id)
+        const deletedVendorLocation = await VendorLocation.remove(vendorLocation_id)
         res.status(200).json(deletedVendorLocation)
     } catch (err) {
         next(err)
