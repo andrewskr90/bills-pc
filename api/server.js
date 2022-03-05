@@ -15,6 +15,7 @@ const cardRouter = require('../api/routers/card-router')
 const productConnectionRouter = require('../api/routers/product-connection-router')
 const collectedCardRouter = require('../api/routers/collected-card-router')
 const collectedCardEventRouter = require('../api/routers/collected-card-event-router')
+const collectedProductEventRouter = require('../api/routers/collected-product-event-router')
 
 const server = express()
 
@@ -36,6 +37,7 @@ server.use('/api/cards', cardRouter)
 server.use('/api/product-connections', productConnectionRouter)
 server.use('/api/collected-cards', collectedCardRouter)
 server.use('/api/collected-card-events', collectedCardEventRouter)
+server.use('/api/collected-product-events', collectedProductEventRouter)
 
 server.get('/api', (req, res) => {
     res.json({ message: 'Bills PC api!' })
