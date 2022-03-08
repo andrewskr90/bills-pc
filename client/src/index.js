@@ -7,7 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import reducer from './reducers';
+import reducer from './trainer/reducers';
 
 import thunk from 'redux-thunk';
 import logger from 'redux-logger';
