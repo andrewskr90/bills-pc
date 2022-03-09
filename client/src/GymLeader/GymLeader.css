@@ -1,0 +1,13 @@
+.cardUploader .sets {
+    border: 1px solid;
+    margin: 2%;
+    padding: 2%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cardUploader .sets .set {
+    padding: 1%;
+    width:10%;
+    border: black 1px solid;
+}
