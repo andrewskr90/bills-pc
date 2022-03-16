@@ -1,14 +1,13 @@
 import React from 'react'
+import Card from './Card'
 
 const Cards = (props) => {
 
-    const { resetCurrentSet, currentSetCards } = props
+    const { currentSetCards } = props
     return (<>
-        <button onClick={resetCurrentSet}>Clear Search Results</button>
-        <div className='searchResults'>
+        <div className='cards'>
             {currentSetCards.map(card => {
-                const cardImg = card.images.small
-                return <img alt='' src={cardImg}/>
+                return <Card key={card.id} card={card} />
             })}
         </div>
         </>)
