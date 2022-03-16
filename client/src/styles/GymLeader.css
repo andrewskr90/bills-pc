@@ -11,3 +11,8 @@
     width:10%;
     border: black 1px solid;
 }
+
+.cardUploader .cards {
+    display: flex;
+    flex-wrap: wrap;
+}
