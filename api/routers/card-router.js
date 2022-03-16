@@ -1,9 +1,8 @@
 const router = require('express').Router()
 const Card = require('../models/card-model')
-const { verifyCard } = require('../middlewares/card-middleware')
-const { sanitizeObjectStrings, gymLeaderAuthorized } = require('../middlewares/universal-middleware')
+const { checkCardDatatypes } = require('../middlewares/card-middleware')
 
-router.post('/', sanitizeObjectStrings, gymLeaderAuthorized, verifyCard, async (req, res, next) => {
+router.post('/', checkCardDatatypes, async (req, res, next) => {
     try {
         const addedCard = await Card.add(req.body)
         res.status(201).json(addedCard)
@@ -31,7 +30,7 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', gymLeaderAuthorized, verifyCard, async (req, res, next) => {
+router.put('/:id', async (req, res, next) => {
     const card_id = req.params.id
     const changes = req.body
     try {
@@ -44,7 +43,7 @@ router.put('/:id', gymLeaderAuthorized, verifyCard, async (req, res, next) => {
     }
 })
 
-router.delete('/:id', gymLeaderAuthorized, async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
     const card_id = req.params.id
     try {
         const deletedCard = await Card.remove(card_id)

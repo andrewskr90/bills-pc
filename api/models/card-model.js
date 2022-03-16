@@ -13,8 +13,8 @@ function findBy(filter) {
   }
 
 const add = async (card) => {
-    const [card_id] = await db('cards').insert(card, 'card_id')
-    return findById(card_id)
+    const card_id = await db('cards').insert(card, 'card_id')
+    return card_id.length
 }
 
 const update = async (card_id, changes) => {
