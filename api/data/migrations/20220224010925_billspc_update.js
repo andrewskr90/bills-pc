@@ -79,7 +79,9 @@ exports.up = async function(knex) {
         })
         .createTable('sets', table => {
             table.increments('set_id')
+            table.string('set_pokemon_tcg_io_id')
             table.string('set_name')
+                .unique()
                 .notNullable()
             table.date('set_release_date')
             table.string('set_language')
@@ -89,9 +91,11 @@ exports.up = async function(knex) {
                 .unsigned()
             table.integer('set_secret_card_count')
                 .unsigned()
-            table.integer('set_generation')
-                .unsigned()
             table.string('set_image')
+            table.string('set_symbol')
+            table.string('set_ptcgo_code')
+            table.string('set_series')
+            table.timestamps(true,true)
         })
         .createTable('products', table => {
             table.increments('product_id')
@@ -108,6 +112,7 @@ exports.up = async function(knex) {
             table.date('product_release_date')
             table.decimal('product_retail_price')
             table.string('product_description')
+            table.timestamps(true,true)
         })
         .createTable('collected_products', table => {
             table.increments('collected_product_id')
@@ -125,6 +130,7 @@ exports.up = async function(knex) {
                 .inTable('users')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
         .createTable('rips', table => {
             table.increments('rip_id')
@@ -149,6 +155,7 @@ exports.up = async function(knex) {
                 .inTable('collected_products')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
         .createTable('cards', table => {
             table.increments('card_id')
@@ -161,11 +168,17 @@ exports.up = async function(knex) {
                 .onUpdate('RESTRICT')
             table.string('card_name')
                 .notNullable()
-            table.integer('card_number')
-                .unsigned()
-            table.string('card_image')
+            table.string('card_number')
+            table.string('card_image_small')
+            table.string('card_image_large')
             table.string('card_rarity')
             table.string('card_rarity_type')
+            table.string('card_national_pokedex_numbers')
+            table.string('card_regulation_mark')
+            table.text('card_flavor_text')
+            table.text('card_rules')
+            table.string('card_artist')
+            table.timestamps(true,true)
         })
         .createTable('product_connections', table => {
             table.increments('product_connection_id')
@@ -194,6 +207,7 @@ exports.up = async function(knex) {
             table.integer('product_connection_child_card_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('collected_cards', table => {
             table.increments('collected_card_id')
@@ -211,6 +225,7 @@ exports.up = async function(knex) {
                 .inTable('users')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
         .createTable('sale_cards', table => {
             table.increments('sale_card_id')
@@ -234,6 +249,7 @@ exports.up = async function(knex) {
             table.integer('sale_card_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('sale_products', table => {
             table.increments('sale_product_id')
@@ -257,6 +273,7 @@ exports.up = async function(knex) {
             table.integer('sale_product_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('trade_cards', table => {
             table.increments('trade_card_id')
@@ -279,6 +296,7 @@ exports.up = async function(knex) {
             table.integer('trade_card_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('trade_products', table => {
             table.increments('trade_product_id')
@@ -301,6 +319,7 @@ exports.up = async function(knex) {
             table.integer('trade_product_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('rip_cards', table => {
             table.increments('rip_card_id')
@@ -318,6 +337,7 @@ exports.up = async function(knex) {
                 .inTable('cards')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
         .createTable('rip_products', table => {
             table.increments('rip_product_id')
@@ -338,6 +358,7 @@ exports.up = async function(knex) {
             table.integer('rip_product_quantity')
                 .unsigned()
                 .notNullable()
+            table.timestamps(true,true)
         })
         .createTable('collected_card_events', table => {
             table.increments('collected_card_event_id')
@@ -369,6 +390,7 @@ exports.up = async function(knex) {
                 .inTable('trade_cards')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
         .createTable('collected_product_events', table => {
             table.increments('collected_product_event_id')
@@ -400,6 +422,7 @@ exports.up = async function(knex) {
                 .inTable('trade_products')
                 .onDelete('RESTRICT')
                 .onUpdate('RESTRICT')
+            table.timestamps(true,true)
         })
     };
   
