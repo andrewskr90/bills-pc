@@ -8,9 +8,9 @@ const findById = (set_id) => {
     return db('sets').where({ set_id }).first()
 }
 
-function findBy(filter) {
-    return db('sets').where(filter).orderBy("set_id");
-  }
+const findBy = (filter) => {
+    return db('sets').where(filter).orderBy("set_id")
+}
 
 const add = async (set) => {
     const [set_id] = await db('sets').insert(set, 'set_id')
