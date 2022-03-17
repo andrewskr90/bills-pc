@@ -5,6 +5,7 @@ const tokenBuilder = (user) => {
     const payload = {
         subject: user.user_id,
         username: user.user_name,
+        role: user.user_role
       }
       const options = {
         expiresIn: '1d'
