@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 
-const PrivateRoute = ({component:Component, ...rest})=> {
+const TrainerRoute = ({component:Component, ...rest})=> {
     return <Route {...rest} render={(props) => {
         if (localStorage.getItem("token")) {
             return <Component {...props} />
         } else {
-            return <Redirect to="/" />
+            return <Redirect to="/login" />
         }
     }}/>
 }
 
-const AdminRoute = ({component:Component, ...rest}) => {
+const GymLeaderRoute = ({component:Component, ...rest}) => {
     return <Route {...rest} render={(props) => {
         if (localStorage.getItem("token")) {
             return <Component {...props} />
@@ -21,4 +21,4 @@ const AdminRoute = ({component:Component, ...rest}) => {
     }} />
 }
 
-export default PrivateRoute;
+export default { TrainerRoute, GymLeaderRoute }

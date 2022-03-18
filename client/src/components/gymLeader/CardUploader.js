@@ -4,7 +4,7 @@ import CardsToolbar from './CardsToolbar'
 import SetsToolbar from './SetsToolbar'
 import { getSets, getCardsFromSet } from '../../api/pokemon-tcg-io'
 import { postCardsToCards, postSetsToSets } from '../../api/bills-pc'
-import { formatCardsArray, formatSetsArray } from '../format-data/pokemon-tcg-io'
+import { formatCardsArray, formatSetsArray } from '../../utils/format-data/pokemon-tcg-io'
 
 import React, { useState, useEffect } from 'react'
 

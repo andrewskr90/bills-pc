@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../App.css';
-import { dummy_collection } from '../data/dummy_collection';
+import { dummy_collection } from '../../data/dummy_collection';
 
 // import CollectedCard from './CollectedCard'
 
