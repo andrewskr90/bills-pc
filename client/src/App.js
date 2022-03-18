@@ -1,25 +1,30 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import React from 'react'
+import { Route, Switch } from 'react-router-dom'
 
 import './styles/App.css';
 import './styles/GymLeader.css'
-import PrivateRoute from './trainer/components/PrivateRoute'
-import HomeNavBar from './trainer/components/HomeNavBar'
-import GymLeaderLogin from './GymLeader/components/GymLeaderLogin'
-import GymLeaderHome from './GymLeader/components/GymLeaderHome'
+import NavBar from './components/trainer/NavBar'
+import TrainerRoute from './utils/auth/privateRoutes/TrainerRoute'
+import GymLeaderRoute from './utils/auth/privateRoutes/GymLeaderRoute'
+import TrainerHome from './components/trainer/TrainerHome'
+import Login from './components/common/Login'
+import GymLeaderHome from './components/gymLeader/GymLeaderHome'
 
 function App() {
-  const [user, setUser] = useState(false)
 
   return (
-    <>
-      <Router>
-        <HomeNavBar path='/' user={user} />
-        <Route path='/gym-leader/login' component={GymLeaderLogin}/>
-        <Route path='/gym-leader/home' component={GymLeaderHome}/>
-        <PrivateRoute path='/home' component={HomeNavBar} user={user} />
-      </Router>
-    </>
+    <div className='app'>
+      <Route path='/' component={NavBar} />
+      <TrainerRoute path='/' component={TrainerHome} />
+      <Route path='/login' component={Login} />
+      <GymLeaderRoute path='/gym-leader' component={GymLeaderHome} />
+
+
+      {/* <HomeNavBar path='/' />
+      <Route path='/gym-leader/login' component={GymLeaderLogin}/>
+      <Route path='/gym-leader/home' component={GymLeaderHome}/>
+      <PrivateRoute path='/home' component={HomeNavBar} /> */}
+    </div>
   );
 }
 
