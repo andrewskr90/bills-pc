@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-const HomeNavBar = (props) => {
+const NavBar = (props) => {
   const { user } = props;
   const history = useHistory();
   const clickBillsPC = () => {
@@ -9,7 +9,7 @@ const HomeNavBar = (props) => {
   }
 
     return (
-      <header className='home-nav-bar'>
+      <header className='nav-bar'>
         <h1
           onClick={clickBillsPC}
         >
@@ -22,4 +22,4 @@ const HomeNavBar = (props) => {
     )
 }
 
-export default HomeNavBar;
+export default NavBar;
