@@ -22,7 +22,7 @@ const addSetsMySQL = async (req, res, next) => {
 const getSetsMySQL = async (req, res, next) => {
     let query = `SELECT * FROM sets`
     // if query params exist, add it to query
-    if (req.originalUrl.includes('?')) {
+    if (Object.keys(req.query).length > 0) {
         let queryFilter = QueryFormatters.filterConcatinated(req.query)
         query += ` WHERE ${queryFilter}`
     }

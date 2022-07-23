@@ -61,6 +61,13 @@ const BillsPcService = {
             method: 'post'
         })
     },
+    getSales(filter) {
+        return axios({
+            ...options,
+            url: '/api/v1/sales',
+            params: filter
+        })
+    },
     postSale(sale) {
         return axios({
             ...options,
@@ -69,10 +76,11 @@ const BillsPcService = {
             data: sale
         })
     },
-    getCollectedCards() {
+    getCollectedCards(filter) {
         return axios({
             ...options,
-            url: '/api/v1/collected-cards'
+            url: '/api/v1/collected-cards',
+            params: filter
         })
     }
 }
