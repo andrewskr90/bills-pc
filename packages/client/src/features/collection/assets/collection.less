@@ -1,18 +1,97 @@
 div.collection {
+    height: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    // border: solid black 4px;
-    div.collectedCardsSection {
-        height: 65%;
-        div.collectedCards {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            overflow: auto;
-            img {
-                padding: 1%;
-            }
-        }
-    }
+}
+
+
+.collectionPage {
+    width: 95%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.collectionPage h1 {
+    margin-bottom: 2%;;
+}
+
+.collectedCards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: auto;
+}
+
+.collectedCard {
+    padding: 2%;
+}
+
+.modalBackground {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modalContent {
+    width: 80%;
+    height: 90%;
+    margin: 15% auto;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+button.modalClose {
+    height: 15%;
+    width: 50%;
+    border-radius: 20px;
+}
+
+.originalPurchaseButton {
+    height: 35%;
+    width: 85%;
+    max-width: none;
+    border-radius: 20px;
+}
+
+.collectedCardInfo, .purchaseInfo {
+    background-color: white;
+    height: 30%;
+    margin-top: 5%;
+    padding: 4%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 20px;
+}
+
+.purchaseInfo div, .collectedCardInfo div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.purchaseCards {
+    height: 57.5%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    overflow: auto;
+}
+
+.purchaseCard {
+    height: 40%;
+    margin: 2% auto;
+}
+
+.modalOpen {
+    overflow-y: hidden;
 }

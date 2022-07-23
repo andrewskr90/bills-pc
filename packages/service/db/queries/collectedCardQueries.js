@@ -2,11 +2,14 @@ const connection = require('..')
 const QueryFormatters = require('../../utils/QueryFormatters')
 
 const findCollectedCardsMySQL = async (req, res, next) => {
-    const collected_card_user_id = req.claims.user_id
-    const queryString = `SELECT * FROM cards 
+    req.query.collected_card_user_id = req.claims.user_id
+    let whereClause = `WHERE ${QueryFormatters.filterConcatinated(req.query)}`
+    let queryString = `SELECT * FROM cards 
         RIGHT JOIN collected_cards ON cards.card_id = collected_cards.collected_card_card_id
-        LEFT JOIN sets ON cards.card_set_id = sets.set_id
-        WHERE collected_card_user_id = '${collected_card_user_id}'`
+        LEFT JOIN sets ON cards.card_set_id = sets.set_id 
+        LEFT JOIN sale_cards ON sale_cards.sale_card_collected_card_id = collected_card_id 
+        LEFT JOIN collected_card_notes ON collected_card_note_collected_card_id = collected_card_id
+        ${whereClause}`
     const query = new Promise((resolve, reject) => {
         connection.query(queryString, (err, results) => {
             if (err) {

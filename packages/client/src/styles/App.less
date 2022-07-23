@@ -82,6 +82,10 @@ div {
   width: 100%;
 }
 
+html, body, #root, .app, .home  {
+  height: 100%;
+}
+
 body {
   background-color: #FBFAF5;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -132,6 +136,7 @@ header {
   align-items: flex-start;
 }
 
+
 .flexColumnCenter {
   display: flex;
   flex-direction: column;
@@ -168,16 +173,13 @@ header {
 .app {
   .flexColumnNullCenter();
   background-color: #FBFAF5;
-  min-height: 100vh;
 }
 
 .home {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100vh;
   max-width: 2200px;
-  // border: solid black 4px
 }
 
 .page {
@@ -189,10 +191,6 @@ header {
 .trainerHome {
 
 }
-
-.collection {
-}
-
 
 .emptyCollection {
 

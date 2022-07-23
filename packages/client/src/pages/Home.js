@@ -39,7 +39,7 @@ const Home = (props) => {
             <h1>Kyle's PC</h1>
         </header>
         <Routes>
-            <Route path='/' element={<Collection collectedCards={collectedCards} />} />
+            <Route path='/' element={<Collection userClaims={userClaims} collectedCards={collectedCards} />} />
             <Route 
                 path='/import/*' 
                 element={<ImportPurchase 

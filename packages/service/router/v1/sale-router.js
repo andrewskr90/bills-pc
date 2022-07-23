@@ -10,10 +10,14 @@ const {
     compileSaleResults
 } = require('../../middleware/sale-middleware')
 const { addCollectedCardsMySQL } = require('../../db/queries/collectedCardQueries')
-const { addSalesMySQL } = require('../../db/queries/saleQueries')
+const { addSalesMySQL, findSalesMySQL } = require('../../db/queries/saleQueries')
 const { addSaleCardsMySQL } = require('../../db/queries/saleCardQueries')
 const { addSaleNotesMySQL } = require('../../db/queries/saleNoteQueries')
 const { addCollectedCardNotesMySQL } = require('../../db/queries/collectedCardNoteQueries')
+
+saleRouter.get('/', verifySession, decodeJwt, findSalesMySQL, (req, res, next) => {
+    res.status(200).json(req.results)
+})
 
 saleRouter.post('/', 
     verifySession,
