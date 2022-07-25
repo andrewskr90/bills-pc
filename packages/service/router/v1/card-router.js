@@ -20,7 +20,7 @@ cardRouter.post('/',
     addCardsMySQL,
     (req, res, next) => {
         const results = req.results
-        res.status(200).json({
+        res.status(201).json({
             data: results
         })
 })

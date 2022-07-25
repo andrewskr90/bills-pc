@@ -63,7 +63,7 @@ const Collection = (props) => {
         const params = {
             sale_id: e.currentTarget.id
         }
-        BillsPcService.getSales(params)
+        BillsPcService.getTransactionSales(params)
             .then(res => {
                 setSelectedPurchaseCards(res.data)
                 setSelectedCardModal(false)

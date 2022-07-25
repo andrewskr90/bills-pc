@@ -18,7 +18,7 @@ authRouter.post('/register',
     encryptPassword, 
     addUserMySQL,
     async (req, res, next) => {
-    res.status(200).json(res.results)
+    res.status(201).json(res.results)
 })
 
 authRouter.post('/login',

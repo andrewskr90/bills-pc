@@ -61,17 +61,17 @@ const BillsPcService = {
             method: 'post'
         })
     },
-    getSales(filter) {
+    getTransactionSales(filter) {
         return axios({
             ...options,
-            url: '/api/v1/sales',
+            url: '/api/v1/transactions/sales',
             params: filter
         })
     },
-    postSale(sale) {
+    postTransactionSales(sale) {
         return axios({
             ...options,
-            url: '/api/v1/sales',
+            url: '/api/v1/transactions/sales',
             method: 'post',
             data: sale
         })
