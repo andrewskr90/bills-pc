@@ -140,25 +140,11 @@ const formatSaleCards = (req, res, next) => {
     next()
 }
 
-const compileSaleResults = (req, res, next) => {
-    const results = {
-        addedCollectedCards: req.addCollectedCardsResults.affectedRows,
-        addedCollectedCardNotes: req.addCollectedCardNotesResults.affectedRows,
-        addedSales: req.addSalesResults.affectedRows,
-        addedSaleCards:  req.addSaleCardsResults.affectedRows,
-        addedSaleNotes: req.addSaleNotesResults.affectedRows
-    }
-    req.results = results
-    // TODO: check that each query successfully adds each necessary row
-    next()
-}
-
 module.exports = {
     checkSaleType,
     formatSales,
     formatSaleNotes,
     formatCollectedCards,
     formatCollectedCardNotes,
-    formatSaleCards,
-    compileSaleResults
+    formatSaleCards
 }

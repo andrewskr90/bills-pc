@@ -10,7 +10,7 @@ const PurchaseDetails = (props) => {
     const handleImportPurchase = (e) => {
         e.preventDefault()
 
-        BillsPcService.postSale(purchaseValues)
+        BillsPcService.postTransactionSales(purchaseValues)
             .then(res => {
                 console.log(res)
                 navigate('/')
