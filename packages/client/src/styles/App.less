@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap');
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
@@ -53,9 +55,10 @@ table {
 #30638e blue */
 
 * {
-    box-sizing:border-box;
+    box-sizing: border-box;
     padding:0;
     max-width:100%;
+    font-family: 'Titillium Web', sans-serif;
 }
 
 p {
@@ -63,11 +66,12 @@ p {
 }
 
 h1 {
-  font-size: 85px;
+  font-weight: 600;
+  font-size: 13vw;
 }
 
 h2 {
-  font-size: 70px;
+  font-size: 10vw;
 }
 
 h3 {
@@ -87,17 +91,18 @@ html, body, #root, .app, .home  {
 }
 
 body {
-  background-color: #FBFAF5;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-color: white;
+  font-family: 'Titillium Web', sans-serif;
+  margin: 0;
 }
 
 header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  background-color: #30638e;
-  color: #FBFAF5;
-  padding: 2vh;
-  margin: 0 0 3vw 0;
+  justify-content: center;
+  color: #6065CB;
+  height: 10%;
 }
 
 .flexCenter {
@@ -172,19 +177,23 @@ header {
 
 .app {
   .flexColumnNullCenter();
-  background-color: #FBFAF5;
+  padding: 2%;
 }
 
 .home {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   max-width: 2200px;
 }
 
 .page {
-  height: 100%;
-  width: 100%;
+  height: 83.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4%;
+  border: solid #C05656 8px;
+  border-radius: 50px 50px 0 0;
 }
 
 /* place styles in either collection or emptyCollection */
@@ -206,21 +215,35 @@ header {
 }
 
 .navBar {
-  height: 7vh;
-  background-color: #D1495B;
+  position: fixed;
+  bottom: 0;
+  margin-bottom: 1%;
+  height: 7%;
+  width: 96%;
   display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  align-items: flex-end;
 }
 
 .navBar .link {
-  width: 100%;
-  font-size: 50px;
-  background-color: #D1495B;
-  border: solid #FBFAF5 1px;
-  color: #FBFAF5;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding-bottom: 3%;
+  border-radius: 50px;
+  width: 18.4%;
+  font-size: 5vw;
+  border: #C05656 solid 8px;
+  color: #C05656;
+  height: 80%;
 }
 
 .link.selected {
-  background-color: #822c38;
+  height: 100%;
+  border-radius: 0 0 50px 50px;
+  background-color: #C05656;
+  color: white;
 }
 
 button.selected {
@@ -229,6 +252,10 @@ button.selected {
 
 .hidden {
   display: none !important;
+}
+
+.bold {
+  font-weight: bold;
 }
 
 .link {
@@ -339,12 +366,12 @@ button:hover {
 }
 
 .modalClose {
-  background-color: #30638e;
-  width: 40vw;
-  height: 5%;
+  background-color: #6065CB;
+  height: 10vw;
   padding: 0 0;
   font-size: 50px;
   margin: 2% auto;
+  border-radius: 20px;
 }
 
 /* ***Component Styles*** */
@@ -352,11 +379,11 @@ button:hover {
 /* ImportPurchase */
 
   div.importPurchase {
-    .page();
+    
     /* PurchaseTable */
     div.purchaseItems {
       .flexColumnNullCenter();
-      .page();
+      
       div.purchaseTable {
         width: 90%;
         button {
@@ -406,7 +433,7 @@ button:hover {
   div.addItemModal {
     display: block;
     position: fixed;
-    z-index: 1;
+    z-index: 10;
     left: 0;
     top: 0;
     width: 100vw;
@@ -414,7 +441,7 @@ button:hover {
     background-color: rgba(0,0,0,0.4);
     div.modalContent {
       .flexColumnNullCenter();
-      background-color: #FBFAF5;
+      background-color: white;
       margin: 80px auto;
       width: 80vw;
       height: 93%;
@@ -442,6 +469,7 @@ button:hover {
             .flexColumnNullStart();
 
             input {
+              border: solid black 1px;
             }
             div.filterResults {
               .flexColumnNullStart();
@@ -465,7 +493,6 @@ button:hover {
           flex-wrap: wrap;
           justify-content: center;
           height: 95%;
-          // max-height: 1010px;
           overflow: auto;
           img {
             margin: 0.5vw;

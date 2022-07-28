@@ -6,10 +6,14 @@ const NavBar = () => {
     const location = useLocation()
 
     useEffect(() => {
-        if (location.pathname.includes('/import')) {
+        if (location.pathname.includes('/rip')) {
+            setSelected('rip')
+        } else if (location.pathname.includes('import')) {
             setSelected('import')
-        } else if (location.pathname.includes('profile')) {
-            setSelected('profile')
+        } else if (location.pathname.includes('sell')) {
+            setSelected('sell')
+        } else if (location.pathname.includes('trade')) {
+            setSelected('trade')
         } else {
             setSelected('collection')
         }
@@ -20,19 +24,31 @@ const NavBar = () => {
             to='/' 
             className={`link ${selected === 'collection' ? 'selected': ''}`}
         >
-            Collection
+            PC
+        </Link>
+        <Link 
+            to='/rip' 
+            className={`link ${selected === 'rip' ? 'selected': ''}`}
+        >
+            Rip
         </Link>
         <Link 
             to='/import' 
             className={`link ${selected === 'import' ? 'selected': ''}`}
         >
-            Import
+            Buy
         </Link>
         <Link 
-            to='/profile' 
-            className={`link ${selected === 'profile' ? 'selected': ''}`}
+            to='/sell' 
+            className={`link ${selected === 'sell' ? 'selected': ''}`}
         >
-            Profile
+            Sell
+        </Link>
+        <Link 
+            to='/trade' 
+            className={`link ${selected === 'trade' ? 'selected': ''}`}
+        >
+            Trade
         </Link>
     </div>)
 }
