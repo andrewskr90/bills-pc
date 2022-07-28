@@ -120,7 +120,7 @@ const ImportPurchase = (props) => {
         })
     }
 
-    return (<div className='importPurchase'>
+    return (<div className='page importPurchase'>
         <h3>Import Purchase</h3>
         <Routes>
             <Route 

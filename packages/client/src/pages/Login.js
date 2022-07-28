@@ -6,7 +6,7 @@ const Login = (props) => {
     const { setUserClaims } = props
 
     return (<div className='loginPage'>
-        <header className='flexColumnSpaceStart'>
+        <header>
             <h1>Kyle's PC</h1>
             <p>Pokemon Card Portfolio App</p>
         </header>

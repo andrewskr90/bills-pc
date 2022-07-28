@@ -1,17 +1,11 @@
 import React from 'react'
+import CollectedCard from './CollectedCard'
 
 const CollectedCards = (props) => {
-    const { collectedCards, selectCollectedCard } = props
-
+    const { collectedCards, selectCollectedCards } = props
     return (<div className='collectedCards'>
         {collectedCards.map(card => {
-            const { collected_card_id, card_image_small } = card
-            return <img 
-                className='collectedCard' 
-                id={collected_card_id} 
-                src={card_image_small}
-                onClick={selectCollectedCard} 
-            />
+            return <CollectedCard card={card} selectCollectedCards={selectCollectedCards} />
         })}
     </div>)
 }
