@@ -5,7 +5,7 @@ const QueryFormatters = require('../../utils/QueryFormatters')
 
 const addSetsMySQL = async (req, res, next) => {
     const sets = req.sets
-    const query = QueryFormatters.objectsToInsert(sets, 'sets')
+    const query = QueryFormatters.objectsToInsert(sets, 'sets_v2')
     connection.query(query, (err, results) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {

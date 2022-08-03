@@ -1,7 +1,7 @@
 const setRouter = require('express').Router()
 const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addSetsMySQL, getSetsMySQL } = require('../../db/queries/setQueries')
-const { generateSetIds } = require('../../middleware/set-middleware')
+const { generateSetIds, formatSetFromTcgPlayerDetails } = require('../../middleware/set-middleware')
 
 setRouter.get('/', 
     verifySession,
@@ -16,8 +16,13 @@ setRouter.post('/',
     decodeJwt,
     gymLeaderOnly, 
     generateSetIds,
+    formatSetFromTcgPlayerDetails,
     addSetsMySQL, 
     (req, res, next) => {
+        req.results = {
+            ...req.results,
+            addedSets: req.sets
+        }
         res.status(201).json(req.results)
 })
 

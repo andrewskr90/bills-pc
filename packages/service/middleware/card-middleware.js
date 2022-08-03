@@ -33,8 +33,16 @@ const generateCardIds = (req, res, next) => {
     next()
 }
 
+const formatCardFromTcgPlayerDetails = (req, res, next) => {
+    if (Object.keys(req.cards[0]).includes('tcgPlayerDetails')) {
+        req.cards = tcgPlayerFormatters.formatTcgDetailsCards(req.cards)
+    }
+    next()
+}
+
 module.exports = {
     findCardSetId,
     alterCardSetIds,
-    generateCardIds
+    generateCardIds,
+    formatCardFromTcgPlayerDetails
 }

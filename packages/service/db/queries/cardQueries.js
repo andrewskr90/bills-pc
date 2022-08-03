@@ -5,7 +5,7 @@ const QueryFormatters = require('../../utils/QueryFormatters')
 
 const addCardsMySQL = async (req, res, next) => {
     const cards = req.cards
-    const query = QueryFormatters.objectsToInsert(cards, 'cards')
+    const query = QueryFormatters.objectsToInsert(cards, 'cards_v2')
     connection.query(query, (err, results) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
