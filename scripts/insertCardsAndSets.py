@@ -42,9 +42,9 @@ for i in range(146650, 146750):
                     #share previous set details
                     if startId:
                         print(f'SetName:{currentSet}, firstItem:{startId}, itemCount:{currentSetCardCount}')
-                        currentSet = product['setName']
-                        startId = product['productId']
-                        currentSetCardCount = 0
+                    startId = product['productId']
+                    currentSet = product['setName']
+                    currentSetCardCount = 0
                     #add tcgPlayerDetails flag to notify sets router where the set is coming from
                     product['tcgPlayerDetails'] = True
                     try:
@@ -58,7 +58,6 @@ for i in range(146650, 146750):
                     cardSetId = addedSets[product['setName']]
                     product['tcgPlayerDetails'] = True
                     product['set_v2_id'] = set_v2_id
-                    print(product)
                     addedCard = requests.post('http://localhost:7070/api/v1/cards', json=[product], cookies=cookies)
                     print(addedCard)
                     currentSetCardCount += 1

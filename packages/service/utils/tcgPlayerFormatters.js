@@ -19,11 +19,10 @@ const tcgPlayerFormatters = {
                 card_v2_name: card.productName,
                 card_v2_number: card.customAttributes.number,
                 card_v2_rarity: card.rarityName,
-                card_v2_tcgplayer_card_id: card.productId
+                card_v2_tcgplayer_product_id: card.productId
             }
             return newCard
         })
-        console.log(formattedCards)
         return formattedCards
     }
 }
