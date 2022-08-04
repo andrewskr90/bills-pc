@@ -24,7 +24,9 @@ db = mysql.connector.connect(
 
 cursor=db.cursor()
 
-cookies = {'billsPcSession': 's%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODE2ZWMwODgtMjVkMS00OTkyLTk4ZDktNjI5ZWRiNDFjOTMyIiwidXNlcl9uYW1lIjoiS3lsZSIsInVzZXJfcm9sZSI6Ikd5bUxlYWRlciIsInVzZXJfZW1haWwiOiJhbmRyZXdza3I5MEBnbWFpbC5jb20iLCJ1c2VyX2Zhdm9yaXRlX2dlbiI6IjEiLCJjcmVhdGVkX2RhdGUiOiIyMDIyLTA3LTE1VDA2OjM3OjA5LjAwMFoiLCJtb2RpZmllZF9kYXRlIjpudWxsLCJpYXQiOjE2NTkyMzQzMDEyMTEsImV4cCI6MTY1OTIzNDMzMDAxMX0.7LKCrdOwrUoWFpGK0hRAeyKCw_bO8wN7RP3EjrT6jP0.UrBuuPvrLlVLrXgFUskzaKZovf1AbUEp0OU3alXIn5k'}
+cookieValue = os.getenv('BILLS_PC_SESSION')
+
+cookies = {'billsPcSession': cookieValue}
 
 addedSets = {}
 currentSet = ''
