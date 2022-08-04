@@ -1,5 +1,6 @@
 const { v4: uuidV4 } = require('uuid')
 const { getSetByPtcgioIdMySQL } = require('../db/queries/setQueries')
+const tcgPlayerFormatters = require('../utils/tcgPlayerFormatters')
 
 const findCardSetId = async (req, res, next) => {
     req.setPtcgioId = req.body[0].card_ptcgio_id 
@@ -23,6 +24,7 @@ const alterCardSetIds = (req, res, next) => {
 }
 
 const generateCardIds = (req, res, next) => {
+    console.log('generateCardIds mw')
     const cardsWithIds = req.body.map(card => {
         return {
             ...card,
@@ -30,11 +32,20 @@ const generateCardIds = (req, res, next) => {
         }
     })
     req.cards = cardsWithIds
+    console.log(cardsWithIds)
+    next()
+}
+
+const formatCardFromTcgPlayerDetails = (req, res, next) => {
+    if (Object.keys(req.cards[0]).includes('tcgPlayerDetails')) {
+        req.cards = tcgPlayerFormatters.formatTcgDetailsCards(req.cards)
+    }
     next()
 }
 
 module.exports = {
     findCardSetId,
     alterCardSetIds,
-    generateCardIds
+    generateCardIds,
+    formatCardFromTcgPlayerDetails
 }

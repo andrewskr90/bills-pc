@@ -17,6 +17,7 @@
     "lerna": "^5.1.6"
   },
   "dependencies": {
-    "@types/eslint": "8.4.3"
+    "@types/eslint": "8.4.3",
+    "dotenv": "^16.0.1"
   }
 }
