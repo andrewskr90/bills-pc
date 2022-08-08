@@ -47,7 +47,7 @@ const FilterSets = (props) => {
 
     return (<>
         <div className='filterSets'>
-            <h2>Filters</h2>
+            <p>Filters</p>
             <form>
                 <label>Set Name</label>
                 <input

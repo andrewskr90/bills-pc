@@ -97,3 +97,65 @@ header {
     justify-content: space-between;
     width: 100%
 }
+
+@media only screen and (min-width: 800px) {
+    .gymLeaderHome {
+        height: 100%;
+        h1 {
+            font-size: 60px;
+            // width: 1%;
+        }
+        h2 {
+            font-size: 40px;
+        }
+        p {
+            font-size: 16px;
+        }
+        button {
+            width: 75px;
+            height: 25px;
+            font-size: 16px;
+            margin: 0;
+        }
+        input {
+            font-size: 16px;
+        }
+        header {
+            display: flex;
+            flex-direction: column;
+            height: 15%;
+            .navBar {
+                margin-bottom: none;
+                display: flex;
+                flex-direction: row;
+                position: relative;
+                border: none;
+                height: 10vw;
+                .link {
+                    border: none;
+                    color: #6065CB;
+                    font-size: 16px;
+                }
+            }
+        }
+        .cardManager {
+            .toolbar {
+                color: white;
+                background-color: #6065CB;
+                .link {
+                    color: white;
+                }
+            }
+            .ptcgioManager {
+                .sidebar, .panel {
+                    background-color: white;
+                    border: solid 4px #6065CB;
+                }
+            }
+            .tcgPlayerManager {
+                border: solid 4px #6065CB;
+                padding: 4%;
+            }
+        }
+    }
+}
