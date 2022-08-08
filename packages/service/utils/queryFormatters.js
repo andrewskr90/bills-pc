@@ -32,7 +32,13 @@ const QueryFormatters = {
                     value = `'${escapedApostrophe}'`
                 } else if (typeof obj[key] === 'number') {
                     value = obj[key]
-                }          
+                } else if (typeof obj[key] === 'boolean') {
+                    if (obj[key]) {
+                        value = 1
+                    } else {
+                        value = 0
+                    }
+                }                 
                 if (j !== keys.length -1) {
                     values += `${value}, `
                 } else {

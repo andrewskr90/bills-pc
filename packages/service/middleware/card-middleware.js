@@ -24,7 +24,6 @@ const alterCardSetIds = (req, res, next) => {
 }
 
 const generateCardIds = (req, res, next) => {
-    console.log('generateCardIds mw')
     const cardsWithIds = req.body.map(card => {
         return {
             ...card,
@@ -32,7 +31,6 @@ const generateCardIds = (req, res, next) => {
         }
     })
     req.cards = cardsWithIds
-    console.log(cardsWithIds)
     next()
 }
 
