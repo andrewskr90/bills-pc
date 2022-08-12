@@ -1,5 +1,5 @@
 const connection = require('..')
-const QueryFormatters = require('../../utils/QueryFormatters')
+const QueryFormatters = require('../../utils/queryFormatters')
 
 const findCollectedCardsMySQL = async (req, res, next) => {
     req.query.collected_card_user_id = req.claims.user_id

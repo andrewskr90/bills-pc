@@ -8,7 +8,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "start": "webpack serve --open --config ./webpack.config.js",
+    "startDev": "webpack serve --open --config ./webpack.config.js",
     "test": "echo testing client"
   },
   "devDependencies": {

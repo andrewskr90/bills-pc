@@ -1,5 +1,5 @@
 const connection = require('..')
-const QueryFormatters = require('../../utils/QueryFormatters')
+const QueryFormatters = require('../../utils/queryFormatters')
 
 const findSalesMySQL = async (req, res, next) => {
     const queryString = `SELECT * FROM sales 
