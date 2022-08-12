@@ -1,5 +1,5 @@
 const connection = require('..')
-const QueryFormatters = require('../../utils/QueryFormatters')
+const QueryFormatters = require('../../utils/queryFormatters')
 
 const addSaleNotesMySQL = async (req, res, next) => {
     const saleNotes = req.saleNotes

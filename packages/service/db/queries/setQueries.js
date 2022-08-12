@@ -1,5 +1,5 @@
 const connection = require('..')
-const QueryFormatters = require('../../utils/QueryFormatters')
+const QueryFormatters = require('../../utils/queryFormatters')
 
 //find, add, update, remove verbage
 

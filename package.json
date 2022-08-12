@@ -8,7 +8,10 @@
   "license": "MIT",
   "scripts": {
     "start": "lerna run start --stream",
+    "server": "lerna run server --stream",
+    "startDev": "lerna run startDev --stream",
     "build": "lerna run build",
+    "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "new-version": "lerna version --conventional-commits --yes",
     "diff": "lerna diff"

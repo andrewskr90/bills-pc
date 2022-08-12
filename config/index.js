@@ -1,9 +1,11 @@
+
 const config = {
     MYSQL: {
-        host: 'localhost',
-        user: 'root',
-        database: 'bills_pc',
-        password: process.env.SQL_PASSWORD
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_ROOT_USER,
+        database: process.env.DB_NAME,
+        password: process.env.DB_ROOT_PASS,
     },
     PTCGIO_API: {
         baseURL: 'https://api.pokemontcg.io/v2'
