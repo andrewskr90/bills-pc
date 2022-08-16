@@ -13,7 +13,7 @@ db = mysql.connector.connect(
     port = 3306,
     user = 'root',
     database = 'bills_pc',
-    password = os.getenv('SQL_PASSWORD')
+    password = os.getenv('DB_PASS')
 )
 
 # cursor.execute('SELECT * FROM collected_cards')
@@ -41,10 +41,10 @@ for i in range(42721, 42741):
                     #add tcgPlayerDetails flag to notify sets router where the set is coming from
                     product['tcgPlayerDetails'] = True
                     try:
-                        addedSet= requests.post('http://localhost:7070/api/v1/sets', json=[product], cookies=cookies) 
+                        addedSet= requests.post('http://localhost:7070/api/v1/sets-v2', json=[product], cookies=cookies) 
                         if addedSet.json()['message'] == 'Set(s) already inserted.':
                             setName = product['setName']
-                            set_v2_id = requests.get(f'http://localhost:7070/api/v1/sets?set_v2_name={setName}', cookies=cookies).json()[0]['set_v2_id']
+                            set_v2_id = requests.get(f'http://localhost:7070/api/v1/sets-v2?set_v2_name={setName}', cookies=cookies).json()[0]['set_v2_id']
                         else:
                             set_v2_id = addedSet.json()['addedSets'][0]['set_v2_id']
                         addedSetIds[product['setName']] = set_v2_id
@@ -57,7 +57,7 @@ for i in range(42721, 42741):
                         product['tcgPlayerDetails'] = True
                         product['set_v2_id'] = cardSetId
                         productId = product['productId']
-                        addedCard = requests.post('http://localhost:7070/api/v1/cards', json=[product], cookies=cookies)
+                        addedCard = requests.post('http://localhost:7070/api/v1/cards-v2', json=[product], cookies=cookies)
                         if addedCard.status_code != 201:
                             message = addedCard.json()['message']
                             logging.debug(f'Card not added: ProductId:{productId}, message:{message}')
