@@ -3,9 +3,9 @@ const QueryFormatters = require('../../utils/queryFormatters')
 
 //find, add, update, remove verbage
 
-const addSetsMySQL = async (req, res, next) => {
+const addSetsV2MySQL = async (req, res, next) => {
     const sets = req.sets
-    const query = QueryFormatters.objectsToInsert(sets, 'sets')
+    const query = QueryFormatters.objectsToInsert(sets, 'sets_v2')
     connection.query(query, (err, results) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -19,8 +19,8 @@ const addSetsMySQL = async (req, res, next) => {
     })
 }
 
-const getSetsMySQL = async (req, res, next) => {
-    let query = `SELECT * FROM sets`
+const getSetsV2MySQL = async (req, res, next) => {
+    let query = `SELECT * FROM sets_v2`
     // if query params exist, add it to query
     if (Object.keys(req.query).length > 0) {
         let queryFilter = QueryFormatters.filterConcatinated(req.query)
@@ -37,10 +37,10 @@ const getSetsMySQL = async (req, res, next) => {
     })
 }
 
-const getSetByPtcgioIdMySQL = async (req, res, next) => {
+const getSetV2ByPtcgioIdMySQL = async (req, res, next) => {
     const set_ptcgio_id = req.setPtcgioId
     const queryFilter = QueryFormatters.filterConcatinated({ set_ptcgio_id })
-    const query = `SELECT * FROM sets WHERE ${queryFilter};`
+    const query = `SELECT * FROM sets_v2 WHERE ${queryFilter};`
     connection.query(query, (err, results) => {
         if (err) {
             return next(err)
@@ -51,7 +51,7 @@ const getSetByPtcgioIdMySQL = async (req, res, next) => {
 }
 
 module.exports = {
-    addSetsMySQL,
-    getSetsMySQL,
-    getSetByPtcgioIdMySQL
+    addSetsV2MySQL,
+    getSetsV2MySQL,
+    getSetV2ByPtcgioIdMySQL
 }

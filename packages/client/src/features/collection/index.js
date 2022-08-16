@@ -43,7 +43,6 @@ const Collection = (props) => {
     const [selectedCollectedCards, setSelectedCollectedCards] = useState(initialSelectedCollectedCardsValues)
 
     const formatDate = (dateCode) => {
-        console.log(dateCode)
         const dateParts = dateCode.split('-')
         return `${dateParts[1]}-${dateParts[2].split('T')[0]}-${dateParts[0]}`
     }
@@ -71,7 +70,7 @@ const Collection = (props) => {
             collection.forEach(card => {
                 if (cardToCheck.card_id === card.card_id) {
                     quantity++
-                    amountInvested += card.sale_card_price
+                    amountInvested += parseFloat(card.sale_card_price)
                 }
             })
             const averagePrice = Math.round(amountInvested / quantity *100) /100
@@ -119,7 +118,6 @@ const Collection = (props) => {
         BillsPcService.getCollectedCards()
             .then(res => {
                 const evaluatedCollection = evaluateCollection(res.data)
-                console.log(evaluatedCollection)
                 setCollectedCards(evaluatedCollection)
             }).catch(err => {
                 console.log(err)
@@ -160,7 +158,6 @@ const Collection = (props) => {
                     sale_vendor: sale_vendor
                 }
             })
-            console.log(formattedPurchaseCards)
             return formattedPurchaseCards
         }
         BillsPcService.getTransactionSales(params)

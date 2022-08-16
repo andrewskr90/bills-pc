@@ -1,22 +1,23 @@
-const setRouter = require('express').Router()
+const setV2Router = require('express').Router()
 const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { addSetsMySQL, getSetsMySQL } = require('../../db/queries/setQueries')
+const { addSetsV2MySQL, getSetsV2MySQL } = require('../../db/queries/setV2Queries')
 const { generateSetIds, formatSetFromTcgPlayerDetails } = require('../../middleware/set-middleware')
 
-setRouter.get('/', 
+setV2Router.get('/', 
     verifySession,
     decodeJwt,
-    getSetsMySQL, 
+    getSetsV2MySQL, 
     (req, res, next) => {
         res.status(200).json(req.results)
 })
 
-setRouter.post('/', 
+setV2Router.post('/', 
     verifySession,
     decodeJwt,
     gymLeaderOnly, 
     generateSetIds,
-    addSetsMySQL, 
+    formatSetFromTcgPlayerDetails,
+    addSetsV2MySQL, 
     (req, res, next) => {
         req.results = {
             ...req.results,
@@ -25,4 +26,4 @@ setRouter.post('/',
         res.status(201).json(req.results)
 })
 
-module.exports = setRouter
+module.exports = setV2Router

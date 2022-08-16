@@ -3,9 +3,9 @@ const QueryFormatters = require('../../utils/queryFormatters')
 
 //find, add, update, remove verbage
 
-const addCardsMySQL = async (req, res, next) => {
+const addCardsV2MySQL = async (req, res, next) => {
     const cards = req.cards
-    const query = QueryFormatters.objectsToInsert(cards, 'cards')
+    const query = QueryFormatters.objectsToInsert(cards, 'cards_v2')
     connection.query(query, (err, results) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -19,9 +19,9 @@ const addCardsMySQL = async (req, res, next) => {
     })
 }
 
-const getCardsBySetIdMySQL = async (req, res, next) => {
+const getCardsV2BySetIdMySQL = async (req, res, next) => {
     const setId = req.params.setId
-    const query = `SELECT * FROM cards WHERE card_set_id = '${setId}'`
+    const query = `SELECT * FROM cards_v2 WHERE card_v2_set_id = '${setId}'`
 
     connection.query(query, (err, results) => {
         if (err) {
@@ -34,6 +34,6 @@ const getCardsBySetIdMySQL = async (req, res, next) => {
 }
 
 module.exports = {
-    addCardsMySQL,
-    getCardsBySetIdMySQL
+    addCardsV2MySQL,
+    getCardsV2BySetIdMySQL
 }

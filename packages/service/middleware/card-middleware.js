@@ -1,5 +1,5 @@
 const { v4: uuidV4 } = require('uuid')
-const { getSetByPtcgioIdMySQL } = require('../db/queries/setQueries')
+const { getSetByPtcgioIdMySQL } = require('../db/queries/setV2Queries')
 const tcgPlayerFormatters = require('../utils/tcgPlayerFormatters')
 
 const findCardSetId = async (req, res, next) => {
