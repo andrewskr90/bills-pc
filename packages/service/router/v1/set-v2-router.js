@@ -1,7 +1,8 @@
 const setV2Router = require('express').Router()
+const { checkReqBody } = require('../../middleware')
 const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addSetsV2MySQL, getSetsV2MySQL } = require('../../db/queries/setV2Queries')
-const { generateSetIds, formatSetFromTcgPlayerDetails } = require('../../middleware/set-middleware')
+const { generateSetV2Ids } = require('../../middleware/set-v2-middleware')
 
 setV2Router.get('/', 
     verifySession,
@@ -15,8 +16,8 @@ setV2Router.post('/',
     verifySession,
     decodeJwt,
     gymLeaderOnly, 
-    generateSetIds,
-    formatSetFromTcgPlayerDetails,
+    checkReqBody,
+    generateSetV2Ids,
     addSetsV2MySQL, 
     (req, res, next) => {
         req.results = {
