@@ -9,7 +9,6 @@ const generateSetV2Ids = (req, res, next) => {
         }
     })
     req.sets = setsWithIds
-    console.log(req.sets)
     next()
 }
 

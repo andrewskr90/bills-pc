@@ -3,4 +3,6 @@ node_modules
 yarn-error.log
 dist
 priceCheck.log
-addSetsFromTcgPlater.log
+addSetsFromTcgPlayer.log
+addItemsFromTcgPlayer.log
+geckodriver.log
