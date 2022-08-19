@@ -18,6 +18,13 @@ const BillsPcService = {
             url: `/api/v1/sets`
         })
     },
+    getSetsV2(filter) {
+        return axios({
+            ...options,
+            url: `api/v1/sets-v2`,
+            params: filter
+        })
+    },
     getSetsBy(filter) {
         return axios({
             ...options,
@@ -37,6 +44,13 @@ const BillsPcService = {
         return axios({
             ...options,
             url: `/api/v1/cards`,
+            params: filter
+        })
+    },
+    getCardsV2(filter) {
+        return axios({
+            ...options,
+            url:`/api/v1/cards-v2`,
             params: filter
         })
     },

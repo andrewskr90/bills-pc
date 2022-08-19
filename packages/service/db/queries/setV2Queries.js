@@ -20,13 +20,13 @@ const addSetsV2MySQL = async (req, res, next) => {
 }
 
 const getSetsV2MySQL = async (req, res, next) => {
-    let query = `SELECT * FROM sets_v2`
-    // if query params exist, add it to query
+    let query
     if (Object.keys(req.query).length > 0) {
-        let queryFilter = QueryFormatters.filterConcatinated(req.query)
-        query += ` WHERE ${queryFilter}`
+        const filter = QueryFormatters.filterConcatinated(req.query)
+        query = `SELECT * FROM sets_v2 WHERE ${filter}`
+    } else {
+        query = `SELECT * FROM sets_v2`
     }
-
     connection.query(query, (err, results) => {
         if (err) {
             return next(err)

@@ -17,7 +17,6 @@ productRouter.post('/',
     decodeJwt,
     gymLeaderOnly,
     generateProductIds,
-    formatProductsFromTcgPlayerDetails,
     addProductsMySQL,
     (req, res, next) => {
         const results = req.results

@@ -1,7 +1,16 @@
 const cardV2Router = require('express').Router()
 const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { addCardsV2MySQL, getCardsV2BySetIdMySQL } = require('../../db/queries/cardV2Queries')
-const { generateCardIds, formatCardFromTcgPlayerDetails } = require('../../middleware/card-middleware')
+const { addCardsV2MySQL, getCardsV2BySetIdMySQL, getCardsV2MySQL } = require('../../db/queries/cardV2Queries')
+const { generateCardV2Ids } = require('../../middleware/card-v2-middleware')
+
+cardV2Router.get('/', 
+    verifySession,
+    decodeJwt,
+    getCardsV2MySQL,
+    (req, res, next) => {
+    const results = req.results
+    res.status(200).json(results)
+})
 
 cardV2Router.get('/set-id/:setId', 
     verifySession,
@@ -16,8 +25,7 @@ cardV2Router.post('/',
     verifySession, 
     decodeJwt,
     gymLeaderOnly,
-    generateCardIds,
-    formatCardFromTcgPlayerDetails,
+    generateCardV2Ids,
     addCardsV2MySQL,
     (req, res, next) => {
         const results = req.results
