@@ -13,9 +13,12 @@ const config = {
     BILLS_PC_API: {
         options: {
             withCredentials: true,
-            baseURL: 'http://localhost:7070'
         }
     }
+}
+
+if (process.env.NODE_ENV === 'development') {
+    config.BILLS_PC_API.options.baseURL = 'http://localhost:7070'
 }
 
 module.exports = config

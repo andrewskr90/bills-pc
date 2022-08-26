@@ -1,4 +1,4 @@
-const connection = require('..')
+const createConnection = require('..')
 const QueryFormatters = require('../../utils/queryFormatters')
 
 const findSalesMySQL = async (req, res, next) => {
@@ -11,6 +11,8 @@ const findSalesMySQL = async (req, res, next) => {
                 AND sale_purchaser_id='${req.claims.user_id}' 
                 AND (sale_note_user_id='${req.claims.user_id}' OR sale_note_user_id IS NULL);`
     const query= new Promise((resolve, reject) => {
+        const connection = createConnection()
+        connection.connect()
         connection.query(queryString, (err, results) => {
             if (err) {
                 reject(err)
@@ -21,6 +23,7 @@ const findSalesMySQL = async (req, res, next) => {
     })
     try {
         req.results = await query
+        connection.end()
         return next()
     } catch (err) {
         return next(err)
@@ -31,11 +34,14 @@ const addSalesMySQL = async (req, res, next) => {
     const sales = req.sales
     const queryString = QueryFormatters.objectsToInsert(sales, 'sales')
     const query = new Promise((resolve, reject) => {
+        const connection = createConnection()
+        connection.connect()
         connection.query(queryString, (err, results) => {
             if (err) {
                 reject(err)
             } else {
                 resolve(results)
+                connection.end()
             }
         })
     })

@@ -6,9 +6,9 @@
   "author": "andrewskr90",
   "license": "MIT",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --config webpack.prod.js",
     "watch": "webpack --watch",
-    "startDev": "webpack serve --open --config ./webpack.config.js",
+    "startDev": "webpack serve --open --config ./webpack.dev.js",
     "test": "echo testing client"
   },
   "devDependencies": {
@@ -31,6 +31,7 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.3.0",
-    "style-loader": "^3.3.1"
+    "style-loader": "^3.3.1",
+    "webpack-merge": "^5.8.0"
   }
 }

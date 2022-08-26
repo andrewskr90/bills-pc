@@ -3,12 +3,17 @@ const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
+
 const server = express()
-const corsOptions = {
-    origin: 'http://localhost:8080',
-    credentials: true
+
+if (process.env.NODE_ENV === 'development') {
+    const corsOptions = {
+        origin: 'http://localhost:8080',
+        credentials: true
+    }
+    server.use(cors(corsOptions))
 }
-server.use(cors(corsOptions))
+
 server.use(bodyParser.json({ limit: '50mb' }))
 server.use(cookieParser(process.env.COOKIE_SECRET))
 

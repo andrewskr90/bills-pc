@@ -55,7 +55,7 @@ const createSession = (req, res, next) => {
          user_email,
          user_favorite_gen,
          created_date,
-         modified_date } = req.results
+         modified_date } = req.user
     const claims = {
         user_id: user_id,
         user_name: user_name,
@@ -109,7 +109,9 @@ const verifySession = async (req, res, next) => {
 
 const decodeJwt = async (req, res, next) => {
     try {
+        console.log(req.sessionJwt)
         const decodedJwt = await jwt.verify(req.sessionJwt, process.env.JWT_SECRET)
+        console.log(decodedJwt)
         req.claims = decodedJwt
     } catch (err) {
         return next(err)
@@ -137,14 +139,16 @@ const encryptPassword = (req, res, next) => {
 }
 
 const authenticateUser = (req, res, next) => {
+    const user = req.users[0]
     const password = req.body.user_password
-    const hash = req.results.user_password
+    const hash = user.user_password
     bcrypt.compare(password, hash, (err, result) => {
         if (err) {
             return next(err)
         } else if (!result) {
             return next({ message: 'Incorrect username and password.' })
         } else {
+            req.user = user
             next()
         }
     })

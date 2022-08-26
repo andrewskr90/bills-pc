@@ -1,4 +1,4 @@
-const connection = require('..')
+const createConnection = require('..')
 const { addCollectedCardsMySQL } = require('./collectedCardQueries')
 const { addSalesMySQL } = require('./saleQueries')
 const { addSaleCardsMySQL } = require('./saleCardQueries')
@@ -17,11 +17,14 @@ const findTransactionSalesMySQL = async (req, res, next) => {
                     AND sale_purchaser_id='${req.claims.user_id}' 
                     AND (sale_note_user_id='${req.claims.user_id}' OR sale_note_user_id IS NULL);`
         const query= new Promise((resolve, reject) => {
+            const connection = createConnection()
+            connection.connect()
             connection.query(queryString, (err, results) => {
                 if (err) {
                     reject(err)
                 } else {
                     resolve(results)
+                    connection.end()
                 }
             })
         })
@@ -38,11 +41,14 @@ const findTransactionSalesMySQL = async (req, res, next) => {
             LEFT JOIN cards ON cards.card_id = collected_cards.collected_card_card_id
             LEFT JOIN sale_notes ON sale_note_sale_id = sale_id`
         const query= new Promise((resolve, reject) => {
+            const connection = createConnection()
+            connection.connect()
             connection.query(queryString, (err, results) => {
                 if (err) {
                     reject(err)
                 } else {
                     resolve(results)
+                    connection.end()
                 }
             })
         })
@@ -58,6 +64,7 @@ const findTransactionSalesMySQL = async (req, res, next) => {
 
 const addTransactionSalesMySQL = async (req, res, next) => {
     const saleTransaction = new Promise((resolve, reject) => {
+        const connection = createConnection()
         connection.beginTransaction(async (err) => {
             try {
                 await addCollectedCardsMySQL(req, res, (err) => {

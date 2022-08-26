@@ -1,1 +1,6 @@
 **/node_modules
+**/.env
+**/Docker/
+**/mysql/
+**/.gitignore
+**/.md
