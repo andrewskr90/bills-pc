@@ -3,24 +3,13 @@ const path = require( 'path' )
 const Dotenv = require('dotenv-webpack')
 
 module.exports = {
-    mode: 'development',
+    mode: 'developments',
     context: __dirname,
     entry: './src/index.js',
-    devServer: {
-        static: './dist',
-        hot: true,
-        compress: true,
-        port: 7071,
-        publicPath: '/'
-    },
-    devtool: 'inline-source-map',
     output: {
         path: path.resolve( __dirname, 'dist' ),
         filename: 'main.js',
         publicPath: '/',
-    },
-    devServer: {
-        historyApiFallback: true
     },
     module: {
         rules: [

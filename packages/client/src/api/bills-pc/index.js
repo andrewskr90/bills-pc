@@ -12,6 +12,14 @@ const BillsPcService = {
             data: formValues,
         })
     },
+    register(formValues) {
+        return axios({
+            ...options,
+            url: '/api/v1/auth/register',
+            method: 'post',
+            data: formValues
+        })
+    },
     getSets() {
         return axios({
             ...options,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import BillsPcService from '../../api/bills-pc'
 
 const initialFormValues = {
     user_name: '',
@@ -24,16 +24,10 @@ const RegisterForm = () => {
 
     const submitForm = (e) => {
         e.preventDefault()
-        const axiosOptions = {
-            url: '/api/v1/auth/register',
-            method: 'post',
-            baseURL: 'http://localhost:7070',
-            data: formValues,
-            withCredentials: true
-        }
-        axios(axiosOptions)
+        BillsPcService.register(formValues)
             .then(res => {
                 setErrorMessage('')
+                setFormValues(initialFormValues)
                 // setResponse(res.message)
             }).catch(err => {
                 console.log(err.response)
