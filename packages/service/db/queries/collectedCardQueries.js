@@ -1,4 +1,4 @@
-const connection = require('..')
+const createConnection = require('..')
 const QueryFormatters = require('../../utils/queryFormatters')
 
 const findCollectedCardsMySQL = async (req, res, next) => {
@@ -11,11 +11,13 @@ const findCollectedCardsMySQL = async (req, res, next) => {
         LEFT JOIN collected_card_notes ON collected_card_note_collected_card_id = collected_card_id
         ${whereClause}`
     const query = new Promise((resolve, reject) => {
+        const connection = createConnection()
         connection.query(queryString, (err, results) => {
             if (err) {
                 reject(err)
             } else {
                 resolve(results)
+                connection.end()
             }
         })
     })
@@ -31,11 +33,14 @@ const addCollectedCardsMySQL = async (req, res, next) => {
     const collectedCards = req.collectedCards
     const queryString = QueryFormatters.objectsToInsert(collectedCards, 'collected_cards')
     const query = new Promise((resolve, reject) => {
+        const connection = createConnection()
+        connection.connect()
         connection.query(queryString, (err, results) => {
             if (err) {
                 reject(err)
             } else {
                 resolve(results)
+                connection.end()
             }
         })
     })
