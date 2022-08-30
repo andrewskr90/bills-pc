@@ -1,11 +1,11 @@
 const productRouter = require('express').Router()
-const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addProductsMySQL, getProductsBySetIdMySQL } = require('../../db/queries/productQueries')
 const { generateProductIds, formatProductsFromTcgPlayerDetails } = require('../../middleware/product-middleware')
 
 productRouter.get('/set-id/:setId', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     getProductsBySetIdMySQL,
     (req, res, next) => {
         const results = req.results
@@ -13,8 +13,8 @@ productRouter.get('/set-id/:setId',
 })
 
 productRouter.post('/',
-    verifySession, 
-    decodeJwt,
+    verifyCookie, 
+    decodeSessionToken,
     gymLeaderOnly,
     generateProductIds,
     addProductsMySQL,

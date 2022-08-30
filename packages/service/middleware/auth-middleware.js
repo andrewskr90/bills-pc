@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+const CryptoJS = require('crypto-js')
 const bcrypt = require('bcryptjs')
 const { v4: uuidV4 } = require('uuid')
 
@@ -56,6 +56,8 @@ const createSession = (req, res, next) => {
          user_favorite_gen,
          created_date,
          modified_date } = req.user
+    const issuedAt = Date.now()
+    const expiration = issuedAt + 1000*60*60*2
     const claims = {
         user_id: user_id,
         user_name: user_name,
@@ -64,59 +66,65 @@ const createSession = (req, res, next) => {
         user_favorite_gen: user_favorite_gen,
         created_date: created_date,
         modified_date: modified_date,
-        iat: Date.now()
+        iat: issuedAt,
+        exp: expiration
     }
-    req.claims = claims
-    const jwtOptions = {
-        expiresIn: '8h'
-    }
-    try {
-        const sessionJwt = jwt.sign(claims, process.env.JWT_SECRET, jwtOptions)
-        req.sessionJwt = sessionJwt
-        next()
-    } catch (err) {
-        return next(err)
-    }
+    const sessionString = JSON.stringify(claims)
+    const encryptedSessionString = CryptoJS.AES.encrypt(sessionString, process.env.JWT_SECRET).toString()
+    req.sessionToken = encryptedSessionString
+
+    next()
 }
 
 const encryptSessionCookie = (req, res, next) => {
     const cookieOptions = {
         signed: true,
-        httpOnly: true,
-        maxAge: 1000*60*60*2
+        httpOnly: true
     }
-    res.cookie('billsPcSession', req.sessionJwt, cookieOptions)
+    res.cookie('billsPcSession', req.sessionToken, cookieOptions)
     next()
 }
 
-const verifySession = async (req, res, next) => {
+const verifyCookie = async (req, res, next) => {
     const parsedCookies = req.signedCookies
-        if (parsedCookies.billsPcSession === undefined) {
-            return next({
-                status: 401,
-                message: 'Missing cookie.'
-            })
-        }
-        if (!parsedCookies.billsPcSession) {
-            return next({
-                status: 401,
-                message: 'Inauthentic cookie.'
-            })
-        }
-        req.sessionJwt = parsedCookies.billsPcSession
-        next()
+
+    if (parsedCookies.billsPcSession === undefined) {
+        return next({
+            status: 401,
+            message: 'Missing cookie.'
+        })
+    }
+    if (!parsedCookies.billsPcSession) {
+        return next({
+            status: 401,
+            message: 'Inauthentic cookie.'
+        })
+    }
+    req.sessionToken = parsedCookies.billsPcSession
+    next()
 }
 
-const decodeJwt = async (req, res, next) => {
-    try {
-        console.log(req.sessionJwt)
-        const decodedJwt = await jwt.verify(req.sessionJwt, process.env.JWT_SECRET)
-        console.log(decodedJwt)
-        req.claims = decodedJwt
-    } catch (err) {
-        return next(err)
+const decodeSessionToken = async (req, res, next) => {
+    const bytes = CryptoJS.AES.decrypt(req.sessionToken, process.env.JWT_SECRET)
+    const decryptedSessionString = bytes.toString(CryptoJS.enc.Utf8)
+    req.claims = JSON.parse(decryptedSessionString)
+    //check if session is expired
+    const currentDate = Date.now()
+    if (req.claims.exp < currentDate) {
+        return next({
+            status: 419,
+            message: 'Session expired.'
+        })
+    } else {
+        //refresh expiration of session
+        const expiration = currentDate + 1000*60*60*2
+        req.claims = {
+            ...req.claims,
+            iat: currentDate,
+            exp: expiration
+        }
+        next()
     }
-    next()
 }
 
 const gymLeaderOnly = async (req, res, next) => {
@@ -164,8 +172,8 @@ module.exports = {
     formatUser,
     createSession,
     encryptSessionCookie,
-    verifySession,
-    decodeJwt, 
+    verifyCookie,
+    decodeSessionToken, 
     encryptPassword, 
     authenticateUser,
     prepUserFilter,

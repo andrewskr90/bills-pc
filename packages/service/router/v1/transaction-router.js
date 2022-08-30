@@ -1,6 +1,6 @@
 const transactionRouter = require('express').Router()
 
-const { verifySession, decodeJwt } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
 const { 
     checkSaleType,
     formatSales,
@@ -11,13 +11,13 @@ const {
 } = require('../../middleware/sale-middleware')
 const { addTransactionSalesMySQL, findTransactionSalesMySQL } = require('../../db/queries/transactionQueries')
 
-transactionRouter.get('/sales', verifySession, decodeJwt, findTransactionSalesMySQL, (req, res, next) => {
+transactionRouter.get('/sales', verifyCookie, decodeSessionToken, findTransactionSalesMySQL, (req, res, next) => {
     res.status(200).json(req.results)
 })
 
 transactionRouter.post('/sales', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     checkSaleType,
     formatSales,
     formatSaleNotes,

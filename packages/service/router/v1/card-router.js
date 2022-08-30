@@ -1,11 +1,11 @@
 const cardRouter = require('express').Router()
-const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addCardsMySQL, getCardsBySetIdMySQL } = require('../../db/queries/cardQueries')
 const { generateCardIds, formatCardFromTcgPlayerDetails } = require('../../middleware/card-middleware')
 
 cardRouter.get('/set-id/:setId', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     getCardsBySetIdMySQL,
     (req, res, next) => {
         const results = req.results
@@ -13,8 +13,8 @@ cardRouter.get('/set-id/:setId',
 })
 
 cardRouter.post('/',
-    verifySession, 
-    decodeJwt,
+    verifyCookie, 
+    decodeSessionToken,
     gymLeaderOnly,
     generateCardIds,
     addCardsMySQL,

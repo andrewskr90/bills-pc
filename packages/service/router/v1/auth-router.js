@@ -4,8 +4,8 @@ const {
     formatUser, 
     createSession, 
     encryptSessionCookie, 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     encryptPassword,
     authenticateUser,
     prepUserFilter,
@@ -32,7 +32,7 @@ authRouter.post('/login',
 })
 
 //authorize cookie
-authRouter.post('/', verifySession, decodeJwt, (req, res, next) => {
+authRouter.post('/', verifyCookie, decodeSessionToken, (req, res, next) => {
     res.status(200).json(req.claims)
 })
 

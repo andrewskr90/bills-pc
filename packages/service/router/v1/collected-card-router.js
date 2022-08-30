@@ -1,10 +1,10 @@
 const collectedCardRouter = require('express').Router()
 
-const { verifySession, decodeJwt } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
 const { findCollectedCardsMySQL } = require('../../db/queries/collectedCardQueries')
 collectedCardRouter.get('/', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     findCollectedCardsMySQL,
     (req, res, next) => {
         res.status(200).json(req.collectedCards)
