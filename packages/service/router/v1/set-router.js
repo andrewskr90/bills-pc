@@ -1,19 +1,19 @@
 const setRouter = require('express').Router()
-const { verifySession, decodeJwt, gymLeaderOnly } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addSetsMySQL, getSetsMySQL } = require('../../db/queries/setQueries')
 const { generateSetIds, formatSetFromTcgPlayerDetails } = require('../../middleware/set-middleware')
 
 setRouter.get('/', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     getSetsMySQL, 
     (req, res, next) => {
         res.status(200).json(req.results)
 })
 
 setRouter.post('/', 
-    verifySession,
-    decodeJwt,
+    verifyCookie,
+    decodeSessionToken,
     gymLeaderOnly, 
     generateSetIds,
     addSetsMySQL, 
