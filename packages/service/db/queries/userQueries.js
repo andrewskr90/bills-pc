@@ -34,9 +34,6 @@ const findUsersByFilterMySQL = (req, res, next) => {
         }
         if (results === 'undefined') {
             console.log('findUsersByFilterMySQL results undefined. Results:', results)
-            console.log('preppedFilter:', preppedFilter)
-            console.log('query:', query)
-            console.log(Date.now())
             next({
                 message: 'findUsersByFilterMySQL results are undefined.'
             })

@@ -3,7 +3,7 @@ const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middl
 const { addProductsMySQL, getProductsBySetIdMySQL } = require('../../db/queries/productQueries')
 const { generateProductIds, formatProductsFromTcgPlayerDetails } = require('../../middleware/product-middleware')
 
-productRouter.get('/set-id/:setId', 
+productRouter.get('/',
     verifyCookie,
     decodeSessionToken,
     getProductsBySetIdMySQL,
