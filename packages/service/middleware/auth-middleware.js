@@ -69,10 +69,10 @@ const createSession = (req, res, next) => {
         iat: issuedAt,
         exp: expiration
     }
+    req.claims = claims
     const sessionString = JSON.stringify(claims)
     const encryptedSessionString = CryptoJS.AES.encrypt(sessionString, process.env.JWT_SECRET).toString()
     req.sessionToken = encryptedSessionString
-
     next()
 }
 

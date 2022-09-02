@@ -8,6 +8,7 @@ const setV2Router = require('./set-v2-router')
 const collectedCardRouter = require('./collected-card-router')
 const transactionRouter = require('./transaction-router')
 const productRouter = require('./product-router')
+const marketPricesRouter = require('./market-prices-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -17,5 +18,6 @@ v1Router.use('/cards-v2', cardV2Router)
 v1Router.use('/collected-cards', collectedCardRouter)
 v1Router.use('/transactions', transactionRouter)
 v1Router.use('/products', productRouter)
+v1Router.use('/market-prices', marketPricesRouter)
 
 module.exports = v1Router

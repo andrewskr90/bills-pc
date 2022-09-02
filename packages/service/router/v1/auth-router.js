@@ -28,7 +28,7 @@ authRouter.post('/login',
     createSession, 
     encryptSessionCookie,
     (req, res, next) => {
-    res.status(200).send(req.claims)
+        res.status(200).json(req.claims)
 })
 
 //authorize cookie
