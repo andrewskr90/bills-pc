@@ -1,25 +1,23 @@
-FROM python:3.6.9-alpine3.10
+FROM python:3.9-alpine
 
+# update apk repo
+RUN echo "http://dl-4.alpinelinux.org/alpine/v3.14/main" >> /etc/apk/repositories && \
+    echo "http://dl-4.alpinelinux.org/alpine/v3.14/community" >> /etc/apk/repositories
 
-# Get all the prereqs for firefox and geckodriver
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk \
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-bin-2.30-r0.apk \
-    && apk add glibc-2.30-r0.apk \
-    && apk add glibc-bin-2.30-r0.apk \
+# install chromedriver
+RUN wget "https://github.com/electron/electron/releases/download/v1.6.0/chromedriver-v2.21-linux-armv7l.zip" \
+    && apk update \
+    && apk add chromium chromium-chromedriver
 
-    # And of course we need Firefox if we actually want to *use* GeckoDriver
-    && apk add firefox-esr=60.9.0-r0 \
+# upgrade pip
+RUN pip install --upgrade pip
 
-    # Then install GeckoDriver
-    && wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz \
-    && tar -zxf geckodriver-v0.26.0-linux64.tar.gz -C /usr/bin \
-    && geckodriver --version
+# install selenium
+RUN pip install selenium
 
 #libraries used in script
 RUN python -m pip install requests
 RUN python -m pip install mysql-connector-python
-RUN python -m pip install selenium
 
 WORKDIR .
 COPY scripts/ scripts/

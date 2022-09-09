@@ -57,7 +57,7 @@ const createSession = (req, res, next) => {
          created_date,
          modified_date } = req.user
     const issuedAt = Date.now()
-    const expiration = issuedAt + 1000*60*60*2
+    const expiration = issuedAt + 1000*60*60*24
     const claims = {
         user_id: user_id,
         user_name: user_name,
@@ -117,7 +117,7 @@ const decodeSessionToken = async (req, res, next) => {
         })
     } else {
         //refresh expiration of session
-        const expiration = currentDate + 1000*60*60*2
+        const expiration = currentDate + 1000*60*60*24
         req.claims = {
             ...req.claims,
             iat: currentDate,
