@@ -1,5 +1,5 @@
 const checkReqBody = (req, res, next) => {
-    if (typeof req.body !== 'Array') {
+    if (!Array.isArray(req.body)) { 
         return next({
             status: 400,
             message: 'Request body must be in form of array.'
@@ -17,6 +17,7 @@ const checkReqBody = (req, res, next) => {
             message: 'Request body is empty.'
         })
     }
+    next()
 }
 
 module.exports = {

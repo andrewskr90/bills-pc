@@ -9,7 +9,8 @@ setV2Router.get('/',
     decodeSessionToken,
     getSetsV2MySQL, 
     (req, res, next) => {
-        res.status(200).json(req.results)
+        const results = req.results
+        res.status(200).json(results)
 })
 
 setV2Router.post('/', 
@@ -20,11 +21,11 @@ setV2Router.post('/',
     generateSetV2Ids,
     addSetsV2MySQL, 
     (req, res, next) => {
-        req.results = {
+        const results = {
             ...req.results,
             addedSets: req.sets
         }
-        res.status(201).json(req.results)
+        res.status(201).json(results)
 })
 
 module.exports = setV2Router
