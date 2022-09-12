@@ -3,10 +3,15 @@ const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middl
 const { addSetsMySQL, getSetsMySQL } = require('../../db/queries/setQueries')
 const { generateSetIds, formatSetFromTcgPlayerDetails } = require('../../middleware/set-middleware')
 
+const QueueQueries = require('../../middleware/QueueQueries')
+const { executeQueries } = require('../../db')
+
 setRouter.get('/', 
     verifyCookie,
     decodeSessionToken,
-    getSetsMySQL, 
+    QueueQueries.init,
+    QueueQueries.sets.select,
+    executeQueries,
     (req, res, next) => {
         res.status(200).json(req.results)
 })
