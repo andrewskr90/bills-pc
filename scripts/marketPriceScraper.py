@@ -72,14 +72,24 @@ def marketPriceScrape():
     options.add_argument("--disable-gpu")
     options.add_argument('--disable-blink-features=AutomationControlled')
     options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("enable-automation")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--dns-prefetch-disable")
+    options.add_argument("enable-features=NetworkServiceInProcess")
 
-    browser = webdriver.Chrome(options=options, service=service)
+    # try this one next
+    # options.add_argument("disable-features=NetworkService")
+    
 
-    try:
-        for set_ in billsPcSetsData:
+    # browser = webdriver.Chrome(options=options, service=service)
+
+    # try:
+    for set_ in billsPcSetsData:
+        try:
             print(f"------------------------Scraping Market Prices: {set_['set_v2_name']}------------------------")
-
+            # open new driver for each set
+            browser = webdriver.Chrome(options=options, service=service)
             # get set cards and products from bills_pc
             try:
                 billsPcCardsV2 = requests.get(f"{baseurl}/api/v1/cards-v2?card_v2_set_id={set_['set_v2_id']}", cookies=credentials)
@@ -258,8 +268,10 @@ def marketPriceScrape():
             except requests.exceptions.RequestException as e:
                 logging(e)
                 raise SystemExit(e)
-    finally:
-        browser.quit()
+        finally:
+            browser.quit()
+    # finally:
+    #     browser.quit()
 
 def oneDay():
     x=datetime.today()
@@ -275,7 +287,7 @@ def startMarketPriceScrape():
     print('------------------------------------------------------------------------------------------------------------')
     print('------------------------------------------------------------------------------------------------------------')
     print('------------------------------------------It Is Midnight UTC------------------------------------------------')
-    print(f'------------------------------------------{datetime.today}-------------------------------------------------')
+    print(f'------------------------------------------{datetime.today()}-------------------------------------------------')
     print('-------------------------------------Starting Market Price Scrape-------------------------------------------')
     print('------------------------------------------------------------------------------------------------------------')
     print('------------------------------------------------------------------------------------------------------------')
