@@ -24,7 +24,7 @@ const RegisterForm = () => {
 
     const submitForm = (e) => {
         e.preventDefault()
-        BillsPcService.register(formValues)
+        BillsPcService.register({ user: formValues })
             .then(res => {
                 setErrorMessage('')
                 setFormValues(initialFormValues)

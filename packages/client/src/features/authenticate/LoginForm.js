@@ -26,7 +26,8 @@ const LoginForm = (props) => {
 
     const submitForm = (e) => {
         e.preventDefault()
-        BillsPcService.login(formValues)
+        const user = formValues
+        BillsPcService.login({ user: user })
             .then(res => {
                 setErrorMessage('')
                 setUserClaims(res.data)
