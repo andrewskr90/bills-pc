@@ -7,7 +7,7 @@ const isOnlyLetters = (string) => {
 }
 
 const checkRegisterValues = (req, res, next) => {
-    const { user_name, user_email, user_password, repeat_user_password, user_favorite_gen } = req.body
+    const { user_name, user_email, user_password, repeat_user_password, user_favorite_gen } = req.body.user
 
     const onlyLetters = isOnlyLetters(user_name)
     
@@ -34,7 +34,7 @@ const checkRegisterValues = (req, res, next) => {
 }
 
 const formatUser = (req, res, next) => {
-    const { user_name, user_email, user_password, user_favorite_gen } = req.body
+    const { user_name, user_email, user_password, user_favorite_gen } = req.body.user
 
     const formattedUser = {
         user_id: uuidV4(),
@@ -44,7 +44,7 @@ const formatUser = (req, res, next) => {
         user_email,
         user_favorite_gen
     }
-    req.user = formattedUser
+    req.body.user = formattedUser
     next()
 }
 
@@ -136,27 +136,27 @@ const gymLeaderOnly = async (req, res, next) => {
 
 const encryptPassword = (req, res, next) => {
     const rounds = 10
-    bcrypt.hash(req.user.user_password, rounds, (err, hash) => {
+    bcrypt.hash(req.body.user.user_password, rounds, (err, hash) => {
         if (err) {
             return next(err)
         } else {
-            req.user.user_password = hash
+            req.body.user.user_password = hash
             next()
         }
     })
 }
 
 const authenticateUser = (req, res, next) => {
-    const user = req.users[0]
-    const password = req.body.user_password
-    const hash = user.user_password
+    const resultUser = req.results[0]
+    const password = req.body.user.user_password
+    const hash = resultUser.user_password
     bcrypt.compare(password, hash, (err, result) => {
         if (err) {
             return next(err)
         } else if (!result) {
             return next({ message: 'Incorrect username and password.' })
         } else {
-            req.user = user
+            req.user = resultUser
             next()
         }
     })
