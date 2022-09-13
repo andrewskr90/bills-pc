@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import BillsPcService from '../api/bills-pc'
+import Marketplace from '../features/marketplace'
 import NavBar from '../layouts/NavBar'
 import Collection from '../features/collection'
 import ImportPurchase from '../features/import-purchase/index.js'
@@ -22,7 +23,7 @@ const Home = (props) => {
             .then(res => {
                 setCollectedCards(res.data)
             })
-        BillsPcService.getSets()
+        BillsPcService.getSetsV2()
             .then(res => {
                 setReferenceData({
                     ...referenceData,
@@ -31,15 +32,21 @@ const Home = (props) => {
             }).catch(err => {
                 console.log(err)
             })
-        
+        BillsPcService.getCardsV2()
+            .then(res => {
+                console.log(res)
+            }).catch(err => {
+                console.log(err)
+            })
     }, [])
     
     return (<div className='home'>
         <header>
-            <h1>Kyle's PC</h1>
+            <h1>Bill's PC</h1>
         </header>
         <Routes>
-            <Route path='/' element={<Collection userClaims={userClaims} collectedCards={collectedCards} />} />
+            <Route path='/' element={<Marketplace />} />
+            <Route path='/collection' element={<Collection userClaims={userClaims} collectedCards={collectedCards} />} />
             <Route 
                 path='/import/*' 
                 element={<ImportPurchase 

@@ -6,39 +6,47 @@ const NavBar = () => {
     const location = useLocation()
 
     useEffect(() => {
-        if (location.pathname.includes('/rip')) {
-            setSelected('rip')
+        if (location.pathname.includes('/collection')) {
+            setSelected('collection')
+        // if (location.pathname.includes('/rip')) {
+        //     setSelected('rip')
         } else if (location.pathname.includes('import')) {
             setSelected('import')
-        } else if (location.pathname.includes('sell')) {
-            setSelected('sell')
-        } else if (location.pathname.includes('trade')) {
-            setSelected('trade')
+        // } else if (location.pathname.includes('sell')) {
+        //     setSelected('sell')
+        // } else if (location.pathname.includes('trade')) {
+        //     setSelected('trade')
         } else {
-            setSelected('collection')
+            setSelected('marketplace')
         }
     }, [location])
 
     return (<div className='navBar'>
         <Link 
             to='/' 
+            className={`link ${selected === 'marketplace' ? 'selected': ''}`}
+        >
+            Market
+        </Link>
+        <Link 
+            to='/collection' 
             className={`link ${selected === 'collection' ? 'selected': ''}`}
         >
             PC
         </Link>
-        <Link 
+        {/* <Link 
             to='/rip' 
             className={`link ${selected === 'rip' ? 'selected': ''}`}
         >
             Rip
-        </Link>
+        </Link> */}
         <Link 
             to='/import' 
             className={`link ${selected === 'import' ? 'selected': ''}`}
         >
             Buy
         </Link>
-        <Link 
+        {/* <Link 
             to='/sell' 
             className={`link ${selected === 'sell' ? 'selected': ''}`}
         >
@@ -49,7 +57,7 @@ const NavBar = () => {
             className={`link ${selected === 'trade' ? 'selected': ''}`}
         >
             Trade
-        </Link>
+        </Link> */}
     </div>)
 }
 
