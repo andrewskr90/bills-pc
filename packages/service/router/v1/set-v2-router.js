@@ -4,10 +4,15 @@ const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middl
 const { addSetsV2MySQL, getSetsV2MySQL } = require('../../db/queries/setV2Queries')
 const { generateSetV2Ids } = require('../../middleware/set-v2-middleware')
 
+const QueueQueries = require('../../middleware/QueueQueries')
+const { executeQueries } = require('../../db')
+
 setV2Router.get('/', 
     verifyCookie,
     decodeSessionToken,
-    getSetsV2MySQL, 
+    QueueQueries.init,
+    QueueQueries.setsV2.select,
+    executeQueries,
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)
