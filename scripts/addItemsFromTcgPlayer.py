@@ -2,30 +2,106 @@ import os
 import requests
 import logging
 import time
-import mechanicalsoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+import argparse
 
-logging.basicConfig(filename='addCardsFromTcgPlayer.log', encoding='utf-8', level=logging.DEBUG)
+# configure logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('priceCheck.log', 'w', 'utf-8')
+logger.addHandler(handler)
 
-cookieValue = os.getenv('BILLS_PC_SESSION')
-cookies = {'billsPcSession': cookieValue}
+# configure login info
+loginInfo = {}
+loginInfo['user'] = {}
+loginInfo['user']['user_name'] = 'kyle'
+loginInfo['user']['user_password'] = os.environ['GYM_LEADER_PASS']
+baseurl = os.environ['API_BASE_URL']
 
-#get sets already present in bills_pc db
+#login and set credentials
 try:
-    billsPcSetsV2 = requests.get('http://localhost:7070/api/v1/sets-v2', cookies=cookies)
-    if billsPcSetsV2.status_code != 200:
-        message = billsPcSetsV2.json()['message']
-        logging.debug(message)
-        raise SystemExit(message)  
+    apiCredentials = requests.post(f'{baseurl}/api/v1/auth/login', json=loginInfo)
+    if apiCredentials.status_code != 200:
+        message = apiCredentials.json()['message']
+        logger.debug(message)
+        raise SystemExit(message) 
 except requests.exceptions.RequestException as e:
     raise SystemExit(e)
-billsPcSetsData = billsPcSetsV2.json()
+credentials = apiCredentials.cookies
+
+## configure selenium ##
+# # this one is for docker
+# service = Service(r'/usr/bin/chromedriver')
+# this one is for development
+service = Service(r'C:\Program Files\chromedriver\bin\chromedriver')
+
+# # WARNING
+# # Using a fake user agent results in being blocked by the site
+# ua = UserAgent()
+# userAgent = ua.chrome
+
+options = webdriver.ChromeOptions() 
+# options.add_argument(f"user-agent={userAgent}")
+options.add_argument("--headless")
+options.add_argument("--disable-gpu")
+options.add_argument('--disable-blink-features=AutomationControlled')
+options.add_argument("--no-sandbox")
+options.add_argument("enable-automation")
+options.add_argument("--window-size=1920,1080")
+options.add_argument("--disable-extensions")
+options.add_argument("--dns-prefetch-disable")
+options.add_argument("enable-features=NetworkServiceInProcess")
+
+# try this one next
+options.add_argument("disable-features=NetworkService")
+
+browser = webdriver.Chrome(options=options, service=service)
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-s", "--set", help='Takes name of set to target for adding items.')
+parser.add_argument("-i", "--id", help='Takes id of set to target for adding items.')
+args = parser.parse_args()
+# if set flag exists
+if args.set:
     try:
-    browser = webdriver.Firefox()
-    for set_ in billsPcSetsData:
+        billsPcSetsV2 = requests.get(f"{baseurl}/api/v1/sets-v2?set_v2_name={args.set}", cookies=credentials)
+        if billsPcSetsV2.status_code != 200:
+            message = billsPcSetsV2.json()['message']
+            logger.debug(message)
+            raise SystemExit(message)  
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    setsToSearch = billsPcSetsV2.json()
+# else if id flag exists
+elif args.id:
+    try:
+        billsPcSetsV2 = requests.get(f"{baseurl}/api/v1/sets-v2?set_v2_id={args.id}", cookies=credentials)
+        if billsPcSetsV2.status_code != 200:
+            message = billsPcSetsV2.json()['message']
+            logger.debug(message)
+            raise SystemExit(message)  
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    setsToSearch = billsPcSetsV2.json()
+# else, loup through all sets in bills_pc
+else:
+    try:
+        billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
+        if billsPcSetsV2.status_code != 200:
+            message = billsPcSetsV2.json()['message']
+            logger.debug(message)
+            raise SystemExit(message)  
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    setsToSearch = billsPcSetsV2.json()
+try:
+    for set_ in setsToSearch:
         print(f"------------------------Scraping Set: {set_['set_v2_name']}------------------------")
         curSetId = set_['set_v2_id']
         curSetName = set_['set_v2_name']
@@ -44,12 +120,10 @@ billsPcSetsData = billsPcSetsV2.json()
         productsToAdd =[]
         visitedProductsToAdd = {}
 
-#### new code ####
-
         # get cards and products already in bills_pc db
         try:
-            billsPcSetCards = requests.get(f'http://localhost:7070/api/v1/cards-v2/set-id/{curSetId}', cookies=cookies)
-            billsPcSetProducts = requests.get(f'http://localhost:7070/api/v1/products/set-id/{curSetId}', cookies=cookies)
+            billsPcSetCards = requests.get(f'{baseurl}/api/v1/cards-v2/set-id/{curSetId}', cookies=credentials)
+            billsPcSetProducts = requests.get(f'{baseurl}/api/v1/products?product_set_id={curSetId}', cookies=credentials)
             if billsPcSetCards.status_code != 200:
                 message = billsPcSetCards.json()
                 print(message)
@@ -58,7 +132,6 @@ billsPcSetsData = billsPcSetsV2.json()
                 print(message)
         except requests.exception.RequestException as e:
             raise SystemExit(e)
-        
         # flag cards as visited
         for card in billsPcSetCards.json():
             cardTcgId = card['card_v2_tcgplayer_product_id']
@@ -67,10 +140,8 @@ billsPcSetsData = billsPcSetsV2.json()
         for product in billsPcSetProducts.json():
             productTcgId = product['product_tcgplayer_product_id']
             visitedProductsToAdd[productTcgId] = 1
-#### new code ####
 
         while notLastPage:
-            print(f'Scraping page {pageNum}...')
             # open product page with driver, using current set and current page
             setUrl = f'https://www.tcgplayer.com/search/pokemon/{curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=pokemon&view=grid&setName={curSetName}&page={pageNum}'
             browser.get(setUrl)
@@ -144,13 +215,13 @@ billsPcSetsData = billsPcSetsV2.json()
                 time.sleep(5)
                 pageNum = str(int(pageNum) + 1)
             except requests.exceptions.RequestException as e:
-                logging(e)
+                logger(e)
                 print(e)
                 raise SystemExit(e)
         #add items to bills_pc
         if len(cardsToAdd) > 0:
             try:
-                addedCards = requests.post('http://localhost:7070/api/v1/cards-v2', json=cardsToAdd, cookies=cookies)
+                addedCards = requests.post(f'{baseurl}/api/v1/cards-v2', json=cardsToAdd, cookies=credentials)
                 print(addedCards)
                 if addedCards.status_code != 201:
                     message = addedCards.json()['message']
@@ -158,11 +229,11 @@ billsPcSetsData = billsPcSetsV2.json()
                 else:
                     print(f"added {len(cardsToAdd)} from {set_['set_v2_name']}")
             except requests.exceptions.RequestException as e:
-                logging(e)
+                logger(e)
                 raise SystemExit(e)
         if len(productsToAdd) > 0:
             try:
-                addedProducts = requests.post('http://localhost:7070/api/v1/products', json=productsToAdd, cookies=cookies)
+                addedProducts = requests.post(f'{baseurl}/api/v1/products', json=productsToAdd, cookies=credentials)
                 print(addedProducts)
                 if addedProducts.status_code != 201:
                     message = addedProducts.json()['message']
@@ -170,7 +241,9 @@ billsPcSetsData = billsPcSetsV2.json()
                 else:
                     print(f"added {len(productsToAdd)} from {set_['set_v2_name']}")
             except requests.exceptions.RequestException as e:
-                logginge(e)
+                logger(e)
                 raise SystemExit(e)
+        if len(cardsToAdd) == 0 and len(productsToAdd) == 0:
+            print(f"Items from {set_['set_v2_name']} up to date.")
 finally:
     browser.quit()

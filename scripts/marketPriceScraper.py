@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import logging
-
+import argparse
 
 # configure logger
 logger = logging.getLogger()
@@ -23,11 +23,12 @@ logger.addHandler(handler)
 
 def marketPriceScrape():
     loginInfo = {}
-    loginInfo['user_name'] = 'kyle'
+    loginInfo['user'] = {}
+    loginInfo['user']['user_name'] = 'kyle'
+    
 
-    loginInfo['user_password'] = os.environ['GYM_LEADER_PASS']
+    loginInfo['user']['user_password'] = os.environ['GYM_LEADER_PASS']
     baseurl = os.environ['API_BASE_URL']
-
     #login and set credentials
     try:
         apiCredentials = requests.post(f'{baseurl}/api/v1/auth/login', json=loginInfo)
@@ -39,21 +40,63 @@ def marketPriceScrape():
         raise SystemExit(e)
     credentials = apiCredentials.cookies
 
-    #get sets already present in bills_pc db
-    try:
-        billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
-        if billsPcSetsV2.status_code != 200:
-            message = billsPcSetsV2.json()['message']
-            logging.debug(message)
-            raise SystemExit(message)  
-    except requests.exceptions.RequestException as e:
-        raise SystemExit(e)
-    billsPcSetsData = billsPcSetsV2.json()
+
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-s", "--set", help='Takes name of set to target for adding prices.')
+    parser.add_argument("-i", "--id", help='Takes id of set to target for adding prices.')
+    args = parser.parse_args()
+    # if set flag exists
+    if args.set:
+        try:
+            billsPcSetsV2 = requests.get(f"{baseurl}/api/v1/sets-v2?set_v2_name={args.set}", cookies=credentials)
+            if billsPcSetsV2.status_code != 200:
+                message = billsPcSetsV2.json()['message']
+                logger.debug(message)
+                raise SystemExit(message)  
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
+        setsToSearch = billsPcSetsV2.json()
+    # else if id flag exists
+    elif args.id:
+        try:
+            billsPcSetsV2 = requests.get(f"{baseurl}/api/v1/sets-v2?set_v2_id={args.id}", cookies=credentials)
+            if billsPcSetsV2.status_code != 200:
+                message = billsPcSetsV2.json()['message']
+                logger.debug(message)
+                raise SystemExit(message)  
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
+        setsToSearch = billsPcSetsV2.json()
+    # else, loup through all sets in bills_pc
+    else:
+        try:
+            billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
+            if billsPcSetsV2.status_code != 200:
+                message = billsPcSetsV2.json()['message']
+                logger.debug(message)
+                raise SystemExit(message)  
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
+        setsToSearch = billsPcSetsV2.json()
+        print(setsToSearch)
+
+    # #get sets already present in bills_pc db
+    # try:
+    #     billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
+    #     if billsPcSetsV2.status_code != 200:
+    #         message = billsPcSetsV2.json()['message']
+    #         logging.debug(message)
+    #         raise SystemExit(message)  
+    # except requests.exceptions.RequestException as e:
+    #     raise SystemExit(e)
+    # billsPcSetsData = billsPcSetsV2.json()
 
     # alphabetize set names
     def takeSetName(set):
         return set['set_v2_name']
-    billsPcSetsData.sort(key=takeSetName)
+    setsToSearch.sort(key=takeSetName)
 
     ## configure selenium ##
     # this one is for docker
@@ -79,13 +122,13 @@ def marketPriceScrape():
     options.add_argument("enable-features=NetworkServiceInProcess")
 
     # try this one next
-    # options.add_argument("disable-features=NetworkService")
+    options.add_argument("disable-features=NetworkService")
     
 
     # browser = webdriver.Chrome(options=options, service=service)
 
     # try:
-    for set_ in billsPcSetsData:
+    for set_ in setsToSearch:
         try:
             print(f"------------------------Scraping Market Prices: {set_['set_v2_name']}------------------------")
             # open new driver for each set
@@ -222,33 +265,40 @@ def marketPriceScrape():
                             if len(resultRaritySection) == 1:
                                 # find card_v2_id
                                 if len(currentSetCards) > 0:
+                                    card_v2_id = False
                                     for card in currentSetCards:
                                         if card['card_v2_tcgplayer_product_id'] == itemTcgProductId:
                                             card_v2_id = card['card_v2_id']
                                             break
-                                    
-                                    # format card market price
-                                    marketPriceToAdd['market_price_card_id'] = card_v2_id
-                                    marketPriceToAdd['market_price_price'] = itemMarketPrice
-                                    marketPriceToAdd['market_price_product_id'] = None
-                                    marketPricesToAdd.append(marketPriceToAdd)
+                                    if card_v2_id is False:
+                                        print(f'WARNING: Card with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.cards_v2 with cards from {curSetName}.')
+                                    else:    
+                                        # format card market price
+                                        marketPriceToAdd['market_price_card_id'] = card_v2_id
+                                        marketPriceToAdd['market_price_price'] = itemMarketPrice
+                                        marketPriceToAdd['market_price_product_id'] = None
+                                        marketPricesToAdd.append(marketPriceToAdd)
                                 else:
-                                    print(f'WARNING: set cards exist, but not added to bills_pc yet. Card tcgplayerid: {itemTcgProductId}. Update bills_pc.cards_v2 with cards from {curSetName}.')
+                                    print(f'WARNING: No cards added to current set, {curSetName}')
                             # item is a product
                             else:
                                 # find product_id
                                 if len(currentSetProducts) > 0:
+                                    product_id = False
                                     for product in currentSetProducts:
                                         if product['product_tcgplayer_product_id'] == itemTcgProductId:
                                             product_id = product['product_id']
                                             break
-                                    #format product market price
-                                    marketPriceToAdd['market_price_product_id'] = product_id
-                                    marketPriceToAdd['market_price_price'] = itemMarketPrice
-                                    marketPriceToAdd['market_price_card_id'] = None
-                                    marketPricesToAdd.append(marketPriceToAdd)
+                                    if card_v2_id is False:
+                                        print(f'WARNING: Product with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.products with products from {curSetName}.')
+                                    else:
+                                        #format product market price
+                                        marketPriceToAdd['market_price_product_id'] = product_id
+                                        marketPriceToAdd['market_price_price'] = itemMarketPrice
+                                        marketPriceToAdd['market_price_card_id'] = None
+                                        marketPricesToAdd.append(marketPriceToAdd)
                                 else:
-                                    print(f'WARNING: set products exist, but not added to bills_pc yet. Product tcgplayerid: {itemTcgProductId}. Update bills_pc.products with products from {curSetName}.')
+                                    print(f'WARNING: No products added to current set, {curSetName}')
                     #wait 5 seconds
                     time.sleep(5)
                     pageNum = str(int(pageNum) + 1)
