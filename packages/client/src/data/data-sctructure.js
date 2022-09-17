@@ -41,9 +41,19 @@ const userObject = {
             tax_amount: 0,
             tax_rate: 0,
             total: 0,
-            cards: [],
-            products: []
-
+            cards: [
+                {
+                    id: '',
+                    // YOU ARE HERE
+                }
+            ],
+            products: [],
+            notes: [
+                {
+                    id: '',
+                    note: ''
+                }
+            ]     
         }
     ]
 }
