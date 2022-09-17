@@ -29,7 +29,39 @@ const userObject = {
             ]
         }
     ],
-    sales: [],
+    sales: [
+        {
+            id: '',
+            date: '',
+            vendor: '',
+            subtotal: 0,
+            discount: 0,
+            shipping: 0,
+            tax_amount: 0,
+            tax_rate: 0,
+            total: 0,
+            cards: [
+                {
+                    id: '',
+                    collected_card_id: '',
+                    price: 0
+                }
+            ],
+            products: [
+                {
+                    id: '',
+                    collected_product_id: '',
+                    price: 0
+                }
+            ],
+            notes: [
+                {
+                    id: '',
+                    note: ''
+                }
+            ]     
+        }
+    ],
     purchases: [
         {
             id: '',
@@ -44,10 +76,17 @@ const userObject = {
             cards: [
                 {
                     id: '',
-                    // YOU ARE HERE
+                    collected_card_id: '',
+                    price: 0
                 }
             ],
-            products: [],
+            products: [
+                {
+                    id: '',
+                    collected_product_id: '',
+                    price: 0
+                }
+            ],
             notes: [
                 {
                     id: '',
