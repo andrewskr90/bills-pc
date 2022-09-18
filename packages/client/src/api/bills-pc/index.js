@@ -104,6 +104,20 @@ const BillsPcService = {
             url: '/api/v1/collected-cards',
             params: filter
         })
+    },
+    getMarketPrices(filter) {
+        return axios({
+            ...options,
+            url: '/api/v1/market-prices',
+            params: filter
+        })
+    },
+    getProducts(filter) {
+        return axios({
+            ...options,
+            url: '/api/v1/products',
+            params: filter
+        })
     }
 }
 
