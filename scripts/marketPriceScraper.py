@@ -83,15 +83,15 @@ def marketPriceScrape():
         print(setsToSearch)
 
     # #get sets already present in bills_pc db
-    # try:
-    #     billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
-    #     if billsPcSetsV2.status_code != 200:
-    #         message = billsPcSetsV2.json()['message']
-    #         logging.debug(message)
-    #         raise SystemExit(message)  
-    # except requests.exceptions.RequestException as e:
-    #     raise SystemExit(e)
-    # billsPcSetsData = billsPcSetsV2.json()
+    try:
+        billsPcSetsV2 = requests.get(f'{baseurl}/api/v1/sets-v2', cookies=credentials)
+        if billsPcSetsV2.status_code != 200:
+            message = billsPcSetsV2.json()['message']
+            logging.debug(message)
+            raise SystemExit(message)  
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    billsPcSetsData = billsPcSetsV2.json()
 
     # alphabetize set names
     def takeSetName(set):
@@ -241,6 +241,8 @@ def marketPriceScrape():
                         # item tcg product id
                         itemATag = result.find_element(By.XPATH, "./div[@class='search-result__content']/a")
                         itemTcgProductId = int(itemATag.get_attribute('href').split('/')[4])
+                        if set_['set_v2_name'] == 'XY - BREAKthrough':
+                            print(itemTcgProductId)
                         # item name
                         itemNameElement = result.find_element(By.CLASS_NAME, 'search-result__title')
                         itemName = itemNameElement.get_attribute('textContent')
@@ -270,6 +272,10 @@ def marketPriceScrape():
                                         if card['card_v2_tcgplayer_product_id'] == itemTcgProductId:
                                             card_v2_id = card['card_v2_id']
                                             break
+                                    else:
+                                        # scraped itemTcgProductId does not match bills pc tcg id
+                                        print('line 280')
+                                        print(card, itemTcgProductId)
                                     if card_v2_id is False:
                                         print(f'WARNING: Card with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.cards_v2 with cards from {curSetName}.')
                                     else:    
@@ -289,7 +295,11 @@ def marketPriceScrape():
                                         if product['product_tcgplayer_product_id'] == itemTcgProductId:
                                             product_id = product['product_id']
                                             break
-                                    if card_v2_id is False:
+                                    else:
+                                        # scraped itemTcgProductId does not match bills pc tcg id
+                                        print('line 299')
+                                        print(product, itemTcgProductId)
+                                    if product_id is False:
                                         print(f'WARNING: Product with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.products with products from {curSetName}.')
                                     else:
                                         #format product market price
@@ -319,17 +329,15 @@ def marketPriceScrape():
                 logging(e)
                 raise SystemExit(e)
         finally:
+            browser.close()
+            time.sleep(3)
             browser.quit()
-    # finally:
-    #     browser.quit()
+            time.sleep(3)
 
 def oneDay():
     x=datetime.today()
-    # print(x)
     y=x.replace(day=x.day+1, hour=0, minute=0, second=0, microsecond=0) + timedelta(minutes=1)
-    # print(y)
     delta_t=y-x
-    # print(delta_t.seconds)
     return delta_t.seconds
 def startMarketPriceScrape():
     print('------------------------------------------------------------------------------------------------------------')
