@@ -63,6 +63,7 @@ const executeQueries = (req, res, next) => {
                     }
                 })
             } catch (err) {
+                connection.release()
                 next(err)
             }
         })
