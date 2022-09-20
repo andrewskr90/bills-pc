@@ -35,10 +35,10 @@ except requests.exceptions.RequestException as e:
 credentials = apiCredentials.cookies
 
 ## configure selenium ##
-# # this one is for docker
-# service = Service(r'/usr/bin/chromedriver')
-# this one is for development
-service = Service(r'C:\Program Files\chromedriver\bin\chromedriver')
+# this one is for docker
+service = Service(r'/usr/bin/chromedriver')
+# # this one is for development
+# service = Service(r'C:\Program Files\chromedriver\bin\chromedriver')
 
 # # WARNING
 # # Using a fake user agent results in being blocked by the site
@@ -59,8 +59,6 @@ options.add_argument("enable-features=NetworkServiceInProcess")
 
 # try this one next
 options.add_argument("disable-features=NetworkService")
-
-browser = webdriver.Chrome(options=options, service=service)
 
 parser = argparse.ArgumentParser()
 
@@ -140,6 +138,9 @@ try:
         for product in billsPcSetProducts.json():
             productTcgId = product['product_tcgplayer_product_id']
             visitedProductsToAdd[productTcgId] = 1
+
+        # start browser
+        browser = webdriver.Chrome(options=options, service=service)
 
         while notLastPage:
             # open product page with driver, using current set and current page
@@ -245,5 +246,10 @@ try:
                 raise SystemExit(e)
         if len(cardsToAdd) == 0 and len(productsToAdd) == 0:
             print(f"Items from {set_['set_v2_name']} up to date.")
+        
+        browser.close()
+        time.sleep(3)
+        browser.quit()
+        time.sleep(3)
 finally:
-    browser.quit()
+    print('Finished searching for new items to add to Bills Pc DB!')
