@@ -17,7 +17,6 @@ RUN pip install selenium
 
 #libraries used in script
 RUN python -m pip install requests
-RUN python -m pip install mysql-connector-python
 
 WORKDIR .
 COPY scripts/ scripts/
