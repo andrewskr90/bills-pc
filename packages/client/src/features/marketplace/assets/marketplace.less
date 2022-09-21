@@ -1,0 +1,98 @@
+.marketplace {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90%;
+}
+
+.setSelector {
+    height: 10%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    select {
+        width: 50%;
+        // height: 50%;
+    }
+    option {
+        border: solid 1px black;
+    }
+}
+
+.rangeSelectors {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // border: solid black 1px;
+    height: 5%;
+    button.rangeSelector {
+
+        font-size: 50px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: grey;
+        width: 10%;
+    }
+    button.rangeSelector.selected {
+        color: #6065CB;
+        font-weight: 800;
+    }
+}
+
+.marketplaceItems {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    // align-items: center;    
+    overflow: auto;
+    height: 85%;
+
+    padding: 5% 0 15% 0;
+    .marketplaceItem {
+        align-self: stretch;
+        height: 15%;
+        border-radius: 15px;
+        // padding: 50px;
+        margin: 20px 0;
+        width: 96%;
+        display: flex;
+        align-items: center;
+        height: 200px;
+        justify-content: space-evenly;
+        div.image {
+            width: 30%;
+            height: 100%;
+        }
+        div.setAndItemName {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        div.valueAndChange {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+}
+
+
+.up {
+    background-color: rgba(42, 163, 0, 0.3);
+    .valueAndChange {
+        color: rgb(0, 108, 0)
+    }
+}
+
+.down {
+    background-color: rgba(200, 76, 76, 0.3);
+    .valueAndChange {
+        color: rgb(118, 0, 0)
+    }
+}
