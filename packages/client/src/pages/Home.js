@@ -80,12 +80,19 @@ const Home = (props) => {
             .then(res => {
                 setCollectedCards(res.data)
             })
-        BillsPcService.getSetsV2()
+        BillsPcService.getSets()
             .then(res => {
                 setReferenceData({
                     ...referenceData,
                     sets: res.data
                 })
+            })
+        BillsPcService.getSetsV2()
+            .then(res => {
+                // setReferenceData({
+                //     ...referenceData,
+                //     sets: res.data
+                // })
                 setMarketData({
                     ...marketData,
                     selectedSetIndex: 105,
