@@ -1,21 +1,26 @@
-import React from 'react'
-import MarketplaceItem from './MarketplaceItem'
-import marketplaceData from '../../data/fake-marketplace-data'
+import React, { useState, useEffect } from 'react'
+import MarketplaceItems from './MarketplaceItems'
 import './assets/marketplace.less'
-import { select } from '../../../../service/middleware/QueueQueries/users'
+import RangeSelectors from './RangeSelectors'
+import MarketplaceDashboard from './MarketplaceDashboard'
+
 
 const Marketplace = (props) => {
-    const { marketData } = props
-    const selectedSet = {
-        id: marketData.selected_set_id,
-        name: marketData.selected_set_name
-    }
+    const { marketData, setMarketData } = props
+
     return (<div className='marketplace'>
-        {marketData.sets.filter(set => set.id === marketData.selected_set_id)[0].items
-            .map(item => <MarketplaceItem item={item} selectedSet={selectedSet} />)}
-        {/* {marketplaceData.map(item => {
-            return <MarketplaceItem item={item} />
-        })} */}
+        {marketData.sets.length > 0 
+        ?
+        <>  
+            <MarketplaceDashboard />
+            <RangeSelectors 
+                marketData={marketData} 
+                setMarketData={setMarketData} 
+            />
+            <MarketplaceItems marketData={marketData} />
+        </>
+        :
+        <p>Loading...</p>}
     </div>)
 }
 

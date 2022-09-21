@@ -1,20 +1,20 @@
 import React from 'react'
+import { calcItemMarketData } from '../../utils/market'
 
 const MarketplaceItem = (props) => {
-    const { item, selectedSet } = props
+    const { item, marketData, percentChange, itemValue } = props
     
-    console.log(item)
-    return (<div className={`marketplaceItem ${item.card_id ? 'up' : 'down'}`}>
+    return (<div className={`marketplaceItem ${Number(item.percentChange) > 0 ? 'up' : 'down'}`}>
         <div className='image'>
-
+            {item.market_prices !== null ? <p>{}</p> : <p>unavailable</p>}
         </div>
         <div className='setAndItemName'>
-            <p className='setName'>{selectedSet.name}</p>
+            <p className='setName'>{marketData.sets[marketData.selectedSetIndex].name}</p>
             <p className='itemName'>{item.name}</p>
         </div>
         <div className='valueAndChange'>
-            <p>${item.market_price_price}</p>
-            <p>{item.market_price_daily_change > 0 ? '+' : ''}{item.market_price_daily_change}%</p>
+            <p>${itemValue}</p>
+            <p>{percentChange > 0 ? '+' : ''}{percentChange}%</p>
         </div>
     </div>)
 }
