@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import MarketplaceItems from './MarketplaceItems'
 import './assets/marketplace.less'
 import RangeSelectors from './RangeSelectors'
-import MarketplaceDashboard from './MarketplaceDashboard'
+import SetSelector from './SetSelector'
 
 
 const Marketplace = (props) => {
@@ -12,7 +12,7 @@ const Marketplace = (props) => {
         {marketData.sets.length > 0 
         ?
         <>  
-            <MarketplaceDashboard />
+            <SetSelector marketData={marketData} setMarketData={setMarketData} />
             <RangeSelectors 
                 marketData={marketData} 
                 setMarketData={setMarketData} 
