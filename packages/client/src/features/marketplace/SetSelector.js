@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 const SetSelector = (props) => {
     const { marketData, setMarketData } = props
@@ -7,13 +7,17 @@ const SetSelector = (props) => {
         // setSetsVisible(false)
         setMarketData({
             ...marketData,
-            selectedSetIndex: e.target.value
+            selectedSetIndex: Number(e.target.value)
         })
     }
 
     return (<div className='setSelector'>
         <select onChange={handleSelectSet} >
-            {marketData.sets.map((set, idx) => <option value={idx}>{set.name}</option>)}
+            {marketData.sets.sort((a, b) => {
+                if (a.name > b.name) return 1
+                if (a.name < b.name) return -1
+                return 0
+            }).map((set, idx) => <option value={idx}>{set.name}</option>)}
         </select>
     </div>)
 }

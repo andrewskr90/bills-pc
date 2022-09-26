@@ -14,10 +14,9 @@ const initialReferenceDataValues = {
 }
 
 const initialMarketData = {
-    selected_set_id: '',
-    selected_set_name: '',
-    selectedSetIndex: 0,
-    dateRange: '1D',
+    // initially set to -1 so change registers, triggering useEffect
+    selectedSetIndex: -1,
+    dateRange: '1W',
     sets: [
         // {
         //     id: '',
@@ -95,9 +94,7 @@ const Home = (props) => {
                 // })
                 setMarketData({
                     ...marketData,
-                    selectedSetIndex: 105,
-                    selected_set_id: res.data[105].set_v2_id,
-                    selected_set_name: res.data[105].set_v2_name,
+                    selectedSetIndex: 0,
                     sets: formatSetsForMarketData(res.data)
                 })
             }).catch(err => {
@@ -144,16 +141,11 @@ const Home = (props) => {
     }
 
     useEffect(() => {
-        console.log(marketData)
-    }, [marketData])
-
-    useEffect(() => {
-        console.log(marketData)
-        if (marketData.selected_set_id) {
-            getSetMarketData(marketData.selected_set_id)
+        if (marketData.sets.length > 0) {
+            getSetMarketData(marketData.sets[marketData.selectedSetIndex].id)
         }
-    }, [marketData.selected_set_id])
-    console.log(marketData)
+    }, [marketData.selectedSetIndex])
+
     return (<div className='home'>
         <header>
             <h1>Bill's PC</h1>
