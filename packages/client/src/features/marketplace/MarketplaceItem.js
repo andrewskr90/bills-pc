@@ -4,7 +4,7 @@ import { calcItemMarketData } from '../../utils/market'
 const MarketplaceItem = (props) => {
     const { item, marketData, percentChange, itemValue } = props
     
-    return (<div className={`marketplaceItem ${Number(item.percentChange) > 0 ? 'up' : 'down'}`}>
+    return (<div className={`marketplaceItem ${Number(item.percentChange) > 0 ? 'up' : Number(item.percentChange) ? 'down' : ''}`}>
         <div className='image'>
             {item.market_prices !== null ? <p>{}</p> : <p>unavailable</p>}
         </div>
