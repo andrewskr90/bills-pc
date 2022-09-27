@@ -12,6 +12,7 @@ const SetSelector = (props) => {
     }
 
     return (<div className='setSelector'>
+        <p>Selected Set: </p>
         <select onChange={handleSelectSet} >
             {marketData.sets.sort((a, b) => {
                 if (a.name > b.name) return 1

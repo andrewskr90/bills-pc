@@ -62,24 +62,24 @@ table {
 }
 
 p {
-  font-size: 40px;
+  font-size: 16px;
 }
 
 h1 {
   font-weight: 600;
-  font-size: 13vw;
+  font-size: 50px;
 }
 
 h2 {
-  font-size: 10vw;
+  font-size: 30px;
 }
 
 h3 {
-  font-size: 60px;
+  font-size: 24px;
 }
 
 label {
-  font-size: 40px;
+  font-size: 20px;
 }
 
 div {
@@ -87,7 +87,7 @@ div {
 }
 
 html, body, #root, .app, .home  {
-  height: 100%;
+  // height: 100%;
 }
 
 body {
@@ -102,12 +102,14 @@ header {
   align-items: center;
   justify-content: center;
   color: #6065CB;
-  height: 10%;
-  position: sticky;
+  height: 70px;
+  position: fixed;
   z-index: 1;
   top: 0;
   width: 100%;
   background-color: white;
+  box-shadow: 0px 0px 10px rgb(71, 71, 71);
+  border-color: black;
 }
 
 .flexCenter {
@@ -188,6 +190,7 @@ header {
 .home {
   display: flex;
   flex-direction: column;
+  align-items: center;
   max-width: 2200px;
   // height:
 }
@@ -221,10 +224,8 @@ header {
   position: fixed;
   bottom: 0;
   height: 7%;
-  width: 96%;
   display: flex;
   justify-content: center;
-  margin-top: auto;
   align-items: flex-end;
 }
 
@@ -235,8 +236,8 @@ header {
   border-radius: 50px;
   width: 20%;
   font-size: 5vw;
-  font-weight: 800;
-  border: #6065CB solid 8px;
+  font-weight: 300;
+  border: #6065CB solid 4px;
   color: #6065CB;
   background-color: white;
   height: 80%;
@@ -248,7 +249,8 @@ header {
 }
 
 button.selected {
-  background-color: #822c38;
+  // background-color: #822c38;
+  box-shadow: inset 2px 2px 10px 4px #5c1f27;
 }
 
 .hidden {
@@ -271,26 +273,18 @@ a {
     font-size: 3vw;
 }
 
-.panel {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 0.5%;
-  padding: 2%;
-  overflow: auto;
-  width: 85%;
-  background-color: #30638e;
-  border-radius: 15px;;
-  border: solid black 4px;
-}
-
 .loginPage {
-  height: 100vh;
+  height: 80vh;
+  width: 100%;
+  margin-top: 75px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loginForm {
-  margin: 2vh 0;
-  height: 15vh;
+  width: 350px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -298,24 +292,34 @@ a {
 }
 
 .registerForm {
-  margin: 2vh 0;
-  height: 30vh;
+  height: 300px;
+  width: 350px;
+}
+
+form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
+  height: 100%;
+  text-align: center;
 }
 
 .formInputs {
-  width: 60vw;
-  height: 100%;
+  width: 50%;
 }
 
 input {
-  font-size: 50px;
+  font-size: 20px;
   width: 100%;
+  margin-top: 12px;
+
 }
 
 select {
-  font-size: 50px;
+  font-size: 20px;
   width: 100%;
+  margin-top: 12px;
 }
 
 option {
@@ -323,16 +327,15 @@ option {
 }
 
 button {
-  font-size: 50px;
+  font-size: 20px;
   text-decoration: none;
   background-color: #D1495B;
   color: #FBFAF5;
-  margin: 3vw;
-  width: 30vw;
-  height: 10vw;
-  max-width: 400px;
-  max-height: 150px;
+  width: 100px;
+  height: 50px;
   text-align: center;
+  border: none;
+  border-radius: 5px;
 }
 
 button:hover {
@@ -353,13 +356,11 @@ button:hover {
 }
 
 .smallButton {
-  font-size: 40px;
+  font-size: 16px;
+  height: 40px;
   text-decoration: none;
   background-color: #D1495B;
   color: #FBFAF5;
-  margin: 2vw;
-  width: 20vw;
-  padding: 2vw;
   text-align: center;
 }
 .error {
@@ -369,8 +370,9 @@ button:hover {
 .modalClose {
   background-color: #6065CB;
   padding: 0 0;
-  font-size: 50px;
-  border-radius: 20px;
+  height: 40px;
+  // font-size: 20px;
+  border-radius: 10px;
 }
 
 /* ***Component Styles*** */
@@ -378,13 +380,21 @@ button:hover {
 /* ImportPurchase */
 
   div.importPurchase {
-    
+    margin-top: 75px;
+    h3 {
+      margin-top: 10px;
+    }
     /* PurchaseTable */
     div.purchaseItems {
-      .flexColumnNullCenter();
-      
-      div.purchaseTable {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+        .purchaseItemsHeader {
+          border-bottom: solid black 1px;
+        }
+        div.purchaseTable {
         width: 90%;
+        margin-bottom: 10px;
         button {
           height: 45%;
           width: 10%;
@@ -394,7 +404,8 @@ button:hover {
         div.row {
           .flexSpaceCenter();
           height: 10vh;
-          border-bottom: solid black 2px;
+          margin-top: 2px;
+          // border-bottom: solid black 2px;
           p {
             text-align: center;
           }
@@ -422,8 +433,16 @@ button:hover {
       }
     }
     div.purchaseDetails {
-      .page();
-      .flexColumnNullCenter();
+      width: 96%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .buttons {
+        margin-top: 10px;
+        width: 250px;
+        display: flex;
+        justify-content: space-between;
+      }
     }
   }
 
@@ -432,29 +451,36 @@ button:hover {
   div.addItemModal {
     display: block;
     position: fixed;
-    z-index: 10;
+    z-index: 1;
     left: 0;
     top: 0;
     width: 100vw;
     height: 100vh;
     background-color: rgba(0,0,0,0.4);
     div.modalContent {
-      .flexColumnNullCenter();
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       background-color: white;
       margin: 80px auto;
-      width: 80vw;
+      width: 330px;
       height: 80%;
       overflow: auto;
+      border-radius: 10px;
       div.itemTypeButtons {
         button {
           width: 50%;
           max-width: none;
           margin: 0;
+          border-radius: 0;
         }
       }
       
       div.addCardToTransaction {
-        .flexColumnNullStart();
+        margin-top: 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         height: 85%;
         div.cardFilter {
           .flexCenterStart();
@@ -488,13 +514,13 @@ button:hover {
           }
         }
         div.selectedSetCardsComponent {
-          flex-direction: row;
+          display: flex;
           flex-wrap: wrap;
-          justify-content: center;
-          height: 90%;
+          justify-content:space-around;
+          height: 85%;
           overflow: auto;
           img {
-            margin: 0.5vw;
+            width: 100px;
           }
         }
       }
@@ -520,29 +546,93 @@ button:hover {
     }
   }
 
-/* Profile */
-  div.profile {
-    .page();
-  }
 
-  @media only screen and (max-width: 800px) {
+  // _________________________________________________
+  // _________________________________________________
+  // _________________________________________________
+  //              Desktop Responsive Styles
+  // _________________________________________________
+  // _________________________________________________
+  // _________________________________________________
+
+  @media only screen and (min-width: 600px) {
+    h3 {
+      font-size: 20px;
+    }
+
     .app {
       padding: 0;
     }
+
+    .loginPage {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      .loginForm {
+        width: 400px;
+      }
+    }
+
     h1 {
       font-size: 80px;
     }
 
     .navBar {
-      width: 60%;
-      height: 15vw;
-      margin-bottom: 0;
+      .link {
+        font-size: 30px;
+      }
     }
 
     header {
-      height: 10%;
+      height: 100px;
       display: flex;
       align-items: center;
-      padding: 1vw;
+      padding: 10px;
+    }
+
+
+
+    div.importPurchase {
+      margin-top: 120px;
+      width: 600px;
+    }
+
+    /* AddItemModal */
+  
+    div.addItemModal {
+      div.modalContent {
+        width: 600px;
+        div.itemTypeButtons {
+          button {
+          }
+        }
+        div.addCardToTransaction {
+          div.cardFilter {
+            select {
+            }
+            div.filterBySets {
+              input {
+              }
+              div.filterResults {
+                div.filterResult {
+                  p {
+                    font-size: 16px;
+                    padding: 4px;
+                  }
+                }
+                div.filterResult:hover {
+                }
+              }
+            }
+          }
+        }
+        div.selectedSetCardsComponent {
+
+          img {
+          }
+        }
+      }
     }
   }
