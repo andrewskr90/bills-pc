@@ -2,19 +2,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 90%;
+    width: 100%;
+    margin-top: 75px;
 }
 
 .setSelector {
-    height: 10%;
-    width: 100%;
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
     align-items: center;
     justify-content: center;
     select {
-        width: 50%;
-        // height: 50%;
+        font-size: 16px;
+        margin-top: 0;
+        width: 60%;
     }
     option {
         border: solid 1px black;
@@ -23,13 +23,14 @@
 
 .rangeSelectors {
     display: flex;
-    align-items: center;
+    // align-items: center;
+    height: 30px;
     justify-content: center;
     // border: solid black 1px;
-    height: 5%;
+    // height: 5%;
     button.rangeSelector {
-
-        font-size: 50px;
+        // font-size: 50px;
+        height: 26px;
         cursor: pointer;
         border: none;
         background: none;
@@ -39,6 +40,7 @@
     button.rangeSelector.selected {
         color: #6065CB;
         font-weight: 800;
+        box-shadow: none;
     }
 }
 
@@ -48,19 +50,18 @@
     justify-content: center;
     // align-items: center;    
     overflow: auto;
-    height: 85%;
+    // height: 85%;
 
-    padding: 5% 0 15% 0;
+    // padding: 5% 0 15% 0;
     .marketplaceItem {
         align-self: stretch;
-        height: 15%;
         border-radius: 15px;
         // padding: 50px;
-        margin: 20px 0;
+        margin-top: 5px;
         width: 96%;
         display: flex;
         align-items: center;
-        height: 200px;
+        height: 75px;
         justify-content: space-evenly;
         background-color: rgba(121, 121, 121, 0.3);
         div.image {
@@ -95,5 +96,35 @@
     background-color: rgba(200, 76, 76, 0.3);
     .valueAndChange {
         color: rgb(118, 0, 0)
+    }
+}
+
+// _________________________________________________
+// _________________________________________________
+// _________________________________________________
+//              Desktop Responsive Styles
+// _________________________________________________
+// _________________________________________________
+// _________________________________________________
+
+
+@media only screen and (min-width: 600px) {
+    .marketplace {
+        justify-content: center;
+        width: 100%;
+        margin-top: 120px;
+    }
+    .setSelector {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-top: 10px;
+        select {
+            width: 400px;
+        }
+    }
+
+    .marketplaceItems {
+        width: 600px;
     }
 }

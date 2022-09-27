@@ -36,8 +36,8 @@ const RegisterForm = () => {
     }
 
     return (<div className='registerForm'>
-        <form className='flexCenterCenter' onSubmit={submitForm}>
-            <div className='formInputs flexColumnSpaceCenter'>
+        <form onSubmit={submitForm}>
+            <div className='formInputs'>
                 <h2>Register</h2>
                 <input
                     name='user_name'
