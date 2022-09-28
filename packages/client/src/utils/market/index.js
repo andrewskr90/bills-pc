@@ -38,14 +38,12 @@ export const calcItemMarketData = (prices) => {
         }
     }
     if (weekPrices.length > 0) {
-        console.log(weekPrices[0][1], weekPrices[weekPrices.length-1][1])
         weeklyChange = (weekPrices[0][1] - weekPrices[weekPrices.length-1][1]) / weekPrices[weekPrices.length-1][1] * 100
     }
     if (monthPrices.length > 0) {
         monthlyChange = (monthPrices[0][1] - monthPrices[monthPrices.length-1][1]) / monthPrices[monthPrices.length-1][1] * 100
     }
-    console.log(todayPrice.length, dailyChange)
-    console.log(weeklyChange)
+
     return {
         keyMarketDates,
         prices: {
