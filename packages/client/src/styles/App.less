@@ -92,6 +92,7 @@ html, body, #root, .app, .home  {
 
 body {
   background-color: white;
+  // background-color: rgb(78, 78, 78);
   font-family: 'Titillium Web', sans-serif;
   margin: 0;
 }
@@ -112,78 +113,10 @@ header {
   border-color: black;
 }
 
-.flexCenter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.flexNullCenter {
-  display: flex;
-  align-items: center;
-}
-
-.flexCenterCenter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.flexCenterStart {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.flexSpaceCenter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.flexColumnCenterStart {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-
-.flexColumnCenter {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.flexColumnNullCenter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.flexColumnNullStart {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.flexColumnSpaceCenter {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.flexColumnSpaceStart {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
 .app {
-  .flexColumnNullCenter();
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
 }
 
@@ -402,7 +335,9 @@ button:hover {
           margin: 0,
         }
         div.row {
-          .flexSpaceCenter();
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           height: 10vh;
           margin-top: 2px;
           // border-bottom: solid black 2px;
@@ -410,7 +345,10 @@ button:hover {
             text-align: center;
           }
           div.image {
-            .flexColumnCenter();
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             height: 100%;
             width: 20%;
           }
@@ -483,7 +421,9 @@ button:hover {
         align-items: center;
         height: 85%;
         div.cardFilter {
-          .flexCenterStart();
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
           select {
             width: 20%;
             option {
@@ -491,13 +431,16 @@ button:hover {
             }
           }
           div.filterBySets {
-            .flexColumnNullStart();
-
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
             input {
               border: solid black 1px;
             }
             div.filterResults {
-              .flexColumnNullStart();
+              display: flex;
+            flex-direction: column;
+            align-items: flex-start;
               div.filterResult {
                 border: solid #FBFAF5 2px;
                 background-color: #30638e;
@@ -529,15 +472,23 @@ button:hover {
 
 /* SelectionDetails */
   div.selectionDetails {
-    .flexColumnCenter();
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     input.checkbox {
       width: 3vw;
       height: 3vw;
     }
     form.purchaseDetails {
-      .flexColumnCenter();
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       div.labelInput {
-        .flexSpaceCenter();
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         input {
           width: 20%;
           margin: 0 5vw 0 0;
@@ -591,8 +542,6 @@ button:hover {
       align-items: center;
       padding: 10px;
     }
-
-
 
     div.importPurchase {
       margin-top: 120px;
