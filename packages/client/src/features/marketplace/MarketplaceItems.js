@@ -6,7 +6,6 @@ import { calcItemMarketData } from '../../utils/market'
 const MarketplaceItems = (props) => {
     const { marketData } = props
     const { selectedSetIndex } = marketData
-
     return (<div className='marketplaceItems'>
         {marketData.sets[selectedSetIndex].items
                 .filter(item => item.market_prices !== null)
@@ -18,6 +17,8 @@ const MarketplaceItems = (props) => {
                         percentChange = Number(itemMarketData.changes.daily).toFixed(2)
                     } else if (marketData.dateRange === '1W') {
                         percentChange = Number(itemMarketData.changes.weekly).toFixed(2)
+                    } else if (marketData.dateRange === '2W') {                    
+                        percentChange = Number(itemMarketData.changes.biweekly).toFixed(2)
                     } else if (marketData.dateRange === '1M') {
                         percentChange = Number(itemMarketData.changes.monthly).toFixed(2)
                     }

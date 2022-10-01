@@ -32,31 +32,13 @@ const NavBar = () => {
             to='/collection' 
             className={`link ${selected === 'collection' ? 'selected': ''}`}
         >
-            PC
+            Collection
         </Link>
         {/* <Link 
-            to='/rip' 
-            className={`link ${selected === 'rip' ? 'selected': ''}`}
-        >
-            Rip
-        </Link> */}
-        <Link 
             to='/import' 
             className={`link ${selected === 'import' ? 'selected': ''}`}
         >
             Buy
-        </Link>
-        {/* <Link 
-            to='/sell' 
-            className={`link ${selected === 'sell' ? 'selected': ''}`}
-        >
-            Sell
-        </Link>
-        <Link 
-            to='/trade' 
-            className={`link ${selected === 'trade' ? 'selected': ''}`}
-        >
-            Trade
         </Link> */}
     </div>)
 }
