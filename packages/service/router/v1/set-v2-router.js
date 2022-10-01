@@ -8,8 +8,8 @@ const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
 
 setV2Router.get('/', 
-    verifyCookie,
-    decodeSessionToken,
+    // verifyCookie,
+    // decodeSessionToken,
     QueueQueries.init,
     QueueQueries.setsV2.select,
     executeQueries,
