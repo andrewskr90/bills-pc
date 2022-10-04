@@ -19,8 +19,6 @@ marketPricesRouter.post('/',
 })
 
 marketPricesRouter.get('/',
-    verifyCookie,
-    decodeSessionToken,
     QueueQueries.init,
     QueueQueries.marketPrices.select,
     executeQueries,    
