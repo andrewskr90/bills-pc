@@ -149,6 +149,7 @@ const Home = (props) => {
     return (<div className='home'>
         <header>
             <h1>Bill's PC</h1>
+            <p>Pokemon Card Portfolio App</p>
         </header>
         <Routes>
             <Route path='/' element={<Marketplace marketData={marketData} setMarketData={setMarketData} />} />

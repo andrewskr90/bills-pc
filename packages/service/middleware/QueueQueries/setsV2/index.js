@@ -14,6 +14,7 @@ const select = (req, res, next) => {
         let queryFilter = QueryFormatters.filterConcatinated(req.query)
         query += ` WHERE ${queryFilter}`
     }
+    query += ` ORDER BY set_v2_name ASC;`
     req.queryQueue.push(query)
     next()
 }

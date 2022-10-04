@@ -26,7 +26,7 @@ const CollectedCard = (props) => {
                 className='collectedCardImg' 
                 src={card_image_small}
             />
-        <div className='collectedCard miniPanel'>
+        <div className='miniPanel'>
             <div className='top'>
                 <div>
                     <p className='setName'>{set_name}</p>

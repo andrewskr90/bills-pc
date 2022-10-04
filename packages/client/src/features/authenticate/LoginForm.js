@@ -39,8 +39,8 @@ const LoginForm = (props) => {
     }
 
     return (<div className='loginForm'>
-        <form className='flexSpaceCenter' onSubmit={submitForm}>
-            <div className='formInputs flexColumnSpaceCenter'>
+        <form onSubmit={submitForm}>
+            <div className='formInputs'>
                 <h2>Login</h2>
                 <input
                     name='user_name'

@@ -29,10 +29,6 @@ const select = (req, res, next) => {
             LEFT JOIN sets_v2 as s
                 ON  s.set_v2_id = c.card_v2_set_id
             WHERE s.set_v2_id = '${req.query.set_v2_id}'
-                AND c.card_v2_rarity != 'common'
-                AND c.card_v2_rarity != 'uncommon'
-                AND c.card_v2_rarity != 'rare'
-                AND c.card_v2_rarity != 'code card'
             GROUP BY card_v2_id
             UNION
             SELECT 
