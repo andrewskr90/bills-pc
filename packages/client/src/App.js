@@ -45,7 +45,7 @@ const formatSetsForMarketData = (sets) => {
 }
 
 const formatInitialFilters = (rarities) => {
-    const excludedRarities = ['common', 'code card', 'holo rare', 'rare', 'uncommon']
+    const excludedRarities = ['common', 'code card', 'rare', 'uncommon']
     return rarities.filter(rarity => {
         let include = true
         excludedRarities.forEach(excluded => {
