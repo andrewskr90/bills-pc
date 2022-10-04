@@ -118,6 +118,12 @@ const BillsPcService = {
             url: '/api/v1/products',
             params: filter
         })
+    },
+    getReferenceData() {
+        return axios({
+            ...options,
+            url: '/api/v1/reference-data'
+        })
     }
 }
 
