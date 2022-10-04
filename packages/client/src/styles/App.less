@@ -148,8 +148,8 @@ header {
   background-color: rgba(0,0,0,0.6);
   .modalContent {
     width: 95%;
-    height: 650px;
-    margin: 15% auto;
+    height: 630px; // this height/margin combo works with iphone 12 safari
+    margin: 30px auto;
     z-index: 1;
     display: flex;
     flex-direction: column;
@@ -603,7 +603,7 @@ button:hover {
       width: 600px;
       height: 550px;
       margin: 100px auto;
-  }
+    }
 
     /* AddItemModal */
   
@@ -640,5 +640,26 @@ button:hover {
           }
         }
       }
+    }
+    // desktop scrollbar styles
+    /* width */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 5px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: #999;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #888;
     }
   }

@@ -44,8 +44,18 @@ const formatSetsForMarketData = (sets) => {
     return formattedSets
 }
 
-const formatFiltersForMarketData = (referenceData) => {
-    return referenceData.rarities.map(rarity => {
+const formatInitialFilters = (rarities) => {
+    const excludedRarities = ['common', 'code card', 'holo rare', 'rare', 'uncommon']
+    return rarities.filter(rarity => {
+        let include = true
+        excludedRarities.forEach(excluded => {
+            console.log(excluded, rarity)
+            if (excluded === rarity.toLowerCase()) {
+                include = false
+            }
+        })
+        return include
+    }).map(rarity => {
         return { rarity: rarity }
     })
 }
@@ -110,6 +120,7 @@ const App = () => {
                         ...marketData,
                         selectedSetIndex: 0,
                         sets: formatSetsForMarketData(res.data.sets),
+                        filters: formatInitialFilters(res.data.rarities)
                     })
                 }).catch(err => {
                     console.log(err)
