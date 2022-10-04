@@ -10,6 +10,7 @@ const setsV2 = require('./setsV2')
 const marketPrices = require('./marketPrices')
 const cardsV2 = require('./cardsV2')
 const products = require('./products')
+const referenceData = require('./referenceData')
 
 
 const init = (req, res, next) => {
@@ -30,5 +31,6 @@ module.exports = {
     setsV2,
     marketPrices,
     cardsV2,
-    products
+    products,
+    referenceData
 }

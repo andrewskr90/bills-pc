@@ -14,11 +14,7 @@ const SetSelector = (props) => {
     return (<div className='setSelector'>
         <p>Selected Set: </p>
         <select onChange={handleSelectSet} >
-            {marketData.sets.sort((a, b) => {
-                if (a.name > b.name) return 1
-                if (a.name < b.name) return -1
-                return 0
-            }).map((set, idx) => <option value={idx}>{set.name}</option>)}
+            {marketData.sets.map((set, idx) => <option value={idx}>{set.name}</option>)}
         </select>
     </div>)
 }

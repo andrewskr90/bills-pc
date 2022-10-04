@@ -16,20 +16,62 @@ import InDevelopment from './pages/InDevelopment'
 const initialReferenceDataValues = {
     sets: [],
     cards: [],
-    products: []
+    products: [],
+    rarities: []
 }
 
 const initialMarketData = {
     // initially set to -1 so change registers, triggering useEffect
     selectedSetIndex: -1,
     dateRange: '1W',
-    sets: []
+    sets: [],
+    filters: []
 }
 
 //calling api before app renders can lead to bugs
 //render app first, call data in useEffect,
 //then set initialData to true
 let initialData = false
+
+const formatSetsForMarketData = (sets) => {
+    const formattedSets = sets.map(set => {
+        return {
+            id: set.set_v2_id,
+            name: set.set_v2_name,
+            items: [],
+        }
+    })
+    return formattedSets
+}
+
+const formatFiltersForMarketData = (referenceData) => {
+    return referenceData.rarities.map(rarity => {
+        return { rarity: rarity }
+    })
+}
+
+const updateSetWithFetchedMarketData = (set, marketPrices) => {
+    const itemsWithPrices = []
+    marketPrices.forEach(item => {
+        itemsWithPrices.push({
+            card_id: item.card_v2_id,
+            name: item.card_v2_name || item.product_name,
+            number: item.card_v2_number,
+            rarity: item.card_v2_rarity,
+            foil_only: item.card_v2_foil_only,
+            product_id: item.product_id,
+            release_date: item.product_release_date,
+            description: item.product_description,
+            market_prices: item.market_price_prices
+        })
+    })
+    return {
+        id: set.id,
+        name: set.name,
+        items: itemsWithPrices
+    }
+}
+
 
 const App = () => {
     const [userClaims, setUserClaims] = useState(false)
@@ -38,18 +80,17 @@ const App = () => {
     const [referenceData, setReferenceData] = useState(initialReferenceDataValues)
     const [marketData, setMarketData] = useState(initialMarketData)
 
-    const formatSetsForMarketData = (sets) => {
-        const formattedSets = sets.map(set => {
-            return {
-                id: set.set_v2_id,
-                name: set.set_v2_name,
-                items: [],
-            }
-        })
-        return formattedSets
-    }
-
     useEffect(() => {
+        const checkAuth = async () => {
+            await BillsPcService.authenticateSession()
+                .then(res =>  {
+                    initialData = true
+                    setUserClaims(res.data)
+                }).catch(err => {
+                    initialData = true
+                })
+        }
+        checkAuth()
         // BillsPcService.getCollectedCards()
         //     .then(res => {
         //         setCollectedCards(res.data)
@@ -61,46 +102,24 @@ const App = () => {
         //             sets: res.data
         //         })
         //     })
-        BillsPcService.getSetsV2()
-            .then(res => {
-                // setReferenceData({
-                //     ...referenceData,
-                //     sets: res.data
-                // })
-                setMarketData({
-                    ...marketData,
-                    selectedSetIndex: 0,
-                    sets: formatSetsForMarketData(res.data)
+        const getReferenceData = async () => {
+            await BillsPcService.getReferenceData()
+                .then(res => {
+                    setReferenceData(res.data)
+                    setMarketData({
+                        ...marketData,
+                        selectedSetIndex: 0,
+                        sets: formatSetsForMarketData(res.data.sets),
+                    })
+                }).catch(err => {
+                    console.log(err)
                 })
-            }).catch(err => {
-                console.log(err)
-            })
-    }, [])
-
-    const updateSetWithFetchedMarketData = (set, marketPrices) => {
-        const itemsWithPrices = []
-        marketPrices.forEach(item => {
-            itemsWithPrices.push({
-                card_id: item.card_v2_id,
-                name: item.card_v2_name || item.product_name,
-                number: item.card_v2_number,
-                rarity: item.card_v2_rarity,
-                foil_only: item.card_v2_foil_only,
-                product_id: item.product_id,
-                release_date: item.product_release_date,
-                description: item.product_description,
-                market_prices: item.market_price_prices
-            })
-        })
-        return {
-            id: set.id,
-            name: set.name,
-            items: itemsWithPrices
         }
-    }
-
-    const getSetMarketData = (set_id) => {
-        BillsPcService.getMarketPrices({ set_v2_id: set_id, marketwatch: true })
+        getReferenceData()
+    }, [])
+    
+    const getSetMarketData = async (set_id) => {
+        await BillsPcService.getMarketPrices({ set_v2_id: set_id, marketwatch: true })
             .then(res => {
                 setMarketData({
                     ...marketData,
@@ -123,20 +142,6 @@ const App = () => {
         }
     }, [marketData.selectedSetIndex])
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            await BillsPcService.authenticateSession()
-                .then(res =>  {
-                    initialData = true
-                    setUserClaims(res.data)
-                }).catch(err => {
-                    initialData = true
-                    // navigate('/login')
-                })
-        }
-        checkAuth()
-    }, [])
-
     return (<>
         <div className='app'>
             <header>
@@ -144,7 +149,7 @@ const App = () => {
                 <p>Pokemon Card Portfolio App</p>
             </header>
             <Routes>
-                <Route path='/' element={<Marketplace marketData={marketData} setMarketData={setMarketData} />} />
+                <Route path='/' element={<Marketplace marketData={marketData} setMarketData={setMarketData} referenceData={referenceData} />} />
                 {/* <Route path='/collection' element={<Collection userClaims={userClaims} collectedCards={collectedCards} setCollectedCards={setCollectedCards} />} /> */}
                 <Route path='/collection' element={<InDevelopment />} />
                 <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />

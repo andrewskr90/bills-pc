@@ -88,16 +88,6 @@ div.collection {
     }
 }
 
-.modalBackground {
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    background-color: rgba(0,0,0,0.6);
-}
-
 .originalPurchaseButton {
     height: 35%;
     width: 85%;
@@ -105,88 +95,82 @@ div.collection {
     border-radius: 20px;
 }
 
-.modalContent {
-    width: 80%;
-    height: 70%;
-    margin: 15% auto;
-    z-index: 1;
+
+.collectedCardInfo, .purchaseInfo {
+    background-color: white;
+    // height: 60%;
+    margin-top: 5%;
+    padding: 5% 10%;
     display: flex;
     flex-direction: column;
-    .collectedCardInfo, .purchaseInfo {
-        background-color: white;
-        // height: 60%;
-        margin-top: 5%;
-        padding: 5% 10%;
+    align-items: center;
+    overflow: auto;
+    justify-content: space-between;
+    border-radius: 25px;
+    .purchases {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        height: 70%;
         overflow: auto;
-        justify-content: space-between;
-        border-radius: 25px;
-        .purchases {
-            display: flex;
-            flex-direction: column;
-            height: 70%;
-            overflow: auto;
-            padding: 1%;
-            .collectedCard {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                height: 100%;
-                .collectedCardImg {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-                .purchasedCard {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    height: 95%;
-                    width: 100%;
-                    // border: solid #C05656 8px;
-                    // border-radius: 25px;
-                    // border-right: none;
-                    // border-bottom: none;
-                    padding-top: 1%;
-                    padding: 4%;    
-                    margin: 2%;
-                    .note {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        overflow: auto;
-                        height: 70%;
-                        width: 100%;
-                    }
-                    
-                    .originalPurchase {
-                        height: 30%;
-                        border-radius: 25px;
-                    }
-                }
-            }
-        }
-        h3 {
-            margin-top: auto;
-        }
-        div.marketPriceTypes {
+        padding: 1%;
+        .collectedCard {
             display: flex;
             flex-direction: row;
-            justify-content: center;
-            .rarities {
+            align-items: center;
+            height: 100%;
+            .collectedCardImg {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+            }
+            .purchasedCard {
+                display: flex;
+                flex-direction: column;
                 justify-content: space-between;
+                height: 95%;
+                width: 100%;
+                // border: solid #C05656 8px;
+                // border-radius: 25px;
+                // border-right: none;
+                // border-bottom: none;
+                padding-top: 1%;
+                padding: 4%;    
+                margin: 2%;
+                .note {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    overflow: auto;
+                    height: 70%;
+                    width: 100%;
+                }
+                
+                .originalPurchase {
+                    height: 30%;
+                    border-radius: 25px;
+                }
             }
         }
-        button {
-            margin-top: auto;
+    }
+    h3 {
+        margin-top: auto;
+    }
+    div.marketPriceTypes {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        .rarities {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
         }
     }
+    button {
+        margin-top: auto;
+    }
 }
+
 
 .purchaseCards {
     height: 45%;
