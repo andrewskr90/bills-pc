@@ -100,6 +100,88 @@
     }
 }
 
+
+.filterBubbles {
+    display: flex;
+    .filterBubble {
+        height: 24px;
+        padding: 4px;
+        width: max-content;
+        margin: 0 4px;
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border: solid 1px #6065CB;
+        border-radius: 25px;
+        p {
+            color: #6065CB;
+            margin: 0 4px;
+            font-size: 12px;
+        }
+        button {
+            background: none;
+            width: 18px;
+            height: 16px;
+            border-radius: 25px;
+            background-color: white;
+            font-size: 12px;
+            font-weight: 900;
+            color: #6065CB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+.filterBubble.active {
+    background-color: #6065CB;
+    p {
+        color: white;
+    }
+}
+
+.setFilters {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    // height: 100px;
+    .filterBubbles {
+        display: flex;
+        flex-direction: row;
+        overflow: auto;
+        white-space: nowrap;
+        padding-bottom: 6px;
+    }
+    .addFilter {
+        background-color: #6065cb;
+        height: 30px;
+        width: 200px;
+        margin: 5px;
+        font-size: 16px;
+    }
+}
+
+.filterModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .raritySection {
+        p {
+            padding: 4px;
+        }
+        .filterBubbles {
+            padding-top: 4px;
+            border-top: solid black 1px;
+            border-bottom: solid black 1px;
+            flex-wrap: wrap;
+            .filterBubble {
+                margin-bottom: 4px;
+            }
+        }
+    }
+}
+
 // _________________________________________________
 // _________________________________________________
 // _________________________________________________
