@@ -3,33 +3,117 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-top: 100px;
+    margin-top: 90px;
+    .selectorAndFilter {
+        padding-left: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
 }
 
 .setSelector {
     display: flex;
-    // flex-direction: column;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    height: 50px;
+    width: 500px;
     select {
         font-size: 16px;
+        text-align: center;
         margin-top: 0;
-        width: 60%;
     }
     option {
         border: solid 1px black;
     }
 }
 
+.filterBubbles {
+    display: flex;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    white-space: nowrap;
+    padding-top: 10px;
+    .filterBubble {
+        height: 24px;
+        padding: 4px;
+        width: max-content;
+        margin: 4px 4px;
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border: solid 1px #6065CB;
+        border-radius: 25px;
+        p {
+            color: #6065CB;
+            margin: 0 4px;
+            font-size: 12px;
+        }
+        button {
+            background: none;
+            width: 18px;
+            height: 16px;
+            border-radius: 25px;
+            background-color: white;
+            font-size: 12px;
+            font-weight: 900;
+            color: #6065CB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+.filterBubble.active {
+    background-color: #6065CB;
+    p {
+        color: white;
+    }
+}
+
+.setFilters {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 20px;
+    .addFilter {
+        background-color: #6065cb;
+        height: 30px;
+        width: 100px;
+        margin: auto;
+        font-size: 16px;
+    }
+    
+}
+
+.filterModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .raritySection {
+        p {
+            padding: 4px;
+        }
+        .filterBubbles {
+            padding-top: 4px;
+            border-top: solid black 1px;
+            border-bottom: solid black 1px;
+            flex-wrap: wrap;
+            .filterBubble {
+                margin-bottom: 4px;
+            }
+        }
+    }
+}
+
 .rangeSelectors {
     display: flex;
-    // align-items: center;
-    height: 30px;
+    height: 40px;
     justify-content: center;
-    // border: solid black 1px;
-    // height: 5%;
+    align-items: center;
     button.rangeSelector {
-        // font-size: 50px;
         height: 26px;
         cursor: pointer;
         border: none;
@@ -97,88 +181,6 @@
     background-color: rgba(200, 76, 76, 0.3);
     .valueAndChange {
         color: rgb(118, 0, 0)
-    }
-}
-
-
-.filterBubbles {
-    display: flex;
-    .filterBubble {
-        height: 24px;
-        padding: 4px;
-        width: max-content;
-        margin: 0 4px;
-        display: flex;
-        align-items: center;
-        background-color: white;
-        border: solid 1px #6065CB;
-        border-radius: 25px;
-        p {
-            color: #6065CB;
-            margin: 0 4px;
-            font-size: 12px;
-        }
-        button {
-            background: none;
-            width: 18px;
-            height: 16px;
-            border-radius: 25px;
-            background-color: white;
-            font-size: 12px;
-            font-weight: 900;
-            color: #6065CB;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    }
-}
-
-.filterBubble.active {
-    background-color: #6065CB;
-    p {
-        color: white;
-    }
-}
-
-.setFilters {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    // height: 100px;
-    .filterBubbles {
-        display: flex;
-        flex-direction: row;
-        overflow: auto;
-        white-space: nowrap;
-        padding-bottom: 6px;
-    }
-    .addFilter {
-        background-color: #6065cb;
-        height: 30px;
-        width: 200px;
-        margin: 5px;
-        font-size: 16px;
-    }
-}
-
-.filterModal {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    .raritySection {
-        p {
-            padding: 4px;
-        }
-        .filterBubbles {
-            padding-top: 4px;
-            border-top: solid black 1px;
-            border-bottom: solid black 1px;
-            flex-wrap: wrap;
-            .filterBubble {
-                margin-bottom: 4px;
-            }
-        }
     }
 }
 
