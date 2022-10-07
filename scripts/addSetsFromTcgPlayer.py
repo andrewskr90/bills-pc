@@ -17,8 +17,9 @@ logger.addHandler(handler)
 
 # configure login info
 loginInfo = {}
-loginInfo['user_name'] = 'kyle'
-loginInfo['user_password'] = os.environ['GYM_LEADER_PASS']
+loginInfo['user'] = {}
+loginInfo['user']['user_name'] = 'kyle'
+loginInfo['user']['user_password'] = os.environ['GYM_LEADER_PASS']
 baseurl = os.environ['API_BASE_URL']
 
 #login and set credentials
