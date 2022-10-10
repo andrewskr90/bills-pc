@@ -9,56 +9,51 @@ pool.on('connection', conn => {
 
 const executeQueries = (req, res, next) => {
     if (req.queryQueue.length === 1) {
-        pool.getConnection((err, connection) => {
+        // pool.query automatically releases connection afterward
+        pool.query(req.queryQueue[0], (err, rows, fields) => {
             if (err) {
                 return next(err)
+            } else {
+                req.results = rows
+                return next()
             }
-            connection.query(req.queryQueue[0], (err, results) => {
-                if (err) {
-                    connection.release()
-                    return next(err)
-                }
-                if (!err) {
-                    req.results = results
-                    connection.release()
-                    return next()
-                }
-            })
         })
     } else {
+        // transactions must be manually released
         pool.getConnection((err, connection) => {
             if (err) {
+                pool.releaseConnection(connection)
                 return next(err)
-            }
-            connection.beginTransaction(err => {
-                if (err) {
-                    connection.release()
-                    return next(err)
-                } else {
-                    try {
+            } else {
+                connection.beginTransaction(err => {
+                    if (err) {
+                        pool.releaseConnection(connection)
+                        return next(err)
+                    } else {
                         req.queryQueue.forEach(query => {
                             connection.query(query, (err, results) => {
                                 if (err) {
-                                    throw Error(err)
+                                    connection.rollback(() => {
+                                        pool.releaseConnection(connection)
+                                        return next(err)
+                                    })
                                 } 
                             })
                         })
                         connection.commit(err => {
                             if (err) {
-                                throw Error(err)
+                                connection.rollback(() => {
+                                    pool.releaseConnection(connection)
+                                    return next(err)
+                                })
                             } else {
-                                connection.release()
+                                pool.releaseConnection(connection)
                                 return next()
                             }
                         })
-                    } catch (err) {
-                        connection.rollback(() => {
-                            connection.release()
-                            return next(err)
-                        })
                     }
-                }
-            })
+                })
+            }
         })
     }
 }
