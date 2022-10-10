@@ -5,7 +5,6 @@ import { calcItemMarketData } from '../../utils/market'
 const MarketplaceItems = (props) => {
     const { marketData } = props
     const { selectedSetIndex } = marketData
-    console.log(marketData)
 
     return (<div className='marketplaceItems'>
         {marketData.sets[selectedSetIndex].items
