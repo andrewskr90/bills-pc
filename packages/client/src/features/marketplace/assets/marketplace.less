@@ -132,55 +132,67 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    // align-items: center;    
     overflow: auto;
     margin-bottom: 100px;
-    // height: 85%;
-
-    // padding: 5% 0 15% 0;
     .marketplaceItem {
         align-self: stretch;
-        border-radius: 15px;
-        // padding: 50px;
         margin-top: 5px;
-        width: 96%;
+        width: 85%;
         display: flex;
         align-items: center;
         height: 75px;
-        justify-content: space-evenly;
-        background-color: rgba(121, 121, 121, 0.3);
+        // border-radius: 15px;
+        // justify-content: space-between;
+        // background-color: #6065cb41;
         div.image {
-            width: 30%;
+            display: flex;
+            justify-content: center;
+            width: 20%;
+            img {
+                height: 70px;
+            }
+        }
+        div.chartAndValue {
+            width: 80%;
             height: 100%;
-        }
-        div.setAndItemName {
-            width: 100%;
+            padding: 0 15%;
+            border-radius: 15px;
+            background-color: #6065cb41;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
-        }
-        div.valueAndChange {
-            width: 40%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            .marketplaceChart {
+                width: 40%;
+                height: 80%;
+            }
+            div.valueAndChange {
+                width: 25%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                p {
+                    font-size: 20px;
+                }
+            }
         }
     }
 }
 
-
 .marketplaceItem.up {
-    background-color: rgba(42, 163, 0, 0.3);
-    .valueAndChange {
-        color: rgb(0, 108, 0)
+    div.chartAndValue {
+        background-color: rgba(42, 163, 0, 0.3);
+        .valueAndChange {
+            color: rgb(0, 180, 0)
+        }
     }
 }
 
 .marketplaceItem.down {
-    background-color: rgba(200, 76, 76, 0.3);
-    .valueAndChange {
-        color: rgb(118, 0, 0)
+    div.chartAndValue {
+        background-color: rgba(200, 76, 76, 0.3);
+        .valueAndChange {
+            color: rgb(160, 0, 0)
+        }
     }
 }
 
