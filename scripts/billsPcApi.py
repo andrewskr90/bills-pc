@@ -12,7 +12,6 @@ def loginBillsPc():
     #login and set credentials
     try:
         apiCredentials = requests.post(f'{baseurl}/api/v1/auth/login', json=loginInfo)
-        print(apiCredentials)
         if apiCredentials.status_code != 200:
             message = apiCredentials.json()['message']
             logger.debug(message)
