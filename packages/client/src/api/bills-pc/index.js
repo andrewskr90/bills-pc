@@ -106,11 +106,24 @@ const BillsPcService = {
         })
     },
     getMarketPrices(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/market-prices',
-            params: filter
-        })
+        if (Object.keys(filter)[0] === 'set_v2_id') {
+            return axios({
+                ...options,
+                url: `/api/v1/market-prices/set-id/${filter['set_v2_id']}`,
+                params: filter
+            })
+        } else if (filter[Object.keys(filter)[0]] === true) {
+            return axios({
+                ...options,
+                url: '/api/v1/market-prices/top-ten-average'
+            })
+        } else {
+            return axios({
+                ...options,
+                url: '/api/v1/market-prices',
+                params: filter
+            })
+        }
     },
     getProducts(filter) {
         return axios({

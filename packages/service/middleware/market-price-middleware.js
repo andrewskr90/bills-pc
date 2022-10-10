@@ -1,5 +1,5 @@
-const formatMarketwatchResults = (req, res, next) => {
-    if (req.query.marketwatch) {
+const formatSingleSetMarketResults = (req, res, next) => {
+    if (req.params.set_v2_id) {
         const formattedResults = req.results.map((item, i) => {
             if (item.market_price_prices) {
                 const commaSplit = item.market_price_prices.split(',')
@@ -23,11 +23,10 @@ const formatMarketwatchResults = (req, res, next) => {
                 return item
             }
         })
-        // console.log(formattedResults)
-        // console.log('hjhjhjjhj')
         req.results = formattedResults
     }
     next()
 }
 
-module.exports = { formatMarketwatchResults }
+
+module.exports = { formatSingleSetMarketResults }
