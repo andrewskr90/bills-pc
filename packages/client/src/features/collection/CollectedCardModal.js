@@ -31,7 +31,6 @@ const CollectedCardModal = (props) => {
         collected_card_quantity,
         collection
     } = selectedCollectedCards
-    console.log(selectedCollectedCards)
     const {
         card_name,
         set_name,

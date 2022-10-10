@@ -33,7 +33,6 @@ const LoginForm = (props) => {
                 setUserClaims(res.data)
                 navigate('/')
             }).catch(err => {
-                console.log(err.response)
                 setErrorMessage(err.response.data.message)
             })
     }
