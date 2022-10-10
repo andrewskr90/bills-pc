@@ -96,7 +96,6 @@ const findPriceTypes = async (sets, bottomIndex, topIndex) => {
     const consolidateSets = async () => {
         const toReturn = []
         for (let i=bottomIndex; i<=topIndex; i++) {
-            console.log(sets, sets[i])
                 const setCards = await PtcgioService.getCardsFromSet(sets[i].id)
                 toReturn.push(setCards.data.data)
         }
@@ -117,7 +116,6 @@ const findPriceTypes = async (sets, bottomIndex, topIndex) => {
 
     const priceTypes = {}
     for (let i=0; i<priceObjects.length; i++){
-        console.log(i, priceObjects)
         const priceTypeKeys = Object.keys(priceObjects[0][i])
         priceTypeKeys.forEach(type => {
             if (!priceTypes[type]) {
@@ -125,7 +123,6 @@ const findPriceTypes = async (sets, bottomIndex, topIndex) => {
             }
         })
     }
-    console.log(priceTypes)
     return priceTypes
 }
 
