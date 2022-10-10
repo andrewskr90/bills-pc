@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 
-import Home from './pages/Home'
 import Login from './pages/Login'
 import GymLeaderHome from './pages/GymLeaderHome'
 import GymLeaderRoute from './utils/auth/GymLeaderRoute'
@@ -44,21 +43,6 @@ const formatSetsForMarketData = (sets) => {
     return formattedSets
 }
 
-const formatInitialFilters = (rarities) => {
-    const excludedRarities = ['common', 'code card', 'rare', 'uncommon']
-    return rarities.filter(rarity => {
-        let include = true
-        excludedRarities.forEach(excluded => {
-            console.log(excluded, rarity)
-            if (excluded === rarity.toLowerCase()) {
-                include = false
-            }
-        })
-        return include
-    }).map(rarity => {
-        return { rarity: rarity }
-    })
-}
 
 const updateSetWithFetchedMarketData = (set, marketPrices) => {
     const itemsWithPrices = []
@@ -72,7 +56,8 @@ const updateSetWithFetchedMarketData = (set, marketPrices) => {
             product_id: item.product_id,
             release_date: item.product_release_date,
             description: item.product_description,
-            market_prices: item.market_price_prices
+            market_prices: item.market_price_prices,
+            tcgplayer_product_id: item.tcgplayer_product_id
         })
     })
     return {
@@ -120,17 +105,22 @@ const App = () => {
                         ...marketData,
                         selectedSetIndex: 0,
                         sets: formatSetsForMarketData(res.data.sets),
-                        filters: formatInitialFilters(res.data.rarities)
                     })
                 }).catch(err => {
                     console.log(err)
                 })
         }
         getReferenceData()
+        const getTopTenAverageMarketData = async () => {
+            await BillsPcService.getMarketPrices({ topTenAverage: true })
+                .then(res => console.log(res))
+                .catch(err => console.log(err))
+        }
+        getTopTenAverageMarketData()
     }, [])
     
     const getSetMarketData = async (set_id) => {
-        await BillsPcService.getMarketPrices({ set_v2_id: set_id, marketwatch: true })
+        await BillsPcService.getMarketPrices({ set_v2_id: set_id })
             .then(res => {
                 setMarketData({
                     ...marketData,
