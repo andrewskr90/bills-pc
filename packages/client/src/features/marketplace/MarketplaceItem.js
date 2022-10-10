@@ -1,12 +1,11 @@
 import React from 'react'
-import { calcItemMarketData } from '../../utils/market'
 
 const MarketplaceItem = (props) => {
     const { item, marketData, percentChange, itemValue } = props
     
     return (<div className={`marketplaceItem ${Number(item.percentChange) > 0 ? 'up' : Number(item.percentChange) ? 'down' : ''}`}>
         <div className='image'>
-            {item.market_prices !== null ? <p>{}</p> : <p>unavailable</p>}
+            <img src={`https://product-images.tcgplayer.com/fit-in/656x656/${item.tcgplayer_product_id}.jpg`}></img>
         </div>
         <div className='setAndItemName'>
             <p className='setName'>{marketData.sets[marketData.selectedSetIndex].name}</p>
