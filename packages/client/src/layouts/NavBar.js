@@ -23,7 +23,7 @@ const NavBar = () => {
 
     return (<div className='navBar'>
         <Link 
-            to='/' 
+            to='/market' 
             className={`link ${selected === 'marketplace' ? 'selected': ''}`}
         >
             Market

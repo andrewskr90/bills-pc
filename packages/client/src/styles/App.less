@@ -86,15 +86,29 @@ div {
   width: 100%;
 }
 
-html, body, #root, .app, .home  {
-  // height: 100%;
+html, body, #root, .app .appLoading  {
+  height: 100%;
 }
 
 body {
   background-color: white;
   // background-color: rgb(78, 78, 78);
+  // height: 100%;
   font-family: 'Titillium Web', sans-serif;
   margin: 0;
+}
+
+.appLoading {
+  height: 100%;
+  border: solid black 1px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  h1 {
+    font-size: 70px;
+    color: #6065CB;
+  }
 }
 
 header {
@@ -585,6 +599,7 @@ button:hover {
       .link {
         font-size: 30px;
         width: 200px;
+        margin-bottom: 1%;
       }
     }
 
