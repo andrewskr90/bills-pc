@@ -3,7 +3,7 @@ import RangeSelector from './RangeSelector'
 
 const RangeSelectors = (props) => {
     const { marketData, setMarketData } = props
-    const rangeValues = ['1W', '2W', '1M']
+    const rangeValues = ['week', 'twoWeek', 'month']
 
     return(<div className='rangeSelectors'>
         {rangeValues.map(value => {
