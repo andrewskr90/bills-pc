@@ -34,16 +34,7 @@ const MarketplaceItems = (props) => {
                 .map((item, idx) => {
                     const itemMarketData = calcItemMarketData(item.market_prices)
                     const itemValue = Number(itemMarketData.prices.latest).toFixed(2) 
-                    let percentChange
-                    if (marketData.dateRange === '1D') {
-                        percentChange = Number(itemMarketData.changes.daily).toFixed(2)
-                    } else if (marketData.dateRange === '1W') {
-                        percentChange = Number(itemMarketData.changes.weekly).toFixed(2)
-                    } else if (marketData.dateRange === '2W') {                    
-                        percentChange = Number(itemMarketData.changes.biweekly).toFixed(2)
-                    } else if (marketData.dateRange === '1M') {
-                        percentChange = Number(itemMarketData.changes.monthly).toFixed(2)
-                    }
+                    let percentChange = Number(itemMarketData.changes[marketData.dateRange]).toFixed(2)
                     return {
                         ...item,
                         formattedPrices: itemMarketData,
