@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 
 import Login from './pages/Login'
 import GymLeaderHome from './pages/GymLeaderHome'
@@ -22,7 +22,7 @@ const initialReferenceDataValues = {
 const initialMarketData = {
     // initially set to -1 so change registers, triggering useEffect
     selectedSetIndex: -1,
-    dateRange: '1W',
+    dateRange: 'week',
     sets: [],
     filters: []
 }
@@ -34,9 +34,69 @@ let initialData = false
 
 const formatSetsForMarketData = (sets) => {
     const formattedSets = sets.map(set => {
+        let todayAverage
+        let weekAverage
+        let twoWeekAverage
+        let monthAverage
+        let weekChange
+        let twoWeekChange
+        let monthChange
+
+        if (set.top_ten_average_today === null) {
+            todayAverage = 'Unavailable'
+            weekChange = 'Unavailable'
+            twoWeekChange = 'Unavailable'
+            monthChange = 'Unavailable'
+
+
+            // START Here
+                        // START Here
+
+                                    // START Here
+
+                                                // START Here
+
+
+            
+        } else {
+            todayAverage = Number(set.top_ten_average_today).toFixed(2)
+            if (set.top_ten_average_week === null) {
+                weekAverage = 'Unavailable'
+                weekChange = 'Unavailable'
+            } else {
+                weekAverage = Number(set.top_ten_average_week)
+                weekChange = ((todayAverage - weekAverage) / weekAverage * 100).toFixed(2)
+            }
+            if (set.top_ten_average_two_week === null) {
+                twoWeekAverage = 'Unavailable'
+                twoWeekChange = 'Unavailable'
+            } else {
+                twoWeekAverage = Number(set.top_ten_average_two_week)
+                twoWeekChange = ((todayAverage - twoWeekAverage) / twoWeekAverage * 100).toFixed(2)
+            }
+            if (set.top_ten_average_month === null) {
+                monthAverage = 'Unavailable'
+                monthChange = 'Unavailable'
+            } else {
+                monthAverage = Number(set.top_ten_average_month)
+                monthChange = ((todayAverage - monthAverage) / monthAverage * 100).toFixed(2)
+            }                
+        }
+
         return {
             id: set.set_v2_id,
             name: set.set_v2_name,
+            topTenAverage: {
+                today: todayAverage,
+                week: weekAverage,
+                twoWeek: twoWeekAverage,
+                month: monthAverage
+            },
+            topTenPercentChange: {
+                week: weekChange,
+                twoWeek: twoWeekChange,
+                month: monthChange
+            },
             items: [],
         }
     })
@@ -76,16 +136,28 @@ const App = () => {
     const [marketData, setMarketData] = useState(initialMarketData)
 
     useEffect(() => {
-        const checkAuth = async () => {
+        (async () => {
+            let fetchedUserClaims
             await BillsPcService.authenticateSession()
-                .then(res =>  {
-                    initialData = true
-                    setUserClaims(res.data)
-                }).catch(err => {
-                    initialData = true
-                })
-        }
-        checkAuth()
+                .then(res => fetchedUserClaims)
+                .catch(err => console.log(err))
+            let fetchedReferenceData
+            await BillsPcService.getReferenceData()
+                .then(res => fetchedReferenceData = res.data)
+                .catch(err => console.log(err))
+            let fetchedTopTenMarket
+            await BillsPcService.getMarketPrices({ topTenAverage: true })
+                .then(res => fetchedTopTenMarket = res.data)
+                .catch(err => console.log(err))
+
+            setUserClaims(fetchedUserClaims)
+            setReferenceData(fetchedReferenceData)
+            setMarketData({
+                ...marketData,
+                sets: formatSetsForMarketData(fetchedTopTenMarket)
+            })
+            initialData = true
+        })()
         // BillsPcService.getCollectedCards()
         //     .then(res => {
         //         setCollectedCards(res.data)
@@ -97,28 +169,9 @@ const App = () => {
         //             sets: res.data
         //         })
         //     })
-        const getReferenceData = async () => {
-            await BillsPcService.getReferenceData()
-                .then(res => {
-                    setReferenceData(res.data)
-                    setMarketData({
-                        ...marketData,
-                        selectedSetIndex: 0,
-                        sets: formatSetsForMarketData(res.data.sets),
-                    })
-                }).catch(err => {
-                    console.log(err)
-                })
-        }
-        getReferenceData()
-        const getTopTenAverageMarketData = async () => {
-            await BillsPcService.getMarketPrices({ topTenAverage: true })
-                .then(res => console.log(res))
-                .catch(err => console.log(err))
-        }
-        getTopTenAverageMarketData()
+        // 
     }, [])
-    
+
     const getSetMarketData = async (set_id) => {
         await BillsPcService.getMarketPrices({ set_v2_id: set_id })
             .then(res => {
@@ -144,19 +197,27 @@ const App = () => {
     }, [marketData.selectedSetIndex])
 
     return (<>
+        {marketData.sets.length > 0
+        ?
         <div className='app'>
             <header>
                 <h1>Bill's PC</h1>
                 <p>Pokemon Card Portfolio App</p>
             </header>
             <Routes>
-                <Route path='/' element={<Marketplace marketData={marketData} setMarketData={setMarketData} referenceData={referenceData} />} />
+                <Route path='/market/*' element={<Marketplace marketData={marketData} setMarketData={setMarketData} referenceData={referenceData} />} />
                 {/* <Route path='/collection' element={<Collection userClaims={userClaims} collectedCards={collectedCards} setCollectedCards={setCollectedCards} />} /> */}
                 <Route path='/collection' element={<InDevelopment />} />
                 <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
             </Routes>
             <NavBar />
         </div>
+        :
+        <div className='appLoading'>
+            <h1>Bill's PC</h1>
+            <p>loading set data...</p>
+        </div>    
+        }
     </>)
 }
 
