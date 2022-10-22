@@ -6,8 +6,7 @@ const MarketplaceChart = (props) => {
     const { item, marketData } = props
     const itemId = item.card_id || item.product_id
     let rangeKey = marketData.dateRange
-    
-    const itemPercentChange = Number(item.percentChange)
+    const itemPercentChange = item.percentChange
 
     return (<div className='marketplaceChart'>
         <Line 
