@@ -5,17 +5,8 @@ import { Line } from 'react-chartjs-2'
 const MarketplaceChart = (props) => {
     const { item, marketData } = props
     const itemId = item.card_id || item.product_id
-    let rangeKey
-    if (marketData.dateRange === '1W') {
-        rangeKey = 'week'
-    } else if (marketData.dateRange === '2W') {
-        rangeKey = 'twoWeek'
-    } else if (marketData.dateRange === '1M') {
-        rangeKey = 'month'
-    }
-    
-    const itemPercentChange = Number(item.percentChange)
-
+    let rangeKey = marketData.dateRange
+    const itemPercentChange = item.percentChange
 
     return (<div className='marketplaceChart'>
         <Line 

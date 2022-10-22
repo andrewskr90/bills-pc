@@ -33,4 +33,15 @@ setV2Router.post('/',
         res.status(201).json(results)
 })
 
+setV2Router.put('/:set_v2_id',
+    verifyCookie,
+    decodeSessionToken,
+    gymLeaderOnly,
+    QueueQueries.init,
+    QueueQueries.setsV2.update,
+    executeQueries,
+    (req, res, next) => {
+        res.status(200).json(req.results)
+})
+
 module.exports = setV2Router

@@ -63,10 +63,10 @@ export const calcItemMarketData = (prices) => {
             month: monthPrices
         },
         changes: {
-            daily: dailyChange,
-            weekly: weeklyChange,
-            biweekly: biweeklyChange,
-            monthly: monthlyChange
+            day: dailyChange,
+            week: weeklyChange,
+            twoWeek: biweeklyChange,
+            month: monthlyChange
         }
     }
 }

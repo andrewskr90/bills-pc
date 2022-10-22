@@ -87,6 +87,28 @@ const QueryFormatters = {
             }
         })
         return filterStringified
+    },
+
+    formatSetStatement(object) {
+        let stringForSetStatement = ''
+        const keys = Object.keys(object)
+        keys.forEach((key, index) => {
+            let value
+            if (object[key] === null) value = null
+            else if (typeof object[key] ==='string') {
+                //remove accents
+                let accentsRemoved = object[key].normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                //escape apostrophes
+                let escapedApostrophe = accentsRemoved.replace(/'/g, "''")
+                value = `'${escapedApostrophe}'`
+            }
+            if (index === keys.length -1) {
+                stringForSetStatement += `${key}=${value}`
+            } else {
+                stringForSetStatement += `${key}=${value} , `
+            }
+        })
+        return stringForSetStatement
     }
 }
 

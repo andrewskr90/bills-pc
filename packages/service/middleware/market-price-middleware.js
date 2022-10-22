@@ -28,5 +28,51 @@ const formatSingleSetMarketResults = (req, res, next) => {
     next()
 }
 
+const formatTopTenAverageResults = (req, res, next) => {
+    req.results = req.results.map(set => {
+        let todayAverage = null
+        let weekAverage = null
+        let weekChange = null
+        let twoWeekAverage = null
+        let twoWeekChange = null
+        let monthAverage = null
+        let monthChange = null
+        if (set.top_ten_average_today !== null) {
+            // averages from sql query returning string for some reason
+            todayAverage = Number(set.top_ten_average_today)
+            if (set.top_ten_average_week !== null) {
+                weekAverage = Number(set.top_ten_average_week)
+                weekChange = (todayAverage - weekAverage) / weekAverage * 100
+            }
+            if (set.top_ten_average_two_week !== null) {
+                twoWeekAverage = Number(set.top_ten_average_two_week)
+                twoWeekChange = (todayAverage - twoWeekAverage) / twoWeekAverage * 100
+            }
+            if (set.top_ten_average_month !== null) {
+                monthAverage = Number(set.top_ten_average_month)
+                monthChange = (todayAverage - monthAverage) / monthAverage * 100
+            }                
+        }
+        return {
+            id: set.set_v2_id,
+            name: set.set_v2_name,
+            ptcgio_id: set.set_v2_ptcgio_id,
+            topTenAverage: {
+                today: todayAverage,
+                week: weekAverage,
+                twoWeek: twoWeekAverage,
+                month: monthAverage
+            },
+            topTenPercentChange: {
+                week: weekChange,
+                twoWeek: twoWeekChange,
+                month: monthChange
+            },
+            items: [],
+        }
+    })
+    next()
+}
 
-module.exports = { formatSingleSetMarketResults }
+
+module.exports = { formatSingleSetMarketResults, formatTopTenAverageResults }
