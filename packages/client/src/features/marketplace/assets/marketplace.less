@@ -137,13 +137,13 @@
     }
 }
 
-.marketplaceItems {
+.expansionItems {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     overflow: auto;
     margin-bottom: 100px;
-    .marketplaceItem {
+    .expansionItem {
         align-self: stretch;
         margin-top: 5px;
         width: 85%;
@@ -187,7 +187,7 @@
     }
 }
 
-.marketplaceItem.up {
+.expansionItem.up {
     div.chartAndValue {
         background-color: rgba(42, 163, 0, 0.3);
         .valueAndChange {
@@ -196,7 +196,7 @@
     }
 }
 
-.marketplaceItem.down {
+.expansionItem.down {
     div.chartAndValue {
         background-color: rgba(200, 76, 76, 0.3);
         .valueAndChange {
@@ -204,7 +204,8 @@
         }
     }
 }
-.expansionMarketplace {
+
+.expansionsMarketplace {
     padding: 0 10px;
 
     .title {
@@ -217,11 +218,11 @@
             line-height: 24px;
         }
     }
-    .marketplaceSets {
+    .expansions {
         display: flex;
         flex-direction: column;
         align-items: center;
-        .marketplaceSet {
+        .expansion {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -259,14 +260,14 @@
                 }
             }
         }
-        .marketplaceSet.up {
+        .expansion.up {
             background-color: rgba(42, 163, 0, 0.3);
             .valueAndChange {
                 color: rgb(0, 180, 0);
             }
         }
 
-        .marketplaceSet.down {
+        .expansion.down {
             background-color: rgba(200, 76, 76, 0.3);
             .valueAndChange {
                 color: rgb(160, 0, 0);

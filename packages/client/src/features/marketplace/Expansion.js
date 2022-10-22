@@ -2,7 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import MinimalPokeball from '../../assets/images/minimal-pokeball.png'
 
-const MarketplaceSet = (props) => {
+const Expansion = (props) => {
     const { marketDataSet, marketData } = props
     const navigate = useNavigate()
 
@@ -27,7 +27,7 @@ const MarketplaceSet = (props) => {
     // else formattedPercentChange = 'Unavailable'
 
     return (<div 
-            className={`marketplaceSet ${marketDataSet.topTenPercentChange[marketData.dateRange] > 0 ? 'up' : marketDataSet.topTenPercentChange[marketData.dateRange] < 0 ? 'down' : ''}`}
+            className={`expansion ${marketDataSet.topTenPercentChange[marketData.dateRange] > 0 ? 'up' : marketDataSet.topTenPercentChange[marketData.dateRange] < 0 ? 'down' : ''}`}
             onClick={() => navigate(marketDataSet.id)}
         >
         <div className='setSymbol'>
@@ -42,4 +42,4 @@ const MarketplaceSet = (props) => {
     </div>)
 }
 
-export default MarketplaceSet
+export default Expansion

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import MarketplaceSets from './MarketplaceSets'
-import MarketplaceSetItems from './MarketplaceSetItems'
+import ExpansionsMarketplace from './ExpansionsMarketplace'
+import ExpansionItemsMarketplace from './ExpansionItemsMarketplace'
 import './assets/marketplace.less'
 
 const Marketplace = (props) => {
@@ -36,14 +36,14 @@ const Marketplace = (props) => {
         <Routes>
             <Route 
                 path='/'
-                element={<MarketplaceSets 
+                element={<ExpansionsMarketplace
                     marketData={marketData}
                     setMarketData={setMarketData}
                 />}
             />
             <Route 
                 path='/:setId' 
-                element={<MarketplaceSetItems 
+                element={<ExpansionItemsMarketplace 
                     marketData={marketData} 
                     setMarketData={setMarketData} 
                     referenceData={referenceData} 

@@ -1,9 +1,9 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import MarketplaceItem from './MarketplaceItem'
+import MarketplaceItem from './ExpansionItem'
 import { calcItemMarketData } from '../../utils/market'
 
-const MarketplaceItems = (props) => {
+const ExpansionItems = (props) => {
     const { marketData } = props
 
     const selectedSetId = useParams()['setId']
@@ -44,7 +44,7 @@ const MarketplaceItems = (props) => {
     }
     
 
-    return (<div className='marketplaceItems'>
+    return (<div className='expansionItems'>
         {marketData.sets.filter(set => set.id === selectedSetId)[0].items
             .filter(item => {
                 let includeItem = false
@@ -86,4 +86,4 @@ const MarketplaceItems = (props) => {
     </div>)
 }
 
-export default MarketplaceItems
+export default ExpansionItems

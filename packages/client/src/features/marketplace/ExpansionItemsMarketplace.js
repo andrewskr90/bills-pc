@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import MarketplaceItems from './MarketplaceItems'
+import MarketplaceItems from './ExpansionItems'
 import RangeSelectors from './RangeSelectors'
 import SetFilters from './SetFilters'
 import SetFilter from './SetFilter'
@@ -26,7 +26,7 @@ const formatSetMarketData = (marketPrices) => {
     return formattedSetMarketData
 }
 
-const MarketplaceSetItems = (props) => {
+const ExpansionItemsMarketplace = (props) => {
     const {
         marketData,
         setMarketData,
@@ -73,7 +73,7 @@ const MarketplaceSetItems = (props) => {
         }
     }, [])
 
-    return (<div className='marketplaceSetItems'>
+    return (<div className='expansionItemsMarketplace'>
         <div className='selectorAndFilter'>
             <SetFilters 
                 marketData={marketData} 
@@ -104,4 +104,4 @@ const MarketplaceSetItems = (props) => {
     </div>)
 }
 
-export default MarketplaceSetItems
+export default ExpansionItemsMarketplace
