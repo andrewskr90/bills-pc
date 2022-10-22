@@ -19,7 +19,16 @@ const select = (req, res, next) => {
     next()
 }
 
+const update = (req, res, next) => {
+    const set_v2_id = req.params.set_v2_id
+    const updatedSet = req.body
+    const setStatement = QueryFormatters.formatSetStatement(updatedSet)
+    const query = `UPDATE sets_v2 SET ${setStatement} WHERE set_v2_id='${set_v2_id}'`
+    req.queryQueue.push(query)
+    next()
+}
 module.exports = {
     insert,
-    select
+    select,
+    update
 }

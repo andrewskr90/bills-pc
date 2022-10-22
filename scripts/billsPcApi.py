@@ -114,3 +114,16 @@ def addProductsBillsPc(productsToAdd, credentials, set_):
     except requests.exceptions.RequestException as e:
         logger(e)
         raise SystemExit(e)
+
+def updateSetBillsPc(updatedSet, credentials):
+    set_v2_id = updatedSet['set_v2_id']
+    print(set_v2_id)
+    try:
+        results = requests.put(f'{baseurl}/api/v1/sets-v2/{set_v2_id}', json=updatedSet, cookies=credentials)
+        print(results)
+        if results.status_code != 200:
+            message = results.json()['message']
+            print(message)
+    except requests.exceptions.RequestException as e:
+        logger(e)
+        raise SystemExit(e)

@@ -8,6 +8,7 @@ pool.on('connection', conn => {
 })
 
 const executeQueries = (req, res, next) => {
+    if (req.queryQueue.length === 0) next({ message: 'No queries added to Query Queue'})
     if (req.queryQueue.length === 1) {
         // pool.query automatically releases connection afterward
         pool.query(req.queryQueue[0], (err, rows, fields) => {
