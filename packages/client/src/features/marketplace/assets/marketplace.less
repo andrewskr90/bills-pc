@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-top: 90px;
+    margin-top: 80px;
     .selectorAndFilter {
         padding-left: 10px;
         display: flex;
@@ -57,7 +57,7 @@
             border-radius: 25px;
             background-color: white;
             font-size: 12px;
-            font-weight: 900;
+            font-weight: 600;
             color: #6065CB;
             display: flex;
             align-items: center;
@@ -108,10 +108,19 @@
     }
 }
 
+.rangeAndSort {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
+    margin-top: 20px;
+}
+
 .rangeSelectors {
     display: flex;
-    height: 40px;
-    justify-content: center;
+    height: 25px;
+    width: 200px;
+    justify-content: space-around;
     align-items: center;
     button.rangeSelector {
         height: 26px;
@@ -123,7 +132,7 @@
     }
     button.rangeSelector.selected {
         color: #6065CB;
-        font-weight: 800;
+        font-weight: 600;
         box-shadow: none;
     }
 }
@@ -195,16 +204,77 @@
         }
     }
 }
+.expansionMarketplace {
+    padding: 0 10px;
 
-.marketDataSet {
-    display: flex;
-    height: 100px;
-    background-color: #6065cb41;
-    .valueAndChange {
+    .title {
+        h3 {
+            font-weight: 500;
+        }
+        p {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+    }
+    .marketplaceSets {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        .marketplaceSet {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            // width: 98%;
+            height: 60px;
+            background-color: #6065cb41;
+            border-radius: 10px;
+            padding: 2vw;
+            margin-top: 5px;
+            .setSymbol {
+                width: 12%;
+                display: flex;
+                justify-content: center;
+                img {
+                    max-width: 40px;
+                    max-height: 40px;
+                }
+            }
+            .setName {
+                width: 60%;
+                font-weight: 500;
+                text-align: center;
+            }
+            .valueAndChange {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 20%;
+                p.marketValue {
+                    font-size: 18px;
+                    font-weight: 400;
+                }
+                .percentChange {
+
+                }
+            }
+        }
+        .marketplaceSet.up {
+            background-color: rgba(42, 163, 0, 0.3);
+            .valueAndChange {
+                color: rgb(0, 180, 0);
+            }
+        }
+
+        .marketplaceSet.down {
+            background-color: rgba(200, 76, 76, 0.3);
+            .valueAndChange {
+                color: rgb(160, 0, 0);
+            }
+        }
     }
 }
+
 
 // _________________________________________________
 // _________________________________________________
