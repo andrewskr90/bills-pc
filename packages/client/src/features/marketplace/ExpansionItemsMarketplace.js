@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import MarketplaceItems from './ExpansionItems'
+import ExpansionItems from './ExpansionItems'
 import RangeSelectors from './RangeSelectors'
 import SetFilters from './SetFilters'
 import SetFilter from './SetFilter'
@@ -93,7 +93,7 @@ const ExpansionItemsMarketplace = (props) => {
             />
             <Sort dataObject={marketData.sets.filter(set => set.id === selectedSetId)[0]} setDataObject={updateSetSort} />
         </div>
-        <MarketplaceItems marketData={marketData} />
+        <ExpansionItems marketData={marketData} />
         <FilterModal 
             marketData={marketData} 
             setMarketData={setMarketData} 

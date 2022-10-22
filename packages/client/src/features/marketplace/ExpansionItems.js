@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import MarketplaceItem from './ExpansionItem'
+import ExpansionItem from './ExpansionItem'
 import { calcItemMarketData } from '../../utils/market'
 
 const ExpansionItems = (props) => {
@@ -81,7 +81,7 @@ const ExpansionItems = (props) => {
                 }
             })
             .sort(sortMarketSetItemsCB)
-            .map(item => <MarketplaceItem marketData={marketData} item={item} />
+            .map(item => <ExpansionItem marketData={marketData} item={item} />
             )}
     </div>)
 }
