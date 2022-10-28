@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ExpansionItem from './ExpansionItem'
 import { calcItemMarketData } from '../../utils/market'
 
 const ExpansionItems = (props) => {
     const { marketData } = props
+    const [expansionItems, setExpansionItems] = useState([])
 
     const selectedSetId = useParams()['setId']
 
@@ -41,26 +42,37 @@ const ExpansionItems = (props) => {
             }
 
         }
-    }
-    
+    }    
 
-    return (<div className='expansionItems'>
-        {marketData.sets.filter(set => set.id === selectedSetId)[0].items
-            .filter(item => {
+    const matchSetToId = (marketDataSets, targetSetId) => {
+        const matchedSet = marketDataSets.filter(set => set.id == targetSetId)[0]
+        return matchedSet
+    }
+
+    const filterExpansionItems = (expansionItems) => {
+            return expansionItems.filter(item => {
                 let includeItem = false
                 if (item.market_prices !== null) {
                     // includeItem = true
                     if (marketData.filters.length > 0) {
                         marketData.filters.forEach(filter => {
-                            // check if item is a card
-                            if (item.card_id) {
-                                if (Object.keys(filter)[0] === 'rarity') {
-                                    if (item.rarity === filter['rarity']) {
+                            // check item type filters
+                            if (Object.keys(filter)[0] === 'itemType') {
+                                if (filter.itemType === 'Card') {
+                                    if (item.card_id) {
+                                        includeItem = true
+                                    }
+                                } else {
+                                    if (item.product_id) {
                                         includeItem = true
                                     }
                                 }
-                            } else {
-                                // place product filters here
+                            }
+                            //check rarity filters
+                            if (Object.keys(filter)[0] === 'rarity') {
+                                if (item.rarity === filter['rarity']) {
+                                    includeItem = true
+                                }
                             }
                         })
                     } else {
@@ -69,20 +81,32 @@ const ExpansionItems = (props) => {
                 }
                 return includeItem
             })
-            .map((item, idx) => {
-                const itemMarketData = calcItemMarketData(item.market_prices)
-                const itemValue = itemMarketData.prices.latest
-                const percentChange = itemMarketData.changes[marketData.dateRange]
-                return {
-                    ...item,
-                    formattedPrices: itemMarketData,
-                    marketValue: itemValue,
-                    percentChange: percentChange
-                }
-            })
-            .sort(sortMarketSetItemsCB)
-            .map(item => <ExpansionItem marketData={marketData} item={item} />
-            )}
+    }
+
+    const applyMarketData = (itemsArray) => {
+        return itemsArray.map((item, idx) => {
+            const itemMarketData = calcItemMarketData(item.market_prices)
+            const itemValue = itemMarketData.prices.latest
+            const percentChange = itemMarketData.changes[marketData.dateRange]
+            return {
+                ...item,
+                formattedPrices: itemMarketData,
+                marketValue: itemValue,
+                percentChange: percentChange
+            }
+        })
+    }
+
+    useEffect(() => {
+        const targetSet = matchSetToId(marketData.sets, selectedSetId)
+        const filteredItems = filterExpansionItems(targetSet.items)
+        const marketPricesAdded = applyMarketData(filteredItems) 
+        const sortedItems = marketPricesAdded.sort(sortMarketSetItemsCB)
+        setExpansionItems(sortedItems)
+    }, [marketData])
+
+    return (<div className='expansionItems'>
+        {expansionItems.map(item => <ExpansionItem marketData={marketData} item={item} />)}
     </div>)
 }
 

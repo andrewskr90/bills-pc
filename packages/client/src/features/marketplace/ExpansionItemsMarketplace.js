@@ -2,8 +2,6 @@ import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import ExpansionItems from './ExpansionItems'
 import RangeSelectors from './RangeSelectors'
-import SetFilters from './SetFilters'
-import SetFilter from './SetFilter'
 import FilterModal from './FilterModal'
 import BillsPcService from '../../api/bills-pc'
 import Sort from '../../components/Sort'
@@ -72,26 +70,26 @@ const ExpansionItemsMarketplace = (props) => {
                 })
         }
     }, [])
-
+    
     return (<div className='expansionItemsMarketplace'>
-        <div className='selectorAndFilter'>
-            <SetFilters 
-                marketData={marketData} 
-                setMarketData={setMarketData} 
-                openFilterModal={openFilterModal}
-            />
+        <div className='title'>
+            <h3>{marketData.sets.filter(set => set.id === selectedSetId)[0].name}</h3>
+            <p>Market Values</p>
         </div>
-        <div className='filterBubbles'>
-            {marketData.filters.map((filter, idx) => {
-                return <SetFilter key={idx} filter={filter} removeFilter={removeFilter} />
-            })}
-        </div>
-        <div className='rangeAndSort'>
+        <div className='toolbar'>
+            <button className='addFilter' onClick={openFilterModal}>
+                <p>Filter</p>
+                {marketData.filters.length > 0
+                ?
+                <div className='filterCount'>{marketData.filters.length}</div>
+                :
+                <></>}
+            </button>
+            <Sort dataObject={marketData.sets.filter(set => set.id === selectedSetId)[0]} setDataObject={updateSetSort} />
             <RangeSelectors 
                 marketData={marketData} 
                 setMarketData={setMarketData} 
             />
-            <Sort dataObject={marketData.sets.filter(set => set.id === selectedSetId)[0]} setDataObject={updateSetSort} />
         </div>
         <ExpansionItems marketData={marketData} />
         <FilterModal 

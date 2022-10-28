@@ -3,6 +3,10 @@ import MarketplaceChart from './MarketplaceChart'
 
 const ExpansionItem = (props) => {
     const { item, marketData } = props
+    let displayedMarketvalue = item.marketValue[0]
+    if (displayedMarketvalue > 100) {
+        displayedMarketvalue = Math.round(displayedMarketvalue)
+    }
     
     return (<div className={`expansionItem ${item.percentChange > 0 ? 'up' : item.percentChange ? 'down' : ''}`}>
         <div className='image'>
@@ -11,7 +15,7 @@ const ExpansionItem = (props) => {
         <div className='chartAndValue'>
             <MarketplaceChart item={item} marketData={marketData} />
             <div className='valueAndChange'>
-                <p className='marketValue'>${item.marketValue}</p>
+                <p className='marketValue'>${displayedMarketvalue}</p>
                 <p className='percentChange'>{item.percentChange > 0 ? '+' : ''}{item.percentChange.toFixed(2)}%</p>
             </div>
         </div>
