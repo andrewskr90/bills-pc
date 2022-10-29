@@ -3,21 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { removeLeadingZeroes } from '../../utils/validation'
 import PurchaseItems from './PurchaseItems'
 import PurchaseDetails from './PurchaseDetails'
-
-const initialPurchaseValues = {
-    date: '',
-    vendor: '',
-    cards: [],
-    products: [],
-    itemCount: 0,
-    subtotal: 0,
-    discount: 0,
-    shipping: 0,
-    taxRate: 0,
-    taxAmount: 0,
-    total: 0,
-    saleNote: ''
-}
+import { initialPurchaseValues } from '../../data/initialData'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
