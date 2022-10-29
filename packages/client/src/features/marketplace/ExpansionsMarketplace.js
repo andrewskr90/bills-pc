@@ -1,9 +1,9 @@
 import React from 'react'
 import Sort from '../../components/Sort'
-import MarketplaceSet from './MarketplaceSet'
+import Expansion from './Expansion'
 import RangeSelectors from './RangeSelectors'
 
-const MarketplaceSets = (props) => {
+const ExpansionsMarketplace = (props) => {
     const { marketData, setMarketData } = props
 
     const sortMarketSetsCB = (a, b) => {
@@ -39,7 +39,7 @@ const MarketplaceSets = (props) => {
         }
     }
     
-    return (<div className='expansionMarketplace'>
+    return (<div className='expansionsMarketplace'>
         <div className='title'>
             <h3>Pokemon Expansions</h3>
             <p>Top 10 Card Averages</p>
@@ -48,10 +48,10 @@ const MarketplaceSets = (props) => {
             <RangeSelectors marketData={marketData} setMarketData={setMarketData} />
             <Sort dataObject={marketData} setDataObject={setMarketData} />
         </div>
-        <div className='marketplaceSets'>
-            {marketData.sets.sort(sortMarketSetsCB).map(marketDataSet => <MarketplaceSet marketData={marketData} marketDataSet={marketDataSet} />)}
+        <div className='expansions'>
+            {marketData.sets.sort(sortMarketSetsCB).map(marketDataSet => <Expansion marketData={marketData} marketDataSet={marketDataSet} />)}
         </div>
     </div>)
 }
 
-export default MarketplaceSets
+export default ExpansionsMarketplace

@@ -4,11 +4,6 @@
     align-items: center;
     width: 100%;
     margin-top: 80px;
-    .selectorAndFilter {
-        padding-left: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
 }
 
 .setSelector {
@@ -73,32 +68,16 @@
     }
 }
 
-.setFilters {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 20px;
-    .addFilter {
-        background-color: #6065cb;
-        height: 30px;
-        width: 100px;
-        margin: auto;
-        font-size: 16px;
-    }
-    
-}
-
 .filterModal {
     display: flex;
     flex-direction: column;
     align-items: center;
-    .raritySection {
+    .filterSection {
         p {
             padding: 4px;
         }
         .filterBubbles {
-            padding-top: 4px;
-            border-top: solid black 1px;
+            padding: 4px 0;
             border-bottom: solid black 1px;
             flex-wrap: wrap;
             .filterBubble {
@@ -106,20 +85,45 @@
             }
         }
     }
+    .clearAndClose {
+        margin-top: auto;
+        width: 100%;;
+        display: flex;
+        justify-content: space-evenly;
+    }
 }
 
-.rangeAndSort {
+.toolbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
-    height: 20px;
+    height: 30px;
     margin-top: 20px;
+    .addFilter {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        background-color: #6065cb;
+        font-size: 16px;
+        height: 100%;
+        width: 80px;
+        .filterCount {
+            display: flex;
+            justify-content: center;
+            width: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6065cb;
+            background-color: white;
+            border-radius: 25px;
+        }
+    }
 }
 
 .rangeSelectors {
     display: flex;
     height: 25px;
-    width: 200px;
+    width: 120px;
     justify-content: space-around;
     align-items: center;
     button.rangeSelector {
@@ -137,77 +141,10 @@
     }
 }
 
-.marketplaceItems {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    overflow: auto;
-    margin-bottom: 100px;
-    .marketplaceItem {
-        align-self: stretch;
-        margin-top: 5px;
-        width: 85%;
-        display: flex;
-        align-items: center;
-        height: 75px;
-        // border-radius: 15px;
-        // justify-content: space-between;
-        // background-color: #6065cb41;
-        div.image {
-            display: flex;
-            justify-content: center;
-            width: 20%;
-            img {
-                height: 70px;
-            }
-        }
-        div.chartAndValue {
-            width: 80%;
-            height: 100%;
-            padding: 0 15%;
-            border-radius: 15px;
-            background-color: #6065cb41;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            .marketplaceChart {
-                width: 40%;
-                height: 80%;
-            }
-            div.valueAndChange {
-                width: 25%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                p {
-                    font-size: 20px;
-                }
-            }
-        }
-    }
-}
-
-.marketplaceItem.up {
-    div.chartAndValue {
-        background-color: rgba(42, 163, 0, 0.3);
-        .valueAndChange {
-            color: rgb(0, 180, 0)
-        }
-    }
-}
-
-.marketplaceItem.down {
-    div.chartAndValue {
-        background-color: rgba(200, 76, 76, 0.3);
-        .valueAndChange {
-            color: rgb(160, 0, 0)
-        }
-    }
-}
-.expansionMarketplace {
-    padding: 0 10px;
-
+.expansionsMarketplace, .expansionItemsMarketplace {
+    margin: 0 2vw;
     .title {
+        padding-left: 2vw;
         h3 {
             font-weight: 500;
         }
@@ -217,20 +154,101 @@
             line-height: 24px;
         }
     }
-    .marketplaceSets {
+}
+
+.expansionItemsMarketplace {
+    .expansionItems {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        overflow: auto;
+        margin-top: 6px;
+        margin-bottom: 100px;
+        .expansionItem {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            height: 150px;
+            border-radius: 15px;
+            border-top: 2px solid #9e9e9e41;
+            border-left: 2px solid #9e9e9e41;
+            box-shadow: 1px 1px #9e9e9e41,
+                2px 2px #9e9e9e41,
+                3px 3px #9e9e9e41,
+                4px 4px #9e9e9e41,
+                5px 5px #9e9e9e41;
+            // background-color: #6065cb41;
+            width: 44%;
+            div.image {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 60%;
+                height: 100%;
+                img {
+                    max-height: 95%;
+                    max-width: 90%;
+                    border-radius: 5px;
+                }
+            }
+            div.chartAndValue {
+                margin-top: 5px;
+                width: 40%;
+                height: 90%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+                .marketplaceChart {
+                    height: 35%;
+                    width: 90%;
+                }
+                div.valueAndChange {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-evenly;
+                    height: 40%;
+                    width: 90%;
+                    .marketValue {
+                        font-size: 20px;
+                    }
+                    .percentChange {
+                        font-size: 14px;
+                    }
+                }
+            }
+            
+        }
+        .expansionItem.up {
+            .valueAndChange {
+                color: rgb(0, 180, 0)
+            }
+        }
+
+        .expansionItem.down {            
+            .valueAndChange {
+                color: rgb(160, 0, 0)
+            }
+        }
+    }
+}
+
+.expansionsMarketplace {
+    .expansions {
         display: flex;
         flex-direction: column;
         align-items: center;
-        .marketplaceSet {
+        margin-bottom: 100px;
+        .expansion {
+            width: 96%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            // width: 98%;
             height: 60px;
             background-color: #6065cb41;
             border-radius: 10px;
             padding: 2vw;
-            margin-top: 5px;
+            margin-top: 10px;
             .setSymbol {
                 width: 12%;
                 display: flex;
@@ -259,14 +277,14 @@
                 }
             }
         }
-        .marketplaceSet.up {
+        .expansion.up {
             background-color: rgba(42, 163, 0, 0.3);
             .valueAndChange {
                 color: rgb(0, 180, 0);
             }
         }
 
-        .marketplaceSet.down {
+        .expansion.down {
             background-color: rgba(200, 76, 76, 0.3);
             .valueAndChange {
                 color: rgb(160, 0, 0);

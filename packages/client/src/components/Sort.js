@@ -3,7 +3,7 @@ import './assets/sort.less'
 
 const Sort = (props) => {
     const { dataObject, setDataObject } = props
-    
+
     const handleChangeValue = (e) => {
         setDataObject({
             ...dataObject,
@@ -36,15 +36,15 @@ const Sort = (props) => {
     }
 
     return (<div className='sort'>
+        <button className='direction' value={dataObject.sort.direction} onClick={toggleDirection}>
+            {dataObject.sort.direction === 'asc' ? <i className='upArrow' /> : <i className= 'downArrow' />}
+        </button>
         <select className='value' onChange={handleChangeValue}>
             {Object.keys(dataObject.sort.values).map(value => {
                 if (dataObject.sort.value === value) return <option value={value} selected>{dataObject.sort.values[value].formatted}</option>
                 return <option value={value}>{dataObject.sort.values[value].formatted}</option>
             })}
         </select>
-        <button className='direction' value={dataObject.sort.direction} onClick={toggleDirection}>
-            {dataObject.sort.direction === 'asc' ? <i className='upArrow' /> : <i className= 'downArrow' />}
-        </button>
     </div>)
 }
 
