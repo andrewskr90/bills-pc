@@ -22,7 +22,9 @@ const selectBySetId = (req, res, next) => {
         c.card_v2_foil_only,
         s.set_v2_id,
         s.set_v2_name,
-        s.set_v2_ptcgio_id
+        s.set_v2_ptcgio_id,
+        s.set_v2_release_date,
+        s.set_v2_series
     FROM market_prices as m
     LEFT JOIN cards_v2 as c
         ON c.card_v2_id = m.market_price_card_id
@@ -45,7 +47,9 @@ const selectBySetId = (req, res, next) => {
         NULL AS card_v2_foil_only,
         s2.set_v2_id,
         s2.set_v2_name,
-        s2.set_v2_ptcgio_id
+        s2.set_v2_ptcgio_id,
+        s2.set_v2_release_date,
+        s2.set_v2_series
     FROM market_prices as m2
     LEFT JOIN products as p2
         ON p2.product_id = m2.market_price_product_id
@@ -58,7 +62,7 @@ const selectBySetId = (req, res, next) => {
 }
 
 const selectTopTenAverage = (req, res, next) => {
-    let query = `SELECT set_v2_id, set_v2_name, set_v2_ptcgio_id,
+    let query = `SELECT set_v2_id, set_v2_name, set_v2_ptcgio_id, set_v2_release_date, set_v2_series,
         (SELECT AVG(top_ten_cards.latest_price)
         FROM (SELECT
             (select market_price_price from market_prices WHERE market_price_card_id = card_v2_id ORDER BY market_prices.created_date DESC LIMIT 1) as latest_price
