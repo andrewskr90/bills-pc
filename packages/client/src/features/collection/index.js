@@ -5,34 +5,8 @@ import CollectedCards from './CollectedCards'
 import PortfolioToolbar from './PortfolioToolbar'
 import CollectedCardModal from './CollectedCardModal'
 import PurchaseCardsModal from './PurchaseCardsModal'
+import { initialSelectedPurchaseCardsValues, initialSelectedCollectedCardsValues } from '../../data/initialData'
 import './assets/collection.less'
-
-const initialSelectedPurchaseCardsValues = [{
-    sale_date: '',
-    sale_total: 0,
-    sale_notes: '',
-    sale_vendor: '',
-    sale_note_note: ''
-}]
-
-const initialSelectedCollectedCardsValues = {
-    card_id: '',
-    collected_card_quantity: 0,
-    collected_card_average_price: 0,
-    collection: [   
-        {
-            card_name: '',
-            set_name: '',
-            set_language: '',
-            sale_card_price: 0,
-            card_image_large: '',
-            sale_card_sale_id: '',
-            collected_card_note_note: '',
-            set_ptcgio_id: '',
-            card_number: ''
-        }
-    ]
-}
 
 const Collection = (props) => {
     const { userClaims } = props

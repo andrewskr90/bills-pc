@@ -2,17 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
 import SelectCard from './SelectCard'
-
-const initialSelectItemModalState = {
-    itemType: 'card',
-    cardFilterBy: 'sets',
-    cardFilterValue: '',
-    productFilterBy: '',
-    productFilterValue: '',
-    filteredSets: [],
-    selectedSetIndex: '',
-    selectedSetCards: [],
-}
+import { initialSelectItemModalState } from '../../data/initialData'
 
 const SelectItemModal = (props) => {
     const [selectItemModalState, setSelectItemModalState] = useState(initialSelectItemModalState)

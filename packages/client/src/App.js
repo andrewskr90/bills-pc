@@ -8,41 +8,7 @@ import NavBar from './layouts/NavBar'
 import BillsPcService from './api/bills-pc'
 import './styles/App.less'
 import InDevelopment from './pages/InDevelopment'
-
-const initialReferenceDataValues = {
-    sets: [],
-    cards: [],
-    products: [],
-    rarities: []
-}
-
-const initialMarketData = {
-    sets: [],
-    filters: [],
-    dateRange: 'week',
-    sort: {
-        value: 'release_date',
-        direction: 'desc',
-        values: {
-            name: {
-                defaultDirection: 'asc',
-                formatted: 'Name'
-            },
-            topTenAverageToday: {
-                defaultDirection: 'desc',
-                formatted: 'Top 10 Average'
-            },
-            topTenPercentChange: {
-                defaultDirection: 'desc',
-                formatted: 'Top 10 Change'
-            },
-            release_date: {
-                defaultDirection: 'desc',
-                formatted: 'Release Date'
-            }
-        }
-    }
-}
+import { initialReferenceDataValues, initialMarketData } from './data/initialData'
 
 //calling api before app renders can lead to bugs
 //render app first, call data in useEffect,
