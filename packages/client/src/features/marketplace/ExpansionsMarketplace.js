@@ -36,6 +36,15 @@ const ExpansionsMarketplace = (props) => {
                 if (a.name.toLowerCase() < b.name.toLowerCase()) return 1
                 else return -1
             }
+        } else if (marketData.sort.value === 'release_date') {
+            if (a.release_date === b.release_date) return 0
+            if (a.release_date === null) return 1
+            if (b.release_date === null) return -1
+            if (marketData.sort.direction === 'desc') { 
+                return Date.parse(b.release_date) - Date.parse(a.release_date)
+            } else {
+                return Date.parse(a.release_date) - Date.parse(b.release_date)
+            }
         }
     }
     
@@ -44,7 +53,7 @@ const ExpansionsMarketplace = (props) => {
             <h3>Pokemon Expansions</h3>
             <p>Top 10 Card Averages</p>
         </div>
-        <div className='rangeAndSort'>
+        <div className='toolbar'>
             <RangeSelectors marketData={marketData} setMarketData={setMarketData} />
             <Sort dataObject={marketData} setDataObject={setMarketData} />
         </div>

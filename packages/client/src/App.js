@@ -21,7 +21,7 @@ const initialMarketData = {
     filters: [],
     dateRange: 'week',
     sort: {
-        value: 'topTenPercentChange',
+        value: 'release_date',
         direction: 'desc',
         values: {
             name: {
@@ -35,6 +35,10 @@ const initialMarketData = {
             topTenPercentChange: {
                 defaultDirection: 'desc',
                 formatted: 'Top 10 Change'
+            },
+            release_date: {
+                defaultDirection: 'desc',
+                formatted: 'Release Date'
             }
         }
     }
@@ -74,9 +78,10 @@ const App = () => {
                 sets: fetchedTopTenMarket.map(set => {
                     return {
                         ...set,
+                        // assign expansion items sorting state
                         sort: {
                             value: 'marketValue',
-                            direction: 'asc',
+                            direction: 'desc',
                             values: {
                                 name: {
                                     defaultDirection: 'asc',

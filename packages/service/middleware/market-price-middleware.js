@@ -57,6 +57,8 @@ const formatTopTenAverageResults = (req, res, next) => {
             id: set.set_v2_id,
             name: set.set_v2_name,
             ptcgio_id: set.set_v2_ptcgio_id,
+            series: set.set_v2_series,
+            release_date: set.set_v2_release_date,
             topTenAverage: {
                 today: todayAverage,
                 week: weekAverage,
