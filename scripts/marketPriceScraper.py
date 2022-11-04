@@ -5,7 +5,7 @@ import requests
 from threading import Timer
 import json
 import argparse
-from billsPcApi import loginBillsPc, getSetsBillsPc, getCardsBillsPc, getProductsBillsPc, getMarketPricesBillsPc, addMarketPricesBillsPc
+from billsPcApi import loginBillsPc, getSetsBillsPc, getCardsBillsPc, getProductsBillsPc, getMarketPricesBillsPc, addMarketPricesBillsPc, getMarketPricesByCardIdBillsPc, getMarketPricesByProductIdBillsPc
 from billsPcScraper import processResultsPerPage, gatherPageMarketPrices
 
 credentials = loginBillsPc()
@@ -26,7 +26,7 @@ def marketPriceScrape():
         setsToSearch = getSetsBillsPc(credentials, parameters)
     # else, loup through all sets in bills_pc
     else:
-        setsToSearch = getSetsBillsPc(credentials, False)
+        setsToSearch = getSetsBillsPc(credentials, None)
     
     for set_ in setsToSearch:
         print(f"------------------------Scraping Market Prices: {set_['set_v2_name']}------------------------")
@@ -37,11 +37,10 @@ def marketPriceScrape():
         # check if current set has been scraped already today
         if len(currentSetCards) > 0:
             firstCardId = currentSetCards[0]['card_v2_id']
-            parameters = f"?market_price_card_id={firstCardId}"
-            cardMarketPrices = getMarketPricesBillsPc(credentials, parameters)
-
-            if len(cardMarketPrices) > 0:
-                mostRecentPriceDate = cardMarketPrices[0]['created_date'].split('T')[0]
+            parameters = f"limit=1"
+            cardMarketPrice = getMarketPricesByCardIdBillsPc(credentials, firstCardId, parameters)
+            if len(cardMarketPrice) > 0:
+                mostRecentPriceDate = cardMarketPrice[0]['created_date'].split('T')[0]
                 todaysDate = str(datetime.utcnow().date())
                 # check if most recent date matches todays date
                 if mostRecentPriceDate == todaysDate:
@@ -50,8 +49,8 @@ def marketPriceScrape():
         # just in case current set only has sealed product i.e. World Championship Decks
         elif len(currentSetProducts) > 0:
             firstProductId = currentSetProducts[0]['product_id']
-            parameters = f"?market_price_card_id={firstProductId}"
-            productMarketPrices = getMarketPricesBillsPc(credentials, parameters)
+            parameters = f"limit=1"
+            productMarketPrices = getMarketPricesByProductIdBillsPc(credentials, firstProductId, parameters)
 
             if len(productMarketPrices) > 0:
                 mostRecentPriceDate = productMarketPrices[0]['created_date'].split('T')[0]

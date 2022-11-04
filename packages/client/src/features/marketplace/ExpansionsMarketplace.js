@@ -18,17 +18,6 @@ const ExpansionsMarketplace = (props) => {
                     return a.topTenAverage.today - b.topTenAverage.today
                 }
             }
-        } else if (referenceData[sortKey].value === 'topTenPercentChange') {
-            if (a.topTenPercentChange) {
-                if (a.topTenPercentChange[referenceData.dateRange] === b.topTenPercentChange[referenceData.dateRange]) return 0
-                if (a.topTenPercentChange[referenceData.dateRange] === null) return 1
-                if (b.topTenPercentChange[referenceData.dateRange] === null) return -1
-                if (referenceData[sortKey].direction === 'desc') {
-                    return Math.abs(b.topTenPercentChange[referenceData.dateRange]) - Math.abs(a.topTenPercentChange[referenceData.dateRange])
-                } else {
-                    return Math.abs(a.topTenPercentChange[referenceData.dateRange]) - Math.abs(b.topTenPercentChange[referenceData.dateRange])
-                }
-            }
         } else if (referenceData[sortKey].value === 'name') {
             if (a.set_v2_name === b.set_v2_name) return 0
             if (a.set_v2_name === null) return 1

@@ -19,10 +19,6 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'desc',
                 formatted: 'Top 10 Average'
             },
-            topTenPercentChange: {
-                defaultDirection: 'desc',
-                formatted: 'Top 10 Change'
-            },
             release_date: {
                 defaultDirection: 'desc',
                 formatted: 'Release Date'
