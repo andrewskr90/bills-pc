@@ -29,7 +29,7 @@ const BillsPcService = {
     getSetsV2(filter) {
         return axios({
             ...options,
-            url: `api/v1/sets-v2`,
+            url: `/api/v1/sets-v2`,
             params: filter
         })
     },
@@ -43,7 +43,7 @@ const BillsPcService = {
     postSetsToSets(setsArray) {
         return axios({
             ...options,
-            url: 'api/v1/sets',
+            url: '/api/v1/sets',
             method: 'post',
             data: setsArray
         })
