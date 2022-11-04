@@ -2,15 +2,12 @@
 export const initialReferenceDataValues = {
     sets: [],
     cards: [],
+    expansionFilters: [],
+    expansionItemFilters: [],
     products: [],
-    rarities: []
-}
-
-export const initialMarketData = {
-    sets: [],
-    filters: [],
+    rarities: [],
     dateRange: 'week',
-    sort: {
+    setSort: {
         value: 'release_date',
         direction: 'desc',
         values: {
@@ -30,6 +27,23 @@ export const initialMarketData = {
                 defaultDirection: 'desc',
                 formatted: 'Release Date'
             }
+        }
+    },
+    itemSort: {
+        value: 'marketValue',
+        direction: 'desc',
+        values: {
+            name: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
+            },
+            marketValue: {
+                defaultDirection: 'desc',
+                formatted: 'Market Value'
+            },
+            percentChange: {
+                defaultDirection: 'desc',
+                formatted: 'Percent Change'}
         }
     }
 }

@@ -26,78 +26,71 @@ const formatSetMarketData = (marketPrices) => {
 
 const ExpansionItemsMarketplace = (props) => {
     const {
-        marketData,
-        setMarketData,
         referenceData,
+        setReferenceData,
         openFilterModal,
-        removeFilter,
         showFilterModal,
         setShowFilterModal
     } = props
-    const selectedSetId = useParams()['setId']
 
-    const updateSetSort = (updatedSet) => {
-        setMarketData({
-            ...marketData,
-            sets: marketData.sets.map(set => {
-                if (set.id === selectedSetId) {
-                    return updatedSet
-                } else {
-                    return set
-                }
-            })
-        })
-    }
+    const selectedSetId = useParams()['setId']
+    const sortKey = 'itemSort'
 
     useEffect(() => {
-        const selectedSetMarketData = marketData.sets.filter((set) => set.id === selectedSetId)[0]
-        if (selectedSetMarketData.items.length === 0) {
-            BillsPcService.getMarketPrices({ set_v2_id: selectedSetId})
-                .then(res => {
-                    setMarketData({
-                    ...marketData,
-                        sets: marketData.sets.map(set => {
-                            if (set.id === selectedSetId) {
-                                return {
-                                    ...set,
-                                    items: formatSetMarketData(res.data)
+        if (referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length === 0) {
+            (async () => {
+                await BillsPcService.getMarketPrices({ set_v2_id: selectedSetId})
+                    .then(res => {
+                        setReferenceData({
+                            ...referenceData,
+                            sets: referenceData.sets.map(expansion => {
+                                if (expansion.set_v2_id === selectedSetId) {
+                                    return {
+                                        ...expansion,
+                                        items: formatSetMarketData(res.data)
+                                    }
+                                } else {
+                                    return expansion
                                 }
-                            } else {
-                                return set
-                            }
+                            })
                         })
                     })
-                })
+                    .catch(err => console.log(err))
+            })()
         }
     }, [])
-    
+
     return (<div className='expansionItemsMarketplace'>
         <div className='title'>
-            <h3>{marketData.sets.filter(set => set.id === selectedSetId)[0].name}</h3>
+            <h3>{ referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].set_v2_name }</h3>
             <p>Market Values</p>
         </div>
         <div className='toolbar'>
             <button className='addFilter' onClick={openFilterModal}>
                 <p>Filter</p>
-                {marketData.filters.length > 0
+                {referenceData.expansionItemFilters.length > 0
                 ?
-                <div className='filterCount'>{marketData.filters.length}</div>
+                <div className='filterCount'>{referenceData.expansionItemFilters.length}</div>
                 :
                 <></>}
             </button>
-            <Sort dataObject={marketData.sets.filter(set => set.id === selectedSetId)[0]} setDataObject={updateSetSort} />
+            <Sort dataObject={referenceData} setDataObject={setReferenceData} sortKey={sortKey} />
             <RangeSelectors 
-                marketData={marketData} 
-                setMarketData={setMarketData} 
+                referenceData={referenceData} 
+                setReferenceData={setReferenceData} 
             />
         </div>
-        <ExpansionItems marketData={marketData} />
+        {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
+        ?
+        <ExpansionItems referenceData={referenceData} sortKey={sortKey} />
+        :
+        <div className='loadingGradient loadingExpansionItems'>Loading Expansion Items...</div>}
         <FilterModal 
-            marketData={marketData} 
-            setMarketData={setMarketData} 
             referenceData={referenceData} 
+            setReferenceData={setReferenceData}
             showFilterModal={showFilterModal} 
             setShowFilterModal={setShowFilterModal}
+            filterKey={'expansionItemFilters'}
         />
     </div>)
 }

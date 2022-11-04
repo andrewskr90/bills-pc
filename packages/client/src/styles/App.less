@@ -97,7 +97,6 @@ body {
 }
 
 .appLoading {
-	border: solid black 1px;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -106,6 +105,10 @@ body {
 		font-size: 70px;
 		color: #6065CB;
 	}
+  div {
+    width: 60%;
+    height: 20px;
+  }
 }
 
 header {
@@ -552,6 +555,23 @@ button:hover {
 
   ::-webkit-scrollbar {
     display: none; // hides sidescroll on filterBubble div
+  }
+
+  .loadingGradient {
+    background: linear-gradient(90deg, rgba(200, 76, 76, 0.3), white, #6065cb30, white, rgba(42, 163, 0, 0.3));
+    background-size: 1000%;
+    animation: gradient 5s ease infinite;
+  }
+  @keyframes gradient {
+      0% {
+          background-position: 0% 50%;
+      }
+      50% {
+          background-position: 100% 50%;
+      }
+      100% {
+          background-position: 0% 50%;
+      }
   }
 
 

@@ -1,112 +1,107 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useParams } from 'react-router-dom'
 import ExpansionItem from './ExpansionItem'
 import { calcItemMarketData } from '../../utils/market'
 
 const ExpansionItems = (props) => {
-    const { marketData } = props
-    const [expansionItems, setExpansionItems] = useState([])
-
+    const { referenceData, sortKey } = props
     const selectedSetId = useParams()['setId']
 
     const sortMarketSetItemsCB = (a, b) => {
-        const currentSet = marketData.sets.filter(set => set.id === selectedSetId)[0]
-        if (currentSet.sort.value === 'name') {
+        if (referenceData[sortKey].value === 'name') {
             if (a.name === b.name) return 0
             if (a.name === null) return 1
             if (b.name === null) return -1
-            if (currentSet.sort.direction === 'asc') { 
+            if (referenceData[sortKey].direction === 'asc') { 
                 if (a.name.toLowerCase() > b.name.toLowerCase()) return 1
                 else return -1
             } else {
                 if (a.name.toLowerCase() < b.name.toLowerCase()) return 1
                 else return -1
             }
-        } else if (currentSet.sort.value === 'marketValue') {
+        } else if (referenceData[sortKey].value === 'marketValue') {
             if (a.marketValue === b.marketValue) return 0
             if (a.marketValue === null) return 1
             if (b.marketValue === null) return -1
-            if (currentSet.sort.direction === 'desc') { 
+            if (referenceData[sortKey].direction === 'desc') { 
                 return Math.abs(b.marketValue) - Math.abs(a.marketValue)
             } else {
                 return Math.abs(a.marketValue) - Math.abs(b.marketValue)
             }
-        } else if (currentSet.sort.value === 'percentChange') {
-            if (a.percentChange === b.percentChange) return 0
-            if (a.percentChange === null) return 1
-            if (b.percentChange === null) return -1
-            if (currentSet.sort.direction === 'desc') {
-                return Math.abs(b.percentChange) - Math.abs(a.percentChange)
+        } else if (referenceData[sortKey].value === 'percentChange') {
+            if (a.formattedPrices.changes[referenceData.dateRange] === b.formattedPrices.changes[referenceData.dateRange]) return 0
+            if (a.formattedPrices.changes[referenceData.dateRange] === null) return 1
+            if (b.formattedPrices.changes[referenceData.dateRange] === null) return -1
+            if (referenceData[sortKey].direction === 'desc') {
+                return Math.abs(b.formattedPrices.changes[referenceData.dateRange]) - Math.abs(a.formattedPrices.changes[referenceData.dateRange])
             } else {
-                return Math.abs(a.percentChange) - Math.abs(b.percentChange)
+                return Math.abs(a.formattedPrices.changes[referenceData.dateRange]) - Math.abs(b.formattedPrices.changes[referenceData.dateRange])
             }
 
         }
     }    
 
     const matchSetToId = (marketDataSets, targetSetId) => {
-        const matchedSet = marketDataSets.filter(set => set.id == targetSetId)[0]
+        const matchedSet = marketDataSets.filter(set => set.set_v2_id == targetSetId)[0]
         return matchedSet
     }
 
-    const filterExpansionItems = (expansionItems) => {
-            return expansionItems.filter(item => {
-                let includeItem = false
-                if (item.market_prices !== null) {
-                    // includeItem = true
-                    if (marketData.filters.length > 0) {
-                        marketData.filters.forEach(filter => {
-                            // check item type filters
-                            if (Object.keys(filter)[0] === 'itemType') {
-                                if (filter.itemType === 'Card') {
-                                    if (item.card_id) {
-                                        includeItem = true
-                                    }
-                                } else {
-                                    if (item.product_id) {
-                                        includeItem = true
-                                    }
-                                }
-                            }
-                            //check rarity filters
-                            if (Object.keys(filter)[0] === 'rarity') {
-                                if (item.rarity === filter['rarity']) {
-                                    includeItem = true
-                                }
-                            }
-                        })
+    const filterExpansionItems = (expansion) => {
+        const expansionItems = expansion.items
+
+        const filterLib = {}
+        referenceData.expansionItemFilters.forEach(filter => {
+            filterLib[Object.keys(filter)[0]] = true
+        })
+        let rarityFilterActive
+        referenceData.rarities.forEach(rarity => {
+            if (filterLib[rarity]) {
+                rarityFilterActive = true
+            }
+        })
+        
+        return expansionItems.filter(item => {
+            let includeItem = false
+            if (item.market_prices !== null) {
+                if (referenceData.expansionItemFilters.length > 0) {
+                    if (item.product_id) {
+                        if (filterLib['Product']) {
+                            includeItem = true
+                        }
                     } else {
-                        includeItem = true
+                        if (rarityFilterActive) {
+                            if (filterLib[item.rarity]) {
+                                includeItem = true
+                            }
+                        } else if (filterLib['Card']) {
+                            if (item.card_id) {
+                                includeItem = true
+                            }
+                        }
                     }
+                } else {
+                    includeItem = true
                 }
-                return includeItem
-            })
+            }
+            return includeItem
+        })
     }
 
     const applyMarketData = (itemsArray) => {
         return itemsArray.map((item, idx) => {
             const itemMarketData = calcItemMarketData(item.market_prices)
-            const itemValue = itemMarketData.prices.latest
-            const percentChange = itemMarketData.changes[marketData.dateRange]
+            const itemValue = itemMarketData.prices.latest[0]
             return {
                 ...item,
                 formattedPrices: itemMarketData,
-                marketValue: itemValue,
-                percentChange: percentChange
+                marketValue: itemValue
             }
         })
     }
 
-    useEffect(() => {
-        const targetSet = matchSetToId(marketData.sets, selectedSetId)
-        const filteredItems = filterExpansionItems(targetSet.items)
-        const marketPricesAdded = applyMarketData(filteredItems) 
-        const sortedItems = marketPricesAdded.sort(sortMarketSetItemsCB)
-        setExpansionItems(sortedItems)
-    }, [marketData])
-
     return (<div className='expansionItems'>
-        {expansionItems.map(item => <ExpansionItem marketData={marketData} item={item} />)}
+        {applyMarketData(filterExpansionItems(matchSetToId(referenceData.sets, selectedSetId))).sort(sortMarketSetItemsCB)
+            .map(item => <ExpansionItem referenceData={referenceData} item={item} />)}
     </div>)
 }
 

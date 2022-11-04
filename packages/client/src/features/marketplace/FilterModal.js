@@ -1,27 +1,25 @@
 import React from 'react'
 
 const FilterModal = (props) => {
-    const { referenceData, marketData, setMarketData, showFilterModal, setShowFilterModal } = props
+    const { referenceData, setReferenceData, showFilterModal, setShowFilterModal, filterKey } = props
 
-    const toggleFilter = (filter, active) => {
-        // const filterType = Object.keys(filter)[0]
-        if (!active) {
-            const newFiltersArray = marketData.filters
+    const toggleFilter = (filter) => {
+        if (filter[Object.keys(filter)[0]] === false) {
+            filter[Object.keys(filter)[0]] = true
+            const newFiltersArray = referenceData[filterKey]
             newFiltersArray.push(filter)
-            setMarketData({
-                ...marketData,
-                filters: newFiltersArray
+            setReferenceData({
+                ...referenceData,
+                [filterKey]: newFiltersArray
             })
         } else {
-            setMarketData({
-                ...marketData,
-                filters: marketData.filters.filter(toRemove => {
-                    if (Object.keys(filter)[0] === Object.keys(toRemove)[0]) {
-                        if (toRemove[Object.keys(toRemove)[0]] !== filter[Object.keys(filter)[0]]) {
-                            return toRemove
-                        }
+            setReferenceData({
+                ...referenceData,
+                [filterKey]: referenceData[filterKey].filter(toCompare => {
+                    if (Object.keys(filter)[0] === Object.keys(toCompare)[0]) {
+                        return false
                     } else {
-                        return toRemove !== filter
+                        return true
                     }
                 })
             })
@@ -29,9 +27,9 @@ const FilterModal = (props) => {
     }
 
     const clearFilters = () => {
-        setMarketData({
-            ...marketData,
-            filters: []
+        setReferenceData({
+            ...referenceData,
+            [filterKey]: []
         })
     }
 
@@ -45,14 +43,12 @@ const FilterModal = (props) => {
                 <div className='filterBubbles'>
                     {itemTypes.map(itemType => {
                         let active = false
-                        marketData.filters.forEach(filter => {
-                            if (Object.keys(filter)[0] === 'itemType') {
-                                if (filter['itemType'] === itemType) {
-                                    active = true
-                                }
+                        referenceData[filterKey].forEach(filter => {
+                            if (Object.keys(filter)[0] === itemType) {
+                                active = true
                             }
                         })
-                        return <div className={`filterBubble ${active ? 'active' : ''}`} onClick={() => toggleFilter({ itemType: itemType }, active)}>
+                        return <div className={`filterBubble ${active ? 'active' : ''}`} onClick={() => toggleFilter({ [itemType]: active })}>
                             <p>{itemType}</p>
                         </div>
                     })}
@@ -63,15 +59,12 @@ const FilterModal = (props) => {
                 <div className='filterBubbles'>
                     {referenceData.rarities.map(rarity => {
                         let active = false
-                        marketData.filters.forEach(filter => {
-                            const currentFilterType = Object.keys(filter)[0]
-                            if (currentFilterType === 'rarity') {
-                                if (filter['rarity'] === rarity) {
-                                    active = true
-                                }
+                        referenceData[filterKey].forEach(filter => {
+                            if (Object.keys(filter)[0] === rarity) {
+                                active = true
                             }
                         })
-                        return <div className={`filterBubble ${active ? 'active' : ''}`} onClick={() => toggleFilter({ rarity: rarity }, active)}>
+                        return <div className={`filterBubble ${active ? 'active' : ''}`} onClick={() => toggleFilter({ [rarity]: active }, active)}>
                             <p>{rarity}</p>
                         </div>
                     })}

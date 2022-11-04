@@ -1,22 +1,21 @@
 import React from 'react'
 
 const RangeSelector = (props) => {
-    const { value, marketData, setMarketData } = props
-
+    const { value, referenceData, setReferenceData } = props
     let condensedValue
     if (value === 'week') condensedValue = '1W'
     else if (value === 'twoWeek') condensedValue = '2W'
     else if (value === 'month') condensedValue = '1M'
 
     const handleSelect = (e) => {
-        setMarketData({
-            ...marketData,
+        setReferenceData({
+            ...referenceData,
             dateRange: e.target.value
         })
     }
     return <button 
         id={value}
-        className={`rangeSelector${marketData.dateRange === value ? ' selected': ''}`} 
+        className={`rangeSelector${referenceData.dateRange === value ? ' selected': ''}`} 
         onClick={handleSelect}
         value={value}>{condensedValue}</button>
 }
