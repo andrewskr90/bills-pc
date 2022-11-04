@@ -7,6 +7,16 @@ const insert = (req, res, next) => {
     next()
 }
 
+const selectByCardId = (req, res, next) => {
+    let query = `SELECT * FROM market_prices WHERE market_price_card_id = '${req.params.card_id}' ORDER BY created_date DESC`
+    if (req.query.limit) {
+        query += ` LIMIT ${req.query.limit}`
+    }
+    query += ';'
+    req.queryQueue.push(query)
+    next()
+}
+
 const selectBySetId = (req, res, next) => {
     let query = `SELECT 
         GROUP_CONCAT('[',UNIX_TIMESTAMP(m.created_date), ',', m.market_price_price,']' ORDER BY m.created_date DESC SEPARATOR ',') as market_price_prices,
@@ -69,32 +79,7 @@ const selectTopTenAverage = (req, res, next) => {
         FROM cards_v2
         WHERE set_v2_id = card_v2_set_id
         ORDER BY latest_price DESC
-        LIMIT 10) top_ten_cards) as top_ten_average_today,
-        
-        (SELECT AVG(top_ten_cards.week_price)
-        FROM (SELECT
-            (select market_price_price from market_prices WHERE market_price_card_id = card_v2_id ORDER BY market_prices.created_date DESC LIMIT 6, 1) as week_price
-        FROM cards_v2
-        WHERE set_v2_id = card_v2_set_id
-        ORDER BY week_price DESC
-        LIMIT 10) top_ten_cards) as top_ten_average_week,
-        
-        (SELECT AVG(top_ten_cards.two_week_price)
-        FROM (SELECT
-            (select market_price_price from market_prices WHERE market_price_card_id = card_v2_id ORDER BY market_prices.created_date DESC LIMIT 13, 1) as two_week_price
-        FROM cards_v2
-        WHERE set_v2_id = card_v2_set_id
-        ORDER BY two_week_price DESC
-        LIMIT 10) top_ten_cards) as top_ten_average_two_week,
-        
-        (SELECT AVG(top_ten_cards.month_price)
-        FROM (SELECT
-            (select market_price_price from market_prices WHERE market_price_card_id = card_v2_id ORDER BY market_prices.created_date DESC LIMIT 30, 1) as month_price
-        FROM cards_v2
-        WHERE set_v2_id = card_v2_set_id
-        ORDER BY month_price DESC
-        LIMIT 10) top_ten_cards) as top_ten_average_month
-        
+        LIMIT 10) top_ten_cards) as top_ten_average_today
     FROM sets_v2;`
     req.queryQueue.push(query)
     next()
@@ -103,5 +88,6 @@ const selectTopTenAverage = (req, res, next) => {
 module.exports = {
     insert,
     selectBySetId,
+    selectByCardId,
     selectTopTenAverage
 }

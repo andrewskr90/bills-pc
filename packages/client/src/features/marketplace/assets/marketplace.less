@@ -132,7 +132,7 @@
         border: none;
         background: none;
         color: grey;
-        width: 10%;
+        width: 30%;
     }
     button.rangeSelector.selected {
         color: #6065CB;
@@ -157,6 +157,11 @@
 }
 
 .expansionItemsMarketplace {
+    .loadingExpansionItems {
+        margin: auto;
+        margin-top: 50px;
+        width: 60%;
+    }
     .expansionItems {
         display: flex;
         flex-wrap: wrap;
@@ -245,7 +250,7 @@
             justify-content: space-between;
             align-items: center;
             height: 60px;
-            background-color: #6065cb41;
+            background-color: #6065cb30;
             border-radius: 10px;
             padding: 2vw;
             margin-top: 10px;
@@ -266,14 +271,17 @@
             .valueAndChange {
                 display: flex;
                 flex-direction: column;
+                justify-content: space-around;
                 align-items: center;
                 width: 20%;
+                height: 100%;
+                .top10Avg {
+                    font-size: 12px;
+                }
                 p.marketValue {
                     font-size: 18px;
-                    font-weight: 400;
-                }
-                .percentChange {
-
+                    font-weight: 600;
+                    color: #6065cb
                 }
             }
         }

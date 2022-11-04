@@ -24,7 +24,9 @@ setV2Router.post('/',
     gymLeaderOnly, 
     checkReqBody,
     generateSetV2Ids,
-    addSetsV2MySQL, 
+    QueueQueries.init,
+    QueueQueries.setsV2.insert,
+    executeQueries, 
     (req, res, next) => {
         const results = {
             ...req.results,

@@ -74,6 +74,28 @@ def getMarketPricesBillsPc(credentials, parameters):
         raise SystemExit(e)
     return billsPcMarketPrices.json()
 
+def getMarketPricesByCardIdBillsPc(credentials, cardId, parameters):
+    try:
+        billsPcMarketPricesByCardId = requests.get(f"{baseurl}/api/v1/market-prices/card-id/{cardId}?{parameters}", cookies=credentials)
+        if billsPcMarketPricesByCardId.status_code != 200:
+            message = billsPcMarketPricesByCardId.json()['message']
+            logger.debug(message)
+            raise SystemExit(message)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    return billsPcMarketPricesByCardId.json()
+
+def getMarketPricesByProductIdBillsPc(credentials, productId, parameters):
+    try:
+        billsPcMarketPricesByProductId = requests.get(f"{baseurl}/api/v1/market-prices/card-id/{productId}?{parameters}", cookies=credentials)
+        if billsPcMarketPricesByProductId.status_code != 200:
+            message = billsPcMarketPricesByProductId.json()['message']
+            logger.debug(message)
+            raise SystemExit(message)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    return billsPcMarketPricesByProductId.json()
+
 def addMarketPricesBillsPc(marketPricesToAdd, credentials, set_):
     #add market prices to bills_pc
     try:

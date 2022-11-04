@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import RangeSelector from './RangeSelector'
 
 const RangeSelectors = (props) => {
-    const { marketData, setMarketData } = props
+    const { referenceData, setReferenceData } = props
     const rangeValues = ['week', 'twoWeek', 'month']
 
     return(<div className='rangeSelectors'>
@@ -10,8 +10,8 @@ const RangeSelectors = (props) => {
             return <RangeSelector 
                 key={value}
                 value={value} 
-                marketData={marketData}
-                setMarketData={setMarketData}
+                referenceData={referenceData}
+                setReferenceData={setReferenceData}
             />
         })}
     </div>)

@@ -3,40 +3,32 @@ import { useNavigate } from 'react-router-dom'
 import MinimalPokeball from '../../assets/images/minimal-pokeball.png'
 
 const Expansion = (props) => {
-    const { marketDataSet, marketData } = props
+    const { referenceDataExpansion } = props
     const navigate = useNavigate()
-
-    let topTenAverage = marketDataSet.topTenAverage.today ? `$${marketDataSet.topTenAverage.today.toFixed(2)}` : ''
-    let percentChange
-    if (marketDataSet.topTenPercentChange[marketData.dateRange]) {
-        if (marketDataSet.topTenPercentChange[marketData.dateRange] > 0) {
-            percentChange = `+${marketDataSet.topTenPercentChange[marketData.dateRange].toFixed(2)}%`
-        } else {
-            percentChange = `${marketDataSet.topTenPercentChange[marketData.dateRange].toFixed(2)}%`
-        }
-    } else {
-        if (marketDataSet.topTenPercentChange[marketData.dateRange] === 0) {
-            percentChange = `0%`
-        } else {
-            percentChange = 'Unavailable'
-        }
+    
+    let topTenAverage = 'loading...'
+    let expansionClassName = 'expansion'
+    if (!referenceDataExpansion.topTenAverage) expansionClassName += ' loadingGradient'
+    
+    if (referenceDataExpansion.topTenAverage) {
+        topTenAverage = referenceDataExpansion.topTenAverage.today ? `$${referenceDataExpansion.topTenAverage.today.toFixed(2)}` : ''
     }
-    // if (marketDataSet.topTenAverage.today) formattedTopTenAverage = marketDataSet.topTenAverage.today.toFixed(2)
-    // else formattedTopTenAverage = 'Unavailable'
-    // if (marketDataSet.topTenPercentChange[marketData.dateRange]) formattedPercentChange = marketDataSet.topTenPercentChange[marketData.dateRange]
-    // else formattedPercentChange = 'Unavailable'
+
+    const handleSelectSet = () => {
+        navigate(referenceDataExpansion.set_v2_id)
+    }
 
     return (<div 
-            className={`expansion ${marketDataSet.topTenPercentChange[marketData.dateRange] > 0 ? 'up' : marketDataSet.topTenPercentChange[marketData.dateRange] < 0 ? 'down' : ''}`}
-            onClick={() => navigate(marketDataSet.id)}
+            className={expansionClassName}
+            onClick={handleSelectSet}
         >
         <div className='setSymbol'>
-            <img src={marketDataSet.ptcgio_id ? `https://images.pokemontcg.io/${marketDataSet.ptcgio_id}/symbol.png` : MinimalPokeball} />
+            <img src={referenceDataExpansion.set_v2_ptcgio_id ? `https://images.pokemontcg.io/${referenceDataExpansion.set_v2_ptcgio_id}/symbol.png` : MinimalPokeball} />
         </div>
-        <p className='setName'>{marketDataSet.name}</p>
+        <p className='setName'>{referenceDataExpansion.set_v2_name}</p>
         <div className='valueAndChange'>
+            <p className='top10Avg'>Top10Avg</p>
             <p className='marketValue'>{topTenAverage}</p>
-            <p className='percentChange'>{percentChange}</p>
         </div>
 
     </div>)
