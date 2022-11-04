@@ -22,11 +22,11 @@ args = parser.parse_args()
 # if set flag exists
 if args.set:
     parameter = f"set_v2_name={args.set}"
-    setsToSearch = getSetsBillsPc(credentials, parameters)
+    setsToSearch = getSetsBillsPc(credentials, parameter)
 # else if id flag exists
 elif args.id:
     parameter = f"set_v2_id={args.id}"
-    setsToSearch = getSetsBillsPc(credentials, parameters)
+    setsToSearch = getSetsBillsPc(credentials, parameter)
 # else, loup through all sets in bills_pc
 else:
     setsToSearch = getSetsBillsPc(credentials, False)
