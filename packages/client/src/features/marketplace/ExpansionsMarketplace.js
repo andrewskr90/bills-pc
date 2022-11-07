@@ -1,7 +1,6 @@
 import React from 'react'
-import Sort from '../../components/Sort'
+import Toolbar from '../../layouts/toolbar'
 import Expansion from './Expansion'
-import RangeSelectors from './RangeSelectors'
 
 const ExpansionsMarketplace = (props) => {
     const { referenceData, setReferenceData } = props
@@ -50,10 +49,16 @@ const ExpansionsMarketplace = (props) => {
             :
             <p className='loadingGradient'>Loading Top 10 Card Averages...</p>}
         </div>
-        <div className='toolbar'>
-            <RangeSelectors referenceData={referenceData} setReferenceData={setReferenceData} />
-            <Sort dataObject={referenceData} setDataObject={setReferenceData} sortKey={sortKey} />
-        </div>
+        <Toolbar
+            viewFilter={false} 
+            viewSort={true}
+            viewRangeSelector={true}
+            referenceData={referenceData}
+            setReferenceData={setReferenceData}
+            dataObject={referenceData}
+            setDataObject={setReferenceData}
+            sortKey={sortKey}
+        />
         <div className='expansions'>
             {referenceData.sets.sort(sortMarketSetsCB).map(referenceDataExpansion => {
                 return <Expansion referenceData={referenceData} referenceDataExpansion={referenceDataExpansion} />

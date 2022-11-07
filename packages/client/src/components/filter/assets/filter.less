@@ -1,0 +1,46 @@
+.filter {
+    width: 80px;
+    height: 100%;
+    .openFilterModal {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        background-color: #6065cb;
+        font-size: 16px;
+        .filterCount {
+            display: flex;
+            justify-content: center;
+            width: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6065cb;
+            background-color: white;
+            border-radius: 25px;
+        }
+    }
+    .filterModal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .filterSection {
+            p {
+                padding: 4px;
+            }
+            .filterBubbles {
+                padding: 4px 0;
+                border-bottom: solid black 1px;
+                flex-wrap: wrap;
+                .filterBubble {
+                    margin-bottom: 4px;
+                }
+            }
+        }
+        .clearAndClose {
+            margin-top: auto;
+            width: 100%;;
+            display: flex;
+            justify-content: space-evenly;
+        }
+    }
+}
