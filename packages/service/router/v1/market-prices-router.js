@@ -1,6 +1,6 @@
 const marketPricesRouter = require('express').Router()
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { formatSingleSetMarketResults, formatTopTenAverageResults } = require('../../middleware/market-price-middleware')
+const { formatMarketPricesFromConcat, formatTopTenAverageResults } = require('../../middleware/market-price-middleware')
 const { addMarketPricesMySQL, getMarketPricesMySQL } = require('../../db/queries/marketPriceQueries')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
@@ -31,7 +31,7 @@ marketPricesRouter.get('/set-id/:set_v2_id',
     QueueQueries.init,
     QueueQueries.marketPrices.selectBySetId,
     executeQueries,    
-    formatSingleSetMarketResults,
+    formatMarketPricesFromConcat,
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)

@@ -109,6 +109,20 @@ const QueryFormatters = {
             }
         })
         return stringForSetStatement
+    },
+
+    searchValueToWhereLike(searchValue, nameColumn) {
+        const splitSearchValues = searchValue.split(' ')
+        let whereAnd = ''
+        splitSearchValues.forEach((value, idx) => {
+            let lowerCaseValue = value.toLowerCase()
+            if (idx === 0) {
+                whereAnd += ` WHERE ${nameColumn} LIKE '%${lowerCaseValue}%'`
+            } else {
+                whereAnd += ` AND ${nameColumn} LIKE '%${lowerCaseValue}%'`
+            }
+        })
+        return whereAnd
     }
 }
 

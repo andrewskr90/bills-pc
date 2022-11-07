@@ -1,8 +1,9 @@
 const cardV2Router = require('express').Router()
+const { formatItems } = require('../../middleware')
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { addCardsV2MySQL, getCardsV2BySetIdMySQL, getCardsV2MySQL } = require('../../db/queries/cardV2Queries')
 const { generateCardV2Ids } = require('../../middleware/card-v2-middleware')
 const QueueQueries = require('../../middleware/QueueQueries')
+const { formatMarketPricesFromConcat } = require('../../middleware/market-price-middleware')
 const { executeQueries } = require('../../db')
 
 cardV2Router.get('/', 
@@ -14,6 +15,16 @@ cardV2Router.get('/',
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)
+})
+
+cardV2Router.get('/values', 
+    QueueQueries.init,
+    QueueQueries.cardsV2.selectWithValues,
+    executeQueries,
+    formatMarketPricesFromConcat,
+    formatItems,
+    (req, res, next) => {
+        res.status(200).json(req.results)
 })
 
 cardV2Router.get('/set-id/:setId', 
