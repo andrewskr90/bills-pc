@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import ExpansionItems from './ExpansionItems'
-import RangeSelectors from './RangeSelectors'
-import FilterModal from './FilterModal'
 import BillsPcService from '../../api/bills-pc'
-import Sort from '../../components/Sort'
+import Toolbar from '../../layouts/toolbar'
 
 const formatSetMarketData = (marketPrices) => {
     const formattedSetMarketData = marketPrices.map(item => {
@@ -27,10 +25,7 @@ const formatSetMarketData = (marketPrices) => {
 const ExpansionItemsMarketplace = (props) => {
     const {
         referenceData,
-        setReferenceData,
-        openFilterModal,
-        showFilterModal,
-        setShowFilterModal
+        setReferenceData
     } = props
 
     const selectedSetId = useParams()['setId']
@@ -65,33 +60,22 @@ const ExpansionItemsMarketplace = (props) => {
             <h3>{ referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].set_v2_name }</h3>
             <p>Market Values</p>
         </div>
-        <div className='toolbar'>
-            <button className='addFilter' onClick={openFilterModal}>
-                <p>Filter</p>
-                {referenceData.expansionItemFilters.length > 0
-                ?
-                <div className='filterCount'>{referenceData.expansionItemFilters.length}</div>
-                :
-                <></>}
-            </button>
-            <Sort dataObject={referenceData} setDataObject={setReferenceData} sortKey={sortKey} />
-            <RangeSelectors 
-                referenceData={referenceData} 
-                setReferenceData={setReferenceData} 
-            />
-        </div>
+        <Toolbar 
+            viewFilter={true} 
+            viewSort={true}
+            viewRangeSelector={true}
+            filterKey={'expansionItemFilters'}
+            referenceData={referenceData}
+            setReferenceData={setReferenceData}
+            dataObject={referenceData}
+            setDataObject={setReferenceData}
+            sortKey={sortKey}
+        />
         {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
         ?
         <ExpansionItems referenceData={referenceData} sortKey={sortKey} />
         :
         <div className='loadingGradient loadingExpansionItems'>Loading Expansion Items...</div>}
-        <FilterModal 
-            referenceData={referenceData} 
-            setReferenceData={setReferenceData}
-            showFilterModal={showFilterModal} 
-            setShowFilterModal={setShowFilterModal}
-            filterKey={'expansionItemFilters'}
-        />
     </div>)
 }
 
