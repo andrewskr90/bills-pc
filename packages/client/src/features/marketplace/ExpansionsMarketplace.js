@@ -42,7 +42,7 @@ const ExpansionsMarketplace = (props) => {
 
     return (<div className='expansionsMarketplace'>
         <div className='title'>
-            <h3>Pokemon Expansions</h3>
+            <h3>Browse By Expansion</h3>
             {referenceData.topTenCalled
             ?
             <p>Top 10 Card Averages</p>
@@ -52,7 +52,7 @@ const ExpansionsMarketplace = (props) => {
         <Toolbar
             viewFilter={false} 
             viewSort={true}
-            viewRangeSelector={true}
+            viewRangeSelector={false}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             dataObject={referenceData}
