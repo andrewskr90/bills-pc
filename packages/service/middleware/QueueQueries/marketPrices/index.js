@@ -8,6 +8,7 @@ const insert = (req, res, next) => {
 }
 
 const selectByCardId = (req, res, next) => {
+    // created_date is essential for marketPriceScraper
     let query = `SELECT * FROM market_prices WHERE market_price_card_id = '${req.params.card_id}' ORDER BY created_date DESC`
     if (req.query.limit) {
         query += ` LIMIT ${req.query.limit}`

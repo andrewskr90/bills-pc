@@ -1,4 +1,6 @@
 const productRouter = require('express').Router()
+const { formatItems } = require('../../middleware')
+const { formatMarketPricesFromConcat } = require('../../middleware/market-price-middleware')
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { addProductsMySQL, getProductsBySetIdMySQL } = require('../../db/queries/productQueries')
 const { generateProductIds, formatProductsFromTcgPlayerDetails } = require('../../middleware/product-middleware')
@@ -14,6 +16,16 @@ productRouter.get('/',
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)
+})
+
+productRouter.get('/values', 
+    QueueQueries.init,
+    QueueQueries.products.selectWithValues,
+    executeQueries,
+    formatMarketPricesFromConcat,
+    formatItems,
+    (req, res, next) => {
+        res.status(200).json(req.results)
 })
 
 productRouter.post('/',
