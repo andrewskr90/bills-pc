@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import ExpansionItem from './ExpansionItem'
-import { calcItemMarketData } from '../../utils/market'
+import { applyMarketChanges } from '../../utils/market'
 
 const ExpansionItems = (props) => {
     const { referenceData, sortKey } = props
@@ -87,20 +87,8 @@ const ExpansionItems = (props) => {
         })
     }
 
-    const applyMarketData = (itemsArray) => {
-        return itemsArray.map((item, idx) => {
-            const itemMarketData = calcItemMarketData(item.market_prices)
-            const itemValue = itemMarketData.prices.latest[0]
-            return {
-                ...item,
-                formattedPrices: itemMarketData,
-                marketValue: itemValue
-            }
-        })
-    }
-
     return (<div className='expansionItems'>
-        {applyMarketData(filterExpansionItems(matchSetToId(referenceData.sets, selectedSetId))).sort(sortMarketSetItemsCB)
+        {applyMarketChanges(filterExpansionItems(matchSetToId(referenceData.sets, selectedSetId))).sort(sortMarketSetItemsCB)
             .map(item => <ExpansionItem referenceData={referenceData} item={item} />)}
     </div>)
 }

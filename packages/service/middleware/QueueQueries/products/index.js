@@ -53,7 +53,7 @@ const selectWithValues = (req, res, next) => {
             query += QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'p.product_name')
         }
     }
-    query += ' GROUP BY product_id LIMIT 20;'
+    query += ' GROUP BY product_id;'
     req.queryQueue.push(query)
     next()
 }

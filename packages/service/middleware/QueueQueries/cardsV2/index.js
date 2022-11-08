@@ -50,7 +50,7 @@ const selectWithValues = (req, res, next) => {
             query += QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'c.card_v2_name')
         }
     }
-    query += ' GROUP BY card_v2_id LIMIT 20;'
+    query += ' GROUP BY card_v2_id;'
     req.queryQueue.push(query)
     next()
 }
