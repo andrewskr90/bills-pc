@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation} from 'react-router-dom'
 import ExpansionItems from './ExpansionItems'
 import BillsPcService from '../../api/bills-pc'
 import Toolbar from '../../layouts/toolbar'
+import PreviousRoutes from '../../layouts/previous-routes'
 
 const formatSetMarketData = (marketPrices) => {
     const formattedSetMarketData = marketPrices.map(item => {
@@ -27,7 +28,7 @@ const ExpansionItemsMarketplace = (props) => {
         referenceData,
         setReferenceData
     } = props
-
+    const location = useLocation()
     const selectedSetId = useParams()['setId']
     const sortKey = 'itemSort'
 
@@ -56,6 +57,7 @@ const ExpansionItemsMarketplace = (props) => {
     }, [])
 
     return (<div className='expansionItemsMarketplace'>
+        <PreviousRoutes location={location} referenceData={referenceData} />
         <div className='title'>
             <h3>{ referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].set_v2_name }</h3>
             <p>Market Values</p>
