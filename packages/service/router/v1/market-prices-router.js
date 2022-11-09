@@ -4,6 +4,7 @@ const { formatMarketPricesFromConcat, formatTopTenAverageResults } = require('..
 const { addMarketPricesMySQL, getMarketPricesMySQL } = require('../../db/queries/marketPriceQueries')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
+const { formatItems } = require('../../middleware')
 
 
 marketPricesRouter.post('/',
@@ -32,6 +33,7 @@ marketPricesRouter.get('/set-id/:set_v2_id',
     QueueQueries.marketPrices.selectBySetId,
     executeQueries,    
     formatMarketPricesFromConcat,
+    formatItems,
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)

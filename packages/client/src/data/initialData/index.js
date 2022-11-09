@@ -6,6 +6,7 @@ export const initialReferenceDataValues = {
     expansionItemFilters: [],
     products: [],
     rarities: [],
+    marketSearchResults: [],
     dateRange: 'week',
     setSort: {
         value: 'release_date',

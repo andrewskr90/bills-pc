@@ -5,24 +5,6 @@ import BillsPcService from '../../api/bills-pc'
 import Toolbar from '../../layouts/toolbar'
 import PreviousRoutes from '../../layouts/previous-routes'
 
-const formatSetMarketData = (marketPrices) => {
-    const formattedSetMarketData = marketPrices.map(item => {
-        return {
-            card_id: item.card_v2_id,
-            name: item.card_v2_name || item.product_name,
-            number: item.card_v2_number,
-            rarity: item.card_v2_rarity,
-            foil_only: item.card_v2_foil_only,
-            product_id: item.product_id,
-            release_date: item.product_release_date,
-            description: item.product_description,
-            market_prices: item.market_price_prices,
-            tcgplayer_product_id: item.tcgplayer_product_id
-        }
-    })
-    return formattedSetMarketData
-}
-
 const ExpansionItemsMarketplace = (props) => {
     const {
         referenceData,
@@ -43,7 +25,7 @@ const ExpansionItemsMarketplace = (props) => {
                                 if (expansion.set_v2_id === selectedSetId) {
                                     return {
                                         ...expansion,
-                                        items: formatSetMarketData(res.data)
+                                        items: res.data
                                     }
                                 } else {
                                     return expansion
