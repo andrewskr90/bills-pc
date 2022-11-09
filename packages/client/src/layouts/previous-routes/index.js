@@ -6,24 +6,20 @@ const PreviousRoutes = (props) => {
     const { location, referenceData } = props
     const navigate = useNavigate()
     const formatPrevMarketRoutes = (prevRoutes) => {
-        return prevRoutes.map((route, idx) => {
-            if (idx === 0) {
+        return prevRoutes.filter((route, idx) => idx < prevRoutes.length-1)
+            .map((route) => {
                 return { 
                     [route]: {
                         formatted: 'Market',
                         path: `/${route}`
                     } 
                 }
-            }
         })
     }
 
     const generatePrevRoutes = () => {
         const prevRoutes = location.pathname.split('/')
         prevRoutes.shift() // remove initial slash in pathname
-        if (!location.search) {
-            prevRoutes.pop()
-        }
         if (prevRoutes[0] === 'market'){
             return formatPrevMarketRoutes(prevRoutes)
         }
