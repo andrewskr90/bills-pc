@@ -15,7 +15,7 @@ const SearchResults = (props) => {
     const [searchValue, setSearchValue] = useState('')
     const location = useLocation()
     const sortKey = 'itemSort'
-    const filterKey = 'expansionItemFilters'
+    const filterKey = 'market'
 
     const searchMarketItems = async (category, searchValue) => {
         let marketSearchResults = []
@@ -84,7 +84,6 @@ const SearchResults = (props) => {
             <h3>{`Search Results for "${searchValue}"`}</h3>
         </div>
         <Toolbar 
-            viewFilter={true} 
             viewSort={true}
             viewRangeSelector={true}
             filterKey={filterKey}

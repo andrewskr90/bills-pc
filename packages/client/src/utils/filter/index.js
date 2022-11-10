@@ -1,29 +1,33 @@
+import { stringToCamelCase } from "../string"
+
 export const filterMarketItems = (marketItems, referenceData) => {
-    const filterLib = {}
-    referenceData.expansionItemFilters.forEach(filter => {
-        filterLib[Object.keys(filter)[0]] = true
-    })
-    let rarityFilterActive
-    referenceData.rarities.forEach(rarity => {
-        if (filterLib[rarity]) {
-            rarityFilterActive = true
-        }
+    let filterActive = false
+    let rarityFilterActive = false
+    const marketFilters = referenceData.filter.market
+    const filterTypes = Object.keys(marketFilters)
+    filterTypes.forEach(type => {
+        Object.keys(marketFilters[type]).forEach(filter => {
+            if (marketFilters[type][filter]) {
+                if (type === 'cardRarity') rarityFilterActive = true
+                filterActive = true
+            }
+        })
     })
     
     return marketItems.filter(item => {
         let includeItem = false
         if (item.market_prices !== null) {
-            if (referenceData.expansionItemFilters.length > 0) {
+            if (filterActive) {
                 if (item.product_id) {
-                    if (filterLib['Product']) {
+                    if (marketFilters.itemType.product) {
                         includeItem = true
                     }
                 } else {
                     if (rarityFilterActive) {
-                        if (filterLib[item.rarity]) {
+                        if (marketFilters.cardRarity[stringToCamelCase(item.rarity)]) {
                             includeItem = true
                         }
-                    } else if (filterLib['Card']) {
+                    } else if (marketFilters.itemType.card) {
                         if (item.card_id) {
                             includeItem = true
                         }
@@ -35,4 +39,17 @@ export const filterMarketItems = (marketItems, referenceData) => {
         }
         return includeItem
     })
+}
+
+export const countFilters = (referenceData, filterKey) => {
+    let filterCount = 0
+    const filterConfig = referenceData.filter[filterKey]
+    const filterTypes = Object.keys(filterConfig)
+    filterTypes.forEach(type => {
+        const filters = Object.keys(filterConfig[type])
+        filters.forEach(filter => {
+            if (filterConfig[type][filter]) filterCount += 1
+        })
+    })
+    return filterCount
 }

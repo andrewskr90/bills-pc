@@ -50,7 +50,7 @@ const ExpansionsMarketplace = (props) => {
             <p className='loadingGradient'>Loading Top 10 Card Averages...</p>}
         </div>
         <Toolbar
-            viewFilter={false} 
+            filterKey={false} 
             viewSort={true}
             viewRangeSelector={false}
             referenceData={referenceData}
