@@ -9,6 +9,8 @@ const MarketplaceChart = (props) => {
     const itemPercentChange = item.formattedPrices.changes[referenceData.dateRange]
 
     return (<div className='marketplaceChart'>
+        {itemPercentChange
+        ?
         <Line 
             datasetIdKey={itemId}
             data={{
@@ -53,6 +55,8 @@ const MarketplaceChart = (props) => {
                 }
             }}
         />
+        :
+        <p className='unavailable'>Market Trend Unavailable</p>}
     </div>)
 }
 
