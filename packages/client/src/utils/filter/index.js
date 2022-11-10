@@ -16,26 +16,24 @@ export const filterMarketItems = (marketItems, referenceData) => {
     
     return marketItems.filter(item => {
         let includeItem = false
-        if (item.market_prices !== null) {
-            if (filterActive) {
-                if (item.product_id) {
-                    if (marketFilters.itemType.product) {
-                        includeItem = true
-                    }
-                } else {
-                    if (rarityFilterActive) {
-                        if (marketFilters.cardRarity[stringToCamelCase(item.rarity)]) {
-                            includeItem = true
-                        }
-                    } else if (marketFilters.itemType.card) {
-                        if (item.card_id) {
-                            includeItem = true
-                        }
-                    }
+        if (filterActive) {
+            if (item.product_id) {
+                if (marketFilters.itemType.product) {
+                    includeItem = true
                 }
             } else {
-                includeItem = true
+                if (rarityFilterActive) {
+                    if (marketFilters.cardRarity[stringToCamelCase(item.rarity)]) {
+                        includeItem = true
+                    }
+                } else if (marketFilters.itemType.card) {
+                    if (item.card_id) {
+                        includeItem = true
+                    }
+                }
             }
+        } else {
+            includeItem = true
         }
         return includeItem
     })
