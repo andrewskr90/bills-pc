@@ -13,6 +13,7 @@ const ExpansionItemsMarketplace = (props) => {
     const location = useLocation()
     const selectedSetId = useParams()['setId']
     const sortKey = 'itemSort'
+    const filterKey = 'market'
 
     useEffect(() => {
         if (referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length === 0) {
@@ -45,10 +46,9 @@ const ExpansionItemsMarketplace = (props) => {
             <p>Market Values</p>
         </div>
         <Toolbar 
-            viewFilter={true} 
+            filterKey={filterKey} 
             viewSort={true}
             viewRangeSelector={true}
-            filterKey={'expansionItemFilters'}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             dataObject={referenceData}

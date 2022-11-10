@@ -42,6 +42,9 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'desc',
                 formatted: 'Percent Change'}
         }
+    },
+    filter: {
+        market: null
     }
 }
 

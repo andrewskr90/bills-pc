@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
 import FilterModal from './FilterModal'
+import { countFilters } from '../../utils/filter'
 import './assets/filter.less'
 
 const Filter = (props) => {
     const { 
         referenceData,
         setReferenceData,
-        // showFilterModal,
-        // setShowFilterModal,
         filterKey
     } = props
     const [showFilterModal, setShowFilterModal] = useState(false)
-
+    const filterCount = countFilters(referenceData, filterKey)
 
     const openFilterModal = () => {
         setShowFilterModal(true)
@@ -20,9 +19,9 @@ const Filter = (props) => {
     return (<div className='filter'>
         <button className='openFilterModal' onClick={openFilterModal}>
             <p>Filter</p>
-            {referenceData.expansionItemFilters.length > 0
+            {filterCount
             ?
-            <div className='filterCount'>{referenceData.expansionItemFilters.length}</div>
+            <div className='filterCount'>{filterCount}</div>
             :
             <></>}
         </button>
