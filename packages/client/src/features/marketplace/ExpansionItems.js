@@ -15,7 +15,8 @@ const ExpansionItems = (props) => {
     }
 
     return (<div className='expansionItems'>
-        {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData)).sort(generateMarketItemSortCB(referenceData, sortKey))
+        {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market))
+            .sort(generateMarketItemSortCB(referenceData, sortKey))
             .map(item => <ExpansionItem referenceData={referenceData} item={item} />)}
     </div>)
 }

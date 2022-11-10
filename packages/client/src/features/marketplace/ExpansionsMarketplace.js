@@ -1,10 +1,12 @@
 import React from 'react'
 import Toolbar from '../../layouts/toolbar'
 import Expansion from './Expansion'
+import { filterExpansions } from '../../utils/filter'
 
 const ExpansionsMarketplace = (props) => {
     const { referenceData, setReferenceData } = props
     const sortKey = 'setSort'
+    const filterKey = 'expansion'
     const sortMarketSetsCB = (a, b) => {
         if (referenceData[sortKey].value === 'topTenAverageToday') {
             if (a.topTenAverage) {
@@ -50,18 +52,22 @@ const ExpansionsMarketplace = (props) => {
             <p className='loadingGradient'>Loading Top 10 Card Averages...</p>}
         </div>
         <Toolbar
-            filterKey={false} 
-            viewSort={true}
+            filterKey={filterKey} 
+            sortKey={sortKey}
             viewRangeSelector={false}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             dataObject={referenceData}
             setDataObject={setReferenceData}
-            sortKey={sortKey}
         />
         <div className='expansions'>
-            {referenceData.sets.sort(sortMarketSetsCB).map(referenceDataExpansion => {
-                return <Expansion referenceData={referenceData} referenceDataExpansion={referenceDataExpansion} />
+            {filterExpansions(referenceData.sets, referenceData.filter.expansion)
+                .sort(sortMarketSetsCB)
+                .map(referenceDataExpansion => {
+                    return <Expansion 
+                        referenceData={referenceData} 
+                        referenceDataExpansion={referenceDataExpansion} 
+                    />
             })}
         </div>
     </div>)

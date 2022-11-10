@@ -1,4 +1,5 @@
 import React from 'react'
+import { clearFilters } from '../../utils/filter'
 import { camelCaseToCapitalized } from '../../utils/string'
 
 const FilterModal = (props) => {
@@ -20,10 +21,13 @@ const FilterModal = (props) => {
         })
     }
 
-    const clearFilters = () => {
+    const handleClearFilters = () => {
         setReferenceData({
             ...referenceData,
-            [filterKey]: []
+            filter: {
+                ...referenceData.filter,
+                [referenceData.filter[filterKey]]: clearFilters(referenceData.filter[filterKey])
+            }
         })
     }
 
@@ -36,14 +40,15 @@ const FilterModal = (props) => {
                     <div className='filterBubbles'>
                         {Object.keys(referenceData.filter[filterKey][filterType]).map(filter => {
                             return <div className={`filterBubble ${referenceData.filter[filterKey][filterType][filter] ? 'active' : ''}`} onClick={() => toggleFilter(filterType, filter)}>
-                                <p>{camelCaseToCapitalized(filter)}</p>
+                                {/* filter keys are already formatted */}
+                                <p>{filter}</p>
                             </div>
                         })}
                     </div>
                 </div>
             })}
             <div className='clearAndClose'>
-                <button onClick={clearFilters}>Clear All</button>
+                <button onClick={handleClearFilters}>Clear All</button>
                 <button onClick={() => setShowFilterModal(false)}>Close</button>
             </div>
         </div>

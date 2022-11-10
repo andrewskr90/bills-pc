@@ -53,9 +53,23 @@ const App = () => {
             cardRarity: {}
         }
         rarities.forEach(rarity => {
-            filterMarketItemsConfig.cardRarity[stringToCamelCase(rarity)] = false
+            filterMarketItemsConfig.cardRarity[rarity] = false
         })
         return filterMarketItemsConfig
+    }
+
+    const calcFilterMarketExpansionsConfig = (expansions) => {
+        const expansionSeries = {}
+        expansions.forEach(expansion => {
+            if (expansion.set_v2_series) {
+                if (!expansionSeries[expansion.set_v2_series]) {
+                    expansionSeries[expansion.set_v2_series] = false
+                }
+            }
+        })
+        return {
+            expansionSeries: expansionSeries
+        }
     }
 
     useEffect(() => {
@@ -78,7 +92,8 @@ const App = () => {
                 sets: formattedExpansions(fetchedExpansions),
                 rarities: fetchedRarities,
                 filter: {
-                    market: calcFilterMarketItemsConfig(fetchedRarities)
+                    market: calcFilterMarketItemsConfig(fetchedRarities),
+                    expansion: calcFilterMarketExpansionsConfig(fetchedExpansions)
                 }
             })
             initialData = true
@@ -104,7 +119,7 @@ const App = () => {
             })
         }
     }, [topTenLoaded])
-    
+
     return (<>
         {initialData
         ?
