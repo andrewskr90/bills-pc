@@ -1,32 +1,39 @@
-import { stringToCamelCase } from "../string"
 
-export const filterMarketItems = (marketItems, referenceData) => {
-    let filterActive = false
-    let rarityFilterActive = false
-    const marketFilters = referenceData.filter.market
-    const filterTypes = Object.keys(marketFilters)
-    filterTypes.forEach(type => {
-        Object.keys(marketFilters[type]).forEach(filter => {
-            if (marketFilters[type][filter]) {
-                if (type === 'cardRarity') rarityFilterActive = true
-                filterActive = true
-            }
+export const countFilters = (filterConfig, filterType) => {
+    let filterCount = 0
+    //check if specific filter type is active
+    if (filterType) {
+        Object.keys(filterConfig[filterType]).forEach(filter => {
+            if (filterConfig[filterType][filter]) filterCount += 1
         })
-    })
+    // check if any filters are active
+    } else {
+        Object.keys(filterConfig).forEach(filterType => {
+            Object.keys(filterConfig[filterType]).forEach(filter => {
+                if (filterConfig[filterType][filter]) filterCount += 1
+            })
+        })
+    }
+    return filterCount
+}
+
+export const filterMarketItems = (marketItems, marketFilterConfig) => {
+    let filterCount = countFilters(marketFilterConfig)
+    let rarityFilterCount = countFilters(marketFilterConfig, 'cardRarity')
     
     return marketItems.filter(item => {
         let includeItem = false
-        if (filterActive) {
+        if (filterCount > 0) {
             if (item.product_id) {
-                if (marketFilters.itemType.product) {
+                if (marketFilterConfig.itemType.product) {
                     includeItem = true
                 }
             } else {
-                if (rarityFilterActive) {
-                    if (marketFilters.cardRarity[stringToCamelCase(item.rarity)]) {
+                if (rarityFilterCount > 0) {
+                    if (marketFilterConfig.cardRarity[item.rarity]) {
                         includeItem = true
                     }
-                } else if (marketFilters.itemType.card) {
+                } else if (marketFilterConfig.itemType.card) {
                     if (item.card_id) {
                         includeItem = true
                     }
@@ -39,15 +46,27 @@ export const filterMarketItems = (marketItems, referenceData) => {
     })
 }
 
-export const countFilters = (referenceData, filterKey) => {
-    let filterCount = 0
-    const filterConfig = referenceData.filter[filterKey]
-    const filterTypes = Object.keys(filterConfig)
-    filterTypes.forEach(type => {
-        const filters = Object.keys(filterConfig[type])
-        filters.forEach(filter => {
-            if (filterConfig[type][filter]) filterCount += 1
+export const filterExpansions = (expansions, expansionFilterConfig) => {
+    const filterCount = countFilters(expansionFilterConfig)
+
+    return expansions.filter(expansion => {
+        let includeExpansion = false
+        if (filterCount > 0) {
+            if (expansionFilterConfig.expansionSeries[expansion.set_v2_series]) {
+                includeExpansion = true
+            }
+        } else {
+            includeExpansion = true
+        }
+        return includeExpansion
+    })
+}
+
+export const clearFilters = (filterConfig) => {
+    Object.keys(filterConfig).forEach(filterType => {
+        Object.keys(filterConfig[filterType]).forEach(filter => {
+            filterConfig[filterType][filter] = false
         })
     })
-    return filterCount
+    return filterConfig
 }

@@ -84,19 +84,18 @@ const SearchResults = (props) => {
             <h3>{`Search Results for "${searchValue}"`}</h3>
         </div>
         <Toolbar 
-            viewSort={true}
             viewRangeSelector={true}
+            sortKey={sortKey}
             filterKey={filterKey}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             dataObject={referenceData}
             setDataObject={setReferenceData}
-            sortKey={sortKey}
         />
         {referenceData.marketSearchResults.length > 0
         ?
         <div className='expansionItems'>
-            {applyMarketChanges(filterMarketItems(referenceData.marketSearchResults, referenceData)).sort(generateMarketItemSortCB(referenceData, sortKey)).map(result => {
+            {applyMarketChanges(filterMarketItems(referenceData.marketSearchResults, referenceData.filter.market)).sort(generateMarketItemSortCB(referenceData, sortKey)).map(result => {
                 return <ExpansionItem referenceData={referenceData} item={result} />
             })}
         </div>

@@ -10,7 +10,7 @@ const Filter = (props) => {
         filterKey
     } = props
     const [showFilterModal, setShowFilterModal] = useState(false)
-    const filterCount = countFilters(referenceData, filterKey)
+    const filterCount = countFilters(referenceData.filter[filterKey])
 
     const openFilterModal = () => {
         setShowFilterModal(true)
