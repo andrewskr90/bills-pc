@@ -13,46 +13,6 @@ const Marketplace = (props) => {
 
     const submitSearch = async (relayedValues) => {
         const { category, value } = relayedValues
-        // let marketSearchResults = []
-        // if (categoryValue === 'All' || categoryValue === 'Cards') {
-        //     if (searchValue === '') {
-        //         await BillsPcService.getCardsV2WithValues()
-        //             .then(res => marketSearchResults = [
-        //                 ...marketSearchResults,
-        //                 ...res.data
-        //             ])
-        //             .catch(err => console.log(err))
-
-        //     } else {
-        //         await BillsPcService.getCardsV2WithValues({searchValue})
-        //                 .then(res => marketSearchResults = [
-        //                 ...marketSearchResults,
-        //                 ...res.data
-        //             ])
-        //                 .catch(err => console.log(err))
-        //     }
-        // } if (categoryValue === 'All' || categoryValue === 'Products') {
-        //     if (searchValue === '') {
-        //         await BillsPcService.getProductsWithValues()
-        //             .then(res => marketSearchResults = [
-        //                 ...marketSearchResults,
-        //                 ...res.data
-        //             ])
-        //             .catch(err => console.log(err))
-
-        //     } else {
-        //         await BillsPcService.getProductsWithValues({searchValue})
-        //                 .then(res => marketSearchResults = [
-        //                 ...marketSearchResults,
-        //                 ...res.data
-        //             ])
-        //                 .catch(err => console.log(err))
-        //     }
-        // }
-        // setReferenceData({
-        //     ...referenceData,
-        //     marketSearchResults: marketSearchResults
-        // })
         navigate(`search?category=${category}&value=${value}`)
     }
 
