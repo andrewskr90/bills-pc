@@ -6,7 +6,6 @@ import './assets/toolbar.less'
 
 const Toolbar = (props) => {
     const { 
-        viewFilter, 
         viewSort, 
         viewRangeSelector, 
         filterKey,
@@ -18,7 +17,7 @@ const Toolbar = (props) => {
     } = props
 
     return (<div className='toolbar'>
-        {viewFilter ? <Filter filterKey={filterKey} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
+        {filterKey ? <Filter filterKey={filterKey} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
         {viewSort ? <Sort sortKey={sortKey} dataObject={dataObject} setDataObject={setDataObject} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
         {viewRangeSelector ? <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
     </div>)

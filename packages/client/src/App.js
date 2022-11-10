@@ -4,11 +4,11 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Login from './pages/Login'
 import Marketplace from './features/marketplace'
 import NavBar from './layouts/NavBar'
-
 import BillsPcService from './api/bills-pc'
-import './styles/App.less'
 import InDevelopment from './pages/InDevelopment'
 import { initialReferenceDataValues } from './data/initialData'
+import { stringToCamelCase } from './utils/string'
+import './styles/App.less'
 
 let initialData = false
 
@@ -44,6 +44,20 @@ const App = () => {
         return updatedReferenceData
     }
 
+    const calcFilterMarketItemsConfig = (rarities) => {
+        const filterMarketItemsConfig = {
+            itemType: {
+                card: false,
+                product: false
+            },
+            cardRarity: {}
+        }
+        rarities.forEach(rarity => {
+            filterMarketItemsConfig.cardRarity[stringToCamelCase(rarity)] = false
+        })
+        return filterMarketItemsConfig
+    }
+
     useEffect(() => {
         (async () => {
             let fetchedUserClaims
@@ -62,7 +76,10 @@ const App = () => {
             setReferenceData({
                 ...referenceData,
                 sets: formattedExpansions(fetchedExpansions),
-                rarities: fetchedRarities
+                rarities: fetchedRarities,
+                filter: {
+                    market: calcFilterMarketItemsConfig(fetchedRarities)
+                }
             })
             initialData = true
             await BillsPcService.getMarketPrices({ topTenAverage: true })
