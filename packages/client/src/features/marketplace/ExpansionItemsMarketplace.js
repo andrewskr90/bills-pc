@@ -47,13 +47,12 @@ const ExpansionItemsMarketplace = (props) => {
         </div>
         <Toolbar 
             filterKey={filterKey} 
-            viewSort={true}
+            sortKey={sortKey}
             viewRangeSelector={true}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             dataObject={referenceData}
             setDataObject={setReferenceData}
-            sortKey={sortKey}
         />
         {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
         ?

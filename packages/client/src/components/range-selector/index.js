@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import './assets/RangeSelector.less'
+import React from 'react'
+import './assets/rangeSelector.less'
 
 const RangeSelector = (props) => {
     const { referenceData, setReferenceData } = props
