@@ -28,6 +28,15 @@ marketPricesRouter.get('/card-id/:card_id',
     }
 )
 
+marketPricesRouter.get('/product-id/:product_id',
+    QueueQueries.init,
+    QueueQueries.marketPrices.selectByProductId,
+    executeQueries,
+    (req, res, next) => {
+        res.status(200).json(req.results)
+    }
+)
+
 marketPricesRouter.get('/set-id/:set_v2_id',
     QueueQueries.init,
     QueueQueries.marketPrices.selectBySetId,

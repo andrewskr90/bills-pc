@@ -18,6 +18,17 @@ const selectByCardId = (req, res, next) => {
     next()
 }
 
+const selectByProductId = (req, res, next) => {
+    // created_date is essential for marketPriceScraper
+    let query = `SELECT * FROM market_prices WHERE market_price_product_id = '${req.params.product_id}' ORDER BY created_date DESC`
+    if (req.query.limit) {
+        query += ` LIMIT ${req.query.limit}`
+    }
+    query += ';'
+    req.queryQueue.push(query)
+    next()
+}
+
 const selectBySetId = (req, res, next) => {
     let query = `SELECT 
         GROUP_CONCAT('[',UNIX_TIMESTAMP(m.created_date), ',', m.market_price_price,']' ORDER BY m.created_date DESC SEPARATOR ',') as market_price_prices,
@@ -90,5 +101,6 @@ module.exports = {
     insert,
     selectBySetId,
     selectByCardId,
+    selectByProductId,
     selectTopTenAverage
 }
