@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
-import MarketplaceChart from './MarketplaceChart'
 import { useNavigate } from 'react-router-dom'
+import MarketplaceChart from './MarketplaceChart'
+import { generateDisplayedMarketValue } from '../../utils/market'
 
 const ExpansionItem = (props) => {
     const { item, referenceData } = props
     const [loadImage, setLoadImage] = useState(true)
     const navigate = useNavigate()
-    let displayedMarketvalue = item.marketValue
-    if (displayedMarketvalue > 100) {
-        displayedMarketvalue = Math.round(displayedMarketvalue)
+    
+    
+
+    const handleSelectItem = (item) => {
+        const expansionId = item.set.id
+        const itemId = item.card_id || item.product_id
+        navigate(`/market/${expansionId}/${itemId}`)
     }
 
     const handleImageError = () => {
@@ -17,7 +22,7 @@ const ExpansionItem = (props) => {
 
     return (
         <div 
-            onClick={() => navigate(`/market/${item.set.id}`)} 
+            onClick={() => handleSelectItem(item)} 
             className={`expansionItem ${item.formattedPrices.changes[referenceData.dateRange] > 0 
                 ? 'up' 
                 : item.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
@@ -39,7 +44,7 @@ const ExpansionItem = (props) => {
             <>
             <MarketplaceChart item={item} referenceData={referenceData} />
             <div className='valueAndChange'>
-                <p className='marketValue'>${displayedMarketvalue}</p>
+                <p className='marketValue'>${generateDisplayedMarketValue(item.marketValue)}</p>
                 <p className='percentChange'>
                     {item.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
                     {item.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
