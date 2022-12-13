@@ -27,14 +27,14 @@ const Marketplace = (props) => {
                 />}
             />
             <Route 
-                path='/:setId' 
+                path='/:setId/*' 
                 element={<ExpansionItemsMarketplace 
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData}
                 />} 
             />
             <Route 
-                path='/search'
+                path='/search/*'
                 element={<SearchResults 
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}

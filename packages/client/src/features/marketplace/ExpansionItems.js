@@ -7,7 +7,8 @@ import { filterMarketItems } from '../../utils/filter'
 
 const ExpansionItems = (props) => {
     const { referenceData, sortKey } = props
-    const selectedSetId = useParams()['setId'] 
+    const params = useParams()
+    const selectedSetId = params['setId']
 
     const matchSetToId = (marketDataSets, targetSetId) => {
         const matchedSet = marketDataSets.filter(set => set.set_v2_id == targetSetId)[0]
