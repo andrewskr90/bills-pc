@@ -107,3 +107,11 @@ export const applyMarketChanges = (itemsArray) => {
         }
     })
 }
+
+export const generateDisplayedMarketValue = (marketValue) => {
+    let displayedMarketvalue = marketValue
+    if (displayedMarketvalue > 100) {
+        displayedMarketvalue = Math.round(displayedMarketvalue)
+    }
+    return displayedMarketvalue
+}
