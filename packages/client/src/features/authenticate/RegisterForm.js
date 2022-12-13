@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
+import './assets/registerForm.less'
 
 const initialFormValues = {
     user_name: '',
@@ -13,6 +15,7 @@ const initialFormValues = {
 const RegisterForm = () => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [errorMessage, setErrorMessage] = useState('')
+    const navigate = useNavigate()
 
     const handleChange = (e) => {
         setErrorMessage('')
@@ -28,7 +31,7 @@ const RegisterForm = () => {
             .then(res => {
                 setErrorMessage('')
                 setFormValues(initialFormValues)
-                // setResponse(res.message)
+                navigate('/collection')
             }).catch(err => {
                 console.log(err.response)
                 setErrorMessage(err.response.data.message)

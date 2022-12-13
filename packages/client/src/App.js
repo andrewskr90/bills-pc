@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'
+import Collection from './features/collection'
 import Login from './pages/Login'
 import Marketplace from './features/marketplace'
 import NavBar from './layouts/NavBar'
 import BillsPcService from './api/bills-pc'
-import InDevelopment from './pages/InDevelopment'
 import { initialReferenceDataValues } from './data/initialData'
-import { stringToCamelCase } from './utils/string'
 import './styles/App.less'
+import RegisterForm from './features/authenticate/RegisterForm'
 
 let initialData = false
 
@@ -120,33 +119,44 @@ const App = () => {
         }
     }, [topTenLoaded])
 
-    return (<>
-        {initialData
-        ?
-        <div className='app'>
-            <header>
+    // if (location.pathname !== '/register') {
+        return (<>
+            {initialData
+            ?
+            <div className='app'>
+                <header>
+                    <h1>Bill's PC</h1>
+                </header>
+                <Routes>
+                    <Route path='/register' 
+                        element={<RegisterForm />}
+                    />
+                    <Route path='/market/*' 
+                        element={<Marketplace 
+                            referenceData={referenceData} 
+                            setReferenceData={setReferenceData}
+                        />} 
+                    />
+                    <Route 
+                        path='/collection' 
+                        element={<Collection 
+                            userClaims={userClaims} 
+                            setUserClaims={setUserClaims}
+                            collectedCards={collectedCards} 
+                            setCollectedCards={setCollectedCards} 
+                        />} 
+                    />
+                    <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
+                </Routes>
+                <NavBar />
+            </div>
+            :
+            <div className='appLoading'>
                 <h1>Bill's PC</h1>
-            </header>
-            <Routes>
-                <Route path='/market/*' 
-                    element={<Marketplace 
-                        referenceData={referenceData} 
-                        setReferenceData={setReferenceData}
-                    />} 
-                />
-                {/* <Route path='/collection' element={<Collection userClaims={userClaims} collectedCards={collectedCards} setCollectedCards={setCollectedCards} />} /> */}
-                <Route path='/collection' element={<InDevelopment />} />
-                <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
-            </Routes>
-            <NavBar />
-        </div>
-        :
-        <div className='appLoading'>
-            <h1>Bill's PC</h1>
-            <div className='loadingGradient'>Loading...</div>
-        </div>    
-        }
-    </>)
+                <div className='loadingGradient'>Loading...</div>
+            </div>    
+            }
+        </>)
 }
 
 export default App

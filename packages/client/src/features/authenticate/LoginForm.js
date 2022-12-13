@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
+import './assets/loginForm.less'
 
 const initialFormValues = {
     user_name: '',
     user_password: ''
-
 }
 
 
@@ -13,7 +13,6 @@ const LoginForm = (props) => {
     const [formValues, setFormValues] = useState(initialFormValues)
     const [errorMessage, setErrorMessage] = useState('')
     const { setUserClaims } = props
-
     const navigate = useNavigate()
 
     const handleChange = (e) => {
@@ -31,7 +30,6 @@ const LoginForm = (props) => {
             .then(res => {
                 setErrorMessage('')
                 setUserClaims(res.data)
-                navigate('/')
             }).catch(err => {
                 setErrorMessage(err.response.data.message)
             })
@@ -40,7 +38,6 @@ const LoginForm = (props) => {
     return (<div className='loginForm'>
         <form onSubmit={submitForm}>
             <div className='formInputs'>
-                <h2>Login</h2>
                 <input
                     name='user_name'
                     type='string'
@@ -59,6 +56,10 @@ const LoginForm = (props) => {
             <button>Login</button>
         </form>
         <p className='error'>{errorMessage}</p>
+        <div className='registerSuggestion'>
+            <p>Don't have an account?</p>
+            <button onClick={() => navigate('/register')}>Register</button>
+        </div>
     </div>)
 }
 

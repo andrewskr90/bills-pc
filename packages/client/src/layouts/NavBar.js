@@ -8,23 +8,17 @@ const NavBar = () => {
     useEffect(() => {
         if (location.pathname.includes('/collection')) {
             setSelected('collection')
-        // if (location.pathname.includes('/rip')) {
-        //     setSelected('rip')
-        } else if (location.pathname.includes('import')) {
-            setSelected('import')
-        // } else if (location.pathname.includes('sell')) {
-        //     setSelected('sell')
-        // } else if (location.pathname.includes('trade')) {
-        //     setSelected('trade')
-        } else {
-            setSelected('marketplace')
+        } else if (location.pathname.includes('/market')) {
+            setSelected('market')
+        } else if (location.pathname.includes('/register')) {
+            setSelected('register')
         }
     }, [location])
 
     return (<div className='navBar'>
         <Link 
             to='/market' 
-            className={`link ${selected === 'marketplace' ? 'selected': ''}`}
+            className={`link ${selected === 'market' ? 'selected': ''}`}
         >
             Market
         </Link>
@@ -34,12 +28,6 @@ const NavBar = () => {
         >
             Collection
         </Link>
-        {/* <Link 
-            to='/import' 
-            className={`link ${selected === 'import' ? 'selected': ''}`}
-        >
-            Buy
-        </Link> */}
     </div>)
 }
 
