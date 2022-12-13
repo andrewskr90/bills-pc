@@ -5,11 +5,12 @@ import CollectedCards from './CollectedCards'
 import PortfolioToolbar from './PortfolioToolbar'
 import CollectedCardModal from './CollectedCardModal'
 import PurchaseCardsModal from './PurchaseCardsModal'
+import LoginForm from '../authenticate/LoginForm'
 import { initialSelectedPurchaseCardsValues, initialSelectedCollectedCardsValues } from '../../data/initialData'
 import './assets/collection.less'
 
 const Collection = (props) => {
-    const { userClaims } = props
+    const { userClaims, setUserClaims } = props
     const [collectedCards, setCollectedCards] = useState([])
     const [selectedCardModal, setSelectedCardModal] = useState(false)
     const [selectedPurchaseModal, setSelectedPurchaseModal] = useState(false)
@@ -96,7 +97,7 @@ const Collection = (props) => {
             }).catch(err => {
                 console.log(err)
             })
-    }, [])
+    }, [userClaims])
 
     const selectCollectedCards = async (e) => {
         const selectedCollectedCards = collectedCards.filter(cards => {
@@ -153,44 +154,50 @@ const Collection = (props) => {
         setSelectedPurchaseModal(false)
     }
 
-    return (<div className='collection page'>
-        {collectedCards.length > 0
-        ?
-        <>
-            {/* <PortfolioToolbar /> */}
-            <h3>Portfolio</h3>
-            <CollectedCards 
-                collectedCards={collectedCards} 
-                selectCollectedCards={selectCollectedCards} 
-            />
-            {selectedCardModal
+    if (userClaims) {
+        return (<div className='collection page'>
+            {collectedCards.length > 0
             ?
-            <CollectedCardModal 
-                userClaims={userClaims} 
-                selectedCollectedCards={selectedCollectedCards} 
-                handleViewCardPurchase={handleViewCardPurchase} 
-                handleCloseCardModal={handleCloseCardModal}
-            />
+            <>
+                <CollectedCards 
+                    collectedCards={collectedCards} 
+                    selectCollectedCards={selectCollectedCards} 
+                />
+                {selectedCardModal
+                ?
+                <CollectedCardModal 
+                    userClaims={userClaims} 
+                    selectedCollectedCards={selectedCollectedCards} 
+                    handleViewCardPurchase={handleViewCardPurchase} 
+                    handleCloseCardModal={handleCloseCardModal}
+                />
+                :
+                <></>}
+                {selectedPurchaseModal
+                ?
+                <PurchaseCardsModal 
+                    selectedPurchaseCards={selectedPurchaseCards} 
+                    selectCollectedCards={selectCollectedCards} 
+                    handleClosePurchaseModal={handleClosePurchaseModal} 
+                />
+                :
+                <></>}
+            </>
             :
-            <></>}
-            {selectedPurchaseModal
-            ?
-            <PurchaseCardsModal 
-                selectedPurchaseCards={selectedPurchaseCards} 
-                selectCollectedCards={selectCollectedCards} 
-                handleClosePurchaseModal={handleClosePurchaseModal} 
-            />
-            :
-            <></>}
-        </>
-        :
-        <div className='emptyCollection page'>
-            <p>No items in your collection!</p>
-            <Link to='/import'>
-                <button>Add Items</button>
-            </Link>
-        </div>}
-    </div>)
+            <div className='emptyCollection page'>
+                <p>No items in your collection!</p>
+                <Link to='/import'>
+                    <button>Add Items</button>
+                </Link>
+            </div>}
+        </div>)
+    } else {
+        return (<div className='collection page'>
+            <p className='loginWarning'>You must be logged in to view your portfolio.</p>
+            <LoginForm setUserClaims={setUserClaims} />
+        </div>)
+    }
+
 }
 
 export default Collection
