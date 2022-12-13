@@ -1,27 +1,41 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { locationPathnameParsed } from '../../utils/location'
 import './assets/previousRoutes.less'
 
 const PreviousRoutes = (props) => {
     const { location, referenceData } = props
     const navigate = useNavigate()
+
     const formatPrevMarketRoutes = (prevRoutes) => {
-        return prevRoutes.filter((route, idx) => idx < prevRoutes.length-1)
+        let dynamicPath = ''
+        return prevRoutes.filter((route, idx) => idx < prevRoutes.length-1) // remove current route
             .map((route) => {
-                return { 
-                    [route]: {
-                        formatted: 'Market',
-                        path: `/${route}`
-                    } 
+
+                if (referenceData.sets.filter(expansion => expansion.set_v2_id === route).length > 0) {
+                    dynamicPath += `/${route}`
+                    return {
+                        [route]: {
+                            formatted: referenceData.sets.filter(expansion => expansion.set_v2_id === route)[0].set_v2_name,
+                            path: dynamicPath
+                        }
+                    }
+                } else if (route === 'market') {
+                    dynamicPath += `/${route}`
+                    return { 
+                        [route]: {
+                            formatted: 'Market',
+                            path: dynamicPath
+                        } 
+                    }
                 }
         })
     }
 
     const generatePrevRoutes = () => {
-        const prevRoutes = location.pathname.split('/')
-        prevRoutes.shift() // remove initial slash in pathname
-        if (prevRoutes[0] === 'market'){
-            return formatPrevMarketRoutes(prevRoutes)
+        const parsedPath = locationPathnameParsed(location)
+        if (parsedPath[0] === 'market'){
+            return formatPrevMarketRoutes(parsedPath)
         }
     }
 
