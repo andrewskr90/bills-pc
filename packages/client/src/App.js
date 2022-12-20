@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom'
+import { Routes, Route, useNavigate, useLocation, useParams, Link } from 'react-router-dom'
 import Collection from './features/collection'
 import Login from './pages/Login'
 import Marketplace from './features/marketplace'
@@ -8,6 +8,7 @@ import BillsPcService from './api/bills-pc'
 import { initialReferenceDataValues } from './data/initialData'
 import './styles/App.less'
 import RegisterForm from './features/authenticate/RegisterForm'
+import SupportUs from '../src/pages/SupportUs'
 
 let initialData = false
 
@@ -125,7 +126,10 @@ const App = () => {
             ?
             <div className='app'>
                 <header>
-                    <h1>Bill's PC</h1>
+                    <Link to='/market'>
+                        <h1>Bill's PC</h1>
+                    </Link>
+                    <Link to='support-us'>Support Us</Link>
                 </header>
                 <Routes>
                     <Route path='/register' 
@@ -138,15 +142,18 @@ const App = () => {
                         />} 
                     />
                     <Route 
-                        path='/collection' 
+                        path='/collection/*' 
                         element={<Collection 
                             userClaims={userClaims} 
                             setUserClaims={setUserClaims}
                             collectedCards={collectedCards} 
                             setCollectedCards={setCollectedCards} 
+                            referenceData={referenceData}
+                            setReferenceData={setReferenceData}
                         />} 
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
+                    <Route path='support-us' element={<SupportUs />} />
                 </Routes>
                 <NavBar />
             </div>
