@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation, useParams, Link } from 'react-router-dom'
-import InDevelopment from './pages/InDevelopment'
+import Collection from './features/collection'
 import Login from './pages/Login'
 import Marketplace from './features/marketplace'
 import NavBar from './layouts/NavBar'
@@ -143,7 +143,14 @@ const App = () => {
                     />
                     <Route 
                         path='/collection/*' 
-                        element={<InDevelopment />} 
+                        element={<Collection 
+                            userClaims={userClaims} 
+                            setUserClaims={setUserClaims}
+                            collectedCards={collectedCards} 
+                            setCollectedCards={setCollectedCards} 
+                            referenceData={referenceData}
+                            setReferenceData={setReferenceData}
+                        />}  
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
                     <Route path='support-us' element={<SupportUs />} />
