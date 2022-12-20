@@ -93,14 +93,12 @@
 }
 
 .title {
-    // height: 50px;
+    width: 50%;
     display: flex;
     flex-direction: column;
-    // margin-top: 10px;
     padding: 10px 0;
     h3 {
         font-weight: 500;
-        // margin-bottom: 8px;
     }
     p {
         font-size: 12px;
@@ -228,7 +226,8 @@
     padding-top: 10px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    padding-bottom: 100px;
     .name {
         font-size: 20px;
         font-weight: 500;
@@ -237,10 +236,11 @@
     div {
         display: flex;
         flex-direction: row;
+        justify-content: space-around;
         width: 100%;
         .image {
             display: flex; flex-direction: row; align-items: center; justify-content: center;
-            width: 60%;
+            width: 30%;
             img { 
                 max-width: 90%; 
             }
@@ -262,7 +262,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 40%;
+            width: 50%;
             .marketplaceChart {
                 padding: 15px;
             }
@@ -281,14 +281,20 @@
             .valueAndChange.down {
             color: rgb(160, 0, 0)
             }
-            .addToCollection {
-                margin-top: 20px;
-                padding: 5px;
-                width: 90%;
-                height: auto;
-            }
         }
     }
+            .purchaseSection {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                margin-top: 20px;
+                .affiliateLinkToItem {
+                    padding: 5px;
+                    margin-left: 15px;
+                    height: auto;
+                }
+            }
 }
 
 .expansionsMarketplace {
@@ -367,7 +373,7 @@
 @media only screen and (min-width: 600px) {
     .marketplace {
         justify-content: center;
-        width: 90%;
+        width: 600px;
         margin-top: 60px;
     }
     .setSelector {
@@ -383,18 +389,19 @@
         display: flex;
         flex-direction: column;
         .previousRoutes {
-            width: 40%;
+            width: 80%;
         }
         .expansionItems {
             .expansionItem {
-                width: 22%;
+                width: 30%;
             }
         }
         .expansionItemInfo {
             div {
                 .image {
+                    justify-content: start;
                     img {
-                        max-height: 500px;
+                        max-height: 400px;
                     }
                 }
             }

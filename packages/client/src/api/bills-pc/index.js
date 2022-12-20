@@ -62,6 +62,12 @@ const BillsPcService = {
             params: filter
         })
     },
+    getCardsV2BySetId(setId) {
+        return axios({
+            ...options,
+            url: `api/v1/cards-v2/set-id/${setId}`
+        })
+    },
     getCardsV2WithValues(filter) {
         return axios({
             ...options,
