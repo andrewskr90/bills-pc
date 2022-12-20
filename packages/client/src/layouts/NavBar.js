@@ -12,6 +12,8 @@ const NavBar = () => {
             setSelected('market')
         } else if (location.pathname.includes('/register')) {
             setSelected('register')
+        } else if (location.pathname.includes('/support-us')) {
+            setSelected('support-us')
         }
     }, [location])
 
