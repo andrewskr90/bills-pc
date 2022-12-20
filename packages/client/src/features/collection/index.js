@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Route, Routes, Link } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
 import CollectedCards from './CollectedCards'
 import PortfolioToolbar from './PortfolioToolbar'
@@ -8,9 +8,10 @@ import PurchaseCardsModal from './PurchaseCardsModal'
 import LoginForm from '../authenticate/LoginForm'
 import { initialSelectedPurchaseCardsValues, initialSelectedCollectedCardsValues } from '../../data/initialData'
 import './assets/collection.less'
+import ImportPurchase from '../import-purchase'
 
 const Collection = (props) => {
-    const { userClaims, setUserClaims } = props
+    const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [collectedCards, setCollectedCards] = useState([])
     const [selectedCardModal, setSelectedCardModal] = useState(false)
     const [selectedPurchaseModal, setSelectedPurchaseModal] = useState(false)
@@ -156,40 +157,43 @@ const Collection = (props) => {
 
     if (userClaims) {
         return (<div className='collection page'>
-            {collectedCards.length > 0
-            ?
-            <>
-                <CollectedCards 
-                    collectedCards={collectedCards} 
-                    selectCollectedCards={selectCollectedCards} 
+            <Routes>
+                <Route 
+                    path='/'
+                    element={<>
+                        <CollectedCards 
+                            collectedCards={collectedCards} 
+                            selectCollectedCards={selectCollectedCards} 
+                        />
+                        {selectedCardModal
+                        ?
+                        <CollectedCardModal 
+                            userClaims={userClaims} 
+                            selectedCollectedCards={selectedCollectedCards} 
+                            handleViewCardPurchase={handleViewCardPurchase} 
+                            handleCloseCardModal={handleCloseCardModal}
+                        />
+                        :
+                        <></>}
+                        {selectedPurchaseModal
+                        ?
+                        <PurchaseCardsModal 
+                            selectedPurchaseCards={selectedPurchaseCards} 
+                            selectCollectedCards={selectCollectedCards} 
+                            handleClosePurchaseModal={handleClosePurchaseModal} 
+                        />
+                        :
+                        <></>}
+                    </>} 
                 />
-                {selectedCardModal
-                ?
-                <CollectedCardModal 
-                    userClaims={userClaims} 
-                    selectedCollectedCards={selectedCollectedCards} 
-                    handleViewCardPurchase={handleViewCardPurchase} 
-                    handleCloseCardModal={handleCloseCardModal}
+                <Route 
+                    path='/update'
+                    element={<ImportPurchase
+                        referenceData={referenceData}
+                        setReferenceData={setReferenceData}
+                     />}
                 />
-                :
-                <></>}
-                {selectedPurchaseModal
-                ?
-                <PurchaseCardsModal 
-                    selectedPurchaseCards={selectedPurchaseCards} 
-                    selectCollectedCards={selectCollectedCards} 
-                    handleClosePurchaseModal={handleClosePurchaseModal} 
-                />
-                :
-                <></>}
-            </>
-            :
-            <div className='emptyCollection page'>
-                <p>No items in your collection!</p>
-                <Link to='/import'>
-                    <button>Add Items</button>
-                </Link>
-            </div>}
+            </Routes>
         </div>)
     } else {
         return (<div className='collection page'>

@@ -30,7 +30,7 @@ const SelectCard = (props) => {
                             id={set.cardDataIndex} 
                             key={set.cardDataIndex}
                         >
-                            <p>{set.set_name}</p>
+                            <p>{set.set_v2_name}</p>
                         </div>
                     })}
                 </div>

@@ -18,7 +18,7 @@ const SelectItemModal = (props) => {
         if (selectItemModalState.cardFilterBy === 'sets') {
             let count = 0
             const filteredSets = referenceData.sets.filter((set, idx) => {
-                const setName = set.set_name.toLowerCase()
+                const setName = set.set_v2_name.toLowerCase()
                 const substring = selectItemModalState.cardFilterValue.toLowerCase()
                 if (count <= 10 && setName.includes(substring)) {
                     count ++
@@ -69,16 +69,16 @@ const SelectItemModal = (props) => {
     }
 
     const selectSet = (set) => { 
-        const { cardDataIndex, set_id } = set
-        const selectedSetCards = referenceData.sets[cardDataIndex].cards
-        if (selectedSetCards) {
+        const { cardDataIndex, set_v2_id } = set
+        const selectedSetItems = referenceData.sets[cardDataIndex].items
+        if (selectedSetItems.length > 0) {
             setSelectItemModalState({
                 ...selectItemModalState,
                 selectedSetCards: selectedSetCards,
                 cardFilterValue: ''
             })
         } else {
-            BillsPcService.getCardsBySetId(set_id)
+            BillsPcService.getCardsV2BySetId(set_v2_id)
                 .then(res => {
                     setSelectItemModalState({
                         ...selectItemModalState,

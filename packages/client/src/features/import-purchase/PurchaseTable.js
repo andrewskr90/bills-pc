@@ -12,10 +12,10 @@ const PurchaseTable = (props) => {
         <button onClick={() => setAddItemModal(true)}>+</button>
     </div>
     {purchaseValues.cards.map((card, idx) => {
-        const { card_id, quantity, retail, card_image_small } = card
-        return <div key ={card_id} className='row'>
+        const { card_v2_id, quantity, retail, card_v2_tcgplayer_product_id } = card
+        return <div key ={card_v2_id} className='row'>
             <div className='image'>
-                <img src={card_image_small} />
+                <img src={`https://product-images.tcgplayer.com/fit-in/656x656/${card_v2_tcgplayer_product_id}.jpg`} />
             </div>
             <input 
                 id={idx}
@@ -45,7 +45,7 @@ const PurchaseTable = (props) => {
                 value={purchaseValues.cards[idx].cardNote}
                 onChange={updatePurchaseValues}
             />
-            <button id={card_id} onClick={removeCardFromPurchase}>x</button>
+            <button id={card_v2_id} onClick={removeCardFromPurchase}>x</button>
         </div>
     })}
 </div>)
