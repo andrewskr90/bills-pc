@@ -38,7 +38,7 @@ const ExpansionItemInfo = (props) => {
         ?
         <>
             <h2 className='name'>{targetItem.name}</h2>
-            <div>
+            <div className='imageAndData'>
                 <div className='image'>
                     {loadImage
                     ?
@@ -50,20 +50,31 @@ const ExpansionItemInfo = (props) => {
                     <p className='unavailable'>Image Unavailable</p>}
                 </div>
                 <div className='besideImg'>
-                    <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} />
-                    <MarketplaceChart item={targetItem} referenceData={referenceData} />
-                    <div 
-                        className={`valueAndChange ${targetItem.formattedPrices.changes[referenceData.dateRange] > 0 
-                            ? 'up' 
-                            : targetItem.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
-                        }
-                    >
-                        <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue)}</p>
-                        <p className='percentChange'>
-                            {targetItem.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
-                            {targetItem.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
-                        </p>
-                    </div>
+                    {targetItem.marketValue
+                    ?
+                    <>
+                        <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} />
+                        <MarketplaceChart item={targetItem} referenceData={referenceData} />
+                        <div 
+                            className={`valueAndChange ${targetItem.formattedPrices.changes[referenceData.dateRange] > 0 
+                                ? 'up' 
+                                : targetItem.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
+                            }
+                        >
+                            <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue)}</p>
+                            {targetItem.formattedPrices.changes[referenceData.dateRange]
+                            ?
+                            <p className='percentChange'>
+                                {targetItem.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
+                                ${targetItem.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
+                            </p>
+                            :
+                            <></>
+                            }
+                        </div>
+                    </>
+                    :
+                    <p>Market Data Unavailable</p>}
                 </div>
             </div>
             <div className='purchaseSection'>
