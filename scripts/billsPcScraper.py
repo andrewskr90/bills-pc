@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from billsPcApi import addCardsBillsPc, addProductsBillsPc, getCardsBillsPc, getProductsBillsPc
 
 def initSelenium():
     ## configure selenium ##
@@ -30,6 +31,8 @@ def initSelenium():
 def formatSetNameForUrl(set_):
     # format set name to match webpage url
     curSetName = set_['set_v2_name']
+    curSetName = curSetName.replace('(', '')
+    curSetName = curSetName.replace(')', '')
     curSetName = curSetName.replace(' ', '-')
     curSetName = curSetName.replace('---', '-')
     curSetName = curSetName.replace('--', '-')
@@ -82,10 +85,6 @@ def gatherPageMarketPrices(referenceLib, results):
                         if card['card_v2_tcgplayer_product_id'] == itemTcgProductId:
                             card_v2_id = card['card_v2_id']
                             break
-                    else:
-                        # scraped itemTcgProductId does not match bills pc tcg id
-                        print('line 280')
-                        print(card, itemTcgProductId)
                     if card_v2_id is False:
                         print(f'WARNING: Card with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.cards_v2 with cards from set with id: {curSetId}.')
                     else:    
@@ -105,10 +104,6 @@ def gatherPageMarketPrices(referenceLib, results):
                         if product['product_tcgplayer_product_id'] == itemTcgProductId:
                             product_id = product['product_id']
                             break
-                    else:
-                        # scraped itemTcgProductId does not match bills pc tcg id
-                        print('line 299')
-                        print(product, itemTcgProductId)
                     if product_id is False:
                         print(f'WARNING: Product with tcgId {itemTcgProductId} not present in Bills Pc DB. Update bills_pc.products with products from set with id: {curSetId}.')
                     else:
@@ -169,6 +164,7 @@ def gatherPageNewItems(referenceLib, results):
                 cardToAdd['card_v2_foil_only'] = None
                 print(f"**found NEW CARD, {cardToAdd['card_v2_name']}, tcgId:{cardToAdd['card_v2_tcgplayer_product_id']}")                    
                 cardsToAdd.append(cardToAdd)
+                currentSetCards.append(cardToAdd)
                 currentSetCardsLib[cardToAdd['card_v2_tcgplayer_product_id']] = 1
         else:
             #format product
@@ -181,6 +177,7 @@ def gatherPageNewItems(referenceLib, results):
             if productToAdd['product_tcgplayer_product_id'] not in currentSetProductsLib:
                 print(f"**found NEW PRODUCT, {productToAdd['product_name']}, tcgId:{productToAdd['product_tcgplayer_product_id']}")
                 productsToAdd.append(productToAdd)
+                currentSetProducts.append(productToAdd)
                 currentSetProductsLib[productToAdd['product_tcgplayer_product_id']] = 1
 
     referenceLib['currentSetCards'] = currentSetCards
@@ -200,7 +197,6 @@ def processResultsPerPage(referenceLib, pageScraperCallback):
     notLastPage = True   
     curSetName = formatSetNameForUrl(referenceLib['set_'])
     while notLastPage:
-        print(f'Scraping page {pageNum}...')
         # open product page with driver, using current set and current page
         setUrl = f'https://www.tcgplayer.com/search/pokemon/{curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=pokemon&view=grid&setName={curSetName}&page={pageNum}'
         browser.get(setUrl)
@@ -227,3 +223,67 @@ def processResultsPerPage(referenceLib, pageScraperCallback):
     browser.quit()
     time.sleep(5)
     return referenceLib
+
+def processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gatherPageNewItems):
+    
+    collectionArray = []
+    browser = initSelenium()
+    # initialize variables
+    pageNum = '1'
+    notLastPage = True   
+    curSetName = formatSetNameForUrl(referenceLib['set_'])
+    while notLastPage:
+        # open product page with driver, using current set and current page
+        setUrl = f'https://www.tcgplayer.com/search/pokemon/{curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=pokemon&view=grid&setName={curSetName}&page={pageNum}'
+        browser.get(setUrl)
+        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        #check if on last page, signal to end while loup
+        nextButton = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.ID, "nextButton"))
+        )
+        nextButtonClasses = nextButton.get_attribute('class')
+        if 'disable' in nextButtonClasses:
+            notLastPage = False
+        # select all product results
+        results = WebDriverWait(browser, 10).until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "search-result"))
+        )
+
+
+        # update referenceLib with new items on current page, if any
+        referenceLib = gatherPageNewItems(referenceLib, results)
+        
+        credentials = referenceLib['credentials']
+        set_ = referenceLib['set_']
+
+        # add any new cards to bills pc
+        cardsToAdd = referenceLib['cardsToAdd']
+        if len(cardsToAdd) > 0:
+            addCardsBillsPc(cardsToAdd, credentials, set_)
+            # update referenceData with newly added cards
+            currentSetCards = getCardsBillsPc(set_, credentials)
+            referenceLib['currentSetCards'] = currentSetCards
+        # add any new products to bills pc
+        productsToAdd = referenceLib['productsToAdd']
+        if len(productsToAdd) > 0:
+            addProductsBillsPc(productsToAdd, credentials, set_)
+            # update referenceData with newly added products
+            currentSetProducts = getProductsBillsPc(set_, credentials)
+            referenceLib['currentSetProducts'] = currentSetProducts
+
+        # reset cards and products to add arrays
+        referenceLib['cardsToAdd'] = []
+        referenceLib['productsToAdd'] = []
+
+        # update referenceLib with page market prices, including the new items from current page
+        referenceLib = gatherPageMarketPrices(referenceLib, results)
+        time.sleep(3)
+        pageNum = str(int(pageNum) + 1)
+
+    browser.close()
+    time.sleep(5)
+    browser.quit()
+    time.sleep(5)
+    return referenceLib
+    
