@@ -7,8 +7,8 @@ const Expansion = (props) => {
     const navigate = useNavigate()
     
     let topTenAverage = 'loading...'
-    let expansionClassName = 'expansion'
-    if (!referenceDataExpansion.topTenAverage) expansionClassName += ' loadingGradient'
+    let valueAndChangeClassName = 'valueAndChange'
+    if (!referenceDataExpansion.topTenAverage) valueAndChangeClassName += ' loadingGradient'
     
     if (referenceDataExpansion.topTenAverage) {
         topTenAverage = referenceDataExpansion.topTenAverage.today ? `$${referenceDataExpansion.topTenAverage.today.toFixed(2)}` : ''
@@ -19,14 +19,14 @@ const Expansion = (props) => {
     }
 
     return (<div 
-            className={expansionClassName}
+            className='expansion'
             onClick={handleSelectSet}
         >
         <div className='setSymbol'>
             <img src={referenceDataExpansion.set_v2_ptcgio_id ? `https://images.pokemontcg.io/${referenceDataExpansion.set_v2_ptcgio_id}/symbol.png` : MinimalPokeball} />
         </div>
         <p className='setName'>{referenceDataExpansion.set_v2_name}</p>
-        <div className='valueAndChange'>
+        <div className={valueAndChangeClassName}>
             <p className='top10Avg'>Top10Avg</p>
             <p className='marketValue'>{topTenAverage}</p>
         </div>
