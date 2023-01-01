@@ -9,6 +9,7 @@ import { filterMarketItems } from '../../../../utils/filter'
 import { eligableMarketSearchParams } from '../../../../utils/params'
 import '../../assets/marketplace.less'
 import Toolbar from '../../../../layouts/toolbar'
+import { escapeApostrophes } from '../../../../utils/string'
 
 const SearchResults = (props) => {
     const { referenceData, setReferenceData } = props
@@ -57,12 +58,17 @@ const SearchResults = (props) => {
         return { data: marketSearchResults }
     }
 
+    const conditionSearchString = (value) => {
+        return escapeApostrophes(value)
+    }
+
     useEffect(() => {
         const verifiedParams = eligableMarketSearchParams(location)
         setSearchValue(verifiedParams.value)
         if (verifiedParams) {
             const { category, value } = verifiedParams
-            searchMarketItems(category, value)
+            const conditionedValue = conditionSearchString(value)
+            searchMarketItems(category, conditionedValue)
                 .then(res => {
                     setReferenceData({
                         ...referenceData,

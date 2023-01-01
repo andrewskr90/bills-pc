@@ -39,3 +39,12 @@ export const camelCaseToLowerCase = (camelCase) => {
     })
     return lowerCase
 }
+
+export const escapeApostrophes = (string) => {
+    const stringArray = string.split('')
+    const escapeApostrophes = stringArray.map(letter => {
+        if (letter === "'") letter += letter
+        return letter
+    })
+    return escapeApostrophes.join('')
+}
