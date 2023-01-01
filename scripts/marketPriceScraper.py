@@ -6,7 +6,7 @@ from threading import Timer
 import json
 import argparse
 from billsPcApi import loginBillsPc, getSetsBillsPc, getCardsBillsPc, getProductsBillsPc, getMarketPricesBillsPc, addMarketPricesBillsPc, getMarketPricesByCardIdBillsPc, getMarketPricesByProductIdBillsPc
-from billsPcScraper import processResultsPerPage, gatherPageMarketPrices
+from billsPcScraper import gatherPageMarketPrices, gatherPageNewItems, processNewItemsThenMarketPerPage
 
 credentials = loginBillsPc()
             
@@ -33,7 +33,6 @@ def marketPriceScrape():
         # get set cards and products from bills_pc
         currentSetCards = getCardsBillsPc(set_, credentials)
         currentSetProducts = getProductsBillsPc(set_, credentials)
-
         # check if current set has been scraped already today
         if len(currentSetCards) > 0:
             firstCardId = currentSetCards[0]['card_v2_id']
@@ -59,19 +58,40 @@ def marketPriceScrape():
                 if mostRecentPriceDate == todaysDate:
                     print(f"---------{set_['set_v2_name']} has already been scraped today---------")
                     continue
+                else:
+                    print(mostRecentPriceDate, todaysDate)
+        # building currentSet Cards and Products from addItemsFromTcgPlayer
+        currentSetCardsLib = {}
+        currentSetProductsLib = {}
+
+        # flag cards as visited
+        for card in currentSetCards:
+            cardTcgId = card['card_v2_tcgplayer_product_id']
+            currentSetCardsLib[cardTcgId] = 1
+        # flag products as visited
+        for product in currentSetProducts:
+            productTcgId = product['product_tcgplayer_product_id']
+            currentSetProductsLib[productTcgId] = 1
+
         referenceLib = {}
         referenceLib['set_'] = set_
         referenceLib['currentSetCards'] = currentSetCards
         referenceLib['currentSetProducts'] = currentSetProducts
         referenceLib['marketPricesToAdd'] = []
         referenceLib['visitedItems'] = {}
-        referenceLib = processResultsPerPage(referenceLib, gatherPageMarketPrices)
+        # referenceLib variables needed for addItemsFromTcgPlayer
+        referenceLib['currentSetCardsLib'] = currentSetCardsLib
+        referenceLib['currentSetProductsLib'] = currentSetProductsLib
+        referenceLib['cardsToAdd'] = []
+        referenceLib['productsToAdd'] = []
+        referenceLib['credentials'] = credentials
+        referenceLib = processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gatherPageNewItems)
         marketPricesToAdd = referenceLib['marketPricesToAdd']
         addMarketPricesBillsPc(marketPricesToAdd, credentials, set_)
 
 def oneDay():
     x=datetime.today()
-    y=x.replace(day=x.day+1, hour=0, minute=0, second=0, microsecond=0) + timedelta(minutes=1)
+    y=x.replace(day=x.day+1, hour=0, minute=0, second=0, microsecond=0) + timedelta(minutes=1)  
     delta_t=y-x
     return delta_t.seconds
 def startMarketPriceScrape():
