@@ -9,6 +9,7 @@ import { initialReferenceDataValues } from './data/initialData'
 import './styles/App.less'
 import RegisterForm from './features/authenticate/RegisterForm'
 import SupportUs from '../src/pages/SupportUs'
+import Collection from './features/collection'
 
 let initialData = false
 
@@ -143,7 +144,6 @@ const App = () => {
                     />
                     <Route 
                         path='/collection/*' 
-<<<<<<< HEAD
                         element={<Collection 
                             userClaims={userClaims} 
                             setUserClaims={setUserClaims}
@@ -152,9 +152,6 @@ const App = () => {
                             referenceData={referenceData}
                             setReferenceData={setReferenceData}
                         />}  
-=======
-                        element={<InDevelopment />} 
->>>>>>> c4da7c5326ba8abf8fcca1d542d0d748463c6d4b
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
                     <Route path='support-us' element={<SupportUs />} />
