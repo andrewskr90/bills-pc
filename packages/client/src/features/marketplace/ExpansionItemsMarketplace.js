@@ -6,6 +6,11 @@ import Toolbar from '../../layouts/toolbar'
 import PreviousRoutes from '../../layouts/previous-routes'
 import ExpansionItemInfo from './ExpansionItemInfo'
 
+import ExpansionItem from './ExpansionItem'
+import { applyMarketChanges } from '../../utils/market'
+import { generateMarketItemSortCB } from '../../utils/sort'
+import { filterMarketItems } from '../../utils/filter'
+
 const ExpansionItemsMarketplace = (props) => {
     const {
         referenceData,
@@ -40,6 +45,15 @@ const ExpansionItemsMarketplace = (props) => {
         }
     }, [])
 
+    const matchSetToId = (marketDataSets, targetSetId) => {
+        const matchedSet = marketDataSets.filter(set => set.set_v2_id == targetSetId)[0]
+        return matchedSet
+    }
+
+    console.log(referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length)
+    console.log(applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market)))
+
+
     return (<div className='expansionItemsMarketplace'>
         <PreviousRoutes location={location} referenceData={referenceData} />
         <Routes>
@@ -61,7 +75,12 @@ const ExpansionItemsMarketplace = (props) => {
                     />
                     {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
                     ?
-                    <ExpansionItems referenceData={referenceData} sortKey={sortKey} />
+                    <ExpansionItems referenceData={referenceData} sortKey={sortKey}>
+                        {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market))
+                            .sort(generateMarketItemSortCB(referenceData, sortKey))
+                            .map(item => <ExpansionItem referenceData={referenceData} item={item} />)
+                        }
+                    </ExpansionItems>
                     :
                     <div className='loadingGradient loadingExpansionItems'>Loading Expansion Items...</div>}
                 </>}
