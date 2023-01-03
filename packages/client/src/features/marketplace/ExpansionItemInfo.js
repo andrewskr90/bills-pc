@@ -38,7 +38,7 @@ const ExpansionItemInfo = (props) => {
         ?
         <>
             <h2 className='name'>{targetItem.name}</h2>
-            <div>
+            <div className='imageAndData'>
                 <div className='image'>
                     {loadImage
                     ?

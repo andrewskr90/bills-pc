@@ -87,7 +87,7 @@ def getMarketPricesByCardIdBillsPc(credentials, cardId, parameters):
 
 def getMarketPricesByProductIdBillsPc(credentials, productId, parameters):
     try:
-        billsPcMarketPricesByProductId = requests.get(f"{baseurl}/api/v1/market-prices/card-id/{productId}?{parameters}", cookies=credentials)
+        billsPcMarketPricesByProductId = requests.get(f"{baseurl}/api/v1/market-prices/product-id/{productId}?{parameters}", cookies=credentials)
         if billsPcMarketPricesByProductId.status_code != 200:
             message = billsPcMarketPricesByProductId.json()['message']
             logger.debug(message)
