@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import BillsPcService from '../../../../api/bills-pc'
 import PreviousRoutes from '../../../../layouts/previous-routes'
-import ExpansionItem from '../../ExpansionItem'
+import Item from '../../../../components/item'
 import { applyMarketChanges } from '../../../../utils/market'
 import { generateMarketItemSortCB } from '../../../../utils/sort'
 import { filterMarketItems } from '../../../../utils/filter'
@@ -10,6 +10,7 @@ import { eligableMarketSearchParams } from '../../../../utils/params'
 import '../../assets/marketplace.less'
 import Toolbar from '../../../../layouts/toolbar'
 import { escapeApostrophes } from '../../../../utils/string'
+import ItemContainer from '../../../../components/item-container'
 
 const SearchResults = (props) => {
     const { referenceData, setReferenceData } = props
@@ -100,11 +101,11 @@ const SearchResults = (props) => {
         />
         {referenceData.marketSearchResults.length > 0
         ?
-        <div className='expansionItems'>
+        <ItemContainer>
             {applyMarketChanges(filterMarketItems(referenceData.marketSearchResults, referenceData.filter.market)).sort(generateMarketItemSortCB(referenceData, sortKey)).map(result => {
-                return <ExpansionItem referenceData={referenceData} item={result} />
+                return <Item referenceData={referenceData} item={result} />
             })}
-        </div>
+        </ItemContainer>
         :
         <></>
         }
