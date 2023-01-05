@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
-import SelectCard from './SelectCard'
 import { initialSelectItemModalState } from '../../data/initialData'
+import './assets/selectItem.less'
 
-const SelectItemModal = (props) => {
+const SelectItem = (props) => {
+    const { addItemModal,
+        setAddItemModal,
+        referenceData,
+        setReferenceData,
+        handleSelectCard 
+    } = props
     const [selectItemModalState, setSelectItemModalState] = useState(initialSelectItemModalState)
     const { 
-        referenceData, 
-        setReferenceData, 
-        setAddItemModal,
-        handleSelectCard
-    } = props
-    
+        itemType,
+        cardFilterValue, 
+        filteredSets,
+        selectedSetCards,
+    } = selectItemModalState
+
     useEffect(() => {
         //filtering by set
         if (selectItemModalState.cardFilterBy === 'sets') {
@@ -92,40 +97,54 @@ const SelectItemModal = (props) => {
         }
     }
 
-    return (<div className='modal addItemModal'>
-        <div className='modalContent'>
-                {/* select card or product */}
-                <div className='itemTypeButtons'>
-                    <button 
-                        onClick={() => setSelectItemModalState({ ...selectItemModalState, itemType: 'card' })} 
-                        className={`smallButton addItemModal${selectItemModalState.itemType === 'card' ? ' selected':''}`}
-                    >
-                        Add card
-                    </button>
-                    <button 
-                        onClick={() => setSelectItemModalState({ ...selectItemModalState, itemType: 'product' })} 
-                        className={`smallButton addItemModal${selectItemModalState.itemType === 'product' ? ' selected':''}`}
-                    >
-                        Add product
-                    </button>
+    return (addItemModal
+    ?
+        <div className='selectItem'>
+            <div className={itemType === 'card' ? 'addCardToTransaction':'hidden'}>
+                <label>Filter By</label>
+                <div className='cardFilter'>
+                    <select name='cardFilterBy' id='cardFilterBy'>
+                        <option value='sets'>Sets</option>
+                    </select>
+                    <div className='filterBySets'>
+                        <input 
+                            type='text'
+                            name='cardFilterValue'
+                            value={cardFilterValue}
+                            onChange={handleSearchFilterChange}
+                        />
+                        <div className={cardFilterValue ? 'filterResults' : 'hidden'}>
+                            {filteredSets.map(set => {
+                                return <div 
+                                    onClick={() => selectSet(set)} 
+                                    className='filterResult' 
+                                    id={set.cardDataIndex} 
+                                    key={set.cardDataIndex}
+                                >
+                                    <p>{set.set_v2_name}</p>
+                                </div>
+                            })}
+                        </div>
+                    </div>
                 </div>
-
-                {/* add card */}
-                <SelectCard 
-                    selectItemModalState={selectItemModalState}
-                    handleSearchFilterChange={handleSearchFilterChange}
-                    handleSelectCard={handleSelectCard}
-                    selectSet={selectSet}
-                />
-                
-                {/* add product */}
-                <div className={selectItemModalState.itemType === 'product' ? 'addProductToTransaction':'hidden'}>
-                    <p>Feature Not Available.</p>
-                </div>    
+                <div className={selectedSetCards.length > 0 ? 'selectedSetCardsComponent' : 'hidden'}>
+                    {selectedSetCards.map((card) => {
+                        const { card_v2_tcgplayer_product_id, card_v2_id } = card
+                        return <img 
+                            src={`https://product-images.tcgplayer.com/fit-in/656x656/${card_v2_tcgplayer_product_id}.jpg`} 
+                            onClick={() => handleSelectCard(card)} 
+                            className='selectedSetCard' 
+                            id={card_v2_id} 
+                            key={card_v2_id} 
+                        />
+                    })}
+                </div>
+            </div>
             <button className='modalClose' onClick={() => setAddItemModal(false)}>X</button>      
         </div>
-    </div>
+    :
+    <></>
     )
 }
 
-export default SelectItemModal
+export default SelectItem
