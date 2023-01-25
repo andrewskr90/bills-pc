@@ -24,11 +24,12 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: Deploy to Amazon ECS
+name: Deploy Bills PC App to ECS
 
 on:
   push:
     branches: [ "master" ]
+    paths: "packages/**"
   workflow_dispatch:
 
 env:
