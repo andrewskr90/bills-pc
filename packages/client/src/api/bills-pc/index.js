@@ -138,6 +138,18 @@ const BillsPcService = {
             })
         }
     },
+    getMarketPricesByCardId(cardId) {
+        return axios({
+            ...options,
+            url: `/api/v1/market-prices/card-id/${cardId}`
+        })
+    },
+    getMarketPricesByProductId(productId) {
+        return axios({
+            ...options,
+            url: `/api/v1/market-prices/product-id/${productId}`
+        })
+    },
     getProducts(filter) {
         return axios({
             ...options,
