@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from 'react'
 import BillsPcService from '../../api/bills-pc'
+import Item from '../item'
+import Search from '../../features/search'
+import { searchForItems } from '../../utils/search'
 import { initialSelectItemModalState } from '../../data/initialData'
 import './assets/selectItem.less'
+import { applyMarketChanges } from '../../utils/market'
+import { useNavigate } from 'react-router-dom'
+import ItemContainer from '../item-container'
 
 const SelectItem = (props) => {
-    const { addItemModal,
-        setAddItemModal,
-        referenceData,
+    const { referenceData,
         setReferenceData,
-        handleSelectCard 
+        handleSelectItem 
     } = props
     const [selectItemModalState, setSelectItemModalState] = useState(initialSelectItemModalState)
+    const [searchedItems, setSearchedItems] = useState([])
     const { 
         itemType,
         cardFilterValue, 
         filteredSets,
         selectedSetCards,
     } = selectItemModalState
+    const navigate = useNavigate()
 
     useEffect(() => {
         //filtering by set
@@ -61,6 +67,12 @@ const SelectItem = (props) => {
         }
     }, [selectItemModalState.selectedSetCards])
 
+    const submitSearch = (relayedSearch) => {
+        searchForItems(relayedSearch.category, relayedSearch.value)
+            .then(res => setSearchedItems(res.data))
+            .catch(err => console.log(err))
+    }
+
     const handleSearchFilterChange = (e) => {
         const { name, value } = e.target
         setSelectItemModalState({
@@ -97,54 +109,16 @@ const SelectItem = (props) => {
         }
     }
 
-    return (addItemModal
-    ?
-        <div className='selectItem'>
-            <div className={itemType === 'card' ? 'addCardToTransaction':'hidden'}>
-                <label>Filter By</label>
-                <div className='cardFilter'>
-                    <select name='cardFilterBy' id='cardFilterBy'>
-                        <option value='sets'>Sets</option>
-                    </select>
-                    <div className='filterBySets'>
-                        <input 
-                            type='text'
-                            name='cardFilterValue'
-                            value={cardFilterValue}
-                            onChange={handleSearchFilterChange}
-                        />
-                        <div className={cardFilterValue ? 'filterResults' : 'hidden'}>
-                            {filteredSets.map(set => {
-                                return <div 
-                                    onClick={() => selectSet(set)} 
-                                    className='filterResult' 
-                                    id={set.cardDataIndex} 
-                                    key={set.cardDataIndex}
-                                >
-                                    <p>{set.set_v2_name}</p>
-                                </div>
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div className={selectedSetCards.length > 0 ? 'selectedSetCardsComponent' : 'hidden'}>
-                    {selectedSetCards.map((card) => {
-                        const { card_v2_tcgplayer_product_id, card_v2_id } = card
-                        return <img 
-                            src={`https://product-images.tcgplayer.com/fit-in/656x656/${card_v2_tcgplayer_product_id}.jpg`} 
-                            onClick={() => handleSelectCard(card)} 
-                            className='selectedSetCard' 
-                            id={card_v2_id} 
-                            key={card_v2_id} 
-                        />
-                    })}
-                </div>
-            </div>
-            <button className='modalClose' onClick={() => setAddItemModal(false)}>X</button>      
-        </div>
-    :
-    <></>
-    )
+    return (<div className='selectItem'>
+        <Search submitSearch={submitSearch} />
+        <ItemContainer>
+            {applyMarketChanges(searchedItems).map((item) => {
+                const item_id = item.card_id || item.product_id
+                return <Item key={item_id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
+            })}
+        </ItemContainer>
+        <button className='cancelAddItem' onClick={() => navigate(-1)}>Cancel</button>
+    </div>)
 }
 
 export default SelectItem
