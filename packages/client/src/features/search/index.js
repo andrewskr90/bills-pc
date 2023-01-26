@@ -23,7 +23,7 @@ const Search = (props) => {
 
     useEffect(() => {
         const verifyParams = eligableMarketSearchParams(location)
-        if (!verifyParams) setCategory('All')
+        if (!verifyParams) setCategory('all')
         else setCategory(verifyParams.category)
     }, [])
     
