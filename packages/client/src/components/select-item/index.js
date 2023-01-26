@@ -8,6 +8,7 @@ import './assets/selectItem.less'
 import { applyMarketChanges } from '../../utils/market'
 import { useNavigate } from 'react-router-dom'
 import ItemContainer from '../item-container'
+import BackArrow from '../buttons/back-arrow'
 
 const SelectItem = (props) => {
     const { referenceData,
@@ -17,9 +18,6 @@ const SelectItem = (props) => {
     const [selectItemModalState, setSelectItemModalState] = useState(initialSelectItemModalState)
     const [searchedItems, setSearchedItems] = useState([])
     const { 
-        itemType,
-        cardFilterValue, 
-        filteredSets,
         selectedSetCards,
     } = selectItemModalState
     const navigate = useNavigate()
@@ -110,6 +108,10 @@ const SelectItem = (props) => {
     }
 
     return (<div className='selectItem'>
+        <div className='backAndTitle'>
+            <BackArrow />
+            <h2>Add Item</h2>
+        </div>
         <Search submitSearch={submitSearch} />
         <ItemContainer>
             {applyMarketChanges(searchedItems).map((item) => {
@@ -117,7 +119,6 @@ const SelectItem = (props) => {
                 return <Item key={item_id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
             })}
         </ItemContainer>
-        <button className='cancelAddItem' onClick={() => navigate(-1)}>Cancel</button>
     </div>)
 }
 
