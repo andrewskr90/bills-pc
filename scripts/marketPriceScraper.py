@@ -90,10 +90,13 @@ def marketPriceScrape():
         addMarketPricesBillsPc(marketPricesToAdd, credentials, set_)
 
 def oneDay():
-    x=datetime.today()
-    y=x.replace(day=x.day+1, hour=0, minute=0, second=0, microsecond=0) + timedelta(minutes=1)  
-    delta_t=y-x
-    return delta_t.seconds
+    date_now=datetime.today()
+    # every unit of time, excluding the day, is reset
+    # day is reset to 12:01am, because a bug was occurring during the first minute
+    today_start = date_now.replace(hour = 0, minute = 1, second=0, microsecond=0)
+    tomorrow_start = today_start + timedelta(days=1)
+    now_until_tomorrow_start=tomorrow_start - date_now
+    return now_until_tomorrow_start.total_seconds()
 def startMarketPriceScrape():
     print('------------------------------------------------------------------------------------------------------------')
     print('------------------------------------------------------------------------------------------------------------')
