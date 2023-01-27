@@ -11,87 +11,22 @@ div.selectItem {
     z-index: 1;
     left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
-    .backAndTitle {
-        height: 50px;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        .backArrow {
-            position: fixed;
-            left: 2%;
-        }
-    }
-    div.itemTypeButtons {
-        button {
-        width: 50%;
-        max-width: none;
-        margin: 0;
-        border-radius: 0;
-        }
-    }
-
-    div.addCardToTransaction {
-        margin-top: 4px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: 85%;
-        div.cardFilter {
+    .header {
+        padding: 0 5px;
+        padding-bottom: 20px;
+        background-color: #ecedff;
+        .backAndTitle {
+            height: 50px;
+            position: relative;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            select {
-                width: 20%;
-                option {
-                font-size: 1.5vw;
-                }
-            }
-            div.filterBySets {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                input {
-                border: solid black 1px;
-                }
-                div.filterResults {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                div.filterResult {
-                    border: solid #FBFAF5 2px;
-                    background-color: #30638e;
-                    p {
-                    font-size: 4vw;
-                    color:#FBFAF5;
-                    padding: 3vw;
-                    }
-                }
-                div.filterResult:hover {
-                    background-color: #822c38;
-                }
-                }
-            }
-            }
-            div.selectedSetCardsComponent {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content:space-around;
-            height: 85%;
-            overflow: auto;
-            img {
-                width: 100px;
+            align-items: center;
+            width: 100%;
+            flex-shrink: 0;
+            .backArrow {
+                position: fixed;
+                left: 2%;
             }
         }
-    }
-    .modalClose {
-        background-color: #6065CB;
-        padding: 0 0;
-        height: 40px;
-        border-radius: 10px;
-        width: 100px;
     }
 }
