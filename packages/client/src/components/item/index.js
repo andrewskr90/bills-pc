@@ -1,21 +1,11 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import MarketplaceChart from '../../features/marketplace/MarketplaceChart'
 import { generateDisplayedMarketValue } from '../../utils/market'
 import './assets/item.less'
 
 const Item = (props) => {
-    const { item, referenceData } = props
+    const { item, referenceData, handleSelectItem } = props
     const [loadImage, setLoadImage] = useState(true)
-    const navigate = useNavigate()
-    
-    
-
-    const handleSelectItem = (item) => {
-        const expansionId = item.set.id
-        const itemId = item.card_id || item.product_id
-        navigate(`/market/${expansionId}/${itemId}`)
-    }
 
     const handleImageError = () => {
         setLoadImage(false)

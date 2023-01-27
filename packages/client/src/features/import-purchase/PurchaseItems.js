@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import SelectItem from '../../components/select-item'
 import PurchaseTable from './PurchaseTable'
 import SelectItemModal from './SelectItemModal' 
 
@@ -163,19 +164,13 @@ const PurchaseItems = (props) => {
         </div>
 
 
-
-        {addItemModal
-        ?
-        <SelectItemModal 
-            addItemModal={addItemModal}
-            setAddItemModal={setAddItemModal}
+        <SelectItem 
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             handleSelectCard={handleSelectCard}
-            purchaseValues={purchaseValues}
+            addItemModal={addItemModal}
+            setAddItemModal={setAddItemModal}
         />
-        :
-        <></>}
     </div>)
 }
 

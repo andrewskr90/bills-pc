@@ -307,14 +307,6 @@ button:hover {
   	color: red;
 }
 
-.modalClose {
-	background-color: #6065CB;
-	padding: 0 0;
-	height: 40px;
-	// font-size: 20px;
-	border-radius: 10px;
-}
-
 /* ***Component Styles*** */
 
 /* ImportPurchase */
@@ -387,92 +379,6 @@ button:hover {
         width: 250px;
         display: flex;
         justify-content: space-between;
-      }
-    }
-  }
-
-/* AddItemModal */
-
-  div.addItemModal {
-    display: block;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0,0,0,0.4);
-    div.modalContent {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: white;
-      margin: 80px auto;
-      width: 330px;
-      height: 80%;
-      overflow: auto;
-      border-radius: 10px;
-      div.itemTypeButtons {
-        button {
-          width: 50%;
-          max-width: none;
-          margin: 0;
-          border-radius: 0;
-        }
-      }
-      
-      div.addCardToTransaction {
-        margin-top: 4px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: 85%;
-        div.cardFilter {
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          select {
-            width: 20%;
-            option {
-              font-size: 1.5vw;
-            }
-          }
-          div.filterBySets {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            input {
-              border: solid black 1px;
-            }
-            div.filterResults {
-              display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-              div.filterResult {
-                border: solid #FBFAF5 2px;
-                background-color: #30638e;
-                p {
-                  font-size: 4vw;
-                  color:#FBFAF5;
-                  padding: 3vw;
-                }
-              }
-              div.filterResult:hover {
-                background-color: #822c38;
-              }
-            }
-          }
-        }
-        div.selectedSetCardsComponent {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content:space-around;
-          height: 85%;
-          overflow: auto;
-          img {
-            width: 100px;
-          }
-        }
       }
     }
   }

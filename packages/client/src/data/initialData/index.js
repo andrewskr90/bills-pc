@@ -89,14 +89,3 @@ export const initialPurchaseValues = {
     total: 0,
     saleNote: ''
 }
-
-export const initialSelectItemModalState = {
-    itemType: 'card',
-    cardFilterBy: 'sets',
-    cardFilterValue: '',
-    productFilterBy: '',
-    productFilterValue: '',
-    filteredSets: [],
-    selectedSetIndex: '',
-    selectedSetCards: [],
-}

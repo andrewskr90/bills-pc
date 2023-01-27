@@ -19,6 +19,7 @@ const ExpansionItemsMarketplace = (props) => {
     const selectedSetId = useParams()['setId']
     const sortKey = 'itemSort'
     const filterKey = 'market'
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length === 0) {
@@ -49,6 +50,12 @@ const ExpansionItemsMarketplace = (props) => {
         return matchedSet
     }
 
+    const handleSelectItem = (item) => {
+        const expansionId = item.set.id
+        const itemId = item.card_id || item.product_id
+        navigate(`/market/${expansionId}/${itemId}`)
+    }
+
     return (<div className='expansionItemsMarketplace'>
         <PreviousRoutes location={location} referenceData={referenceData} />
         <Routes>
@@ -65,15 +72,13 @@ const ExpansionItemsMarketplace = (props) => {
                         viewRangeSelector={true}
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        dataObject={referenceData}
-                        setDataObject={setReferenceData}
                     />
                     {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
                     ?
                     <ItemContainer>
                         {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market))
                             .sort(generateMarketItemSortCB(referenceData, sortKey))
-                            .map(item => <Item referenceData={referenceData} item={item} />)
+                            .map(item => <Item referenceData={referenceData} item={item} handleSelectItem={handleSelectItem} />)
                         }
                     </ItemContainer>
                     :

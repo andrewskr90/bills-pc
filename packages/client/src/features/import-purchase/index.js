@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { removeLeadingZeroes } from '../../utils/validation'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import PurchaseItems from './PurchaseItems'
 import PurchaseDetails from './PurchaseDetails'
 import { initialPurchaseValues } from '../../data/initialData'
+import SelectItem from '../../components/select-item'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
-
     const { 
         referenceData, 
         setReferenceData 
     } = props
+    const navigate = useNavigate()
+    const initialEmptyMessage = 'Search for an item to add to your purchase.'
 
     const updatePurchaseValues = (e) => {
         let { name, value, id } = e.target
@@ -106,8 +107,44 @@ const ImportPurchase = (props) => {
         })
     }
 
+    const handleSelectItem = (item) => {
+        let itemCount = purchaseValues.itemCount + 1
+        if (item.card_id) {
+            const purchasedCard = {
+                ...item,
+                quantity: 1,
+                retail: 0,
+                cardNote: ''
+            }
+            setPurchaseValues({
+                ...purchaseValues,
+                itemCount: itemCount,
+                cards: [
+                    ...purchaseValues.cards,
+                    purchasedCard
+                ]
+            })
+        } else if (item.product_id) {
+            const purchasedProduct = {
+                ...item,
+                quantity: 1,
+                retail: 0,
+                productNote: ''
+            }
+            setPurchaseValues({
+                ...purchaseValues,
+                itemCount: itemCount,
+                products: [
+                    ...purchaseValues.products,
+                    purchasedProduct
+                ]
+            })
+        }
+        navigate(-1)
+    }
+    console.log(purchaseValues)
     return (<div className='page importPurchase'>
-        <h3>Import Purchase</h3>
+        <h3>Purchase Details</h3>
         <Routes>
             <Route 
                 path='/' 
@@ -118,6 +155,15 @@ const ImportPurchase = (props) => {
                     setPurchaseValues={setPurchaseValues}
                     updatePurchaseValues={updatePurchaseValues}
                 />} 
+            />
+            <Route 
+                path='/add-item'
+                element={<SelectItem 
+                    referenceData={referenceData}
+                    setReferenceData={setReferenceData}
+                    handleSelectItem={handleSelectItem}
+                    initialEmptyMessage={initialEmptyMessage}
+                />}
             />
             <Route 
                 path='/details' 
