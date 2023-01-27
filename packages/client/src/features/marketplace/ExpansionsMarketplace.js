@@ -57,8 +57,6 @@ const ExpansionsMarketplace = (props) => {
             viewRangeSelector={false}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
-            dataObject={referenceData}
-            setDataObject={setReferenceData}
         />
         <div className='expansions'>
             {filterExpansions(referenceData.sets, referenceData.filter.expansion)

@@ -72,8 +72,6 @@ const ExpansionItemsMarketplace = (props) => {
                         viewRangeSelector={true}
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        dataObject={referenceData}
-                        setDataObject={setReferenceData}
                     />
                     {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
                     ?

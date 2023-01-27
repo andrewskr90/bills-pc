@@ -10,14 +10,12 @@ const Toolbar = (props) => {
         filterKey,
         referenceData, 
         setReferenceData,
-        dataObject, 
-        setDataObject, 
         sortKey
     } = props
 
     return (<div className='toolbar'>
         {filterKey ? <Filter filterKey={filterKey} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
-        {sortKey ? <Sort sortKey={sortKey} dataObject={dataObject} setDataObject={setDataObject} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
+        {sortKey ? <Sort sortKey={sortKey} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
         {viewRangeSelector ? <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
     </div>)
 }

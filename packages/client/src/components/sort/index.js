@@ -2,33 +2,33 @@ import React from 'react'
 import './assets/sort.less'
 
 const Sort = (props) => {
-    const { dataObject, setDataObject, sortKey } = props
+    const { referenceData, setReferenceData, sortKey } = props
 
     const handleChangeValue = (e) => {
-        setDataObject({
-            ...dataObject,
+        setReferenceData({
+            ...referenceData,
             [sortKey]: {
-                ...dataObject[sortKey],
+                ...referenceData[sortKey],
                 value: e.target.value,
-                direction: dataObject[sortKey].values[e.target.value].defaultDirection
+                direction: referenceData[sortKey].values[e.target.value].defaultDirection
             }
         })
     }
 
     const toggleDirection = (e) => {
         if (e.currentTarget.value === 'asc') {
-            setDataObject({
-                ...dataObject,
+            setReferenceData({
+                ...referenceData,
                 [sortKey]: {
-                    ...dataObject[sortKey],
+                    ...referenceData[sortKey],
                     direction: 'desc'
                 }
             })
         } else {
-            setDataObject({
-                ...dataObject,
+            setReferenceData({
+                ...referenceData,
                 [sortKey]: {
-                    ...dataObject[sortKey],
+                    ...referenceData[sortKey],
                     direction: 'asc'
                 }
             })
@@ -36,13 +36,13 @@ const Sort = (props) => {
     }
 
     return (<div className='sort'>
-        <button className='direction' value={dataObject[sortKey].direction} onClick={toggleDirection}>
-            {dataObject[sortKey].direction === 'asc' ? <i className='upArrow' /> : <i className= 'downArrow' />}
+        <button className='direction' value={referenceData[sortKey].direction} onClick={toggleDirection}>
+            {referenceData[sortKey].direction === 'asc' ? <i className='upArrow' /> : <i className= 'downArrow' />}
         </button>
         <select className='value' onChange={handleChangeValue}>
-            {Object.keys(dataObject[sortKey].values).map(value => {
-                if (dataObject[sortKey].value === value) return <option value={value} selected>{dataObject[sortKey].values[value].formatted}</option>
-                return <option value={value}>{dataObject[sortKey].values[value].formatted}</option>
+            {Object.keys(referenceData[sortKey].values).map(value => {
+                if (referenceData[sortKey].value === value) return <option value={value} selected>{referenceData[sortKey].values[value].formatted}</option>
+                return <option value={value}>{referenceData[sortKey].values[value].formatted}</option>
             })}
         </select>
     </div>)

@@ -57,8 +57,6 @@ const SearchResults = (props) => {
             filterKey={filterKey}
             referenceData={referenceData}
             setReferenceData={setReferenceData}
-            dataObject={referenceData}
-            setDataObject={setReferenceData}
         />
         {referenceData.marketSearchResults.length > 0
         ?
