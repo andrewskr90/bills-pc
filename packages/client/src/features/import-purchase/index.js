@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { removeLeadingZeroes } from '../../utils/validation'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import PurchaseItems from './PurchaseItems'
 import PurchaseDetails from './PurchaseDetails'
 import { initialPurchaseValues } from '../../data/initialData'
@@ -8,12 +7,11 @@ import SelectItem from '../../components/select-item'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
-
     const { 
         referenceData, 
         setReferenceData 
     } = props
-
+    const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
 
     const updatePurchaseValues = (e) => {
@@ -142,6 +140,7 @@ const ImportPurchase = (props) => {
                 ]
             })
         }
+        navigate(-1)
     }
     console.log(purchaseValues)
     return (<div className='page importPurchase'>
