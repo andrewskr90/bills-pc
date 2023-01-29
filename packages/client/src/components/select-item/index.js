@@ -36,7 +36,7 @@ const SelectItem = (props) => {
             })
     }
 
-    return (<div className='selectItem'>
+    return (<div className='selectItem page'>
         <Banner titleText={'Add Item'}>
             <Search submitSearch={submitSearch} />
             <Toolbar 

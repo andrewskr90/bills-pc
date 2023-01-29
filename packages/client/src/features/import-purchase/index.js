@@ -90,7 +90,6 @@ const ImportPurchase = (props) => {
             updateTaxRate = Math.round((updateTotal - beforeTax) / (beforeTax)*10000) / 100
             updateTaxAmount = Math.round((updateTotal - beforeTax)*100) /100
         }
-        
         setPurchaseValues({
             date: updateDate,
             vendor: updateVendor,
@@ -144,7 +143,6 @@ const ImportPurchase = (props) => {
     }
     console.log(purchaseValues)
     return (<div className='page importPurchase'>
-        <h3>Purchase Details</h3>
         <Routes>
             <Route 
                 path='/' 

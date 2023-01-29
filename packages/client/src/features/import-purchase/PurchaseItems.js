@@ -2,10 +2,8 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectItem from '../../components/select-item'
 import PurchaseTable from './PurchaseTable'
-import SelectItemModal from './SelectItemModal' 
 
 const PurchaseItems = (props) => {
-    const [addItemModal, setAddItemModal] = useState(false)
     const { 
         referenceData, 
         setReferenceData,
@@ -14,25 +12,6 @@ const PurchaseItems = (props) => {
         updatePurchaseValues 
     } = props
     const navigate = useNavigate()
-
-    const handleSelectCard = (card) => {
-        const purchasedCard = {
-            ...card,
-            quantity: 1,
-            retail: 0,
-            cardNote: ''
-        }
-        let itemCount = purchaseValues.itemCount + 1
-        setPurchaseValues({
-            ...purchaseValues,
-            itemCount: itemCount,
-            cards: [
-                ...purchaseValues.cards,
-                purchasedCard
-            ]
-        })
-        setAddItemModal(false)
-    }    
 
     const removeCardFromPurchase = (e) => {
         const id = e.currentTarget.id
@@ -63,7 +42,6 @@ const PurchaseItems = (props) => {
 
     return (<div className='purchaseItems'>
         <PurchaseTable 
-            setAddItemModal={setAddItemModal}
             removeCardFromPurchase={removeCardFromPurchase}
             purchaseValues={purchaseValues}
             updatePurchaseValues={updatePurchaseValues}
@@ -162,15 +140,6 @@ const PurchaseItems = (props) => {
                 <button onClick={handleImportPurchase}>Confirm</button>
             </div>
         </div>
-
-
-        <SelectItem 
-            referenceData={referenceData}
-            setReferenceData={setReferenceData}
-            handleSelectCard={handleSelectCard}
-            addItemModal={addItemModal}
-            setAddItemModal={setAddItemModal}
-        />
     </div>)
 }
 
