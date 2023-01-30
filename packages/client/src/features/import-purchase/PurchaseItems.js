@@ -5,17 +5,19 @@ const PurchaseItems = (props) => {
     const { removeCardFromPurchase, purchaseValues, updatePurchaseValues } = props
     const navigate = useNavigate()
 
-    return (<div className='purchaseItems'>
-        <div className='purchaseItemsHeader row'>
-            <p className='image'>Item</p>
-            <p className='quantity'>Qty</p>
-            <p className='retail'>Retail</p>
-            <p className='note'>Note</p>
-            <button onClick={() => navigate('add-item')}>+</button>
-        </div>
+    return (<div className='itemsTable'>
+        <label className='title'>Items</label>
+        <table>
+            <tr className='header'>
+                <th className='name'>Name</th>
+                <th className='price'>Price</th>
+                <th className='quantity'>Qty</th>
+                <th classname='edit'></th>
+            </tr>
+        </table>
         {purchaseValues.cards.map((card, idx) => {
             const { card_v2_id, quantity, retail, card_v2_tcgplayer_product_id } = card
-            return <div key ={card_v2_id} className='row'>
+            return <div key ={card_v2_id} className='items'>
                 <div className='image'>
                     <img src={`https://product-images.tcgplayer.com/fit-in/656x656/${card_v2_tcgplayer_product_id}.jpg`} />
                 </div>
@@ -50,6 +52,7 @@ const PurchaseItems = (props) => {
                 <button id={card_v2_id} onClick={removeCardFromPurchase}>x</button>
             </div>
         })}
+        <button onClick={() => navigate('add-item')}>+</button>
     </div>)
 }
 
