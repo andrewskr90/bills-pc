@@ -1,11 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const PurchaseTable = (props) => {
+const PurchaseItems = (props) => {
     const { removeCardFromPurchase, purchaseValues, updatePurchaseValues } = props
     const navigate = useNavigate()
 
-    return (<div className='purchaseTable'>
+    return (<div className='purchaseItems'>
         <div className='purchaseItemsHeader row'>
             <p className='image'>Item</p>
             <p className='quantity'>Qty</p>
@@ -53,4 +53,4 @@ const PurchaseTable = (props) => {
     </div>)
 }
 
-export default PurchaseTable
+export default PurchaseItems

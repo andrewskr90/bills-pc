@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import PurchaseTable from './PurchaseTable'
+import PurchaseItems from './PurchaseItems'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
 import BillsPcService from '../../api/bills-pc'
@@ -211,7 +211,7 @@ const ImportPurchase = (props) => {
                             onChange={updatePurchaseValues}
                         />
                     </div>
-                    <PurchaseTable 
+                    <PurchaseItems 
                         removeCardFromPurchase={removeCardFromPurchase}
                         purchaseValues={purchaseValues}
                         updatePurchaseValues={updatePurchaseValues}
