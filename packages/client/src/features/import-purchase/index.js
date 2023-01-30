@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import PurchaseItems from './PurchaseItems'
+import ItemsTable from './feature/items-table'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
 import BillsPcService from '../../api/bills-pc'
@@ -211,12 +211,13 @@ const ImportPurchase = (props) => {
                             onChange={updatePurchaseValues}
                         />
                     </div>
-                    <PurchaseItems 
+                    <label>Items</label>
+                    <ItemsTable 
                         removeCardFromPurchase={removeCardFromPurchase}
                         purchaseValues={purchaseValues}
                         updatePurchaseValues={updatePurchaseValues}
                     />
-                    <div className='purchaseDetails'>
+                    {/* <div className='purchaseDetails'>
                         <div>
                             <p>Item Count:</p>
                             <p>{purchaseValues.itemCount}</p>
@@ -270,7 +271,7 @@ const ImportPurchase = (props) => {
                             <button onClick={() => navigate('/import')}>back</button>
                             <button onClick={handleImportPurchase}>Confirm</button>
                         </div>
-                    </div>
+                    </div> */}
                 </form>} 
             />
             <Route 
