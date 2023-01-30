@@ -175,52 +175,48 @@ const ImportPurchase = (props) => {
         <Routes>
             <Route 
                 path='/' 
-                element={<div className='purchaseItems'>
-                    <PurchaseTable 
-                        removeCardFromPurchase={removeCardFromPurchase}
-                        purchaseValues={purchaseValues}
-                        updatePurchaseValues={updatePurchaseValues}
-                    />
-                    <button 
-                        onClick={() => navigate('details')} 
-                        disabled={purchaseValues.cards.length < 1}
-                    >Continue
-                    </button>
-
-                    <div className='purchaseDetails'>
-                        <div>
-                            <p>Date</p>
+                element={<form className='purchaseForm'>
+                    <div className='dateAndVendor'>
+                        <div className='labelInput date'>
+                            <label>Date</label>
                             <input 
                                 id='date'
-                                className=''
+                                className='date'
                                 name='date'
                                 type='date'
                                 value={purchaseValues.date}
                                 onChange={updatePurchaseValues}
                             />
                         </div>
-                        <div>
-                            <p>Vendor</p>
+                        <div className='labelInput vendor'>
+                            <label>Vendor</label>
                             <input 
                                 id='vendor'
-                                className=''
+                                className='vendor'
                                 name='vendor'
                                 type='text'
                                 value={purchaseValues.vendor}
                                 onChange={updatePurchaseValues}
                             />
                         </div>
-                        <div>
-                            <p>Note</p>
-                            <input 
-                                id='saleNote'
-                                className=''
-                                name='saleNote'
-                                type='text'
-                                value={purchaseValues.saleNote}
-                                onChange={updatePurchaseValues}
-                            />
-                        </div>
+                    </div>
+                    <div className='labelInput saleNote'>
+                        <label>Note</label>
+                        <input 
+                            id='saleNote'
+                            className='saleNote'
+                            name='saleNote'
+                            type='text'
+                            value={purchaseValues.saleNote}
+                            onChange={updatePurchaseValues}
+                        />
+                    </div>
+                    <PurchaseTable 
+                        removeCardFromPurchase={removeCardFromPurchase}
+                        purchaseValues={purchaseValues}
+                        updatePurchaseValues={updatePurchaseValues}
+                    />
+                    <div className='purchaseDetails'>
                         <div>
                             <p>Item Count:</p>
                             <p>{purchaseValues.itemCount}</p>
@@ -275,7 +271,7 @@ const ImportPurchase = (props) => {
                             <button onClick={handleImportPurchase}>Confirm</button>
                         </div>
                     </div>
-                </div>} 
+                </form>} 
             />
             <Route 
                 path='/add-item'
