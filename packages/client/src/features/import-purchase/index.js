@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import PurchaseItems from './PurchaseItems'
-import PurchaseDetails from './PurchaseDetails'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
+import './assets/importPurchase.less'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
@@ -162,13 +162,6 @@ const ImportPurchase = (props) => {
                     handleSelectItem={handleSelectItem}
                     initialEmptyMessage={initialEmptyMessage}
                 />}
-            />
-            <Route 
-                path='/details' 
-                element={<PurchaseDetails 
-                    purchaseValues={purchaseValues}
-                    updatePurchaseValues={updatePurchaseValues}
-                />} 
             />
         </Routes>
     </div>)
