@@ -1,0 +1,75 @@
+div.importPurchase {
+    position: relative;
+    /* PurchaseTable */
+    div.purchaseItems {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .purchaseItemsHeader {
+            border-bottom: solid black 1px;
+        }
+        div.purchaseTable {
+        width: 90%;
+        margin-bottom: 10px;
+        button {
+            height: 45%;
+            width: 10%;
+            padding: 0;
+            margin: 0,
+        }
+        div.row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 10vh;
+            margin-top: 2px;
+            // border-bottom: solid black 2px;
+            p {
+            text-align: center;
+            }
+            div.image {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 20%;
+            }
+            .image {
+            width: 20%;
+            img {
+                height: 90%;
+            }
+            }
+            .quantity {
+            width: 10%;
+            }
+            .retail {
+            width: 20%;
+            }
+            .note {
+            width: 30%;
+            }
+        }
+        }
+    }
+    div.purchaseDetails {
+        width: 96%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .buttons {
+        margin-top: 10px;
+        width: 250px;
+        display: flex;
+        justify-content: space-between;
+        }
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    div.importPurchase {
+      margin-top: 120px;
+      width: 600px;
+    }
+}
