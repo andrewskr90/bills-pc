@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import PurchaseItems from './PurchaseItems'
+import PurchaseTable from './PurchaseTable'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
+import BillsPcService from '../../api/bills-pc'
 import './assets/importPurchase.less'
 
 const ImportPurchase = (props) => {
@@ -11,6 +12,7 @@ const ImportPurchase = (props) => {
         referenceData, 
         setReferenceData 
     } = props
+    
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
 
@@ -141,18 +143,139 @@ const ImportPurchase = (props) => {
         }
         navigate(-1)
     }
+    
+    const removeCardFromPurchase = (e) => {
+        const id = e.currentTarget.id
+        const filteredArray = purchaseValues.cards.filter(card => {
+            if (id === card.card_v2_id) {
+                return false
+            } else {
+                return true
+            }
+        })
+        setPurchaseValues({
+            ...purchaseValues,
+            cards: filteredArray
+        })
+    } 
+
+    const handleImportPurchase = (e) => {
+        e.preventDefault()
+
+        BillsPcService.postTransactionSales(purchaseValues)
+            .then(res => {
+                console.log(res)
+                navigate('/')
+            }).catch(err => {
+                console.log(err)
+            })
+    }
     console.log(purchaseValues)
     return (<div className='page importPurchase'>
         <Routes>
             <Route 
                 path='/' 
-                element={<PurchaseItems 
-                    referenceData={referenceData} 
-                    setReferenceData={setReferenceData} 
-                    purchaseValues={purchaseValues}
-                    setPurchaseValues={setPurchaseValues}
-                    updatePurchaseValues={updatePurchaseValues}
-                />} 
+                element={<div className='purchaseItems'>
+                    <PurchaseTable 
+                        removeCardFromPurchase={removeCardFromPurchase}
+                        purchaseValues={purchaseValues}
+                        updatePurchaseValues={updatePurchaseValues}
+                    />
+                    <button 
+                        onClick={() => navigate('details')} 
+                        disabled={purchaseValues.cards.length < 1}
+                    >Continue
+                    </button>
+
+                    <div className='purchaseDetails'>
+                        <div>
+                            <p>Date</p>
+                            <input 
+                                id='date'
+                                className=''
+                                name='date'
+                                type='date'
+                                value={purchaseValues.date}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div>
+                            <p>Vendor</p>
+                            <input 
+                                id='vendor'
+                                className=''
+                                name='vendor'
+                                type='text'
+                                value={purchaseValues.vendor}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div>
+                            <p>Note</p>
+                            <input 
+                                id='saleNote'
+                                className=''
+                                name='saleNote'
+                                type='text'
+                                value={purchaseValues.saleNote}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div>
+                            <p>Item Count:</p>
+                            <p>{purchaseValues.itemCount}</p>
+                        </div>
+                        <div>
+                            <p>Subtotal</p>
+                            <p>{purchaseValues.subtotal}</p>
+                        </div>
+                        <div>
+                            <p>Discount</p>
+                            <input 
+                                id='discount'
+                                className=''
+                                name='discount'
+                                type='number'
+                                value={purchaseValues.discount}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div>
+                            <p>Shipping</p>
+                            <input 
+                                id='shipping'
+                                className=''
+                                name='shipping'
+                                type='number'
+                                value={purchaseValues.shipping}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div>
+                            <p>Tax Rate</p>
+                            <p>{purchaseValues.taxRate}</p>
+                        </div>
+                        <div>
+                            <p>Tax Amount</p>
+                            <p>{purchaseValues.taxAmount}</p>
+                        </div>
+                        <div>
+                            <p>Total</p>
+                            <input 
+                                id='total'
+                                className=''
+                                name='total'
+                                type='number'
+                                value={purchaseValues.total}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='buttons'>
+                            <button onClick={() => navigate('/import')}>back</button>
+                            <button onClick={handleImportPurchase}>Confirm</button>
+                        </div>
+                    </div>
+                </div>} 
             />
             <Route 
                 path='/add-item'
