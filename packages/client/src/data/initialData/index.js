@@ -1,3 +1,4 @@
+import { localYYYYMMDD } from "../../utils/date"
 
 export const initialReferenceDataValues = {
     sets: [],
@@ -76,7 +77,7 @@ export const initialSelectedCollectedCardsValues = {
 }
 
 export const initialPurchaseValues = {
-    date: '',
+    date: localYYYYMMDD(),
     vendor: '',
     cards: [],
     products: [],
