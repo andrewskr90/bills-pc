@@ -9,6 +9,9 @@ import Banner from '../../layouts/banner'
 import Toolbar from '../../layouts/toolbar'
 import { filterMarketItems } from '../../utils/filter'
 import { generateMarketItemSortCB } from '../../utils/sort'
+import { useNavigate } from 'react-router-dom'
+import { buildPreviousRoute } from '../../utils/location'
+import slakoth from '../../data/scratch-data'
 
 const SelectItem = (props) => {
     const { referenceData,
@@ -17,10 +20,11 @@ const SelectItem = (props) => {
         initialEmptyMessage
     } = props
     const [loading, setLoading] = useState(false)
-    const [searchedItems, setSearchedItems] = useState([])
+    const [searchedItems, setSearchedItems] = useState(slakoth)
     const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const sortKey = 'itemSort'
     const filterKey = 'market'
+    const navigate = useNavigate()
 
     const submitSearch = (relayedSearch) => {
         setLoading(true)
@@ -36,8 +40,12 @@ const SelectItem = (props) => {
             })
     }
 
+    const handleClickBackArrow = () => {
+        navigate(buildPreviousRoute(location))
+    }
+    console.log(referenceData)
     return (<div className='selectItem page'>
-        <Banner titleText={'Add Item'}>
+        <Banner titleText={'Add Item'} handleClickBackArrow={handleClickBackArrow}>
             <Search submitSearch={submitSearch} />
             <Toolbar 
                 viewRangeSelector={true} 

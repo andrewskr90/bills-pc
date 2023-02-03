@@ -1,11 +1,11 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
 import BackArrowPNG from './assets/backArrow.png'
 import './assets/backArrow.less'
 
-const BackArrow = () => {
-    const navigate = useNavigate()
-    return (<button className='backArrow' onClick={() => navigate(-1)}>
+const BackArrow = (props) => {
+    const { handleClickBackArrow } = props
+
+    return (<button className='backArrow' onClick={handleClickBackArrow}>
         <img src={BackArrowPNG} />
     </button>)
 }
