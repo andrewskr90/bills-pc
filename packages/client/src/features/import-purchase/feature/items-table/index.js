@@ -1,59 +1,36 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import EditPNG from '../../../collection/assets/edit.png'
 import './assets/itemsTable.less'
 
 const ItemsTable = (props) => {
-    const { removeCardFromPurchase, purchaseValues, updatePurchaseValues } = props
-    const navigate = useNavigate()
+    const { purchaseValues } = props
 
-    return (<div className='itemsTable'>
-        <table>
-            <tr className='header'>
-                <th className='name'>Name</th>
-                <th className='price'>Price</th>
-                <th className='quantity'>Qty</th>
-                <th classname='edit'></th>
-            </tr>
-        </table>
+    const handleEditItem = (idx) => {
+        console.log('item to edit index,', idx)
+    }
+
+    return (<table className='itemsTable'>
+        <tr className='header'>
+            <th className='name'>Name</th>
+            <th className='price'>Price</th>
+            <th className='quantity'>Qty</th>
+            <th className='edit'></th>
+        </tr>
         {purchaseValues.cards.map((card, idx) => {
-            const { card_v2_id, quantity, retail, card_v2_tcgplayer_product_id } = card
-            return <div key ={card_v2_id} className='items'>
-                <div className='image'>
-                    <img src={`https://product-images.tcgplayer.com/fit-in/656x656/${card_v2_tcgplayer_product_id}.jpg`} />
-                </div>
-                <input 
-                    id={idx}
-                    className='quantity'
-                    type='number'
-                    min='1'
-                    step='1'
-                    name='quantity'
-                    value={purchaseValues.cards[idx].quantity}
-                    onChange={updatePurchaseValues}
-                />
-                <input 
-                    id={idx}
-                    className='retail'
-                    type='number'
-                    min='0'
-                    step='.01'
-                    name='retail'
-                    value={purchaseValues.cards[idx].retail}
-                    onChange={updatePurchaseValues}
-                />
-                <input 
-                    id={idx}
-                    className='note'
-                    type='text'
-                    name='cardNote'
-                    value={purchaseValues.cards[idx].cardNote}
-                    onChange={updatePurchaseValues}
-                />
-                <button id={card_v2_id} onClick={removeCardFromPurchase}>x</button>
-            </div>
+            const { card_v2_id } = card
+            return <>
+                <tr className='spacer'></tr>
+                <tr key ={card_v2_id} className='tableItem'>
+                    <td className='name'>{purchaseValues.cards[idx].name}</td>
+                    <td className='price'>{purchaseValues.cards[idx].retail}</td>
+                    <td className='quantity'>{purchaseValues.cards[idx].quantity}</td>
+                    <td className='edit'>
+                        <img onClick={() => handleEditItem(idx)} className='pointer' src={EditPNG} />
+                    </td>
+                </tr>
+            </>
         })}
-        <button onClick={() => navigate('add-item')}>+</button>
-    </div>)
+    </table>)
 }
 
 export default ItemsTable
