@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import PurchaseItems from './PurchaseItems'
-import PurchaseDetails from './PurchaseDetails'
+import ItemsTable from './feature/items-table'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
+import BillsPcService from '../../api/bills-pc'
+import PlusButton from '../../components/buttons/plus-button'
+import './assets/importPurchase.less'
+import Button from '../../components/buttons/text-button'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
@@ -11,6 +14,7 @@ const ImportPurchase = (props) => {
         referenceData, 
         setReferenceData 
     } = props
+    
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
 
@@ -141,18 +145,142 @@ const ImportPurchase = (props) => {
         }
         navigate(-1)
     }
+    
+    const removeCardFromPurchase = (e) => {
+        const id = e.currentTarget.id
+        const filteredArray = purchaseValues.cards.filter(card => {
+            if (id === card.card_v2_id) {
+                return false
+            } else {
+                return true
+            }
+        })
+        setPurchaseValues({
+            ...purchaseValues,
+            cards: filteredArray
+        })
+    } 
+
+    const handleImportPurchase = (e) => {
+        e.preventDefault()
+
+        BillsPcService.postTransactionSales(purchaseValues)
+            .then(res => {
+                console.log(res)
+                navigate('/')
+            }).catch(err => {
+                console.log(err)
+            })
+    }
     console.log(purchaseValues)
     return (<div className='page importPurchase'>
         <Routes>
             <Route 
                 path='/' 
-                element={<PurchaseItems 
-                    referenceData={referenceData} 
-                    setReferenceData={setReferenceData} 
-                    purchaseValues={purchaseValues}
-                    setPurchaseValues={setPurchaseValues}
-                    updatePurchaseValues={updatePurchaseValues}
-                />} 
+                element={<form className='purchaseForm'>
+                    <div className='dateAndVendor'>
+                        <div className='labelInput date'>
+                            <label>Date</label>
+                            <input 
+                                id='date'
+                                className='date'
+                                name='date'
+                                type='date'
+                                value={purchaseValues.date}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='labelInput vendor'>
+                            <label>Vendor</label>
+                            <input 
+                                id='vendor'
+                                className='vendor'
+                                name='vendor'
+                                type='text'
+                                value={purchaseValues.vendor}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                    </div>
+                    <div className='labelInput saleNote'>
+                        <label>Note</label>
+                        <input 
+                            id='saleNote'
+                            className='saleNote'
+                            name='saleNote'
+                            type='text'
+                            value={purchaseValues.saleNote}
+                            onChange={updatePurchaseValues}
+                        />
+                    </div>
+                    <label className='items'>Items</label>
+                    <ItemsTable 
+                        removeCardFromPurchase={removeCardFromPurchase}
+                        purchaseValues={purchaseValues}
+                        updatePurchaseValues={updatePurchaseValues}
+                    />
+                    <PlusButton handleClick={() => navigate('add-item')} />
+                    <div className='discountSubtotalAndTax'>
+                        <div className='labelInput discount'>
+                            <label>Discount</label>
+                            <input 
+                                id='discount'
+                                className='discount'
+                                name='discount'
+                                type='number'
+                                value={purchaseValues.discount}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='labelInput subtotal'>
+                            <label>Subtotal</label>
+                            <input 
+                                id='subtotal'
+                                className='subtotal'
+                                name='subtotal'
+                                type='text'
+                                value={purchaseValues.subtotal}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='labelInput taxAmount'>
+                            <label>Tax</label>
+                            <input 
+                                id='taxAmount'
+                                className='taxAmount'
+                                name='taxAmount'
+                                type='text'
+                                value={purchaseValues.taxAmount}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                    </div>
+                    <div className='shippingAndTotal'>
+                        <div className='labelInput shipping'>
+                            <label>Shipping</label>
+                            <input 
+                                id='shipping'
+                                className='shipping'
+                                name='shipping'
+                                type='number'
+                                value={purchaseValues.shipping}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='labelInput total'>
+                            <label>Total</label>
+                            <input 
+                                id='total'
+                                className='total'
+                                name='total'
+                                type='text'
+                                value={purchaseValues.total}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                    </div>
+                    <Button onClick={onClick}>Update</Button>
+                </form>} 
             />
             <Route 
                 path='/add-item'
@@ -162,13 +290,6 @@ const ImportPurchase = (props) => {
                     handleSelectItem={handleSelectItem}
                     initialEmptyMessage={initialEmptyMessage}
                 />}
-            />
-            <Route 
-                path='/details' 
-                element={<PurchaseDetails 
-                    purchaseValues={purchaseValues}
-                    updatePurchaseValues={updatePurchaseValues}
-                />} 
             />
         </Routes>
     </div>)

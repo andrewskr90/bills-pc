@@ -121,7 +121,6 @@ const App = () => {
         }
     }, [topTenLoaded])
 
-    // if (location.pathname !== '/register') {
         return (<>
             {initialData
             ?

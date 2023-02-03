@@ -187,6 +187,10 @@ header {
 	}
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 
 /* place styles in either collection or emptyCollection */
 .trainerHome {
@@ -323,107 +327,6 @@ button:hover {
 
 /* ***Component Styles*** */
 
-/* ImportPurchase */
-
-  div.importPurchase {
-    margin-top: 75px;
-    h3 {
-      margin-top: 10px;
-    }
-    /* PurchaseTable */
-    div.purchaseItems {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-        .purchaseItemsHeader {
-          border-bottom: solid black 1px;
-        }
-        div.purchaseTable {
-        width: 90%;
-        margin-bottom: 10px;
-        button {
-          height: 45%;
-          width: 10%;
-          padding: 0;
-          margin: 0,
-        }
-        div.row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          height: 10vh;
-          margin-top: 2px;
-          // border-bottom: solid black 2px;
-          p {
-            text-align: center;
-          }
-          div.image {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            width: 20%;
-          }
-          .image {
-            width: 20%;
-            img {
-              height: 90%;
-            }
-          }
-          .quantity {
-            width: 10%;
-          }
-          .retail {
-            width: 20%;
-          }
-          .note {
-            width: 30%;
-          }
-        }
-      }
-    }
-    div.purchaseDetails {
-      width: 96%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      .buttons {
-        margin-top: 10px;
-        width: 250px;
-        display: flex;
-        justify-content: space-between;
-      }
-    }
-  }
-
-/* SelectionDetails */
-  div.selectionDetails {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    input.checkbox {
-      width: 3vw;
-      height: 3vw;
-    }
-    form.purchaseDetails {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      div.labelInput {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        input {
-          width: 20%;
-          margin: 0 5vw 0 0;
-        }
-      }
-    }
-  }
-
   .inDevelopment {
     margin-top: 200px;
     height: 500px;
@@ -516,11 +419,6 @@ button:hover {
       p {
         font-size: 16px;
       }
-    }
-
-    div.importPurchase {
-      margin-top: 120px;
-      width: 600px;
     }
 
     .modalBackground .modalContent{

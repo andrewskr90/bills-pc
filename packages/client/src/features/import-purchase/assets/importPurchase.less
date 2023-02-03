@@ -1,0 +1,75 @@
+div.importPurchase {
+    position: relative;
+    form.purchaseForm {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 5px;
+        .labelInput {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .labelInput.date, .labelInput.discount, .labelInput.subtotal, .labelInput.shipping { padding-right: 5px; }
+        label {
+            font-size: 16px;
+        }
+        input {
+            border: none;
+            background-color: lightgray;
+            padding: 5px;
+        }
+        .dateAndVendor {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            .labelInput.date {
+                width: 45%;
+            }
+            .labelInput.vendor {
+                width: 55%;
+            }
+        }
+        .discountSubtotalAndTax {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            .labelInput.discount {
+                width: 25%;
+            }
+            .labelInput.subtotal {
+                width: 50%;
+            }
+            .labelInput.taxAmount {
+                width: 25%;
+            }
+        }
+        .shippingAndTotal {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            .labelInput.shipping {
+                width: 25%;
+            }
+            .labelInput.total {
+                width: 50%;
+            }
+        }
+        .labelInput.saleNote { width: 100%; }
+        .items { margin-top: 20px; }
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    div.importPurchase {
+      margin-top: 120px;
+      width: 600px;
+    }
+}
