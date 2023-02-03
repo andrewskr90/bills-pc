@@ -4,7 +4,9 @@ import ItemsTable from './feature/items-table'
 import { initialPurchaseValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
 import BillsPcService from '../../api/bills-pc'
+import PlusButton from '../../components/buttons/plus-button'
 import './assets/importPurchase.less'
+import Button from '../../components/buttons/text-button'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
@@ -211,67 +213,73 @@ const ImportPurchase = (props) => {
                             onChange={updatePurchaseValues}
                         />
                     </div>
-                    <label>Items</label>
+                    <label className='items'>Items</label>
                     <ItemsTable 
                         removeCardFromPurchase={removeCardFromPurchase}
                         purchaseValues={purchaseValues}
                         updatePurchaseValues={updatePurchaseValues}
                     />
-                    {/* <div className='purchaseDetails'>
-                        <div>
-                            <p>Item Count:</p>
-                            <p>{purchaseValues.itemCount}</p>
-                        </div>
-                        <div>
-                            <p>Subtotal</p>
-                            <p>{purchaseValues.subtotal}</p>
-                        </div>
-                        <div>
-                            <p>Discount</p>
+                    <PlusButton handleClick={() => navigate('add-item')} />
+                    <div className='discountSubtotalAndTax'>
+                        <div className='labelInput discount'>
+                            <label>Discount</label>
                             <input 
                                 id='discount'
-                                className=''
+                                className='discount'
                                 name='discount'
                                 type='number'
                                 value={purchaseValues.discount}
                                 onChange={updatePurchaseValues}
                             />
                         </div>
-                        <div>
-                            <p>Shipping</p>
+                        <div className='labelInput subtotal'>
+                            <label>Subtotal</label>
+                            <input 
+                                id='subtotal'
+                                className='subtotal'
+                                name='subtotal'
+                                type='text'
+                                value={purchaseValues.subtotal}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                        <div className='labelInput taxAmount'>
+                            <label>Tax</label>
+                            <input 
+                                id='taxAmount'
+                                className='taxAmount'
+                                name='taxAmount'
+                                type='text'
+                                value={purchaseValues.taxAmount}
+                                onChange={updatePurchaseValues}
+                            />
+                        </div>
+                    </div>
+                    <div className='shippingAndTotal'>
+                        <div className='labelInput shipping'>
+                            <label>Shipping</label>
                             <input 
                                 id='shipping'
-                                className=''
+                                className='shipping'
                                 name='shipping'
                                 type='number'
                                 value={purchaseValues.shipping}
                                 onChange={updatePurchaseValues}
                             />
                         </div>
-                        <div>
-                            <p>Tax Rate</p>
-                            <p>{purchaseValues.taxRate}</p>
-                        </div>
-                        <div>
-                            <p>Tax Amount</p>
-                            <p>{purchaseValues.taxAmount}</p>
-                        </div>
-                        <div>
-                            <p>Total</p>
+                        <div className='labelInput total'>
+                            <label>Total</label>
                             <input 
                                 id='total'
-                                className=''
+                                className='total'
                                 name='total'
-                                type='number'
+                                type='text'
                                 value={purchaseValues.total}
                                 onChange={updatePurchaseValues}
                             />
                         </div>
-                        <div className='buttons'>
-                            <button onClick={() => navigate('/import')}>back</button>
-                            <button onClick={handleImportPurchase}>Confirm</button>
-                        </div>
-                    </div> */}
+                    </div>
+                    <Button onClick={onClick}>Update</Button>
                 </form>} 
             />
             <Route 
