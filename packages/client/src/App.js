@@ -97,13 +97,13 @@ const App = () => {
                 }
             })
             initialData = true
-            await BillsPcService.getMarketPrices({ topTenAverage: true })
-                .then(res => {
-                    setTopTenLoaded(res.data)
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+            // await BillsPcService.getMarketPrices({ topTenAverage: true })
+            //     .then(res => {
+            //         setTopTenLoaded(res.data)
+            //     })
+            //     .catch(err => {
+            //         console.log(err)
+            //     })
         })()
         if (location.pathname === '/') {
             navigate('market')
