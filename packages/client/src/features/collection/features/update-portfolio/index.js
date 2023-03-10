@@ -21,12 +21,15 @@ const UpdatePortfolio = (props) => {
     }
 
     const handleClickBackArrow = () => {
-        navigate(buildPreviousRoute(location))
+        navigate(buildPreviousRoute(location, 2))
     }
 
     return (<div className='updatePortfolio page'>
         <Banner titleText={'Update Portfolio'} handleClickBackArrow={handleClickBackArrow}>
-            <CategorySelector categories={updatePortfolioCategories} selectCategory={selectCategory} />
+            <CategorySelector 
+                categories={updatePortfolioCategories} 
+                selectCategory={selectCategory} 
+            />
         </Banner>
         <Routes>
             <Route 

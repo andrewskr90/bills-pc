@@ -1,9 +1,13 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { parseLastRouteParameter } from '../../utils/location'
 import './assets/categorySelector.less'
 
 const CategorySelector = (props) => {
+    const location = useLocation()
     const { categories, selectCategory } = props
-    const [selectedCategory, setSelectedCategory] = useState(categories[0])
+    const initialSelectedCategory = parseLastRouteParameter(location)
+    const [selectedCategory, setSelectedCategory] = useState(initialSelectedCategory)
 
     const handleSelectCategory = (category) => {
         setSelectedCategory(category)
