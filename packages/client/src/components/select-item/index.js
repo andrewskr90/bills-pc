@@ -11,7 +11,6 @@ import { filterMarketItems } from '../../utils/filter'
 import { generateMarketItemSortCB } from '../../utils/sort'
 import { useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
-import slakoth from '../../data/scratch-data'
 
 const SelectItem = (props) => {
     const { referenceData,
@@ -20,7 +19,7 @@ const SelectItem = (props) => {
         initialEmptyMessage
     } = props
     const [loading, setLoading] = useState(false)
-    const [searchedItems, setSearchedItems] = useState(slakoth)
+    const [searchedItems, setSearchedItems] = useState([])
     const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const sortKey = 'itemSort'
     const filterKey = 'market'
