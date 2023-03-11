@@ -45,11 +45,11 @@ const ExpansionsMarketplace = (props) => {
     return (<div className='expansionsMarketplace'>
         <div className='title'>
             <h3>Browse By Expansion</h3>
-            {referenceData.topTenCalled
+            {/* {referenceData.topTenCalled
             ?
             <p>Top 10 Card Averages</p>
             :
-            <p className='loadingGradient'>Loading Top 10 Card Averages...</p>}
+            <p className='loadingGradient'>Loading Top 10 Card Averages...</p>} */}
         </div>
         <Toolbar
             filterKey={filterKey} 

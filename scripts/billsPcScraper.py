@@ -232,6 +232,12 @@ def processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gathe
     pageNum = '1'
     notLastPage = True   
     curSetName = formatSetNameForUrl(referenceLib['set_'])
+    
+    # skipping dp training kit blue and gold until I can confirm they should be removed
+    if curSetName == 'dp-training-kit-1-blue' or curSetName == 'dp-training-kit-1-gold':
+        print('deprecated set', curSetName)
+        return referenceLib
+
     while notLastPage:
         # open product page with driver, using current set and current page
         setUrl = f'https://www.tcgplayer.com/search/pokemon/{curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=pokemon&view=grid&setName={curSetName}&page={pageNum}'

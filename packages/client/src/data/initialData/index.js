@@ -17,10 +17,10 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'asc',
                 formatted: 'Name'
             },
-            topTenAverageToday: {
-                defaultDirection: 'desc',
-                formatted: 'Top 10 Average'
-            },
+            // topTenAverageToday: {
+            //     defaultDirection: 'desc',
+            //     formatted: 'Top 10 Average'
+            // },
             release_date: {
                 defaultDirection: 'desc',
                 formatted: 'Release Date'
