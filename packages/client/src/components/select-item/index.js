@@ -42,7 +42,7 @@ const SelectItem = (props) => {
     const handleClickBackArrow = () => {
         navigate(buildPreviousRoute(location))
     }
-    console.log(referenceData)
+
     return (<div className='selectItem page'>
         <Banner titleText={'Add Item'} handleClickBackArrow={handleClickBackArrow}>
             <Search submitSearch={submitSearch} />
