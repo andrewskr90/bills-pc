@@ -79,14 +79,82 @@ export const initialSelectedCollectedCardsValues = {
 export const initialPurchaseValues = {
     date: localYYYYMMDD(),
     vendor: '',
-    cards: [],
-    products: [],
-    itemCount: 0,
-    subtotal: 0,
-    discount: 0,
-    shipping: 0,
-    taxRate: 0,
-    taxAmount: 0,
-    total: 0,
+    items: [],
+    subtotal: null,
+    discount: null,
+    shipping: null,
+    taxRate: null,
+    taxAmount: null,
+    total: null,
     saleNote: ''
 }
+
+// export const initialCollectionValues = {
+//     userId: '212',
+//     cards: [ 
+//         {
+//             id: '223',
+//             productId: '224',
+//             expansionId: '225',
+//             rarity: 'Rainbow Rare',
+//             name: "Pikachu VMAX",
+//             tcgPlayerProductId: '226'
+//         },
+//         {
+//             id: '227',
+//             productId: '228',
+//             expansionId: '229',
+//             rarity: 'Gold Card',
+//             name: "Mew",
+//             tcgPlayerProductId: '220'
+//         }
+//     ],
+//     bulk: {
+//         normal: {
+//             general: {},
+//             commonUncommon: {},
+//             rare: {},
+//             trainerSpecialEnergy: {},
+//             energy: {}
+//         },
+//         reverseHolo: {
+//             general: {},
+//             commonUncommon: {},
+//             rare: {},
+//             trainerSpecialEnergy: {}
+//         },
+//         holo: {
+//             general: {},
+//             rare: {},
+//             trainerSpecialEnergy: {},
+//             ultraRare: {},
+//             fullArt: {},
+//             fullArtTrainer: {},
+//             energy: {}
+//         }
+//     },
+//     products: [
+//         {
+//             id: '234',
+//             productId: '345',
+//             expansionId: '456',
+//             type: 'Elite Trainer Box',
+//             name: "Champion's Path Elite Trainer Box",
+//             tcgPlayerProductId: '567'
+//         },
+//         {
+//             id: '678',
+//             productId: '789',
+//             expansionId: '890',
+//             type: 'Ultra Premium Collection Box',
+//             name: "Celebrations Ultra Premium Collection Box",
+//             tcgPlayerProductId: '901'
+//         }
+//     ]
+// }
+
+// 'bulk'
+// 'bulk_id', 'bulk_normal_general', 'bulk_normal_common_uncommon'
+
+// 'bulk_sortings'
+// 'bulk_sorting_id', 
