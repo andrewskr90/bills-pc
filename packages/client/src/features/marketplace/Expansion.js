@@ -26,10 +26,10 @@ const Expansion = (props) => {
             <img src={referenceDataExpansion.set_v2_ptcgio_id ? `https://images.pokemontcg.io/${referenceDataExpansion.set_v2_ptcgio_id}/symbol.png` : MinimalPokeball} />
         </div>
         <p className='setName'>{referenceDataExpansion.set_v2_name}</p>
-        <div className={valueAndChangeClassName}>
+        {/* <div className={valueAndChangeClassName}>
             <p className='top10Avg'>Top10Avg</p>
             <p className='marketValue'>{topTenAverage}</p>
-        </div>
+        </div> */}
 
     </div>)
 }

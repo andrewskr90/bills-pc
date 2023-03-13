@@ -180,7 +180,7 @@
                 color: rgb(0, 180, 0)
             }
             .valueAndChange.down {
-            color: rgb(160, 0, 0)
+            color: #a00000
             }
         }
     }
@@ -207,16 +207,20 @@
         .expansion {
             width: 100%;
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
             height: 60px;
             background-color: #6065cb30;
             border-radius: 10px;
             margin-top: 10px;
+            position: relative;
             .setSymbol {
                 width: 12%;
                 display: flex;
                 justify-content: center;
+                position: absolute;
+                left: 0;
+                margin-left: 2%;
                 img {
                     max-width: 40px;
                     max-height: 40px;
