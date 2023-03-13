@@ -1,6 +1,7 @@
 export const parseLocationPathname = (location) => {
     const parsedPath = location.pathname.split('/')
     parsedPath.shift() // remove initial slash in pathname
+    if (parsedPath[parsedPath.length-1] === '') parsedPath.pop()
     return parsedPath
 }
 
