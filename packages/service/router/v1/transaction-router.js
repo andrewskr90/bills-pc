@@ -1,15 +1,7 @@
 const transactionRouter = require('express').Router()
 
 const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
-const { 
-    checkSaleType,
-    formatSales,
-    formatSaleNotes,
-    formatCollectedCards,
-    formatCollectedCardNotes,
-    formatSaleCards
-} = require('../../middleware/sale-middleware')
-const { addTransactionSalesMySQL, findTransactionSalesMySQL } = require('../../db/queries/transactionQueries')
+const { formatImportPurchase } = require('../../middleware/sale-middleware')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
 
@@ -17,30 +9,27 @@ transactionRouter.get('/sales',
     verifyCookie, 
     decodeSessionToken, 
     QueueQueries.init,
+    // todo: remove saleId from query and add to route
     QueueQueries.sales.select,
     executeQueries,
-    // findTransactionSalesMySQL, 
     (req, res, next) => {
         res.status(200).json(req.results)
 })
 
-transactionRouter.post('/sales', 
+transactionRouter.post('/sales/import-purchase', 
     verifyCookie,
     decodeSessionToken,
-    checkSaleType,
-    formatSales,
-    formatSaleNotes,
-    formatCollectedCards,
-    formatCollectedCardNotes,
-    formatSaleCards,
+    formatImportPurchase,
     QueueQueries.init,
     QueueQueries.collectedCards.insert,
     QueueQueries.collectedCardNotes.insert,
+    // QueueQueries.collectedProducts.insert,
+    // QueueQueries.collectedProductNotes.insert,
     QueueQueries.sales.insert,
-    QueueQueries.saleCards.insert,
     QueueQueries.saleNotes.insert,
-    executeQueries,
-    // addTransactionSalesMySQL,
+    QueueQueries.saleCards.insert,
+    // QueueQueries.saleProducts.insert,
+    // executeQueries,
     (req, res, next) => {
         res.status(201).json(req.results)
 })

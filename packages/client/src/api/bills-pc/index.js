@@ -106,7 +106,7 @@ const BillsPcService = {
     postTransactionSales(sale) {
         return axios({
             ...options,
-            url: '/api/v1/transactions/sales',
+            url: '/api/v1/transactions/sales/import-purchase',
             method: 'post',
             data: sale
         })

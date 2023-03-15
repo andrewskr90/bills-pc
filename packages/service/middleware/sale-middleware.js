@@ -1,150 +1,180 @@
 const { v4: uuidV4 } = require('uuid')
 
-const checkSaleType = (req, res, next) => {
-    const sale = req.body
-    let saleType
-    if (sale.cards || sale.products) {
-        saleType = 'importPurchase'
-    } else if (sale.collectedCards || sale.collectedProducts) {
-
+const createSaleNote = (note, saleId, userId) => {
+    if (!note) return null
+    return {
+        sale_note_id: uuidV4(),
+        sale_note_sale_id: saleId,
+        sale_note_user_id: userId,
+        sale_note_note: note
     }
-    req.saleType = saleType
-    next()
 }
 
-const formatSales = (req, res, next) => {
-    let sale_purchaser_id
-    const saleType = req.saleType
-    const sale_id = uuidV4()
-    const sales = []
-    if (saleType === 'importPurchase') {
-        sale_purchaser_id = req.claims.user_id
-        const { date, vendor, subtotal, discount, shipping, taxAmount, taxRate, total } = req.body
-        const sale = {
-            sale_id: sale_id,
-            sale_seller_id: null,
-            sale_purchaser_id: sale_purchaser_id,
-            sale_date: date,
-            sale_vendor: vendor,
-            sale_subtotal: subtotal,
-            sale_discount: discount,
-            sale_shipping: shipping,
-            sale_tax_amount: taxAmount,
-            sale_tax_rate: taxRate,
-            sale_total: total
+const createSale =(sale, sellerId, purchaserId) => {
+    const { date, vendor, subtotal, discount, shipping, taxAmount, total, purchaserNote, sellerNote } = sale
+    const saleId = uuidV4()
+    return {
+        sale_id: saleId,
+        sale_seller_id: sellerId,
+        sale_purchaser_id: purchaserId,
+        sale_date: date,
+        sale_vendor: vendor,
+        sale_subtotal: subtotal,
+        sale_discount: discount,
+        sale_shipping: shipping,
+        sale_tax_amount: taxAmount,
+        sale_total: total,
+        purchaserNote: createSaleNote(purchaserNote, saleId, purchaserId),
+        sellerNote: createSaleNote(sellerNote, saleId, sellerId)
+    }
+}
+
+const createCollectedCardNote = (note, collectedCardId, userId) => {
+    if (!note) return null
+    return {
+        collected_card_note_id: uuidV4(),
+        collected_card_note_collected_card_id: collectedCardId,
+        collected_card_note_note: note,
+        collected_card_note_user_id: userId
+    }
+}
+
+const createCollectedCard = (cardId, note, userId) => {
+    const collectedCardId = uuidV4()
+    return {
+        collected_card_id: collectedCardId,
+        collected_card_card_id: cardId,
+        collected_card_user_id: userId,
+        collected_card_note: createCollectedCardNote(note, collectedCardId, userId)
+    }
+}
+
+const createSaleCard = (saleId, collectedCardId, price) => {
+    return {
+        sale_card_id: uuidV4(),
+        sale_card_sale_id: saleId,
+        sale_card_collected_card_id: collectedCardId,
+        sale_card_price: price
+    }
+}
+
+const createCollectedProductNote = (note, collectedProductId, userId) => {
+    if (!note) return null
+    return {
+        collected_product_note_id: uuidV4(),
+        collected_product_note_collected_product_id: collectedProductId,
+        collected_product_note_note: note,
+        collected_product_note_user_id: userId
+    }
+}
+
+const createCollectedProduct = (productId, note, userId) => {
+    const collectedProductId = uuidV4()
+    return {
+        collected_product_id: collectedProductId,
+        collected_product_product_id: productId,
+        collected_product_user_id: userId,
+        collected_product_note: createCollectedProductNote(note, collectedProductId, userId)
+    }
+}
+
+const createSaleProduct = (saleId, collectedProductId, price) => {
+    return {
+        sale_product_id: uuidV4(),
+        sale_product_sale_id: saleId,
+        sale_product_collected_product_id: collectedProductId,
+        sale_product_price: price
+    }
+}
+
+
+
+
+const formatImportPurchase = (req, res, next) => {
+    const sales = req.body
+    const sellerId = null
+    const purchaserId = req.claims.user_id
+    const createdSaleNotes = []
+    const createdCollectedCards = []
+    const createdCollectedProducts = []
+    const createdCollectedCardNotes = []
+    const createdCollectedProductNotes = []
+    const createdSaleCards = []
+    const createdSaleProducts = []
+    const createdSales = sales.map(sale => {
+        const createdSale = createSale(sale, sellerId, purchaserId)
+        if (createdSale.purchaserNote) {
+            createdSaleNotes.push(createdSale.purchaserNote)
         }
-        sales.push(sale)
-    }
-    req.sale_id = sale_id
-    req.sales = sales
-    next()
-}
-
-const formatSaleNotes = (req, res, next) => {
-    const saleType = req.saleType
-    const sale_id = req.sale_id
-    let sale_note_user_id
-    let salePurchaserNote
-    const saleNotes = []
-    //only handles one note from purchaser at this point
-    //an array in order to handle multiple notes in future
-    if (saleType === 'importPurchase') {
-        if (req.body.saleNote) {
-            sale_note_user_id = req.claims.user_id
-            sale_note_note = req.body.saleNote
-            salePurchaserNote = {
-                sale_note_id: uuidV4(),
-                sale_note_sale_id: sale_id,
-                sale_note_user_id: sale_note_user_id,
-                sale_note_note: sale_note_note
-            }
-            saleNotes.push(salePurchaserNote)
+        if (createdSale.sellerNote) {
+            createdSaleNotes.push(createdSale.sellerNote)
         }
-    }
-    req.saleNotes = saleNotes
-    next()
-}
-
-const formatCollectedCards = (req, res, next) => {
-    const saleType = req.saleType
-    const collectedCards = []
-    if (saleType === 'importPurchase') {
-        req.body.cards.forEach(card => {
+        delete createdSale.purchaserNote
+        delete createdSale.sellerNote
+        sale.cards.forEach(card => {
+            // consider the quantity of card in sale
             for (let i=0; i<card.quantity; i++) {
-                const collectedCard = {
-                    collected_card_id: uuidV4(),
-                    collected_card_card_id: card.card_id,
-                    collected_card_user_id: req.claims.user_id
-                
+                const createdCollectedCard = createCollectedCard(
+                    card.card_id, 
+                    card.itemNote, 
+                    purchaserId
+                )
+                const createdSaleCard = createSaleCard(
+                    createdSale.sale_id, 
+                    createdCollectedCard.collected_card_id, 
+                    card.retail
+                )
+                if (createdCollectedCard.collected_card_note) { 
+                    createdCollectedCardNotes.push(createdCollectedCard.collected_card_note)
                 }
-                collectedCards.push(collectedCard)
+                delete createdCollectedCard.collected_card_note
+                createdCollectedCards.push(createdCollectedCard)
+                createdSaleCards.push(createdSaleCard)
             }
         })
-    }
-    req.collectedCards = collectedCards
-    next()
-}
-
-const formatCollectedCardNotes = (req, res, next) => {
-    const saleType = req.saleType
-    const collectedCards = req.collectedCards
-    const collectedCardNotes = []
-    let collectedCardIdx = 0
-    if (saleType === 'importPurchase') {
-        req.body.cards.forEach((card, idx) => {
-            if (saleType === 'importPurchase') {
-                for (let i=0; i<card.quantity; i++) {
-                    //cardNote will be the same for all cards 
-                    //imported with a given quantity
-                    if (card.cardNote) {
-                        const collectedCardNote = {
-                            collected_card_note_id: uuidV4(),
-                            collected_card_note_collected_card_id: collectedCards[collectedCardIdx].collected_card_id,
-                            collected_card_note_user_id: req.claims.user_id,
-                            collected_card_note_note: card.cardNote
-                        }
-                        collectedCardNotes.push(collectedCardNote)
-                        collectedCardIdx++
-                    }
+        sale.products.forEach(product => {
+            // consider the quantity of card in sale
+            for (let i=0; i<product.quantity; i++) {
+                const createdCollectedProduct = createCollectedProduct(
+                    product.product_id, 
+                    product.itemNote, 
+                    purchaserId
+                )
+                const createdSaleProduct = createSaleProduct(
+                    createdSale.sale_id, 
+                    createdCollectedProduct.collected_product_id, 
+                    product.retail
+                )
+                if (createdCollectedProduct.collected_product_note) { 
+                    createdCollectedProductNotes.push(createdCollectedProduct.collected_product_note)
                 }
+                delete createdCollectedProduct.collected_product_note
+                createdCollectedProducts.push(createdCollectedProduct)
+                createdSaleProducts.push(createdSaleProduct)
             }
         })
-        req.collectedCardNotes = collectedCardNotes
-    }
-    next()
-}
-
-const formatSaleCards = (req, res, next) => {
-    const sale_id = req.sale_id
-    const saleType = req.saleType
-    const collectedCards = req.collectedCards
-    const saleCards = []
-    let collectedCardIdx = 0
-    req.body.cards.forEach((card, idx) => {
-        //importPurchase saleType needs to consider quantity
-        //when resolving saleCards
-        if (saleType === 'importPurchase') {
-            for (let i=0; i<card.quantity; i++) {
-                const saleCard = {
-                    sale_card_id: uuidV4(),
-                    sale_card_sale_id: sale_id,
-                    sale_card_collected_card_id: collectedCards[collectedCardIdx].collected_card_id,
-                    sale_card_price: card.retail
-                }
-                saleCards.push(saleCard)
-                collectedCardIdx++
-            }
-        }
+        return createdSale
     })
-    req.saleCards = saleCards
+
+    req.sales = createdSales
+    req.saleNotes = createdSaleNotes
+    req.collectedCards = createdCollectedCards
+    req.collectedProducts = createdCollectedProducts
+    req.collectedCardNotes = createdCollectedCardNotes
+    req.collectedProductNotes = createdCollectedProductNotes
+    req.saleCards = createdSaleCards
+    req.saleProducts = createdSaleProducts
+    
+    console.log(req.sales)
+    console.log(req.saleNotes)
+    console.log(req.collectedCards)
+    console.log(req.collectedProducts)
+    console.log(req.collectedCardNotes)
+    console.log(req.collectedProductNotes)
+    console.log(req.saleCards)
+    console.log(req.saleProducts)
+
     next()
 }
 
-module.exports = {
-    checkSaleType,
-    formatSales,
-    formatSaleNotes,
-    formatCollectedCards,
-    formatCollectedCardNotes,
-    formatSaleCards
-}
+module.exports = { formatImportPurchase }
