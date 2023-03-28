@@ -29,7 +29,7 @@ transactionRouter.post('/sales/import-purchase',
     QueueQueries.saleNotes.insert,
     QueueQueries.saleCards.insert,
     // QueueQueries.saleProducts.insert,
-    // executeQueries,
+    executeQueries,
     (req, res, next) => {
         res.status(201).json(req.results)
 })
