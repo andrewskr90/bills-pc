@@ -19,10 +19,9 @@ const ImportPurchase = (props) => {
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
 
-    const updatePurchaseItem = (editedItem) => {
-        let editedItemId = editedItem.card_id || editedItem.product_id
-        const updatedPurchaseItems = purchaseValues.items.map(item => {
-            if (item.card_id === editedItemId || item.product_id === editedItemId) {
+    const updatePurchaseItem = (editedItem, i) => {
+        const updatedPurchaseItems = purchaseValues.items.map((item, j) => {
+            if (i === j) {
                 return editedItem
             } else return item
         })
@@ -46,7 +45,7 @@ const ImportPurchase = (props) => {
             ...item,
             quantity: 1,
             retail: null,
-            cardNote: ''
+            itemNote: ''
         }
         setPurchaseValues({
             ...purchaseValues,
@@ -72,16 +71,27 @@ const ImportPurchase = (props) => {
         })
     } 
 
+    const seperateCardsAndProducts = (purchaseValues) => {
+        const saleItems = purchaseValues.items
+        const saleCards = saleItems.filter(item => item.card_id)
+        const saleProducts = saleItems.filter(item => item.product_id)
+        return {
+            ...purchaseValues,
+            cards: saleCards,
+            products: saleProducts
+        }
+    }
+
     const handleUpdateCollection = (e) => {
         e.preventDefault()
         console.log(purchaseValues)
-        // BillsPcService.postTransactionSales(purchaseValues)
-        //     .then(res => {
-        //         console.log(res)
-        //         navigate('/')
-        //     }).catch(err => {
-        //         console.log(err)
-        //     })
+        BillsPcService.postTransactionSales([seperateCardsAndProducts(purchaseValues)])
+            .then(res => {
+                console.log(res)
+                // navigate('/')
+            }).catch(err => {
+                console.log(err)
+            })
     }
 
 
@@ -114,14 +124,14 @@ const ImportPurchase = (props) => {
                             />
                         </div>
                     </div>
-                    <div className='labelInput saleNote'>
+                    <div className='labelInput purchaserNote'>
                         <label>Note</label>
                         <input 
-                            id='saleNote'
-                            className='saleNote'
-                            name='saleNote'
+                            id='purchaserNote'
+                            className='purchaserNote'
+                            name='purchaserNote'
                             type='text'
-                            value={purchaseValues.saleNote}
+                            value={purchaseValues.purchaserNote}
                             onChange={updatePurchaseValues}
                         />
                     </div>

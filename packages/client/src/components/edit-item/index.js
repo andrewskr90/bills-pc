@@ -25,7 +25,7 @@ const EditItem = (props) => {
 
     const handleSaveItem = (e) => {
         e.preventDefault()
-        updatePurchaseItem(itemValues)
+        updatePurchaseItem(itemValues, itemIndex)
         navigate(buildPreviousRoute(location, 2))
     }
 
@@ -68,8 +68,8 @@ const EditItem = (props) => {
                         type: 'input',
                         width: 100,
                         onChange: updateItemValues,
-                        name: 'cardNote',
-                        value: itemValues.cardNote
+                        name: 'itemNote',
+                        value: itemValues.itemNote
                     }
                 ]
             },

@@ -86,7 +86,8 @@ export const initialPurchaseValues = {
     taxRate: null,
     taxAmount: null,
     total: null,
-    saleNote: ''
+    purchaserNote: '',
+    sellerNote: ''
 }
 
 // export const initialCollectionValues = {
