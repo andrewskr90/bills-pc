@@ -1,9 +1,9 @@
 const QueryFormatters = require('../../../utils/queryFormatters')
 
 const insert = (req, res, next) => {
-    const saleCards = req.saleCards
-    if (saleCards.length > 0) {
-        const query = QueryFormatters.objectsToInsert(saleCards, 'sale_cards')
+    const saleProducts = req.saleProducts
+    if (saleProducts.length > 0) {
+        const query = QueryFormatters.objectsToInsert(saleProducts, 'sale_products')
         req.queryQueue.push(`${query};`)
     }
     next()

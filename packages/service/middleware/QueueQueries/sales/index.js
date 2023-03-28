@@ -2,8 +2,10 @@ const QueryFormatters = require('../../../utils/queryFormatters')
 
 const insert = (req, res, next) => {
     const sales = req.sales
-    const query = QueryFormatters.objectsToInsert(sales, 'sales')
-    req.queryQueue.push(`${query};`)
+    if (sales.length > 0) {
+        const query = QueryFormatters.objectsToInsert(sales, 'sales')
+        req.queryQueue.push(`${query};`)
+    }
     next()
 }
 

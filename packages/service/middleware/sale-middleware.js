@@ -164,15 +164,6 @@ const formatImportPurchase = (req, res, next) => {
     req.collectedProductNotes = createdCollectedProductNotes
     req.saleCards = createdSaleCards
     req.saleProducts = createdSaleProducts
-    
-    // console.log(req.sales)
-    // console.log(req.saleNotes)
-    // console.log(req.collectedCards)
-    // console.log(req.collectedProducts)
-    // console.log(req.collectedCardNotes)
-    // console.log(req.collectedProductNotes)
-    // console.log(req.saleCards)
-    // console.log(req.saleProducts)
 
     next()
 }
