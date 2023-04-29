@@ -14,6 +14,7 @@ const marketPrices = require('./marketPrices')
 const cardsV2 = require('./cardsV2')
 const products = require('./products')
 const referenceData = require('./referenceData')
+const portfolio = require('./portfolio')
 
 
 const init = (req, res, next) => {
@@ -38,5 +39,6 @@ module.exports = {
     marketPrices,
     cardsV2,
     products,
-    referenceData
+    referenceData, 
+    portfolio
 }

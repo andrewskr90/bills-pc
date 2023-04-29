@@ -4,7 +4,6 @@ const insert = (req, res, next) => {
     const collectedCards = req.collectedCards
     if (collectedCards.length > 0) {
         const query = QueryFormatters.objectsToInsert(collectedCards, 'collected_cards')
-        console.log(query)
         req.queryQueue.push(`${query};`)
     }
     next()
