@@ -22,7 +22,10 @@ const rootRouter = require('./router/index')
 server.use('/api', rootRouter)
 
 server.use((err, req, res, next) => {
+    console.log(err.stack)
     res.status(err.status || 500).json({
+        success: false,
+        status: err.status || 500,
         message: err.message
     })
 })

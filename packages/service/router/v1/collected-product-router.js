@@ -1,13 +1,14 @@
-const collectedCardRouter = require('express').Router()
-const CollectedCard = require('../../models/CollectedCard')
+const collectedProductRouter = require('express').Router()
+const CollectedProduct = require('../../models/CollectedProduct')
+
 const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
 
-collectedCardRouter.get('/', 
+collectedProductRouter.get('/', 
     verifyCookie,
     decodeSessionToken,
     async (req, res, next) => {
         try {
-            const results = await CollectedCard.findByUserId(req.claims.user_id)
+            const results = await CollectedProduct.findByUserId()
             res.status(200).json(results)
         } catch (err) {
             next(err)
@@ -15,4 +16,4 @@ collectedCardRouter.get('/',
     }
 )
 
-module.exports = collectedCardRouter
+module.exports = collectedProductRouter

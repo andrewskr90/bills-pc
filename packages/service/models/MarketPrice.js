@@ -16,7 +16,7 @@ const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
     const res = {}
     let marketPrices
     await executeQueries(req, res, (err) => {
-        if (err) return err
+        if (err) throw new Error(err)
         marketPrices = req.results
     })
     return marketPrices
@@ -38,7 +38,7 @@ const selectByProductIdsBetweenDates = async (ids, formerDate, latterDate) => {
     const res = {}
     let marketPrices
     await executeQueries(req, res, (err) => {
-        if (err) return err
+        if (err) throw new Error(err)
         marketPrices = req.results
     })
     return marketPrices
