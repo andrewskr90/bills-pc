@@ -84,17 +84,22 @@ const evaluatePortfolio = async (req, res, next) => {
         if (Object.keys(cardInventory).length > 0) {
             const formattedInventory = formatInventory(cardInventory)
             const inventoryCardIds = formattedInventory.map(card => card.card_v2_id)
-            keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
-                inventoryCardIds, 
-                stringifyDateYYYYMMDD(startOfDay), 
-                stringifyDateYYYYMMDD(endOfDay)
-            )
+            try {
+                keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
+                    inventoryCardIds, 
+                    stringifyDateYYYYMMDD(startOfDay), 
+                    stringifyDateYYYYMMDD(endOfDay)
+                )
+            } catch (err) {
+                throw new Error(err)
+            }
             keyDateCardPrices.forEach(price => {
                 if (price.market_price_price) {
                     const priceCardId = price.market_price_card_id
-                    const inventoryCount = formattedInventory.filter(card => {
-                        card.card_v2_id === priceCardId
-                    })[0].inventory.length
+                    const selectedItem = formattedInventory.filter(card => {
+                        return card.card_v2_id === priceCardId
+                    })[0]
+                    const inventoryCount = selectedItem.inventory.length
                     dailyBalance+= parseFloat(price.market_price_price) * inventoryCount
                 }
             })
@@ -103,17 +108,22 @@ const evaluatePortfolio = async (req, res, next) => {
         if (Object.keys(productInventory).length > 0) {
             const formattedInventory = formatInventory(productInventory)
             const inventoryProductIds = formattedInventory.map(product => product.product_id)
-            keyDateProductPrices = await MarketPrice.selectByProductIdsBetweenDates(
-                inventoryProductIds, 
-                stringifyDateYYYYMMDD(startOfDay), 
-                stringifyDateYYYYMMDD(endOfDay)
-            )
+            try {
+                keyDateProductPrices = await MarketPrice.selectByProductIdsBetweenDates(
+                    inventoryProductIds, 
+                    stringifyDateYYYYMMDD(startOfDay), 
+                    stringifyDateYYYYMMDD(endOfDay)
+                )
+            } catch (err) {
+                throw new Error(err)
+            }
             keyDateProductPrices.forEach(price => {
                 if (price.market_price_price) {
                     const priceProductId = price.market_price_product_id
-                    const inventoryCount = formattedInventory.filter(product => {
-                        product.product_id === priceProductId
-                    })[0].inventory.length
+                    const selectedItem = formattedInventory.filter(product => {
+                        return product.product_id === priceProductId
+                    })[0]
+                    const inventoryCount = selectedItem.inventory.length
                     dailyBalance+= parseFloat(price.market_price_price) * inventoryCount
                 }
             })
@@ -187,15 +197,23 @@ const evaluatePortfolio = async (req, res, next) => {
                 // no more transactions after current, 
                 while (keyMarketDates.length > 0) {
                     const startOfDay = keyMarketDates.pop()
-                    const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
-                    balanceHistory.push({ balance: dailyBalance, date: startOfDay })
+                    try {
+                        const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
+                        balanceHistory.push({ balance: dailyBalance, date: startOfDay })
+                    } catch (err) {
+                        next(err)
+                    }
                 }
             } else {
                 while (keyMarketDates[0] < currentTransactionDate) keyMarketDates.pop()
                 while (keyMarketDates[0] >= currentTransactionDate && keyMarketDates[0] < nextTransactionDate) {
                     const startOfDay = keyMarketDates.pop()
-                    const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
-                    balanceHistory.push({ balance: dailyBalance, date: startOfDay })
+                    try {
+                        const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
+                        balanceHistory.push({ balance: dailyBalance, date: startOfDay })
+                    } catch (err) {
+                        next(err)
+                    }
                 }
             }
         }
