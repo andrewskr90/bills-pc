@@ -118,6 +118,20 @@ const BillsPcService = {
             params: filter
         })
     },
+    getCollectedProducts(filter) {
+        return axios({
+            ...options,
+            url: '/api/v1/collected-products',
+            params: filter
+        })
+    },
+    getCollectionMarketPrices(collection, date) {
+        return axios({
+            ...options,
+            url: `/api/v1/market-prices/collection/${date}`,
+            data: collection
+        })
+    },
     getMarketPrices(filter) {
         if (Object.keys(filter)[0] === 'set_v2_id') {
             return axios({
@@ -168,6 +182,19 @@ const BillsPcService = {
         return axios({
             ...options,
             url: '/api/v1/reference-data'
+        })
+    },
+    getSales() {
+        return axios({
+            ...options, 
+            url: '/api/v1/sales'
+        })
+    },
+    getPortfolio(params) {
+        return axios({
+            ...options,
+            url: '/api/v1/portfolio',
+            params: params
         })
     }
 }
