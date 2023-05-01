@@ -84,16 +84,17 @@ const ImportPurchase = (props) => {
 
     const handleUpdateCollection = (e) => {
         e.preventDefault()
-        console.log(purchaseValues)
         BillsPcService.postTransactionSales([seperateCardsAndProducts(purchaseValues)])
             .then(res => {
-                console.log(res)
+                setPurchaseValues({
+                    ...initialPurchaseValues,
+                    date: purchaseValues.date
+                })
                 // navigate('/')
             }).catch(err => {
                 console.log(err)
             })
     }
-
 
     return (<div className='page importPurchase'>
         <Routes>
