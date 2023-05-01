@@ -5,6 +5,8 @@ import ExpansionsMarketplace from './ExpansionsMarketplace'
 import ExpansionItemsMarketplace from './ExpansionItemsMarketplace'
 import Search from '../search'
 import SearchResults from './features/search-results'
+import Header from '../../layouts/header'
+import { Link } from 'react-router-dom'
 import './assets/marketplace.less'
 
 const Marketplace = (props) => {
@@ -17,6 +19,9 @@ const Marketplace = (props) => {
     }
 
     return (<div className='marketplace'>
+        <Header main title={'Marketplace'}>
+            <Link to='support-us'>Support Us</Link>
+        </Header>
         <Search submitSearch={submitSearch}/>
         <Routes>
             <Route 

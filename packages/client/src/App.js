@@ -125,12 +125,6 @@ const App = () => {
             {initialData
             ?
             <div className='app'>
-                <header>
-                    <Link to='/market'>
-                        <h1>Bill's PC</h1>
-                    </Link>
-                    <Link to='support-us'>Support Us</Link>
-                </header>
                 <Routes>
                     <Route path='/register' 
                         element={<RegisterForm />}
