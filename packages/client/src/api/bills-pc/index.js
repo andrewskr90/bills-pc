@@ -125,13 +125,6 @@ const BillsPcService = {
             params: filter
         })
     },
-    getCollectionMarketPrices(collection, date) {
-        return axios({
-            ...options,
-            url: `/api/v1/market-prices/collection/${date}`,
-            data: collection
-        })
-    },
     getMarketPrices(filter) {
         if (Object.keys(filter)[0] === 'set_v2_id') {
             return axios({
