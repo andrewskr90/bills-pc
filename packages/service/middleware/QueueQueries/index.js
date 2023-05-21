@@ -15,6 +15,10 @@ const cardsV2 = require('./cardsV2')
 const products = require('./products')
 const referenceData = require('./referenceData')
 const portfolio = require('./portfolio')
+const gifts = require('./gifts')
+const giftNotes = require('./giftNotes')
+const giftCards = require('./giftCards')
+const giftProducts = require('./giftProducts')
 
 
 const init = (req, res, next) => {
@@ -40,5 +44,9 @@ module.exports = {
     cardsV2,
     products,
     referenceData, 
-    portfolio
+    portfolio, 
+    gifts,
+    giftNotes,
+    giftCards,
+    giftProducts
 }

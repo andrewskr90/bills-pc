@@ -10,6 +10,16 @@ const createSaleNote = (note, saleId, userId) => {
     }
 }
 
+const createGiftNote = (note, giftId, userId) => {
+    if (!note) return null
+    return {
+        gift_note_id: uuidV4(),
+        gift_note_gift_id: giftId,
+        gift_note_user_id: userId,
+        gift_note_note: note
+    }
+}
+
 const createSale =(sale, sellerId, purchaserId) => {
     const { date, vendor, subtotal, discount, shipping, taxAmount, total, purchaserNote, sellerNote } = sale
     const saleId = uuidV4()
@@ -58,6 +68,14 @@ const createSaleCard = (saleId, collectedCardId, price) => {
     }
 }
 
+const createGiftCard = (giftId, collectedCardId) => {
+    return {
+        gift_card_id: uuidV4(),
+        gift_card_gift_id: giftId,
+        gift_card_collected_card_id: collectedCardId
+    }
+}
+
 const createCollectedProductNote = (note, collectedProductId, userId) => {
     if (!note) return null
     return {
@@ -84,6 +102,28 @@ const createSaleProduct = (saleId, collectedProductId, price) => {
         sale_product_sale_id: saleId,
         sale_product_collected_product_id: collectedProductId,
         sale_product_price: price
+    }
+}
+
+const createGiftProduct = (giftId, collectedProductId) => {
+    return {
+        gift_product_id: uuidV4(),
+        gift_product_gift_id: giftId,
+        gift_product_collected_product_id: collectedProductId
+    }
+}
+
+const createGift =(gift, giverId, receiverId) => {
+    const { date, giverName, receiverNote, giver_note } = gift
+    const giftId = uuidV4()
+    return {
+        gift_id: giftId,
+        gift_giver_id: giverId,
+        gift_receiver_id: receiverId,
+        gift_date: date,
+        gift_giver_name: giverName,
+        receiverNote: createGiftNote(receiverNote, giftId, receiverId),
+        giverNote: createGiftNote(giver_note, giftId, giverId)
     }
 }
 
@@ -257,4 +297,79 @@ const formatSaleResults = (req, res, next) => {
     next()
 }
 
-module.exports = { formatImportPurchase, formatSaleResults }
+const formatImportGift = (req, res, next) => {
+    const gifts = req.body
+    const giverId = null
+    const receiverId = req.claims.user_id
+    const createdGiftNotes = []
+    const createdCollectedCards = []
+    const createdCollectedProducts = []
+    const createdCollectedCardNotes = []
+    const createdCollectedProductNotes = []
+    const createdGiftCards = []
+    const createdGiftProducts = []
+    const createdGifts = gifts.map(gift => {
+        const createdGift = createGift(gift, giverId, receiverId)
+        if (createdGift.receiverNote) {
+            createdGiftNotes.push(createdGift.receiverNote)
+        }
+        if (createdGift.giverNote) {
+            createdGiftNotes.push(createdGift.giverNote)
+        }
+        delete createdGift.receiverNote
+        delete createdGift.giverNote
+        gift.cards.forEach(card => {
+            // consider the quantity of card in gift
+            for (let i=0; i<card.quantity; i++) {
+                const createdCollectedCard = createCollectedCard(
+                    card.card_id, 
+                    card.itemNote, 
+                    receiverId
+                )
+                const createdGiftCard = createGiftCard(
+                    createdGift.gift_id, 
+                    createdCollectedCard.collected_card_id, 
+                )
+                if (createdCollectedCard.collected_card_note) { 
+                    createdCollectedCardNotes.push(createdCollectedCard.collected_card_note)
+                }
+                delete createdCollectedCard.collected_card_note
+                createdCollectedCards.push(createdCollectedCard)
+                createdGiftCards.push(createdGiftCard)
+            }
+        })
+        gift.products.forEach(product => {
+            // consider the quantity of card in gift
+            for (let i=0; i<product.quantity; i++) {
+                const createdCollectedProduct = createCollectedProduct(
+                    product.product_id, 
+                    product.itemNote, 
+                    receiverId
+                )
+                const createdGiftProduct = createGiftProduct(
+                    createdGift.gift_id, 
+                    createdCollectedProduct.collected_product_id
+                )
+                if (createdCollectedProduct.collected_product_note) { 
+                    createdCollectedProductNotes.push(createdCollectedProduct.collected_product_note)
+                }
+                delete createdCollectedProduct.collected_product_note
+                createdCollectedProducts.push(createdCollectedProduct)
+                createdGiftProducts.push(createdGiftProduct)
+            }
+        })
+        return createdGift
+    })
+
+    req.gifts = createdGifts
+    req.giftNotes = createdGiftNotes
+    req.collectedCards = createdCollectedCards
+    req.collectedProducts = createdCollectedProducts
+    req.collectedCardNotes = createdCollectedCardNotes
+    req.collectedProductNotes = createdCollectedProductNotes
+    req.giftCards = createdGiftCards
+    req.giftProducts = createdGiftProducts
+    next()
+}
+
+module.exports = { formatImportPurchase, formatSaleResults, formatImportGift }
