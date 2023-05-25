@@ -356,9 +356,9 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
         const setUrl = `https://www.tcgplayer.com/search/${category}/${curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=${category}&view=grid&setName=${curSetName}&page=${pageNum}`
         await page.goto(setUrl)
         await page.setViewport({width: 1080, height: 1024})
-        await page.waitForSelector('aria/Next page')
-        const nextPageButtonDisabled = await page.$eval('aria/Next page', (element) => element.disabled)
-        if (nextPageButtonDisabled) {
+        const nextPageElement = await page.waitForSelector('aria/Next page')
+        const nextPageButtonClasses = await page.evaluate(element => element.classList, nextPageElement)
+        if (Object.values(nextPageButtonClasses).indexOf('is-disabled') > -1) {
             notLastPage = false
         }
         //  select all product results
