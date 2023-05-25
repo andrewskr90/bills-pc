@@ -2,7 +2,7 @@ import React from 'react'
 import './assets/form.less'
 
 const Form = (props) => {
-    const { config } = props
+    const { config, children } = props
 
     const buildElement = (elements, idx) => {
         let styleObj = {}
@@ -29,6 +29,25 @@ const Form = (props) => {
             } else {
                 return <button onClick={elements[idx].onClick} style={styleObj}>{elements[idx].title}</button>
             }
+        } else if (elements[idx].type === 'date') {
+            return <div 
+                className='labelInput date'
+                style={styleObj}
+            >
+                <label>{elements[idx].title}</label>
+                <input 
+                    id={elements[idx].id}
+                    className='date'
+                    name={elements[idx].name}
+                    type='date'
+                    value={elements[idx].value}
+                    onChange={elements[idx].onChange}
+                />
+            </div>
+        } else if (elements[idx].type === 'child') {
+            return <>
+                {children[elements[idx].childIndex]}
+            </>
         }
     }
 

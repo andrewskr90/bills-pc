@@ -4,7 +4,7 @@ import EditPNG from '../../../collection/assets/edit.png'
 import './assets/itemsTable.less'
 
 const ItemsTable = (props) => {
-    const { purchaseValues } = props
+    const { formValues } = props
     const navigate = useNavigate()
     
     const handleEditItem = (idx) => {
@@ -12,20 +12,21 @@ const ItemsTable = (props) => {
     }
 
     return (<table className='itemsTable'>
+        <label className='items'>Items</label>
         <tr className='header'>
             <th className='name'>Name</th>
             <th className='price'>Price</th>
             <th className='quantity'>Qty</th>
             <th className='edit'></th>
         </tr>
-        {purchaseValues.items.map((card, idx) => {
+        {formValues.items.map((card, idx) => {
             const { card_v2_id } = card
             return <>
                 <tr className='spacer'></tr>
                 <tr key ={card_v2_id} className='tableItem'>
-                    <td className='name'>{purchaseValues.items[idx].name}</td>
-                    <td className='price'>{purchaseValues.items[idx].retail}</td>
-                    <td className='quantity'>{purchaseValues.items[idx].quantity}</td>
+                    <td className='name'>{formValues.items[idx].name}</td>
+                    <td className='price'>{formValues.items[idx].retail}</td>
+                    <td className='quantity'>{formValues.items[idx].quantity}</td>
                     <td className='edit'>
                         <img onClick={() => handleEditItem(idx)} className='pointer' src={EditPNG} />
                     </td>

@@ -126,9 +126,9 @@ const App = () => {
             ?
             <div className='app'>
                 <Routes>
-                    <Route path='/register' 
+                    {/* <Route path='/register' 
                         element={<RegisterForm />}
-                    />
+                    /> */}
                     <Route path='/market/*' 
                         element={<Marketplace 
                             referenceData={referenceData} 
@@ -136,7 +136,11 @@ const App = () => {
                         />} 
                     />
                     <Route 
-                        path='/collection/*' 
+                        path='/collection'
+                        element={<InDevelopment />}
+                    />
+                    <Route 
+                        path='/admin/*' 
                         element={<Collection 
                             userClaims={userClaims} 
                             setUserClaims={setUserClaims}

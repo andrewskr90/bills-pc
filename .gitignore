@@ -9,3 +9,5 @@ geckodriver.log
 addCardsFromTcgPlayer.log
 packages/client/src/assets/images/sets
 packages/client/src/assets/images/TCGplayerAffiliateBrandPackage
+scripts/__pycache__
+.gitignore

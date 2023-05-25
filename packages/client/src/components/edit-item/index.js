@@ -6,7 +6,7 @@ import { buildPreviousRoute, parseLastRouteParameter } from '../../utils/locatio
 import './assets/editItem.less'
 
 const EditItem = (props) => {
-    const { purchaseValues, updatePurchaseItem, removeItemFromPurchase } = props
+    const { purchaseValues, updatePurchaseItem, removeItemFromPurchase, includeRetail } = props
     const location = useLocation()
     const [itemIndex, setItemIndex] = useState(parseInt(parseLastRouteParameter(location)))
     const [itemValues, setItemValues] = useState(purchaseValues.items[itemIndex])
@@ -101,6 +101,8 @@ const EditItem = (props) => {
             }
         ]
     }
+
+    if (!includeRetail) formConfig.rows[0].elements.shift()
 
     return (<div className='editItem page'>
         <Banner titleText={'Edit Item'} handleClickBackArrow={handleClickBackArrow} />

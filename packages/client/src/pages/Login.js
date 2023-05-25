@@ -11,7 +11,7 @@ const Login = (props) => {
             <p>Pokemon Card Portfolio App</p>
         </header>
         <LoginForm setUserClaims={setUserClaims} />
-        <RegisterForm />
+        {/* <RegisterForm /> */}
     </div>)
 }
 

@@ -111,6 +111,14 @@ const BillsPcService = {
             data: sale
         })
     },
+    postTransactionGifts(gift) {
+        return axios({
+            ...options,
+            url: '/api/v1/transactions/gifts/import-gift',
+            method: 'post',
+            data: gift
+        })
+    },
     getCollectedCards(filter) {
         return axios({
             ...options,

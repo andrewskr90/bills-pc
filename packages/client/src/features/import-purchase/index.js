@@ -136,10 +136,8 @@ const ImportPurchase = (props) => {
                             onChange={updatePurchaseValues}
                         />
                     </div>
-                    <label className='items'>Items</label>
                     <ItemsTable 
-                        purchaseValues={purchaseValues}
-                        updatePurchaseValues={updatePurchaseValues}
+                        formValues={purchaseValues}
                     />
                     <PlusButton handleClick={() => navigate('add-item')} />
                     <div className='discountSubtotalAndTax'>

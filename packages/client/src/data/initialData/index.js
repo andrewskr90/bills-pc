@@ -80,14 +80,80 @@ export const initialPurchaseValues = {
     date: localYYYYMMDD(),
     vendor: '',
     items: [],
-    subtotal: null,
-    discount: null,
-    shipping: null,
-    taxRate: null,
-    taxAmount: null,
-    total: null,
+    subtotal: '',
+    discount: '',
+    shipping: '',
+    taxRate: '',
+    taxAmount: '',
+    total: '',
     purchaserNote: '',
     sellerNote: ''
+}
+
+export const initialImportGiftValues = {
+    date: localYYYYMMDD(),
+    giver: '',
+    items: [],
+    receiverNote: ''
+}
+
+export const initialPortfolioValues = {
+    userId: null,
+    investment: null,
+    balance: null,
+    roi: null,
+    sales: [
+        {
+            saleId: null,
+            sellerId: null,
+            sellerName: null,
+            purchaserId: null,
+            purchaserName: null,
+            date: null,
+            vendor: null,
+            subtotal: null,
+            discount: null,
+            shipping: null,
+            taxAmount: null,
+            total: null,
+            note: null,
+            items: [
+                {
+                    cardId: null,
+                    productId: null,
+                    name: null,
+                    setName: null,
+                    tcgplayerProductId: null,
+                    collectedCardId: null,
+                    collectedProductId: null,
+                    price: null,
+                    note: null
+                }
+            ]
+        }
+    ],
+    trades: [],
+    rips: [],
+    assets: [
+        {
+            cardId: null,
+            productId: null,
+            lastUpdated: null,
+            marketValue: null,
+            balance: null,
+            roi: null,
+            investment: null,
+            inventory: [
+                {
+                    collectedCardId: null,
+                    saleId: null,
+                    dateAdded: null,
+                    investment: null,
+                    roi: null
+                }
+            ]
+        }
+    ]
 }
 
 // export const initialCollectionValues = {

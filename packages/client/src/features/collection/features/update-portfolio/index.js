@@ -5,6 +5,7 @@ import './assets/updatePortfolio.less'
 import ImportPurchase from '../../../import-purchase'
 import CategorySelector from '../../../../components/category-selector'
 import { buildPreviousRoute } from '../../../../utils/location'
+import ImportGift from '../../../import-gift'
 
 const updatePortfolioCategories = ['import', 'purchase', 'trade', 'sale', 'export']
 
@@ -34,7 +35,7 @@ const UpdatePortfolio = (props) => {
         <Routes>
             <Route 
                 path='/import/*'
-                element={<>import component</>}
+                element={<ImportGift referenceData={referenceData} setReferenceData={setReferenceData} />}
             />
             <Route 
                 path='/purchase/*'
