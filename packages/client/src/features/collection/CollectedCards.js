@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import CollectedCard from './CollectedCard'
 
 const CollectedCards = (props) => {
@@ -14,8 +15,9 @@ const CollectedCards = (props) => {
         :
         <div className='emptyCollection page'>
             <p>No items in your collection!</p>
-            <Link to='/import'>
-                <button>Add Items</button>
+            <p>Update your collection with a purchase.</p>
+            <Link to='update'>
+                <button>Update Collection</button>
             </Link>
         </div>
         }

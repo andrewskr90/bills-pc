@@ -106,15 +106,30 @@ const BillsPcService = {
     postTransactionSales(sale) {
         return axios({
             ...options,
-            url: '/api/v1/transactions/sales',
+            url: '/api/v1/transactions/sales/import-purchase',
             method: 'post',
             data: sale
+        })
+    },
+    postTransactionGifts(gift) {
+        return axios({
+            ...options,
+            url: '/api/v1/transactions/gifts/import-gift',
+            method: 'post',
+            data: gift
         })
     },
     getCollectedCards(filter) {
         return axios({
             ...options,
             url: '/api/v1/collected-cards',
+            params: filter
+        })
+    },
+    getCollectedProducts(filter) {
+        return axios({
+            ...options,
+            url: '/api/v1/collected-products',
             params: filter
         })
     },
@@ -138,6 +153,18 @@ const BillsPcService = {
             })
         }
     },
+    getMarketPricesByCardId(cardId) {
+        return axios({
+            ...options,
+            url: `/api/v1/market-prices/card-id/${cardId}`
+        })
+    },
+    getMarketPricesByProductId(productId) {
+        return axios({
+            ...options,
+            url: `/api/v1/market-prices/product-id/${productId}`
+        })
+    },
     getProducts(filter) {
         return axios({
             ...options,
@@ -156,6 +183,19 @@ const BillsPcService = {
         return axios({
             ...options,
             url: '/api/v1/reference-data'
+        })
+    },
+    getSales() {
+        return axios({
+            ...options, 
+            url: '/api/v1/sales'
+        })
+    },
+    getPortfolio(params) {
+        return axios({
+            ...options,
+            url: '/api/v1/portfolio',
+            params: params
         })
     }
 }

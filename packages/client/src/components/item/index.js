@@ -1,20 +1,11 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import MarketplaceChart from './MarketplaceChart'
+import MarketplaceChart from '../../features/marketplace/MarketplaceChart'
 import { generateDisplayedMarketValue } from '../../utils/market'
+import './assets/item.less'
 
-const ExpansionItem = (props) => {
-    const { item, referenceData } = props
+const Item = (props) => {
+    const { item, referenceData, handleSelectItem } = props
     const [loadImage, setLoadImage] = useState(true)
-    const navigate = useNavigate()
-    
-    
-
-    const handleSelectItem = (item) => {
-        const expansionId = item.set.id
-        const itemId = item.card_id || item.product_id
-        navigate(`/market/${expansionId}/${itemId}`)
-    }
 
     const handleImageError = () => {
         setLoadImage(false)
@@ -23,7 +14,7 @@ const ExpansionItem = (props) => {
     return (
         <div 
             onClick={() => handleSelectItem(item)} 
-            className={`expansionItem ${item.formattedPrices.changes[referenceData.dateRange] > 0 
+            className={`item ${item.formattedPrices.changes[referenceData.dateRange] > 0 
                 ? 'up' 
                 : item.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
         }>
@@ -57,4 +48,4 @@ const ExpansionItem = (props) => {
     </div>)
 }
 
-export default ExpansionItem
+export default Item

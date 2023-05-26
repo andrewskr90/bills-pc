@@ -9,6 +9,7 @@ import { initialReferenceDataValues } from './data/initialData'
 import './styles/App.less'
 import RegisterForm from './features/authenticate/RegisterForm'
 import SupportUs from '../src/pages/SupportUs'
+import Collection from './features/collection'
 
 let initialData = false
 
@@ -120,21 +121,14 @@ const App = () => {
         }
     }, [topTenLoaded])
 
-    // if (location.pathname !== '/register') {
         return (<>
             {initialData
             ?
             <div className='app'>
-                <header>
-                    <Link to='/market'>
-                        <h1>Bill's PC</h1>
-                    </Link>
-                    <Link to='support-us'>Support Us</Link>
-                </header>
                 <Routes>
-                    <Route path='/register' 
+                    {/* <Route path='/register' 
                         element={<RegisterForm />}
-                    />
+                    /> */}
                     <Route path='/market/*' 
                         element={<Marketplace 
                             referenceData={referenceData} 
@@ -142,8 +136,19 @@ const App = () => {
                         />} 
                     />
                     <Route 
-                        path='/collection/*' 
-                        element={<InDevelopment />} 
+                        path='/collection'
+                        element={<InDevelopment />}
+                    />
+                    <Route 
+                        path='/admin/*' 
+                        element={<Collection 
+                            userClaims={userClaims} 
+                            setUserClaims={setUserClaims}
+                            collectedCards={collectedCards} 
+                            setCollectedCards={setCollectedCards} 
+                            referenceData={referenceData}
+                            setReferenceData={setReferenceData}
+                        />}  
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
                     <Route path='support-us' element={<SupportUs />} />

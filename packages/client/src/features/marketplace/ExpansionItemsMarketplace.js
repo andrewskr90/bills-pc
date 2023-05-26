@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react'
 import { useParams, useLocation, Routes, Route, useNavigate} from 'react-router-dom'
-import ExpansionItems from './ExpansionItems'
+import ItemContainer from '../../components/item-container'
 import BillsPcService from '../../api/bills-pc'
 import Toolbar from '../../layouts/toolbar'
 import PreviousRoutes from '../../layouts/previous-routes'
 import ExpansionItemInfo from './ExpansionItemInfo'
+import Item from '../../components/item'
+import { applyMarketChanges } from '../../utils/market'
+import { generateMarketItemSortCB } from '../../utils/sort'
+import { filterMarketItems } from '../../utils/filter'
 
 const ExpansionItemsMarketplace = (props) => {
     const {
@@ -15,6 +19,7 @@ const ExpansionItemsMarketplace = (props) => {
     const selectedSetId = useParams()['setId']
     const sortKey = 'itemSort'
     const filterKey = 'market'
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length === 0) {
@@ -40,6 +45,17 @@ const ExpansionItemsMarketplace = (props) => {
         }
     }, [])
 
+    const matchSetToId = (marketDataSets, targetSetId) => {
+        const matchedSet = marketDataSets.filter(set => set.set_v2_id == targetSetId)[0]
+        return matchedSet
+    }
+
+    const handleSelectItem = (item) => {
+        const expansionId = item.set.id
+        const itemId = item.card_id || item.product_id
+        navigate(`/market/${expansionId}/${itemId}`)
+    }
+
     return (<div className='expansionItemsMarketplace'>
         <PreviousRoutes location={location} referenceData={referenceData} />
         <Routes>
@@ -56,12 +72,15 @@ const ExpansionItemsMarketplace = (props) => {
                         viewRangeSelector={true}
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        dataObject={referenceData}
-                        setDataObject={setReferenceData}
                     />
                     {referenceData.sets.filter(expansion => expansion.set_v2_id === selectedSetId)[0].items.length > 0
                     ?
-                    <ExpansionItems referenceData={referenceData} sortKey={sortKey} />
+                    <ItemContainer>
+                        {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market))
+                            .sort(generateMarketItemSortCB(referenceData, sortKey))
+                            .map(item => <Item referenceData={referenceData} item={item} handleSelectItem={handleSelectItem} />)
+                        }
+                    </ItemContainer>
                     :
                     <div className='loadingGradient loadingExpansionItems'>Loading Expansion Items...</div>}
                 </>}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { locationPathnameParsed } from '../../utils/location'
+import { parseLocationPathname } from '../../utils/location'
 import './assets/previousRoutes.less'
 
 const PreviousRoutes = (props) => {
@@ -33,7 +33,7 @@ const PreviousRoutes = (props) => {
     }
 
     const generatePrevRoutes = () => {
-        const parsedPath = locationPathnameParsed(location)
+        const parsedPath = parseLocationPathname(location)
         if (parsedPath[0] === 'market'){
             return formatPrevMarketRoutes(parsedPath)
         }

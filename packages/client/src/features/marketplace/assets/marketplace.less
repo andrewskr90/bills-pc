@@ -3,7 +3,6 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-top: 50px;
 }
 
 .setSelector {
@@ -112,115 +111,6 @@
     margin-top: 50px;
     width: 60%;
 }
-.expansionItems {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    overflow: auto;
-    margin-top: 6px;
-    margin-bottom: 100px;
-    .expansionItem {
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        height: 150px;
-        border-radius: 15px;
-        border-top: 2px solid #9e9e9e41;
-        border-left: 2px solid #9e9e9e41;
-        box-shadow: 1px 1px #9e9e9e41,
-            2px 2px #9e9e9e41,
-            3px 3px #9e9e9e41,
-            4px 4px #9e9e9e41,
-            5px 5px #9e9e9e41;
-        width: 44%;
-        div.image {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 60%;
-            height: 100%;
-            img {
-                max-height: 95%;
-                max-width: 90%;
-                border-radius: 5px;
-            }
-            .unavailable {
-                display: flex;
-                align-items: center;
-                height: 85%;
-                width: 90%;
-                background-color: rgb(236, 236, 236);
-                font-size: 12px;
-                padding: 2px;
-                text-align: center;
-                border-radius: 5px;
-                margin: 4px;
-            }
-        }
-        div.chartAndValue {
-            color: #6065CB;
-            margin-top: 5px;
-            width: 40%;
-            height: 90%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            .marketplaceChart {
-                height: 35%;
-                width: 90%;
-                padding: 2px 0;
-                .unavailable {
-                    background-color: #6065cb30;
-                    color: #6065CB;
-                    display: flex;
-                    align-items: center;
-                    height: 100%;
-                    width: 100%;
-                    font-size: 10px;
-                    text-align: center;
-                    border-radius: 5px;
-                }
-            }
-            div.valueAndChange {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-evenly;
-                height: 40%;
-                width: 90%;
-                .marketValue {
-                    font-size: 18px;
-                }
-                .percentChange {
-                    font-size: 14px;
-                }
-            }
-            .unavailable {
-                background-color: #6065cb30;
-                // color: #6065CB;
-                display: flex;
-                align-items: center;
-                height: 50%;
-                width: 90%;
-                font-size: 10px;
-                text-align: center;
-                border-radius: 5px;
-            }
-        }
-        
-    }
-    .expansionItem.up {
-        .valueAndChange {
-            color: rgb(0, 180, 0)
-        }
-    }
-
-    .expansionItem.down {            
-        .valueAndChange {
-            color: rgb(160, 0, 0)
-        }
-    }
-}
 
 .expansionItemInfo {
     padding-top: 10px;
@@ -243,7 +133,6 @@
         // padding: 20px;
         .image {
             display: flex; flex-direction: row; align-items: center; justify-content: center;
-            // padding: 10px 0;
             width: 30%;
             img { 
                 max-width: 90%; 
@@ -290,7 +179,7 @@
                 color: rgb(0, 180, 0)
             }
             .valueAndChange.down {
-            color: rgb(160, 0, 0)
+            color: #a00000
             }
         }
     }
@@ -410,11 +299,6 @@
         flex-direction: column;
         .previousRoutes {
             width: 80%;
-        }
-        .expansionItems {
-            .expansionItem {
-                width: 30%;
-            }
         }
         .expansionItemInfo {
             div.imageAndData {

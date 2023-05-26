@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Route, Routes, Link } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
 import CollectedCards from './CollectedCards'
+import ItemContainer from '../../components/item-container'
 import PortfolioToolbar from './PortfolioToolbar'
 import CollectedCardModal from './CollectedCardModal'
 import PurchaseCardsModal from './PurchaseCardsModal'
 import LoginForm from '../authenticate/LoginForm'
-import { initialSelectedPurchaseCardsValues, initialSelectedCollectedCardsValues } from '../../data/initialData'
+import { initialSelectedPurchaseCardsValues, initialSelectedCollectedCardsValues, initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.less'
+import ImportPurchase from '../import-purchase'
+import UpdatePortfolio from './features/update-portfolio'
+import Header from '../../layouts/header'
 
 const Collection = (props) => {
-    const { userClaims, setUserClaims } = props
+    const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [collectedCards, setCollectedCards] = useState([])
     const [selectedCardModal, setSelectedCardModal] = useState(false)
     const [selectedPurchaseModal, setSelectedPurchaseModal] = useState(false)
     const [selectedPurchaseCards, setSelectedPurchaseCards] = useState(initialSelectedPurchaseCardsValues)
     const [selectedCollectedCards, setSelectedCollectedCards] = useState(initialSelectedCollectedCardsValues)
+    const [portfolio, setPortfolio] = useState(initialPortfolioValues)
 
     const formatDate = (dateCode) => {
         const dateParts = dateCode.split('-')
@@ -38,65 +43,84 @@ const Collection = (props) => {
     }
 
     const evaluateCollection = (collection) => {
-        const visited = {}
-        const findCardStats = (cardToCheck) => {
+        const visitedCards = {}
+        const visitedProducts = {}
+        const findItemStats = (itemToCheck) => {
             let quantity = 0
             let amountInvested = 0
-            collection.forEach(card => {
-                if (cardToCheck.card_id === card.card_id) {
-                    quantity++
-                    amountInvested += parseFloat(card.sale_card_price)
+            collection.forEach(item => {
+                if (item.card_id) {
+                    if (itemToCheck.card_id === item.card_id) {
+                        quantity++
+                        amountInvested += parseFloat(item.sale_card_price)
+                    }
+                } else if (item.product_id) {
+                    if (itemToCheck.product_id === item.product_id) {
+                        quantity++
+                        amountInvested += parseFloat(item.sale_product_price)
+                    }
                 }
             })
             const averagePrice = Math.round(amountInvested / quantity *100) /100
-            const cardWithStats = {
-                ...cardToCheck,
-                collected_card_quantity: quantity,
-                collected_card_average_price: averagePrice
+            const itemWithStats = {
+                ...itemToCheck,
+                collected_item_quantity: quantity,
+                collected_item_average_price: averagePrice
             }
-            return cardWithStats
+            return itemWithStats
         }
-        const updateWithMultiples = (uniqueCards) => {
-            const updatedWithMultiples = uniqueCards.map((uniqueCard, idx) => {
+        const updateWithMultiples = (uniqueItems) => {
+            const updatedWithMultiples = uniqueItems.map((uniqueItem, idx) => {
                 const collectionArray = []
-                collection.forEach(collectedCard => {
-                    if (uniqueCard.card_id === collectedCard.card_id) {
-                        collectionArray.push(collectedCard)
+                collection.forEach(collectedItem => {
+                    if (collectedItem.card_id) {
+                        if (uniqueItem.card_id === collectedItem.card_id) {
+                            collectionArray.push(collectedItem)
+                        }
+                    } else if (collectedItem.product_id) {
+                        if (uniqueItem.product_id === collectedItem.product_id) {
+                            collectionArray.push(collectedItem)
+                        }
                     }
                 })
-                const uniqueCardWithCollection = {
-                    card_id: uniqueCard.card_id,
-                    collected_card_quantity: uniqueCard.collected_card_quantity,
-                    collected_card_average_price: uniqueCard.collected_card_average_price,
+                const uniqueItemWithCollection = {
+                    item_id: uniqueItem.card_id || uniqueItem.product_id,
+                    collected_item_quantity: uniqueItem.collected_item_quantity,
+                    collected_item_average_price: uniqueItem.collected_item_average_price,
                     collection: collectionArray
                 }
-                return uniqueCardWithCollection
+                return uniqueItemWithCollection
             })
             return updatedWithMultiples
         }
 
-        const uniqueCards = collection.filter(card => {
-            if (!visited[card.card_id]) {
-                visited[card.card_id] = 1
-                return card
+        const uniqueItems = collection.filter(item => {
+            if (item.card_id) {
+                if (!visitedCards[item.card_id]) {
+                    visitedCards[item.card_id] = 1
+                    return item
+                }
+            } else if (item.product_id) {
+                if (!visitedProducts[item.product_id]) {
+                    visitedProducts[item.product_id] = 1
+                    return item
+                }
             }
         })
-        const evaluatedCollection = uniqueCards.map(card => {
-            const cardWithStats = findCardStats(card)
-            return cardWithStats
+        const evaluatedCollection = uniqueItems.map(item => {
+            const itemWithStats = findItemStats(item)
+            return itemWithStats
         })
         const updatedWithMultiples = updateWithMultiples(evaluatedCollection)
         return updatedWithMultiples
     }
 
     useEffect(() => {
-        BillsPcService.getCollectedCards()
-            .then(res => {
-                const evaluatedCollection = evaluateCollection(res.data)
-                setCollectedCards(evaluatedCollection)
-            }).catch(err => {
-                console.log(err)
-            })
+        (async () => { 
+            await BillsPcService.getPortfolio({ timeFrame: '2w' })
+                .then(res => console.log(res))
+                .catch(err => console.log(err))
+        })()
     }, [userClaims])
 
     const selectCollectedCards = async (e) => {
@@ -105,7 +129,6 @@ const Collection = (props) => {
                 return cards
             }
         })
-
         setSelectedCollectedCards(selectedCollectedCards[0])
         setSelectedPurchaseModal(false)
         setSelectedCardModal(true)
@@ -155,44 +178,72 @@ const Collection = (props) => {
     }
 
     if (userClaims) {
-        return (<div className='collection page'>
-            {collectedCards.length > 0
-            ?
-            <>
-                <CollectedCards 
-                    collectedCards={collectedCards} 
-                    selectCollectedCards={selectCollectedCards} 
+        return (<div className='collection'>
+            <Header main title={'Portfolio'}>
+                <Link to='support-us'>Support Us</Link>
+            </Header>
+            <Routes>
+                <Route 
+                    path='/'
+                    element={<>
+                        {/* <CollectedCards 
+                            collectedCards={collectedCards} 
+                            selectCollectedCards={selectCollectedCards} 
+                        /> */}
+                        <Link to='update/purchase'><button>Update Collection</button></Link>
+                        {collectedCards.length > 0
+                        ?
+                            // <div className='collectedCards'>
+                            //     {collectedCards.map(card => {
+                            //         return <CollectedCard card={card} selectCollectedCards={selectCollectedCards} />
+                            //     })}
+                            // </div>
+                            <ItemContainer>
+                                {collectedCards.map(item => {
+                                    return <p>{item.collection[0].card_v2_id ? item.collection[0].card_v2_id : item.collection[0].product_id}</p>
+                                })}
+                            </ItemContainer>
+                        :
+                            <div className='emptyCollection'>
+                                <p>No items in your collection!</p>
+                                <p>Update your collection with a purchase.</p>
+                                <Link to='update/purchase'>
+                                    <button>Update Collection</button>
+                                </Link>
+                            </div>
+                        }
+                        {selectedCardModal
+                        ?
+                        <CollectedCardModal 
+                            userClaims={userClaims} 
+                            selectedCollectedCards={selectedCollectedCards} 
+                            handleViewCardPurchase={handleViewCardPurchase} 
+                            handleCloseCardModal={handleCloseCardModal}
+                        />
+                        :
+                        <></>}
+                        {selectedPurchaseModal
+                        ?
+                        <PurchaseCardsModal 
+                            selectedPurchaseCards={selectedPurchaseCards} 
+                            selectCollectedCards={selectCollectedCards} 
+                            handleClosePurchaseModal={handleClosePurchaseModal} 
+                        />
+                        :
+                        <></>}
+                    </>} 
                 />
-                {selectedCardModal
-                ?
-                <CollectedCardModal 
-                    userClaims={userClaims} 
-                    selectedCollectedCards={selectedCollectedCards} 
-                    handleViewCardPurchase={handleViewCardPurchase} 
-                    handleCloseCardModal={handleCloseCardModal}
+                <Route 
+                    path='/update/*'
+                    element={<UpdatePortfolio
+                        referenceData={referenceData}
+                        setReferenceData={setReferenceData}
+                     />}
                 />
-                :
-                <></>}
-                {selectedPurchaseModal
-                ?
-                <PurchaseCardsModal 
-                    selectedPurchaseCards={selectedPurchaseCards} 
-                    selectCollectedCards={selectCollectedCards} 
-                    handleClosePurchaseModal={handleClosePurchaseModal} 
-                />
-                :
-                <></>}
-            </>
-            :
-            <div className='emptyCollection page'>
-                <p>No items in your collection!</p>
-                <Link to='/import'>
-                    <button>Add Items</button>
-                </Link>
-            </div>}
+            </Routes>
         </div>)
     } else {
-        return (<div className='collection page'>
+        return (<div className='collection'>
             <p className='loginWarning'>You must be logged in to view your portfolio.</p>
             <LoginForm setUserClaims={setUserClaims} />
         </div>)

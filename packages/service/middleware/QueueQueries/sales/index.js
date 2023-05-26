@@ -2,8 +2,10 @@ const QueryFormatters = require('../../../utils/queryFormatters')
 
 const insert = (req, res, next) => {
     const sales = req.sales
-    const query = QueryFormatters.objectsToInsert(sales, 'sales')
-    req.queryQueue.push(`${query};`)
+    if (sales.length > 0) {
+        const query = QueryFormatters.objectsToInsert(sales, 'sales')
+        req.queryQueue.push(`${query};`)
+    }
     next()
 }
 
@@ -14,7 +16,7 @@ const select = (req, res, next) => {
         query = `SELECT * FROM sales 
             LEFT JOIN sale_cards ON sales.sale_id = sale_cards.sale_card_sale_id
             LEFT JOIN collected_cards ON collected_cards.collected_card_id = sale_cards.sale_card_collected_card_id
-            LEFT JOIN cards ON cards.card_id = collected_cards.collected_card_card_id
+            LEFT JOIN cards_v2 ON cards_v2.card_v2_id = collected_cards.collected_card_card_id
             LEFT JOIN sale_notes ON sale_note_sale_id = sale_id 
                 WHERE sale_id='${req.query.sale_id}' 
                     AND sale_purchaser_id='${req.claims.user_id}' 
@@ -23,7 +25,7 @@ const select = (req, res, next) => {
         query = `SELECT * FROM sales
             LEFT JOIN sale_cards ON sales.sale_id = sale_cards.sale_card_sale_id
             LEFT JOIN collected_cards ON collected_cards.collected_card_id = sale_cards.sale_card_collected_card_id
-            LEFT JOIN cards ON cards.card_id = collected_cards.collected_card_card_id
+            LEFT JOIN cards_v2 ON cards_v2.card_v2_id = collected_cards.collected_card_card_id
             LEFT JOIN sale_notes ON sale_note_sale_id = sale_id`
     }
     req.queryQueue.push(query)

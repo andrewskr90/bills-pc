@@ -1,4 +1,5 @@
 const QueryFormatters = require('../../../utils/queryFormatters')
+const { executeQueries } = require('../../../db/index')
 
 const insert = (req, res, next) => {
     const marketPrices = req.body
@@ -96,7 +97,6 @@ const selectTopTenAverage = (req, res, next) => {
     req.queryQueue.push(query)
     next()
 }
-
 module.exports = {
     insert,
     selectBySetId,

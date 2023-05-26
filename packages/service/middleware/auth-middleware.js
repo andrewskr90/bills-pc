@@ -127,6 +127,16 @@ const decodeSessionToken = async (req, res, next) => {
     }
 }
 
+const checkUserSession = (req, res, next) => {
+    verifyCookie(req, res, (err) => {
+        if (err) next(err)
+    })
+    decodeSessionToken(req, res, (err) => {
+        if (err) next(err)
+    })
+    next()
+}
+
 const gymLeaderOnly = async (req, res, next) => {
     if (req.claims.user_role !== 'GymLeader') {
         return next({ message: 'Unauthorized.'})
@@ -178,5 +188,6 @@ module.exports = {
     authenticateUser,
     prepUserFilter,
     checkRegisterValues,
-    gymLeaderOnly
+    gymLeaderOnly, 
+    checkUserSession
 }

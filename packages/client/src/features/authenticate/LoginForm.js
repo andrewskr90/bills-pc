@@ -56,10 +56,10 @@ const LoginForm = (props) => {
             <button>Login</button>
         </form>
         <p className='error'>{errorMessage}</p>
-        <div className='registerSuggestion'>
+        {/* <div className='registerSuggestion'>
             <p>Don't have an account?</p>
             <button onClick={() => navigate('/register')}>Register</button>
-        </div>
+        </div> */}
     </div>)
 }
 
