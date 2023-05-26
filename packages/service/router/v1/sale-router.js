@@ -1,9 +1,10 @@
 const saleRouter = require('express').Router()
-const { checkUserSession } = require('../../middleware/auth-middleware')
+const { decodeSessionToken, verifyCookie } = require('../../middleware/auth-middleware')
 const Sale = require('../../models/Sale')
 
 saleRouter.get('/', 
-    checkUserSession,
+        verifyCookie,
+    decodeSessionToken,
     Sale.findByUserId,
     (req, res, next) => {
         const results = req.sales

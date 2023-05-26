@@ -1,11 +1,12 @@
 const portfolioRouter = require('express').Router()
-const { checkUserSession } = require('../../middleware/auth-middleware')
+const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
 const { evaluatePortfolio } = require('../../middleware/portfolio-middleware')
 const Sale = require('../../models/Sale')
 const CollectedCard = require('../../models/CollectedCard')
 
 portfolioRouter.get('/', 
-    checkUserSession,
+    verifyCookie,
+    decodeSessionToken,
     // Import.findByUserId,
     Sale.findByUserId,
     // Trade.findByUserId,
