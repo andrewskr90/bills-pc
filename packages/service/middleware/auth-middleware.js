@@ -87,7 +87,9 @@ const encryptSessionCookie = (req, res, next) => {
 
 const verifyCookie = async (req, res, next) => {
     const parsedCookies = req.signedCookies
-
+    console.log('parsedCookies,', parsedCookies)
+    console.log('parsedCookies.billsPcSession,', parsedCookies.billsPcSession)
+    console.log('parsedCookies.billsPcSession === undefined', parsedCookies.billsPcSession === undefined)
     if (parsedCookies.billsPcSession === undefined) {
         return next({
             status: 401,
@@ -105,6 +107,7 @@ const verifyCookie = async (req, res, next) => {
 }
 
 const decodeSessionToken = async (req, res, next) => {
+    console.log('JWT_SECRET', process.env.JWT_SECRET)
     const bytes = CryptoJS.AES.decrypt(req.sessionToken, process.env.JWT_SECRET)
     const decryptedSessionString = bytes.toString(CryptoJS.enc.Utf8)
     req.claims = JSON.parse(decryptedSessionString)
