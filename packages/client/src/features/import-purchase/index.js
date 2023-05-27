@@ -214,6 +214,7 @@ const ImportPurchase = (props) => {
             <Route 
                 path='/edit-item/:idx'
                 element={<EditItem 
+                    includeRetail={true}
                     purchaseValues={purchaseValues}
                     updatePurchaseItem={updatePurchaseItem}
                     removeItemFromPurchase={removeItemFromPurchase}
