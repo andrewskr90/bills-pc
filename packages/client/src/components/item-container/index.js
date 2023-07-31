@@ -9,7 +9,9 @@ const ItemContainer = ({ children, loading, emptyMessage }) => {
                     {children}
                 </div>
             ) : (
-                <p className='emptyMessage'>{emptyMessage}</p>
+                <div className='itemContainer'>
+                    <p className='emptyMessage'>{emptyMessage}</p>
+                </div>
             )
     ) : (
         <p>Loading...</p>

@@ -8,6 +8,12 @@ export const initialReferenceDataValues = {
     products: [],
     rarities: [],
     marketSearchResults: [],
+    bulk: {
+        rarities: [],
+        types: [],
+        printings: [],
+        expansions: []
+    },
     dateRange: 'week',
     setSort: {
         value: 'release_date',
@@ -80,6 +86,7 @@ export const initialPurchaseValues = {
     date: localYYYYMMDD(),
     vendor: '',
     items: [],
+    bulkSplits: [],
     subtotal: '',
     discount: '',
     shipping: '',
@@ -134,6 +141,11 @@ export const initialPortfolioValues = {
     ],
     trades: [],
     rips: [],
+    inventory: {
+        cards: [],
+        products: [],
+        bulkSplits: []
+    },
     assets: [
         {
             cardId: null,
@@ -155,6 +167,22 @@ export const initialPortfolioValues = {
         }
     ]
 }
+
+export const purchaseInitialSplitValues = {
+    count: null,
+    estimate: false,
+    rate: null,
+    labels: []
+}
+
+export const initialSplitLabelFormValues = {
+    rarities: [null],
+    types: [null],
+    printings: [null],
+    expansions: [null]
+}
+
+export const initialBulkSplitsValues = []
 
 // export const initialCollectionValues = {
 //     userId: '212',

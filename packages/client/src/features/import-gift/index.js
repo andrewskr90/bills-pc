@@ -57,7 +57,7 @@ const ImportGift = (props) => {
                 giftedItem
             ]
         })
-        navigate('/admin/update/import')
+        navigate('/collection/update/import')
     }
 
     const updateGiftItem = (editedItem, i) => {

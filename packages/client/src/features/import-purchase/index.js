@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import ItemsTable from './feature/items-table'
-import { initialPurchaseValues } from '../../data/initialData'
+import { initialPurchaseValues, purchaseInitialSplitValues } from '../../data/initialData'
 import SelectItem from '../../components/select-item'
 import EditItem from '../../components/edit-item'
 import BillsPcService from '../../api/bills-pc'
 import PlusButton from '../../components/buttons/plus-button'
 import './assets/importPurchase.less'
 import Button from '../../components/buttons/text-button'
+import BulkSplitForm from '../../components/bulk-form/components/bulk-split-form'
+import Banner from '../../layouts/banner'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
@@ -15,6 +17,7 @@ const ImportPurchase = (props) => {
         referenceData, 
         setReferenceData 
     } = props
+    const [addItemOrBulk, setAddItemOrBulk] = useState('item')
     
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
@@ -56,6 +59,13 @@ const ImportPurchase = (props) => {
         })
         navigate(-1)
     }
+
+    const updateBulkSplits = (updatedBulkSplits) => {
+        setPurchaseValues({
+            ...purchaseValues,
+            bulkSplits: updatedBulkSplits
+        })
+    }
     
     const removeItemFromPurchase = (itemId) => {
         const filteredArray = purchaseValues.items.filter(item => {
@@ -71,20 +81,32 @@ const ImportPurchase = (props) => {
         })
     } 
 
-    const seperateCardsAndProducts = (purchaseValues) => {
+    const formatImportPurchaseValues = (purchaseValues) => {
         const saleItems = purchaseValues.items
-        const saleCards = saleItems.filter(item => item.card_id)
-        const saleProducts = saleItems.filter(item => item.product_id)
+        const cards = saleItems.filter(item => item.card_id)
+        const products = saleItems.filter(item => item.product_id)
+        const bulkSplits = purchaseValues.bulkSplits.map(split => {
+            return {
+                ...split,
+                labels: split.labels.map(label => ({
+                    rarities: label.rarities.filter(label => label),
+                    types: label.types.filter(label => label),
+                    printings: label.printings.filter(label => label),
+                    expansions: label.expansions.filter(label => label)
+                }))
+            }
+        })
         return {
             ...purchaseValues,
-            cards: saleCards,
-            products: saleProducts
+            cards,
+            products,
+            bulkSplits
         }
     }
 
     const handleUpdateCollection = (e) => {
         e.preventDefault()
-        BillsPcService.postTransactionSales([seperateCardsAndProducts(purchaseValues)])
+        BillsPcService.postTransactionSales([formatImportPurchaseValues(purchaseValues)])
             .then(res => {
                 setPurchaseValues({
                     ...initialPurchaseValues,
@@ -94,6 +116,34 @@ const ImportPurchase = (props) => {
             }).catch(err => {
                 console.log(err)
             })
+    }
+
+    const handleSelectTypeToAdd = (e) => {
+        setAddItemOrBulk(e.target.value)
+    }
+
+    const handleToggleSelectItem = () => navigate('add-item')
+    const handleToggleAddBulk = () => navigate('add-bulk')
+
+    const addSplitToPurchase = (split) => {
+        setPurchaseValues({
+            ...purchaseValues,
+            bulkSplits: [
+                ...purchaseValues.bulkSplits,
+                split
+            ]
+        })
+    }
+
+    const updateSplitInBulkValues = (updatedSplit, idx) => {
+        const updatedBulkSplits = purchaseValues.bulkSplits.map((split, i) => {
+            if (i === parseInt(idx)) return updatedSplit
+            return split
+        })
+        setPurchaseValues({
+            ...purchaseValues,
+            bulkSplits: updatedBulkSplits
+        })
     }
 
     return (<div className='page importPurchase'>
@@ -136,10 +186,30 @@ const ImportPurchase = (props) => {
                             onChange={updatePurchaseValues}
                         />
                     </div>
-                    <ItemsTable 
-                        formValues={purchaseValues}
-                    />
-                    <PlusButton handleClick={() => navigate('add-item')} />
+                    <select 
+                        className='addItemOrBulk' 
+                        onChange={handleSelectTypeToAdd}
+                        value={addItemOrBulk}
+                        style={{ width: '25%', marginTop: '10px' }}
+                    >
+                        <option value='item'>Item</option>
+                        <option value='bulk'>Bulk</option>
+                    </select>
+                    {addItemOrBulk === 'item' ? <>
+                        <ItemsTable 
+                            format='item'
+                            formValues={purchaseValues}
+                            referenceData={referenceData}
+                        />
+                        <PlusButton handleClick={handleToggleSelectItem} />
+                    </> : <>
+                        <ItemsTable 
+                            format='bulk'
+                            formValues={purchaseValues}
+                            referenceData={referenceData}
+                        />
+                        <PlusButton handleClick={handleToggleAddBulk} />
+                    </>}
                     <div className='discountSubtotalAndTax'>
                         <div className='labelInput discount'>
                             <label>Discount</label>
@@ -199,7 +269,7 @@ const ImportPurchase = (props) => {
                             />
                         </div>
                     </div>
-                    <Button onClick={handleUpdateCollection}>Update</Button>
+                    <Button style={{ marginTop: '10px' }} onClick={handleUpdateCollection}>Update</Button>
                 </form>} 
             />
             <Route 
@@ -219,6 +289,35 @@ const ImportPurchase = (props) => {
                     updatePurchaseItem={updatePurchaseItem}
                     removeItemFromPurchase={removeItemFromPurchase}
                 />}
+            />
+            <Route 
+                path='/add-bulk'
+                element={<div className='addPurchaseBulk page'>
+                    <Banner 
+                        titleText={'Add Bulk Split'} 
+                        handleClickBackArrow={() => navigate(-1)} 
+                    />
+                    <BulkSplitForm 
+                        initialSplitValues={purchaseInitialSplitValues}
+                        addSplitToPurchase={addSplitToPurchase}
+                        referenceData={referenceData}
+                    />
+                </div>}
+            />
+            <Route 
+                path='/edit-bulk/:idx'
+                element={<div className='addPurchaseBulk page'>
+                    <Banner 
+                        titleText={'Edit Bulk Split'} 
+                        handleClickBackArrow={() => navigate(-1)} 
+                    />
+                    <BulkSplitForm 
+                        updateSplitInBulkValues={updateSplitInBulkValues}
+                        referenceData={referenceData}
+                        initialSplitValues={purchaseInitialSplitValues}
+                        purchaseValues={purchaseValues}
+                    />
+                </div>}
             />
         </Routes>
     </div>)
