@@ -1,7 +1,7 @@
 const transactionRouter = require('express').Router()
 
 const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
-const { formatImportPurchase, formatImportGift } = require('../../middleware/sale-middleware')
+const { formatImportPurchase, formatImportGift, checkPurchaseBulkLabels } = require('../../middleware/sale-middleware')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
 
@@ -19,16 +19,19 @@ transactionRouter.get('/sales',
 transactionRouter.post('/sales/import-purchase', 
     verifyCookie,
     decodeSessionToken,
+    checkPurchaseBulkLabels,
     formatImportPurchase,
     QueueQueries.init,
     QueueQueries.collectedCards.insert,
     QueueQueries.collectedCardNotes.insert,
     QueueQueries.collectedProducts.insert,
     QueueQueries.collectedProductNotes.insert,
+    QueueQueries.bulkSplits.insert,
     QueueQueries.sales.insert,
     QueueQueries.saleNotes.insert,
     QueueQueries.saleCards.insert,
     QueueQueries.saleProducts.insert,
+    QueueQueries.saleBulkSplits.insert,
     executeQueries,
     (req, res, next) => {
         res.status(201).json(req.results)

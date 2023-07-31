@@ -1,4 +1,7 @@
 const { v4: uuidV4 } = require('uuid')
+const Label = require('../models/Label')
+const { formatSingularComponent } = require('../utils/label')
+const Sale = require('../models/Sale')
 
 const createSaleNote = (note, saleId, userId) => {
     if (!note) return null
@@ -127,7 +130,39 @@ const createGift =(gift, giverId, receiverId) => {
     }
 }
 
-const formatImportPurchase = (req, res, next) => {
+const generateNewOrExistingLabelId = async (label) => {
+    const matchedLabels = await Label.getLabelByExactComponents(label)
+    if (matchedLabels.length === 0) {
+        try {
+            const label_id = uuidV4()
+            await Label.createLabel(label_id, label)
+            return label_id
+        } catch (err) {
+            throw err
+        }
+    } else {
+        return matchedLabels[0].label_component_label_id
+    }
+}
+
+const fetchOrCreateLabelIds = async (split) => {
+    const labels = split.labels
+    for (let i=0; i<labels.length; i++) {
+        try {
+            const labelId = await generateNewOrExistingLabelId(labels[i])
+            labels[i] = {
+                bulk_split_label_assignment_id: uuidV4(),
+                bulk_split_label_assignment_bulk_split_id: split.bulk_split_id,
+                bulk_split_label_assignment_label_id: labelId
+            }
+        } catch (err) {
+            throw err
+        }
+    }
+    return labels
+}
+
+const formatImportPurchase = async (req, res, next) => {
     const sales = req.body
     const sellerId = null
     const purchaserId = req.claims.user_id
@@ -138,8 +173,13 @@ const formatImportPurchase = (req, res, next) => {
     const createdCollectedProductNotes = []
     const createdSaleCards = []
     const createdSaleProducts = []
-    const createdSales = sales.map(sale => {
+    const createdSales = []
+    const createdBulkSplits = []
+
+    for (let i=0; i<sales.length; i++) {
+        const sale = sales[i]
         const createdSale = createSale(sale, sellerId, purchaserId)
+        req.body[i].sale_id = createdSale.sale_id
         if (createdSale.purchaserNote) {
             createdSaleNotes.push(createdSale.purchaserNote)
         }
@@ -148,6 +188,28 @@ const formatImportPurchase = (req, res, next) => {
         }
         delete createdSale.purchaserNote
         delete createdSale.sellerNote
+        
+        for (let j=0; j<sale.bulkSplits.length; j++) {
+            const { count, estimate, rate, labels } = req.body[i].bulkSplits[j]
+            req.body[i].bulkSplits[j] = {
+                bulk_split_id: uuidV4(),
+                sale_bulk_split_id: uuidV4(),
+                bulk_split_count: count,
+                bulk_split_estimate: estimate,
+                sale_bulk_split_rate: rate,
+                labels
+            }
+            try {
+                const formattedLabels = await fetchOrCreateLabelIds(req.body[i].bulkSplits[j])
+                req.body[i].bulkSplits[j] = {
+                    ...req.body[i].bulkSplits[j],
+                    labels: formattedLabels
+                }
+            } catch(err) {
+                return next(err)
+            }
+        }
+
         sale.cards.forEach(card => {
             // consider the quantity of card in sale
             for (let i=0; i<card.quantity; i++) {
@@ -190,8 +252,9 @@ const formatImportPurchase = (req, res, next) => {
                 createdSaleProducts.push(createdSaleProduct)
             }
         })
-        return createdSale
-    })
+        createdSales.push(createdSale)
+    }
+    
 
     req.sales = createdSales
     req.saleNotes = createdSaleNotes
@@ -372,4 +435,35 @@ const formatImportGift = (req, res, next) => {
     next()
 }
 
-module.exports = { formatImportPurchase, formatSaleResults, formatImportGift }
+const checkPurchaseBulkLabels = async (req, res, next) => {
+    const uniqueLabels = {}
+    const cleanseLabelComponents = (component) => {
+        if (!component) return false
+        if (uniqueLabels[component]) return false
+        uniqueLabels[component] = 1
+        return true
+    }
+    const formattedSales = req.body.map(sale => {
+        return {
+            ...sale,
+            bulkSplits: sale.bulkSplits.map(split => {
+                return {
+                    ...split,
+                    estimate: split.estimate ? 1 : 0,
+                    labels: split.labels.map(label => {
+                        return {
+                            ...label,
+                            rarities: label.rarities.filter(cleanseLabelComponents),
+                            types: label.types.filter(cleanseLabelComponents),
+                            printings: label.printings.filter(cleanseLabelComponents),
+                            expansions: label.expansions.filter(cleanseLabelComponents)
+                        }
+                    })
+                }
+            })
+        }
+    })
+    next()
+}
+
+module.exports = { formatImportPurchase, formatSaleResults, formatImportGift, checkPurchaseBulkLabels }
