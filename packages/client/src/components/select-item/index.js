@@ -16,7 +16,7 @@ const SelectItem = (props) => {
     const { referenceData,
         setReferenceData,
         handleSelectItem,
-        initialEmptyMessage
+        initialEmptyMessage,
     } = props
     const [loading, setLoading] = useState(false)
     const [searchedItems, setSearchedItems] = useState([])
@@ -44,7 +44,8 @@ const SelectItem = (props) => {
     }
 
     return (<div className='selectItem page'>
-        <Banner titleText={'Add Item'} handleClickBackArrow={handleClickBackArrow}>
+        <Banner titleText={'Add'} handleClickBackArrow={handleClickBackArrow} />
+        <div className='itemFinder'>
             <Search submitSearch={submitSearch} />
             <Toolbar 
                 viewRangeSelector={true} 
@@ -53,14 +54,14 @@ const SelectItem = (props) => {
                 setReferenceData={setReferenceData}
                 sortKey={sortKey}
             />
-        </Banner>
-        <ItemContainer emptyMessage={emptyMessage} loading={loading}>
-            {applyMarketChanges(
-                filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
-                const item_id = item.card_id || item.product_id
-                return <Item key={item_id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
-            })}
-        </ItemContainer>
+            <ItemContainer emptyMessage={emptyMessage} loading={loading}>
+                {applyMarketChanges(
+                    filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
+                    const item_id = item.card_id || item.product_id
+                    return <Item key={item_id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
+                })}
+            </ItemContainer>
+        </div>
     </div>)
 }
 

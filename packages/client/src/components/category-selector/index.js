@@ -15,10 +15,10 @@ const CategorySelector = (props) => {
     }
 
     return (<div className='categorySelector'>
-        {categories.map(category => {
+        {categories.map((category, idx) => {
             let selected = false
             if (category === selectedCategory) selected = true
-            return <div className={`category ${selected ? 'selected' : ''}`} onClick={() => handleSelectCategory(category)}>{category}</div>
+            return <div key={idx} className={`category ${selected ? 'selected' : ''}`} onClick={() => handleSelectCategory(category)}>{category}</div>
         })}
     </div>)
 }
