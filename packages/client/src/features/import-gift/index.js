@@ -150,7 +150,9 @@ const ImportGift = (props) => {
                         onClick: handleUpdateCollection,
                         styles: {
                             color: 'white',
-                            backgroundColor: '#6065cb'
+                            backgroundColor: '#6065cb',
+                            paddingBottom: '100px',
+                            overflow: 'auto'
                         }
                     }
                 ]

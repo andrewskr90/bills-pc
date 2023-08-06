@@ -109,36 +109,7 @@ export const initialPortfolioValues = {
     investment: null,
     balance: null,
     roi: null,
-    sales: [
-        {
-            saleId: null,
-            sellerId: null,
-            sellerName: null,
-            purchaserId: null,
-            purchaserName: null,
-            date: null,
-            vendor: null,
-            subtotal: null,
-            discount: null,
-            shipping: null,
-            taxAmount: null,
-            total: null,
-            note: null,
-            items: [
-                {
-                    cardId: null,
-                    productId: null,
-                    name: null,
-                    setName: null,
-                    tcgplayerProductId: null,
-                    collectedCardId: null,
-                    collectedProductId: null,
-                    price: null,
-                    note: null
-                }
-            ]
-        }
-    ],
+    sales: [],
     trades: [],
     rips: [],
     inventory: {
@@ -146,24 +117,53 @@ export const initialPortfolioValues = {
         products: [],
         bulkSplits: []
     },
-    assets: [
+    assets: []
+}
+
+export const initialSaleValues = {
+    saleId: null,
+    sellerId: null,
+    sellerName: null,
+    purchaserId: null,
+    purchaserName: null,
+    date: null,
+    vendor: null,
+    subtotal: null,
+    discount: null,
+    shipping: null,
+    taxAmount: null,
+    total: null,
+    note: null,
+    items: [
         {
             cardId: null,
             productId: null,
-            lastUpdated: null,
-            marketValue: null,
-            balance: null,
-            roi: null,
+            name: null,
+            setName: null,
+            tcgplayerProductId: null,
+            collectedCardId: null,
+            collectedProductId: null,
+            price: null,
+            note: null
+        }
+    ]
+}
+
+export const initialAssetValues = {
+    cardId: null,
+    productId: null,
+    lastUpdated: null,
+    marketValue: null,
+    balance: null,
+    roi: null,
+    investment: null,
+    inventory: [
+        {
+            collectedCardId: null,
+            saleId: null,
+            dateAdded: null,
             investment: null,
-            inventory: [
-                {
-                    collectedCardId: null,
-                    saleId: null,
-                    dateAdded: null,
-                    investment: null,
-                    roi: null
-                }
-            ]
+            roi: null
         }
     ]
 }
