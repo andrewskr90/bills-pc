@@ -1,11 +1,12 @@
-const formatBulkSplits = (rawSplitData) => {
+const Label = require("../../models/Label")
+const { v4: uuidV4 } = require('uuid')
+
+const compileLabelComponentsIntoSplits = (components) => {
     const splitsRef = {}
-    rawSplitData.forEach(component => {
+    components.forEach(component => {
         if (!splitsRef[component.bulk_split_id]) { // if it is a new split
             splitsRef[component.bulk_split_id] = {
-                bulk_split_id: component.bulk_split_id,
-                bulk_split_count: component.bulk_split_count,
-                bulk_split_estimate: component.bulk_split_estimate,
+                ...component,
                 labels: [
                     {
                         bulk_split_label_assignment_id: component.bulk_split_label_assignment_id,
@@ -81,7 +82,60 @@ const formatBulkSplits = (rawSplitData) => {
             }
         }
     })
-    return Object.keys(splitsRef).map(splitKey => splitsRef[splitKey])
+    const removedExcessLabelData = Object.keys(splitsRef).map(splitKey => {
+        const bulkSplit = splitsRef[splitKey]
+        delete bulkSplit.bulk_split_label_assignment_id
+        delete bulkSplit.label_id
+        delete bulkSplit.label_component_id
+        delete bulkSplit.rarity_id
+        delete bulkSplit.rarity_name
+        delete bulkSplit.type_id
+        delete bulkSplit.type_name
+        delete bulkSplit.printing_id
+        delete bulkSplit.printing_name
+        delete bulkSplit.set_v2_id
+        delete bulkSplit.set_v2_name
+        return bulkSplit
+    })
+    return removedExcessLabelData
 }
 
-module.exports = { formatBulkSplits }
+const generateNewOrExistingLabelId = async (label) => {
+    const matchedLabels = await Label.getLabelByExactComponents(label)
+    if (matchedLabels.length === 0) {
+        try {
+            const label_id = uuidV4()
+            await Label.createLabel(label_id, label)
+            return label_id
+        } catch (err) {
+            throw err
+        }
+    } else {
+        return matchedLabels[0].label_component_label_id
+    }
+}
+
+const fetchOrCreateLabelIds = async (split) => {
+    const labels = split.labels.map(label => ({
+        rarities: label.rarities.filter(label => label),
+        types: label.types.filter(label => label),
+        printings: label.printings.filter(label => label),
+        expansions: label.expansions.filter(label => label)
+    }))
+
+    for (let i=0; i<labels.length; i++) {
+        try {
+            const labelId = await generateNewOrExistingLabelId(labels[i])
+            labels[i] = {
+                bulk_split_label_assignment_id: uuidV4(),
+                bulk_split_label_assignment_bulk_split_id: split.bulk_split_id,
+                bulk_split_label_assignment_label_id: labelId
+            }
+        } catch (err) {
+            throw err
+        }
+    }
+    return labels
+}
+
+module.exports = { fetchOrCreateLabelIds, compileLabelComponentsIntoSplits }

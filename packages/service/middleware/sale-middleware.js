@@ -2,6 +2,7 @@ const { v4: uuidV4 } = require('uuid')
 const Label = require('../models/Label')
 const { formatSingularComponent } = require('../utils/label')
 const Sale = require('../models/Sale')
+const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 
 const createSaleNote = (note, saleId, userId) => {
     if (!note) return null
@@ -128,38 +129,6 @@ const createGift =(gift, giverId, receiverId) => {
         receiverNote: createGiftNote(receiverNote, giftId, receiverId),
         giverNote: createGiftNote(giver_note, giftId, giverId)
     }
-}
-
-const generateNewOrExistingLabelId = async (label) => {
-    const matchedLabels = await Label.getLabelByExactComponents(label)
-    if (matchedLabels.length === 0) {
-        try {
-            const label_id = uuidV4()
-            await Label.createLabel(label_id, label)
-            return label_id
-        } catch (err) {
-            throw err
-        }
-    } else {
-        return matchedLabels[0].label_component_label_id
-    }
-}
-
-const fetchOrCreateLabelIds = async (split) => {
-    const labels = split.labels
-    for (let i=0; i<labels.length; i++) {
-        try {
-            const labelId = await generateNewOrExistingLabelId(labels[i])
-            labels[i] = {
-                bulk_split_label_assignment_id: uuidV4(),
-                bulk_split_label_assignment_bulk_split_id: split.bulk_split_id,
-                bulk_split_label_assignment_label_id: labelId
-            }
-        } catch (err) {
-            throw err
-        }
-    }
-    return labels
 }
 
 const formatImportPurchase = async (req, res, next) => {
@@ -466,4 +435,11 @@ const checkPurchaseBulkLabels = async (req, res, next) => {
     next()
 }
 
-module.exports = { formatImportPurchase, formatSaleResults, formatImportGift, checkPurchaseBulkLabels }
+module.exports = { 
+    formatImportPurchase,
+     formatSaleResults,
+     formatImportGift,
+     checkPurchaseBulkLabels,
+     createCollectedCard,
+     createCollectedCardNote
+}

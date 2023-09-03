@@ -13,4 +13,22 @@ const findByUserId = async (userId) => {
     return collectedCards
 }
 
-module.exports = { findByUserId }
+const findCurrent = async (userId) => {
+    let query = `
+        SELECT * FROM collected_cards
+        LEFT JOIN sale_cards on sale_card_collected_card_id = collected_card_id
+        LEFT JOIN
+        
+        WHERE sale_card_id IS NULL
+    ;`
+    const req = { queryQueue: [query] }
+    const res = {}
+    let currentCollectedCards
+    await executeQueries(req, res, (err) => {
+        if (err) throw new Error(err)
+        currentCollectedCards = req.results
+    })
+    return currentCollectedCards
+}
+
+module.exports = { findByUserId, findCurrent }

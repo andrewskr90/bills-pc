@@ -36,6 +36,7 @@ const getLabelByExactComponents = async (label) => {
         if (err) throw new Error(err)
         labels = req.results
     })
+    req.queryQueue = []
     return labels   
 }
 
