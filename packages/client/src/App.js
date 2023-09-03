@@ -10,6 +10,8 @@ import './styles/App.less'
 import RegisterForm from './features/authenticate/RegisterForm'
 import SupportUs from '../src/pages/SupportUs'
 import Collection from './features/collection'
+import GymLeader from './pages/gym-leader'
+import GymLeaderOnly from './utils/auth/GymLeaderOnly'
 
 let initialData = false
 
@@ -87,11 +89,21 @@ const App = () => {
             await BillsPcService.getReferenceData()
                 .then(res => fetchedRarities = res.data.rarities)
                 .catch(err => console.log(err))
+            const raritiesResponse = await BillsPcService.getRarities()
+            const typesResponse = await BillsPcService.getTypes()
+            const printingsResponse = await BillsPcService.getPrintings()
+            const expansionsResponse = await BillsPcService.getSetsV2()
             setUserClaims(fetchedUserClaims)
             setReferenceData({
                 ...referenceData,
                 sets: formattedExpansions(fetchedExpansions),
                 rarities: fetchedRarities,
+                bulk: {
+                    rarities: raritiesResponse.data,
+                    types: typesResponse.data,
+                    printings: printingsResponse.data,
+                    expansions: expansionsResponse.data
+                },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),
                     expansion: calcFilterMarketExpansionsConfig(fetchedExpansions)
@@ -120,7 +132,7 @@ const App = () => {
             })
         }
     }, [topTenLoaded])
-
+    
         return (<>
             {initialData
             ?
@@ -136,19 +148,32 @@ const App = () => {
                         />} 
                     />
                     <Route 
-                        path='/collection'
-                        element={<InDevelopment />}
+                        path='/collection/*'
+                        element={<InDevelopment />}  
                     />
                     <Route 
-                        path='/admin/*' 
-                        element={<Collection 
-                            userClaims={userClaims} 
+                        path='/gym-leader/collection/*' 
+                        element={<GymLeaderOnly
+                            userClaims={userClaims}
                             setUserClaims={setUserClaims}
-                            collectedCards={collectedCards} 
-                            setCollectedCards={setCollectedCards} 
-                            referenceData={referenceData}
-                            setReferenceData={setReferenceData}
-                        />}  
+                        >
+                            <Collection 
+                                userClaims={userClaims} 
+                                setUserClaims={setUserClaims}
+                                collectedCards={collectedCards} 
+                                setCollectedCards={setCollectedCards} 
+                                referenceData={referenceData}
+                                setReferenceData={setReferenceData}
+                            />
+                    </GymLeaderOnly>} />
+                    <Route 
+                        path='/gym-leader/*' 
+                        element={<GymLeaderOnly
+                            userClaims={userClaims}
+                            setUserClaims={setUserClaims}
+                        >
+                            <GymLeader />
+                        </GymLeaderOnly>}
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
                     <Route path='support-us' element={<SupportUs />} />

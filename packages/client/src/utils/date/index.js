@@ -26,3 +26,8 @@ export const localYYYYMMDD = () => {
     if (dd < 10) dd = `0${dd}`
     return `${yyyy}-${mm}-${dd}`
 }
+
+export const formatDate = (dateCode) => {
+    const dateParts = dateCode.split('-')
+    return `${dateParts[1]}-${dateParts[2].split('T')[0]}-${dateParts[0]}`
+}

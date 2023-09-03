@@ -8,6 +8,12 @@ export const initialReferenceDataValues = {
     products: [],
     rarities: [],
     marketSearchResults: [],
+    bulk: {
+        rarities: [],
+        types: [],
+        printings: [],
+        expansions: []
+    },
     dateRange: 'week',
     setSort: {
         value: 'release_date',
@@ -80,6 +86,7 @@ export const initialPurchaseValues = {
     date: localYYYYMMDD(),
     vendor: '',
     items: [],
+    bulkSplits: [],
     subtotal: '',
     discount: '',
     shipping: '',
@@ -102,59 +109,95 @@ export const initialPortfolioValues = {
     investment: null,
     balance: null,
     roi: null,
-    sales: [
-        {
-            saleId: null,
-            sellerId: null,
-            sellerName: null,
-            purchaserId: null,
-            purchaserName: null,
-            date: null,
-            vendor: null,
-            subtotal: null,
-            discount: null,
-            shipping: null,
-            taxAmount: null,
-            total: null,
-            note: null,
-            items: [
-                {
-                    cardId: null,
-                    productId: null,
-                    name: null,
-                    setName: null,
-                    tcgplayerProductId: null,
-                    collectedCardId: null,
-                    collectedProductId: null,
-                    price: null,
-                    note: null
-                }
-            ]
-        }
-    ],
+    sales: [],
+    sortings: [],
     trades: [],
     rips: [],
-    assets: [
+    inventory: {
+        cards: [],
+        products: [],
+        bulkSplits: []
+    },
+    assets: []
+}
+
+export const initialSaleValues = {
+    saleId: null,
+    sellerId: null,
+    sellerName: null,
+    purchaserId: null,
+    purchaserName: null,
+    date: null,
+    vendor: null,
+    subtotal: null,
+    discount: null,
+    shipping: null,
+    taxAmount: null,
+    total: null,
+    note: null,
+    items: [
         {
             cardId: null,
             productId: null,
-            lastUpdated: null,
-            marketValue: null,
-            balance: null,
-            roi: null,
-            investment: null,
-            inventory: [
-                {
-                    collectedCardId: null,
-                    saleId: null,
-                    dateAdded: null,
-                    investment: null,
-                    roi: null
-                }
-            ]
+            name: null,
+            setName: null,
+            tcgplayerProductId: null,
+            collectedCardId: null,
+            collectedProductId: null,
+            price: null,
+            note: null
         }
     ]
 }
+
+export const initialAssetValues = {
+    cardId: null,
+    productId: null,
+    lastUpdated: null,
+    marketValue: null,
+    balance: null,
+    roi: null,
+    investment: null,
+    inventory: [
+        {
+            collectedCardId: null,
+            saleId: null,
+            dateAdded: null,
+            investment: null,
+            roi: null
+        }
+    ]
+}
+
+export const purchaseInitialSplitValues = {
+    count: null,
+    estimate: false,
+    rate: null,
+    labels: []
+}
+
+export const initialSortingSplitValues = {
+    count: null,
+    estimate: false,
+    labels: []
+}
+
+export const initialSortingValues = {
+    sorting_id: null,
+    sorting_bulk_split_id: null,
+    sorting_date: localYYYYMMDD(),
+    sortingSplits: [],
+    sortingGems: []
+}
+
+export const initialSplitLabelFormValues = {
+    rarities: [null],
+    types: [null],
+    printings: [null],
+    expansions: [null]
+}
+
+export const initialBulkSplitsValues = []
 
 // export const initialCollectionValues = {
 //     userId: '212',

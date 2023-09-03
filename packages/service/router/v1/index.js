@@ -13,6 +13,12 @@ const marketPricesRouter = require('./market-prices-router')
 const referenceDataRouter = require('./reference-data-router')
 const saleRouter = require('./sale-router')
 const portfolioRouter = require('./portfolio-router')
+const typeRouter = require('./type-router')
+const rarityRouter = require('./rarity-router')
+const printingRouter = require('./printing-router')
+const bulkSplitRouter = require('./bulk-split-router')
+const sortingRouter = require('./sorting-router'
+)
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -27,5 +33,10 @@ v1Router.use('/market-prices', marketPricesRouter)
 v1Router.use('/reference-data', referenceDataRouter)
 v1Router.use('/sales', saleRouter)
 v1Router.use('/portfolio', portfolioRouter)
+v1Router.use('/types', typeRouter)
+v1Router.use('/rarities', rarityRouter)
+v1Router.use('/printings', printingRouter)
+v1Router.use('/bulk-splits', bulkSplitRouter)
+v1Router.use('/sortings', sortingRouter)
 
 module.exports = v1Router

@@ -197,6 +197,112 @@ const BillsPcService = {
             url: '/api/v1/portfolio',
             params: params
         })
+    },
+    postType(config) {
+        const { data } = config
+        return axios({
+            ...options,
+            url: '/api/v1/types',
+            method: 'post',
+            data
+        })
+    },
+    getTypes() {
+        return axios({
+            ...options,
+            url: 'api/v1/types'
+        })
+    },
+    updateType({ type }) {
+        return axios({
+            ...options,
+            method: 'put',
+            data: type,
+            url: `/api/v1/types/${type.type_id}`
+        })
+    },
+    deleteType({ type }) {
+        return axios({
+            ...options,
+            method: 'delete',
+            url: `/api/v1/types/${type.type_id}`
+        })
+    },
+    postRarity(config) {
+        const { data } = config
+        return axios({
+            ...options,
+            url: '/api/v1/rarities',
+            method: 'post',
+            data
+        })
+    },
+    getRarities() {
+        return axios({
+            ...options,
+            url: 'api/v1/rarities'
+        })
+    },
+    updateRarity({ rarity }) {
+        return axios({
+            ...options,
+            method: 'put',
+            data: rarity,
+            url: `/api/v1/rarities/${rarity.rarity_id}`
+        })
+    },
+    deleteRarity({ rarity }) {
+        return axios({
+            ...options,
+            method: 'delete',
+            url: `/api/v1/rarities/${rarity.rarity_id}`
+        })
+    },
+    postPrinting(config) {
+        const { data } = config
+        return axios({
+            ...options,
+            url: '/api/v1/printings',
+            method: 'post',
+            data
+        })
+    },
+    getPrintings() {
+        return axios({
+            ...options,
+            url: 'api/v1/printings'
+        })
+    },
+    updatePrinting({ printing }) {
+        return axios({
+            ...options,
+            method: 'put',
+            data: printing,
+            url: `/api/v1/printings/${printing.printing_id}`
+        })
+    },
+    deletePrinting({ printing }) {
+        return axios({
+            ...options,
+            method: 'delete',
+            url: `/api/v1/printings/${printing.printing_id}`
+        })
+    },
+    getBulkSplits() {
+        return axios({
+            ...options,
+            url: 'api/v1/bulk-splits'
+        })
+    },
+    postSortings(config) {
+        const { data } = config
+        console.log(data)
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/sortings',
+            data
+        })
     }
 }
 

@@ -6,13 +6,15 @@ import ImportPurchase from '../../../import-purchase'
 import CategorySelector from '../../../../components/category-selector'
 import { buildPreviousRoute } from '../../../../utils/location'
 import ImportGift from '../../../import-gift'
+import SortBulkSplits from './features/sort-bulk-splits'
 
-const updatePortfolioCategories = ['import', 'purchase', 'trade', 'sale', 'export']
+const updatePortfolioCategories = ['import', 'purchase', 'sort', 'trade', 'sale', 'export']
 
 const UpdatePortfolio = (props) => {
     const { 
         referenceData, 
-        setReferenceData
+        setReferenceData,
+        portfolio={portfolio}
     } = props
     const navigate = useNavigate()
     const location = useLocation()
@@ -49,6 +51,7 @@ const UpdatePortfolio = (props) => {
                 path='/sale/*'
                 element={<>sale component</>}
             />
+            <Route path="/sort/*" element={<SortBulkSplits portfolio={portfolio} referenceData={referenceData} setReferenceData={setReferenceData} />} />
             <Route 
                 path='/export/*'
                 element={<>export component</>}

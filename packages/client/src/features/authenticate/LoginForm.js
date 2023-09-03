@@ -29,7 +29,7 @@ const LoginForm = (props) => {
         BillsPcService.login({ user: user })
             .then(res => {
                 setErrorMessage('')
-                setUserClaims(res.data)
+                setUserClaims(res.data[0])
             }).catch(err => {
                 setErrorMessage(err.response.data.message)
             })

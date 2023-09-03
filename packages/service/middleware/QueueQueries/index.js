@@ -19,7 +19,11 @@ const gifts = require('./gifts')
 const giftNotes = require('./giftNotes')
 const giftCards = require('./giftCards')
 const giftProducts = require('./giftProducts')
-
+const bulkSplits = require('./bulkSplits')
+const saleBulkSplits = require('./saleBulkSplits')
+const sortings = require('./sortings')
+const sortingSplits = require('./sortingSplits')
+const sortingGems = require('./sortingGems')
 
 const init = (req, res, next) => {
     req.queryQueue = []
@@ -48,5 +52,10 @@ module.exports = {
     gifts,
     giftNotes,
     giftCards,
-    giftProducts
+    giftProducts, 
+    bulkSplits,
+    saleBulkSplits,
+    sortings,
+    sortingSplits,
+    sortingGems
 }
