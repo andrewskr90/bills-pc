@@ -12,7 +12,7 @@ const BulkSplitForm = (props) => {
         referenceData, 
         updateSplitInBulkValues, 
         initialSplitValues,
-        addSplitToPurchase,
+        addSplitToTransaction,
         purchaseValues
     } = props
     const [splitValues, setSplitValues] = useState(initialSplitValues)
@@ -25,7 +25,6 @@ const BulkSplitForm = (props) => {
 
     useEffect(() => {
         if (params['idx']) {
-            console.log('here')
             if (purchaseValues.bulkSplits.length > params['idx']) {
                 setSplitValues(purchaseValues.bulkSplits[params['idx']])
             } else navigate(-1)
@@ -94,7 +93,7 @@ const BulkSplitForm = (props) => {
 
     const handleAddSplitToPurchase = (e) => {
         e.preventDefault()
-        addSplitToPurchase(splitValues)
+        addSplitToTransaction(splitValues)
         navigate(-1)
     }
 
@@ -149,8 +148,8 @@ const BulkSplitForm = (props) => {
                 <div className='row'>
                     <Button 
                         variation='secondary'
-                        onClick={addSplitToPurchase ? handleAddSplitToPurchase : handleUpdateSplit}
-                    >{addSplitToPurchase ? 'Confirm' : 'Update'}</Button>
+                        onClick={addSplitToTransaction ? handleAddSplitToPurchase : handleUpdateSplit}
+                    >{addSplitToTransaction ? 'Confirm' : 'Update'}</Button>
                 </div>
             </form>
         </> : <>

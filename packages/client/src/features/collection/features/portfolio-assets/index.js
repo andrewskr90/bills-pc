@@ -1,33 +1,35 @@
-import React from "react"
-import { Link } from "react-router-dom"
+import React, { useEffect, useState } from "react"
+import { Link, Route, Routes, useNavigate, useParams } from "react-router-dom"
 import ItemContainer from "../../../../components/item-container"
+import BulkSplitInfo from "../../BulkSplitInfo"
+import Button from "../../../../components/buttons/text-button"
+import BulkSplit from "../../BulkSplit"
 const PortfolioAssets = (props) => {
-    const { portfolio } = props 
-
-    const compileBulkLabels = (labels) => {
-        return labels.map(label => {
-            const rarities = []
-            const types = []
-            const printings = []
-            return label.components.map(component => {
-                const { rarity_name, type_name, printing_name, set_v2_name } = component
-                return rarity_name || type_name || printing_name || set_v2_name
-            }).join('/')
-        }).join(', ')
+    const { portfolio, userClaims } = props 
+    const navigate = useNavigate()
+    
+    const selectBulkSplit = (splitId) => {
+        navigate(`bulk/${splitId}`)
     }
 
     return (<>
         {portfolio.inventory.bulkSplits.length > 0
-        ?
-            <ItemContainer>
-                <h3>Bulk</h3>
-                {portfolio.inventory.bulkSplits.map(split => {
-                    return <div className='bulkSplit'>
-                        <p>{compileBulkLabels(split.labels)}</p>
-                        <p>{split.bulk_split_estimate ? '~' : ''}{split.bulk_split_count}</p>
-                    </div>
-                })}
-            </ItemContainer>
+        ?   
+            <Routes>
+                <Route 
+                    path="/"
+                    element={<ItemContainer>
+                        <h3>Bulk</h3>
+                        {portfolio.inventory.bulkSplits.map(split => {
+                            return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
+                        })}
+                    </ItemContainer>}
+                />
+                <Route 
+                    path={`/bulk/:bulkSplitId`}
+                    element={<BulkSplitInfo portfolio={portfolio} userClaims={userClaims} />}
+                />
+            </Routes>
         :
             <div className='emptyCollection'>
                 <p>No items in your collection!</p>

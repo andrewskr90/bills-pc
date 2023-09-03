@@ -132,7 +132,7 @@ const App = () => {
             })
         }
     }, [topTenLoaded])
-
+    
         return (<>
             {initialData
             ?
@@ -149,15 +149,23 @@ const App = () => {
                     />
                     <Route 
                         path='/collection/*'
-                        element={<Collection 
-                            userClaims={userClaims} 
-                            setUserClaims={setUserClaims}
-                            collectedCards={collectedCards} 
-                            setCollectedCards={setCollectedCards} 
-                            referenceData={referenceData}
-                            setReferenceData={setReferenceData}
-                        />}  
+                        element={<InDevelopment />}  
                     />
+                    <Route 
+                        path='/gym-leader/collection/*' 
+                        element={<GymLeaderOnly
+                            userClaims={userClaims}
+                            setUserClaims={setUserClaims}
+                        >
+                            <Collection 
+                                userClaims={userClaims} 
+                                setUserClaims={setUserClaims}
+                                collectedCards={collectedCards} 
+                                setCollectedCards={setCollectedCards} 
+                                referenceData={referenceData}
+                                setReferenceData={setReferenceData}
+                            />
+                    </GymLeaderOnly>} />
                     <Route 
                         path='/gym-leader/*' 
                         element={<GymLeaderOnly

@@ -57,7 +57,7 @@ const ImportGift = (props) => {
                 giftedItem
             ]
         })
-        navigate('/collection/update/import')
+        navigate('/gym-leader/collection/update/import')
     }
 
     const updateGiftItem = (editedItem, i) => {
@@ -151,7 +151,7 @@ const ImportGift = (props) => {
                         styles: {
                             color: 'white',
                             backgroundColor: '#6065cb',
-                            paddingBottom: '100px',
+                            marginBottom: '100px',
                             overflow: 'auto'
                         }
                     }
@@ -166,7 +166,7 @@ const ImportGift = (props) => {
                 path='/'
                 element={<Form config={formConfig}>
                     <ItemsTable 
-                        formValues={importGiftValues}
+                        items={importGiftValues.items}
                     />
                     <PlusButton handleClick={() => navigate('add-item')} />
                 </Form>}

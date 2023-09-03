@@ -85,17 +85,7 @@ const ImportPurchase = (props) => {
         const saleItems = purchaseValues.items
         const cards = saleItems.filter(item => item.card_id)
         const products = saleItems.filter(item => item.product_id)
-        const bulkSplits = purchaseValues.bulkSplits.map(split => {
-            return {
-                ...split,
-                labels: split.labels.map(label => ({
-                    rarities: label.rarities.filter(label => label),
-                    types: label.types.filter(label => label),
-                    printings: label.printings.filter(label => label),
-                    expansions: label.expansions.filter(label => label)
-                }))
-            }
-        })
+        const bulkSplits = purchaseValues.bulkSplits
         return {
             ...purchaseValues,
             cards,
@@ -145,7 +135,7 @@ const ImportPurchase = (props) => {
             bulkSplits: updatedBulkSplits
         })
     }
-
+    
     return (<div className='page importPurchase'>
         <Routes>
             <Route 
@@ -198,14 +188,14 @@ const ImportPurchase = (props) => {
                     {addItemOrBulk === 'item' ? <>
                         <ItemsTable 
                             format='item'
-                            formValues={purchaseValues}
+                            items={purchaseValues.items}
                             referenceData={referenceData}
                         />
                         <PlusButton handleClick={handleToggleSelectItem} />
                     </> : <>
                         <ItemsTable 
                             format='bulk'
-                            formValues={purchaseValues}
+                            items={purchaseValues.bulkSplits}
                             referenceData={referenceData}
                         />
                         <PlusButton handleClick={handleToggleAddBulk} />
@@ -299,7 +289,7 @@ const ImportPurchase = (props) => {
                     />
                     <BulkSplitForm 
                         initialSplitValues={purchaseInitialSplitValues}
-                        addSplitToPurchase={addSplitToPurchase}
+                        addSplitToTransaction={addSplitToPurchase}
                         referenceData={referenceData}
                     />
                 </div>}

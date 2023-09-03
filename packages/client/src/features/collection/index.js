@@ -37,8 +37,8 @@ const Collection = (props) => {
             </>
             <Routes>
                 <Route 
-                    path='/assets'
-                    element={<PortfolioAssets portfolio={portfolio} />}
+                    path='/assets/*'
+                    element={<PortfolioAssets portfolio={portfolio} userClaims={userClaims} />}
                 />
                 <Route 
                     path='/transactions/*'
@@ -46,12 +46,14 @@ const Collection = (props) => {
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
                         portfolio={portfolio}
+                        userClaims={userClaims}
                      />}
                 />
                 <Route 
                     path='/update/*'
                     element={<UpdatePortfolio
                         portfolio={portfolio}
+                        referenceData={referenceData}
                      />}
                 />
             </Routes>

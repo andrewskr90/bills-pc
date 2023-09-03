@@ -293,6 +293,16 @@ const BillsPcService = {
             ...options,
             url: 'api/v1/bulk-splits'
         })
+    },
+    postSortings(config) {
+        const { data } = config
+        console.log(data)
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/sortings',
+            data
+        })
     }
 }
 

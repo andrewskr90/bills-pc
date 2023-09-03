@@ -110,6 +110,7 @@ export const initialPortfolioValues = {
     balance: null,
     roi: null,
     sales: [],
+    sortings: [],
     trades: [],
     rips: [],
     inventory: {
@@ -173,6 +174,20 @@ export const purchaseInitialSplitValues = {
     estimate: false,
     rate: null,
     labels: []
+}
+
+export const initialSortingSplitValues = {
+    count: null,
+    estimate: false,
+    labels: []
+}
+
+export const initialSortingValues = {
+    sorting_id: null,
+    sorting_bulk_split_id: null,
+    sorting_date: localYYYYMMDD(),
+    sortingSplits: [],
+    sortingGems: []
 }
 
 export const initialSplitLabelFormValues = {
