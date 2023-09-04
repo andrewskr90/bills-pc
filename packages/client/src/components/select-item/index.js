@@ -13,7 +13,8 @@ import { useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
 
 const SelectItem = (props) => {
-    const { referenceData,
+    const { 
+        referenceData,
         setReferenceData,
         handleSelectItem,
         initialEmptyMessage,

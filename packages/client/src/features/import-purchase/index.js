@@ -135,6 +135,14 @@ const ImportPurchase = (props) => {
             bulkSplits: updatedBulkSplits
         })
     }
+
+    const purchaseItemsValue = () => {
+        let value = 0
+        purchaseValues.items.forEach(item => {
+            value += item.marketValue
+        })
+        return value
+    }
     
     return (<div className='page importPurchase'>
         <Routes>
@@ -200,6 +208,7 @@ const ImportPurchase = (props) => {
                         />
                         <PlusButton handleClick={handleToggleAddBulk} />
                     </>}
+                    <p>Market Value: {purchaseItemsValue()}</p>
                     <div className='discountSubtotalAndTax'>
                         <div className='labelInput discount'>
                             <label>Discount</label>

@@ -54,6 +54,7 @@ const Collection = (props) => {
                     element={<UpdatePortfolio
                         portfolio={portfolio}
                         referenceData={referenceData}
+                        setReferenceData={setReferenceData}
                      />}
                 />
             </Routes>
