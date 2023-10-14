@@ -15,13 +15,13 @@ const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
     const { 
         referenceData, 
-        setReferenceData 
+        setReferenceData,
+        setWatchingToAdd
     } = props
     const [addItemOrBulk, setAddItemOrBulk] = useState('item')
     
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
-
     const updatePurchaseItem = (editedItem, i) => {
         const updatedPurchaseItems = purchaseValues.items.map((item, j) => {
             if (i === j) {
@@ -139,9 +139,14 @@ const ImportPurchase = (props) => {
     const purchaseItemsValue = () => {
         let value = 0
         purchaseValues.items.forEach(item => {
-            value += item.marketValue
+            value += item.quantity*(item.marketValue)
         })
         return value
+    }
+
+    const handleToggleCreateLot = () => {
+        setWatchingToAdd(purchaseValues.items)
+        navigate('/gym-leader/collection/watching/add')
     }
     
     return (<div className='page importPurchase'>
@@ -199,7 +204,17 @@ const ImportPurchase = (props) => {
                             items={purchaseValues.items}
                             referenceData={referenceData}
                         />
-                        <PlusButton handleClick={handleToggleSelectItem} />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            {purchaseValues.items.length > 1 && (
+                                <a 
+                                    style={{ color: 'blue', textDecoration: 'underline' }}
+                                    onClick={handleToggleCreateLot}
+                                >
+                                    Create Lot
+                                </a>
+                            )}
+                            <PlusButton handleClick={handleToggleSelectItem} />                                
+                        </div>
                     </> : <>
                         <ItemsTable 
                             format='bulk'
@@ -236,7 +251,7 @@ const ImportPurchase = (props) => {
                             <label>Tax</label>
                             <input 
                                 id='taxAmount'
-                                className='taxAmount'
+                                 className='taxAmount'
                                 name='taxAmount'
                                 type='text'
                                 value={purchaseValues.taxAmount}

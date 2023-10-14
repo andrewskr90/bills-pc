@@ -199,6 +199,20 @@ export const initialSplitLabelFormValues = {
 
 export const initialBulkSplitsValues = []
 
+export const initialExternalListing = {
+    date: undefined,
+    description: undefined,
+    sellerId: undefined,
+    lotId: undefined,
+    collected_card_id: undefined,
+    collected_product_id: undefined
+}
+
+export const initialProxyUser = {
+    id: undefined,
+    name: undefined
+}
+
 // export const initialCollectionValues = {
 //     userId: '212',
 //     cards: [ 

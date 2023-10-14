@@ -296,11 +296,25 @@ const BillsPcService = {
     },
     postSortings(config) {
         const { data } = config
-        console.log(data)
         return axios({
             ...options,
             method: 'post',
             url: '/api/v1/sortings',
+            data
+        })
+    },
+    getProxyUsers() {
+        return axios({
+            ...options,
+            url: '/api/v1/proxy-users'
+        })
+    },
+    postProxyUser(config) {
+        const { data } = config
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/proxy-users',
             data
         })
     }
