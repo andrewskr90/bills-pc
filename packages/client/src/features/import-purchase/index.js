@@ -15,8 +15,7 @@ const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
     const { 
         referenceData, 
-        setReferenceData,
-        setWatchingToAdd
+        setReferenceData
     } = props
     const [addItemOrBulk, setAddItemOrBulk] = useState('item')
     
@@ -143,11 +142,6 @@ const ImportPurchase = (props) => {
         })
         return value
     }
-
-    const handleToggleCreateLot = () => {
-        setWatchingToAdd(purchaseValues.items)
-        navigate('/gym-leader/collection/watching/add')
-    }
     
     return (<div className='page importPurchase'>
         <Routes>
@@ -204,17 +198,6 @@ const ImportPurchase = (props) => {
                             items={purchaseValues.items}
                             referenceData={referenceData}
                         />
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            {purchaseValues.items.length > 1 && (
-                                <a 
-                                    style={{ color: 'blue', textDecoration: 'underline' }}
-                                    onClick={handleToggleCreateLot}
-                                >
-                                    Create Lot
-                                </a>
-                            )}
-                            <PlusButton handleClick={handleToggleSelectItem} />                                
-                        </div>
                     </> : <>
                         <ItemsTable 
                             format='bulk'

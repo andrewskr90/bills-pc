@@ -6,21 +6,24 @@ import BillsPcService from "../../../../api/bills-pc"
 import { initialExternalListing, initialProxyUser } from "../../../../data/initialData"
 
 const ImportListing = (props) => {
-    const { referenceData, setReferenceData, watchingToAdd, setWatchingToAdd } = props
+    const { referenceData, setReferenceData } = props
     const [externalListing, setExternalListing] = useState(initialExternalListing)
     const [createdProxyUsers, setCreatedProxyUsers] = useState([])
     const [proxyUser, setProxyUser] = useState(initialProxyUser)
     const navigate = useNavigate()
     const initialEmptyMessage = "Select item to import"
     const handleSelectItem = (item) => {
-        setWatchingToAdd([
-            ...watchingToAdd,
-            {
-                ...item,
-                quantity: 1,
-                price: null,
-            }
-        ])
+        setExternalListing({
+            ...externalListing,
+            items: [
+                ...externalListing.items,
+                {
+                    ...item,
+                    quantity: 1,
+                    price: null,
+                }
+            ]
+        })
         navigate('/gym-leader/collection/watching/import')
     }
     useEffect(() => {
@@ -35,16 +38,16 @@ const ImportListing = (props) => {
         const [searchInput, setSearchInput] = useState("")
         return (
             selected[searchKey] ? (<p>selected</p>) : (
-                <>
+                <div style={{ width: '200px' }}>
                     <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
                     {searchInput ? (
-                        <div>
-                            {!items.find(item => item.name.toLowerCase() === searchInput.toLocaleLowerCase()) ? (<button onClick={() => handleCreateNew(searchInput)}>Create New Seller</button>) : (<></>)}
+                        <div style={{ width: '100%' }}>
+                            {!items.find(item => item.name.toLowerCase() === searchInput.toLocaleLowerCase()) ? (<button style={{ width: '100%' }} onClick={() => handleCreateNew(searchInput)}>Create New Seller</button>) : (<></>)}
                             {items.filter(item => item[searchKey].includes(searchInput.toLowerCase()))
-                                .map(item => <button onClick={() => handleSelect(item)}>{item[searchKey]}</button>)}
+                                .map(item => <button style={{ width: '100%' }} onClick={() => handleSelect(item)}>{item[searchKey]}</button>)}
                         </div>
                     ) : (<></>)}
-                </>
+                </div>
             )
         )
     }
@@ -52,11 +55,12 @@ const ImportListing = (props) => {
         try {
             const { data: { id } } = await BillsPcService.postProxyUser({ data: newProxyUser })
             setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, id }])
+            setProxyUser({ ...newProxyUser, id })
         } catch (err) {
 
         }
     }
-    console.log(createdProxyUsers)
+
     const ProxyUserSelector = () => {
         return (
             proxyUser.id ? (
@@ -82,16 +86,18 @@ const ImportListing = (props) => {
                         alignItems: 'center'
                     }}>
                         <p>External Listing</p>
-                        <label>
-                            Date
-                            <input type="date" value={externalListing.date} />
-                        </label>
-                        <label>
-                            Seller
-                            <ProxyUserSelector />
-                        </label>
-                        {watchingToAdd.length > 1 ? <p>Lot Items</p> : <p>Item</p>}
-                        {watchingToAdd.map(item => {
+                        <div style={{ display: 'flex' }}>
+                            <label>
+                                Date
+                                <input type="date" value={externalListing.date} />
+                            </label>
+                            <label>
+                                Seller
+                                <ProxyUserSelector />
+                            </label>
+                        </div>
+                        {externalListing.items.length > 1 ? <p>Lot Items</p> : <p>Item</p>}
+                        {externalListing.items.map(item => {
                             return <p>{item.name}</p>
                         })}
                         <PlusButton handleClick={() => navigate('add-item')} />

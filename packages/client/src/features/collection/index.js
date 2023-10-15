@@ -14,7 +14,6 @@ import Watching from './features/watching'
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [portfolio, setPortfolio] = useState(initialPortfolioValues)
-    const [watchingToAdd, setWatchingToAdd] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -57,15 +56,12 @@ const Collection = (props) => {
                         portfolio={portfolio}
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        setWatchingToAdd={setWatchingToAdd}
                      />}
                 />
                 <Route 
                     path='/watching/*'
                     element={
                         <Watching 
-                            watchingToAdd={watchingToAdd} 
-                            setWatchingToAdd={setWatchingToAdd} 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />
