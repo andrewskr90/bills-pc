@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { parseLastRouteParameter } from '../../utils/location'
+import { parseSlugAfter } from '../../utils/location'
 import './assets/categorySelector.less'
 
 const CategorySelector = (props) => {
     const location = useLocation()
-    const { categories, selectCategory } = props
-    const initialSelectedCategory = parseLastRouteParameter(location)
+    const { categories, selectCategory, basePage } = props
+    const initialSelectedCategory = parseSlugAfter(basePage, location)
     const [selectedCategory, setSelectedCategory] = useState(initialSelectedCategory)
 
     const handleSelectCategory = (category) => {

@@ -10,6 +10,12 @@ export const parseLastRouteParameter = (location) => {
     return parsedLocationPathname[parsedLocationPathname.length-1]
 
 }
+export const parseSlugAfter = (baseName, location) => {
+    const pathname = location.pathname
+    const baseNameSplit = pathname.split(baseName)
+    if (baseNameSplit.length === 1) return undefined
+    return baseNameSplit[1].split('/')[1]
+}
 
 export const buildPreviousRoute = (location, optionalNumber) => {
     const parsedLocation = parseLocationPathname(location)

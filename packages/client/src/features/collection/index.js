@@ -32,6 +32,7 @@ const Collection = (props) => {
             <>
                 <Link to='update/purchase'><button>Update Collection</button></Link>
                 <CategorySelector
+                    basePage="collection"
                     categories={['assets', 'transactions', 'watching']} 
                     selectCategory={(category) => navigate(category)} 
                 />
