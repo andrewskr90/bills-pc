@@ -317,6 +317,24 @@ const BillsPcService = {
             url: '/api/v1/proxy-users',
             data
         })
+    },
+    postListing(config) {
+        const { data, params } = config
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/listings',
+            data,
+            params
+        })
+    },
+    getListings(config) {
+        const { params } = config
+        return axios({
+            ...options,
+            url: '/api/v1/listings',
+            params
+        })
     }
 }
 

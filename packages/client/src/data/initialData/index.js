@@ -203,14 +203,33 @@ export const initialExternalListing = {
     date: undefined,
     description: undefined,
     sellerId: undefined,
-    lotId: undefined,
-    collected_card_id: undefined,
-    collected_product_id: undefined
+    price: undefined,
+    cards: [],
+    products: []
 }
 
 export const initialProxyUser = {
     id: undefined,
     name: undefined
+}
+
+export const initialListingValues = {
+    id: undefined,
+    sellerId: undefined,
+    sellerName: undefined,
+    date: undefined,
+    price: undefined,
+    description: undefined,
+    collectedCard: {
+        id: undefined
+    },
+    collectedProduct: {
+        id: undefined
+    },
+    lot: {
+        id: undefined,
+        items: []
+    }
 }
 
 // export const initialCollectionValues = {
