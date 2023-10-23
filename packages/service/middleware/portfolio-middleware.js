@@ -4,6 +4,7 @@ const SaleProduct = require('../models/SaleProduct')
 const SaleCard = require('../models/SaleCard')
 const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
+const { formatSaleFromPortfolioResult } = require('../utils/sale')
 
 const stringifyDateYYYYMMDD = (date) => date.toISOString().split('T')[0]
 
@@ -384,22 +385,32 @@ const evaluatePortfolio = async (req, res, next) => {
         }
         return keyMarketDates.reverse()
     }
+    const findCardPricesBetweenDates = async (cardInventory, start, end) => {
+        const formattedInventory = formatInventory(cardInventory)
+        const inventoryCardIds = formattedInventory.map(card => card.card_v2_id)
+
+        try {
+            const keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
+                inventoryCardIds, 
+                stringifyDateYYYYMMDD(start), 
+                stringifyDateYYYYMMDD(end)
+            )
+            return keyDateCardPrices
+        } catch (err) {
+            throw new Error(err)
+        }
+    }
     const calculateDailyBalance = async (startOfDay, cardInventory, productInventory) => {
         const endOfDay = new Date(startOfDay)
         endOfDay.setDate(startOfDay.getDate()+1)
         let dailyBalance = 0
-        let keyDateCardPrices
         if (Object.keys(cardInventory).length > 0) {
+            let keyDateCardPrices
             const formattedInventory = formatInventory(cardInventory)
-            const inventoryCardIds = formattedInventory.map(card => card.card_v2_id)
             try {
-                keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
-                    inventoryCardIds, 
-                    stringifyDateYYYYMMDD(startOfDay), 
-                    stringifyDateYYYYMMDD(endOfDay)
-                )
+                keyDateCardPrices = await findCardPricesBetweenDates(cardInventory, startOfDay, endOfDay)
             } catch (err) {
-                throw new Error(err)
+                throw err
             }
             keyDateCardPrices.forEach(price => {
                 if (price.market_price_price) {
@@ -452,7 +463,7 @@ const evaluatePortfolio = async (req, res, next) => {
             /* check if user is purchaser in sale */
             if (sale.sale_purchaser_id === req.claims.user_id) {
                 /* add sale amount to investmentCount */
-                investmentCount += sale.sale_total
+                investmentCount += parseFloat(sale.sale_total)
                 investmentHistory.push({
                     investment: investmentCount,
                     date: sale.transaction_date,
@@ -483,11 +494,9 @@ const evaluatePortfolio = async (req, res, next) => {
                 sale.saleBulkSplits.forEach(split => bulkSplitInventory.push(split))
             /* otherwise, user is seller in sale */
             } else if (sale.sale_seller_id === req.claims.user_id) {
-                revenue += sale.sale_total
+                revenue += parseFloat(sale.sale_total)
             }
-        }
-
-        if (transactions[i].sorting_id) {
+        } else if (transactions[i].sorting_id) {
             const sorting = transactions[i]
             sortings.push(sorting)
             const sortedBulkSplitId = sorting.sorting_bulk_split_id
@@ -509,8 +518,9 @@ const evaluatePortfolio = async (req, res, next) => {
         /** check if current transaction is last of the day */
         const currentTransactionDate = new Date(transactions[i].transaction_date).setHours(0, 0, 0, 0)
         let nextTransactionDate = false
+        const transaction_date = transactions[i].sale_date || transactions[i].gift_date || transactions[i].sorting_date 
         if (i < transactions.length - 1) {
-            nextTransactionDate = new Date(transactions[i + 1].transaction_date).setHours(0, 0, 0, 0)
+            nextTransactionDate = new Date(transaction_date).setHours(0, 0, 0, 0)
         }
         if (currentTransactionDate !== nextTransactionDate || !nextTransactionDate) {
             /** find market prices for the day's adjusted inventory */
@@ -519,8 +529,9 @@ const evaluatePortfolio = async (req, res, next) => {
                 // no more transactions after current, 
                 while (keyMarketDates.length > 0) {
                     const startOfDay = keyMarketDates.pop()
-                    try {
-                        const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
+                    try {  
+                        // const dailyBalance = await calculateDailyBalance(startOfDay, cardInventory, productInventory)
+                        const dailyBalance = 'uncoment out calcDailyBalance'
                         balanceHistory.push({ balance: dailyBalance, date: startOfDay })
                     } catch (err) {
                         next(err)
@@ -543,7 +554,7 @@ const evaluatePortfolio = async (req, res, next) => {
     req.results = {
         balanceHistory: balanceHistory,
         investmentHistory: investmentHistory,
-        // revenue: revenue,
+        revenue: revenue,
         sales,
         sortings,
         inventory: { 
