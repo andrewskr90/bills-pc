@@ -8,8 +8,7 @@ import BillsPcService from '../../api/bills-pc'
 import PlusButton from '../../components/buttons/plus-button'
 import './assets/importPurchase.less'
 import Button from '../../components/buttons/text-button'
-import BulkSplitForm from '../../components/bulk-form/components/bulk-split-form'
-import Banner from '../../layouts/banner'
+import BulkEditor from '../../components/bulk-editor'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
@@ -122,6 +121,7 @@ const ImportPurchase = (props) => {
                 split
             ]
         })
+        navigate('/gym-leader/collection/update/purchase')
     }
 
     const updateSplitInBulkValues = (updatedSplit, idx) => {
@@ -133,6 +133,7 @@ const ImportPurchase = (props) => {
             ...purchaseValues,
             bulkSplits: updatedBulkSplits
         })
+        navigate('/gym-leader/collection/update/purchase')
     }
 
     const purchaseItemsValue = () => {
@@ -198,6 +199,7 @@ const ImportPurchase = (props) => {
                             items={purchaseValues.items}
                             referenceData={referenceData}
                         />
+                        <PlusButton handleClick={handleToggleSelectItem} />                                
                     </> : <>
                         <ItemsTable 
                             format='bulk'
@@ -289,32 +291,20 @@ const ImportPurchase = (props) => {
             />
             <Route 
                 path='/add-bulk'
-                element={<div className='addPurchaseBulk page'>
-                    <Banner 
-                        titleText={'Add Bulk Split'} 
-                        handleClickBackArrow={() => navigate(-1)} 
-                    />
-                    <BulkSplitForm 
-                        initialSplitValues={purchaseInitialSplitValues}
-                        addSplitToTransaction={addSplitToPurchase}
-                        referenceData={referenceData}
-                    />
-                </div>}
+                element={<BulkEditor 
+                    initialSplitValues={purchaseInitialSplitValues}
+                    addSplitToTransaction={addSplitToPurchase}
+                    referenceData={referenceData}
+                />}
             />
             <Route 
                 path='/edit-bulk/:idx'
-                element={<div className='addPurchaseBulk page'>
-                    <Banner 
-                        titleText={'Edit Bulk Split'} 
-                        handleClickBackArrow={() => navigate(-1)} 
-                    />
-                    <BulkSplitForm 
-                        updateSplitInBulkValues={updateSplitInBulkValues}
-                        referenceData={referenceData}
-                        initialSplitValues={purchaseInitialSplitValues}
-                        purchaseValues={purchaseValues}
-                    />
-                </div>}
+                element={<BulkEditor 
+                    initialSplitValues={purchaseInitialSplitValues}
+                    referenceData={referenceData}
+                    updateSplitInBulkValues={updateSplitInBulkValues}
+                    purchaseValues={purchaseValues}
+                />}
             />
         </Routes>
     </div>)

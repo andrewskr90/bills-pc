@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
 import SelectItem from "../../../../components/select-item"
-import PlusButton from "../../../../components/buttons/plus-button"
 import BillsPcService from "../../../../api/bills-pc"
-import { initialExternalListing, initialProxyUser } from "../../../../data/initialData"
+import { initialExternalListing, initialSortingSplitValues } from "../../../../data/initialData"
+import BulkEditor from "../../../../components/bulk-editor"
+import editPNG from '../../assets/edit.png'
+import EditListingItem from './EditListingItem'
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData } = props
@@ -17,7 +19,10 @@ const ImportListing = (props) => {
                 ...externalListing,
                 cards: [
                     ...externalListing.cards,
-                    item
+                    {
+                        ...item,
+                        note: ''
+                    }
                 ]
             })
         } else if (item.product_id) {
@@ -25,16 +30,23 @@ const ImportListing = (props) => {
                 ...externalListing,
                 products: [
                     ...externalListing.products,
-                    item
+                    {
+                        ...item,
+                        note: ''
+                    }
                 ]
             })
         }
         navigate('/gym-leader/collection/watching/import')
     }
     const handleCreateExternalListing = async () => {
-        await BillsPcService.postListing({ data: externalListing, params: { external: true } })
+        try {
+            await BillsPcService.postListing({ data: externalListing, params: { external: true } })
+            navigate('/gym-leader/collection/watching/import')
+        } catch (err) {
+            console.log(err)
+        }
     }
-    console.log(externalListing)
     useEffect(() => {
         (async () => {
             await BillsPcService.getProxyUsers()
@@ -88,6 +100,23 @@ const ImportListing = (props) => {
             )
         )
     }
+    const addSplitToTransaction = (splitToAdd) => {
+        setExternalListing({
+            ...externalListing,
+            bulkSplits: [
+                ...externalListing.bulkSplits,
+                {
+                    ...splitToAdd,
+                    note: ''
+                }
+            ]
+        })
+        navigate('/gym-leader/collection/watching/import')
+    }
+    const handleEditItem = (itemType, idx) => {
+        navigate(`edit/${itemType}/${idx}`)
+    }
+    console.log(externalListing)
     return <Routes>
             <Route
                 path="/"
@@ -95,7 +124,9 @@ const ImportListing = (props) => {
                     <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        overflow: 'auto',
+                        paddingBottom: '128px'
                     }}>
                         <p>External Listing</p>
                         <div style={{ display: 'flex' }}>
@@ -119,18 +150,37 @@ const ImportListing = (props) => {
                             <textarea type='text' value={externalListing.description} onChange={(e) => setExternalListing({ ...externalListing, description: e.target.value })}/>
                         </label>
 
-                        {(externalListing.cards.length + externalListing.products.length) > 1 ? (
+                        {externalListing.cards.length + 
+                        externalListing.products.length +
+                        externalListing.bulkSplits.length > 1  ? (
                             <p>Lot Items</p> 
                         ) : (
                             <p>Item</p>
                         )}
-                        {externalListing.cards.map(card => {
-                            return <p>{card.name}</p>
+                        {externalListing.cards.map((card, idx) => {
+                            console.log(card)
+                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
+                                {card.name}
+                                <img src={editPNG} onClick={() => handleEditItem('card', idx)} />
+                            </div>)
                         })}
-                        {externalListing.products.map(product => {
-                            return <p>{product.name}</p>
+                        {externalListing.products.map((product, idx) => {
+                            console.log(product)
+                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
+                                <p>{product.name}</p>
+                                <img src={editPNG} onClick={() => handleEditItem('product', idx)} />
+                            </div>)
                         })}
-                        <PlusButton handleClick={() => navigate('add-item')} />
+                        {externalListing.bulkSplits.map((split, idx) => {
+                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
+                                <p>{`Bulk: ${split.estimate ? '~' : ''}${split.count} cards`}</p>
+                                <img src={editPNG} onClick={() => handleEditItem('bulkSplit', idx)} />
+                            </div>)
+                        })}
+                        <div style={{ display: 'flex' }}>
+                            <button onClick={() => navigate('add-item')}>Add Item</button>
+                            <button onClick={() => navigate('add-bulk')}>Add Bulk</button>
+                        </div>
                         <button onClick={handleCreateExternalListing}>Create Listing</button>
                     </div>
                 }
@@ -142,6 +192,21 @@ const ImportListing = (props) => {
                     setReferenceData={setReferenceData}
                     handleSelectItem={handleSelectItem}
                     initialEmptyMessage={initialEmptyMessage}
+                />}
+            />
+            <Route 
+                path='/add-bulk'
+                element={<BulkEditor 
+                    referenceData={referenceData}
+                    addSplitToTransaction={addSplitToTransaction}
+                    initialSplitValues={initialSortingSplitValues} 
+                />}
+            />
+            <Route 
+                path='/edit/:itemType/:idx'
+                element={<EditListingItem 
+                    listing={externalListing}
+                    setListing={setExternalListing}
                 />}
             />
         </Routes>

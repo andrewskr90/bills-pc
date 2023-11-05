@@ -205,7 +205,8 @@ export const initialExternalListing = {
     sellerId: undefined,
     price: undefined,
     cards: [],
-    products: []
+    products: [],
+    bulkSplits: []
 }
 
 export const initialProxyUser = {
