@@ -138,4 +138,4 @@ const fetchOrCreateLabelIds = async (split) => {
     return labels
 }
 
-module.exports = { fetchOrCreateLabelIds, compileLabelComponentsIntoSplits }
+module.exports = { fetchOrCreateLabelIds, compileLabelComponentsIntoSplits, generateNewOrExistingLabelId }

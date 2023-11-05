@@ -3,6 +3,7 @@ const Label = require('../models/Label')
 const { formatSingularComponent } = require('../utils/label')
 const Sale = require('../models/Sale')
 const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
+const { formatSaleFromPortfolioResult } = require('../utils/sale')
 
 const createSaleNote = (note, saleId, userId) => {
     if (!note) return null
@@ -240,79 +241,7 @@ const formatImportPurchase = async (req, res, next) => {
 const formatSaleResults = (req, res, next) => {
     const saleItems = req.results
     const sales = []
-    const formatSaleFromPortfolioResult = (result) => {
-        const {
-            sale_id,
-            sale_seller_id,
-            sale_purchaser_id,
-            sale_date,
-            sale_vendor,
-            sale_subtotal,
-            sale_discount,
-            sale_shipping,
-            sale_tax_amount,
-            sale_total,
-            sale_note_id,
-            sale_note_note
-        } = result
-        return {
-            sale_id,
-            sale_seller_id,
-            sale_purchaser_id,
-            transaction_date: sale_date,
-            sale_vendor,
-            sale_subtotal: sale_subtotal ? parseFloat(sale_subtotal) : null,
-            sale_discount: sale_discount ? parseFloat(sale_discount) : null,
-            sale_shipping: sale_shipping ? parseFloat(sale_shipping) : null,
-            sale_tax_amount: sale_tax_amount ? parseFloat(sale_tax_amount) : null,
-            sale_total: sale_total ? parseFloat(sale_total) : null,
-            sale_note_id,
-            sale_note_note,
-            items: []
-        }
-    }
-    const formatSaleItemFromPortfolioResult = (result) => {
-        const {
-            sale_card_id,
-            sale_product_id,
-            sale_card_price,
-            sale_product_price,
-            collected_card_id,
-            collected_product_id,
-            collected_card_note_id,
-            collected_product_note_id,
-            collected_card_note_note,
-            collected_product_note_note,
-            card_v2_id,
-            product_id,
-            card_v2_name,
-            product_name,
-            card_v2_number,
-            card_v2_rarity,
-            tcgplayer_product_id,
-            card_v2_foil_only
-        } = result
-        return {
-            sale_card_id,
-            sale_product_id,
-            sale_card_price: sale_card_price ? parseFloat(sale_card_price) : null,
-            sale_product_price: sale_product_price ? parseFloat(sale_product_price) : null,
-            collected_card_id,
-            collected_product_id,
-            collected_card_note_id,
-            collected_product_note_id,
-            collected_card_note_note,
-            collected_product_note_note,
-            card_v2_id,
-            product_id,
-            card_v2_name,
-            product_name,
-            card_v2_number,
-            card_v2_rarity,
-            tcgplayer_product_id,
-            card_v2_foil_only
-        }
-    }
+
     // format is dependent on SQL query ordering by purchase date, then sale_id
     let currentSale = formatSaleFromPortfolioResult(saleItems[0])
     saleItems.forEach(saleItem => {

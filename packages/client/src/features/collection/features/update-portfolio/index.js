@@ -14,7 +14,7 @@ const UpdatePortfolio = (props) => {
     const { 
         referenceData, 
         setReferenceData,
-        portfolio={portfolio}
+        portfolio
     } = props
     const navigate = useNavigate()
     const location = useLocation()
@@ -30,6 +30,7 @@ const UpdatePortfolio = (props) => {
     return (<div className='updatePortfolio page'>
         <Banner titleText={'Update Portfolio'} handleClickBackArrow={handleClickBackArrow}>
             <CategorySelector 
+                basePage="update"
                 categories={updatePortfolioCategories} 
                 selectCategory={selectCategory} 
             />

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import './assets/index.less'
-import Form from '../../../form'
 import SplitLabelForm from './components/split-label-form'
 import SplitLabelsTable from './components/split-labels-table'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -52,7 +51,6 @@ const BulkSplitForm = (props) => {
         e.preventDefault()
         updateSplitInBulkValues(splitValues, params['idx'])
         setSplitValues(initialSplitValues)
-        navigate(-1)
     }
 
     const toggleAddLabel = () => {
@@ -94,7 +92,6 @@ const BulkSplitForm = (props) => {
     const handleAddSplitToPurchase = (e) => {
         e.preventDefault()
         addSplitToTransaction(splitValues)
-        navigate(-1)
     }
 
     const isPurchaseBulk = () => Object.keys(splitValues).find(key => key === 'rate')

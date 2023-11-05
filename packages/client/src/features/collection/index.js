@@ -9,6 +9,7 @@ import Header from '../../layouts/header'
 import CategorySelector from '../../components/category-selector'
 import Transactions from './features/transactions'
 import PortfolioAssets from './features/portfolio-assets'
+import Watching from './features/watching'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
@@ -31,7 +32,8 @@ const Collection = (props) => {
             <>
                 <Link to='update/purchase'><button>Update Collection</button></Link>
                 <CategorySelector
-                    categories={['assets', 'transactions']} 
+                    basePage="collection"
+                    categories={['assets', 'transactions', 'watching']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -56,6 +58,15 @@ const Collection = (props) => {
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
                      />}
+                />
+                <Route 
+                    path='/watching/*'
+                    element={
+                        <Watching 
+                            referenceData={referenceData} 
+                            setReferenceData={setReferenceData} 
+                        />
+                    }
                 />
             </Routes>
         </div>)
