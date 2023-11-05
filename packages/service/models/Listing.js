@@ -1,4 +1,5 @@
 const { executeQueries } = require('../db/index')
+const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { objectsToInsert } = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
 
@@ -66,35 +67,92 @@ const getWatching = async (watcherId) => {
 
 const createExternal = async (listing, watcherId) => {
     const queryQueue = []
+    if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) === 0) {
+        throw new Error("No item(s) specified within listing.")
+    }
     // create collected items
     // collected cards
     if (listing.cards.length > 0) {
         const collectedCardsToInsert = []
+        const collectedCardNotesToInsert = []
         listing.cards.forEach((card, idx) => {
             const collected_card_id = uuidV4()
             const formattedCard = {
                 collected_card_id,
                 collected_card_card_id: card.card_id,
             }
+            if (card.note) {
+                const collected_card_note_id = uuidV4()
+                const formattedCollectedCardNote = {
+                    collected_card_note_id, 
+                    collected_card_note_collected_card_id: collected_card_id, 
+                    collected_card_note_user_id: watcherId,
+                    collected_card_note_note: card.note
+                }
+                collectedCardNotesToInsert.push(formattedCollectedCardNote)
+            }
             collectedCardsToInsert.push(formattedCard)
             listing.cards[idx] = { ...card, collected_card_id }
         })
         queryQueue.push(`${objectsToInsert(collectedCardsToInsert, 'collected_cards')};`)
-    } else if (listing.products.length > 0) {
+        queryQueue.push(`${objectsToInsert(collectedCardNotesToInsert, 'collected_card_notes')};`)
+    }
+    if (listing.products.length > 0) {
         // collected products
         const collectedProductsToInsert = []
+        const collectedProductNotesToInsert = []
         listing.products.forEach((product, idx) => {
             const collected_product_id = uuidV4()
             const formattedProduct = {
                 collected_product_id,
                 collected_product_product_id: product.product_id,
             }
+            if (product.note) {
+                const collected_product_note_id = uuidV4()
+                const formattedCollectedProductNote = {
+                    collected_product_note_id, 
+                    collected_product_note_collected_product_id: collected_product_id, 
+                    collected_product_note_user_id: watcherId,
+                    collected_product_note_note: product.note
+                }
+                collectedProductNotesToInsert.push(formattedCollectedProductNote)
+            }            
             collectedProductsToInsert.push(formattedProduct)
             listing.products[idx] = { ...product, collected_product_id }
         })
         queryQueue.push(`${objectsToInsert(collectedProductsToInsert, 'collected_products')};`)
-    } else {
-        throw new Error("No item(s) specified within listing.")
+        queryQueue.push(`${objectsToInsert(collectedProductNotesToInsert, 'collected_product_notes')};`)
+    }
+    if (listing.bulkSplits.length > 0) {
+        // bulk splits
+        const bulkSplitsToInsert = []
+        const bulkSplitLabelAssignmentsToInsert = []
+        const bulkSplitNotesToInsert = []
+        for (let i=0; i<listing.bulkSplits.length; i++) {
+            const bulk_split_id = uuidV4()
+            const formattedBulkSplit = {
+                bulk_split_id,
+                bulk_split_count: listing.bulkSplits[i].count,
+                bulk_split_estimate: listing.bulkSplits[i].estimate
+            }
+            if (listing.bulkSplits[i].note) {
+                const bulk_split_note_id = uuidV4()
+                const formattedBulkSplitNote = {
+                    bulk_split_note_id, 
+                    bulk_split_note_bulk_split_id: bulk_split_id, 
+                    bulk_split_note_user_id: watcherId,
+                    bulk_split_note_note: listing.bulkSplits[i].note
+                }
+                bulkSplitNotesToInsert.push(formattedBulkSplitNote)
+            }             
+            listing.bulkSplits[i] = { ...listing.bulkSplits[i], bulk_split_id }
+            const labelAssignments = await fetchOrCreateLabelIds(listing.bulkSplits[i])
+            bulkSplitsToInsert.push(formattedBulkSplit)
+            bulkSplitLabelAssignmentsToInsert.push(...labelAssignments)
+        }
+        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'bulk_splits')};`)  
+        queryQueue.push(`${objectsToInsert(bulkSplitLabelAssignmentsToInsert, 'bulk_split_label_assignments')};`)  
+        queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'bulk_split_notes')};`)  
     }
     // create proxy import
     const proxyImportId = uuidV4();
@@ -111,7 +169,8 @@ const createExternal = async (listing, watcherId) => {
             id: uuidV4(),
             proxyImportId,
             collected_card_id,
-            collected_product_id: null
+            collected_product_id: null,
+            bulk_split_id: null
         }
         proxyImportItemsToInsert.push(formattedProxyImportCard)
     })
@@ -121,15 +180,27 @@ const createExternal = async (listing, watcherId) => {
             id: uuidV4(),
             proxyImportId,
             collected_card_id: null,
-            collected_product_id
+            collected_product_id,
+            bulk_split_id: null
         }
         proxyImportItemsToInsert.push(formattedProxyImportProduct)
+    })    
+    listing.bulkSplits.forEach(bulkSplit => {
+        const { bulk_split_id } = bulkSplit
+        const formattedProxyImportBulkSplit = {
+            id: uuidV4(),
+            proxyImportId,
+            collected_card_id: null,
+            collected_product_id: null,
+            bulk_split_id
+        }
+        proxyImportItemsToInsert.push(formattedProxyImportBulkSplit)
     })
     queryQueue.push(`${objectsToInsert(proxyImportItemsToInsert, 'ProxyImportItem')};`)
     // at this point, all items are imported into proxy user's collection, now create listing with item or lot
     const listingId = uuidV4();
     const { date, price, description } = listing
-    if ((listing.cards.length + listing.products.length) > 1) {
+    if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
         // create lot
         const lotId = uuidV4();
         const formattedLot = {
@@ -144,7 +215,8 @@ const createExternal = async (listing, watcherId) => {
                 id: uuidV4(),
                 lotId,
                 collected_card_id,
-                collected_product_id: null
+                collected_product_id: null,
+                bulk_split_id: null
             }
             lotItemsToInsert.push(formattedLotCard)
         })
@@ -154,9 +226,21 @@ const createExternal = async (listing, watcherId) => {
                 id: uuidV4(),
                 lotId,
                 collected_card_id: null,
-                collected_product_id
+                collected_product_id,
+                bulk_split_id: null
             }
             lotItemsToInsert.push(formattedLotProduct)
+        })        
+        listing.bulkSplits.forEach(bulkSplit => {
+            const { bulk_split_id } = bulkSplit
+            const formattedLotBulkSplit = {
+                id: uuidV4(),
+                lotId,
+                collected_card_id: null,
+                collected_product_id: null,
+                bulk_split_id
+            }
+            lotItemsToInsert.push(formattedLotBulkSplit)
         })
         queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
         // create listing
@@ -167,7 +251,8 @@ const createExternal = async (listing, watcherId) => {
             description,
             lotId: lotId,
             collected_card_id: null,
-            collected_product_id: null
+            collected_product_id: null,
+            bulk_split_id: null
         }
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
     } else {
@@ -179,14 +264,18 @@ const createExternal = async (listing, watcherId) => {
             description,
             lotId: null,
             collected_card_id: null,
-            collected_product_id: null
+            collected_product_id: null,
+            bulk_split_id: null
         }
         if (listing.cards.length === 1) {
             const { collected_card_id } = listing.cards[0]
             formattedListing.collected_card_id = collected_card_id
-        } else if (listing.product.length === 1) {
-            const { collected_product_id } = listing.cards[0]
+        } else if (listing.products.length === 1) {
+            const { collected_product_id } = listing.products[0]
             formattedListing.collected_product_id = collected_product_id
+        } else if (listing.bulkSplits.length === 1) {
+            const { bulk_split_id } = listing.bulkSplits[0]
+            formattedListing.bulk_split_id = bulk_split_id
         }
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
     }

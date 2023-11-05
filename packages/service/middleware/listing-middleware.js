@@ -73,8 +73,8 @@ const formatListings = (listingItems) => {
                             date: item.date,
                             price: parseFloat(item.price),
                             description: item.description,
-                            collectedCard: { id: item.collected_card_id },
-                            collectedProduct: { id: item.collected_product_id },
+                            collectedCard: { id: undefined },
+                            collectedProduct: { id: undefined},
                             lot: { ...currentLot }  
                         })
                         currentLot = {}
@@ -87,8 +87,8 @@ const formatListings = (listingItems) => {
                         date: item.date,
                         price: parseFloat(item.price),
                         description: item.description,
-                        collectedCard: { id: item.collected_card_id },
-                        collectedProduct: { id: item.collected_product_id },
+                        collectedCard: { id: undefined },
+                        collectedProduct: { id: undefined},
                         lot: { ...currentLot }  
                     })
                 }
@@ -137,8 +137,8 @@ const formatListings = (listingItems) => {
                             date: item.date,
                             price: parseFloat(item.price),
                             description: item.description,
-                            collectedCard: { id: item.collected_card_id },
-                            collectedProduct: { id: item.collected_product_id },
+                            collectedCard: { id: undefined },
+                            collectedProduct: { id: undefined},
                             lot: { ...currentLot }  
                         })
                         currentLot = {}
@@ -151,8 +151,8 @@ const formatListings = (listingItems) => {
                         date: item.date,
                         price: parseFloat(item.price),
                         description: item.description,
-                        collectedCard: { id: item.collected_card_id },
-                        collectedProduct: { id: item.collected_product_id },
+                        collectedCard: { id: undefined },
+                        collectedProduct: { id: undefined},
                         lot: { ...currentLot }  
                     })
                 }
