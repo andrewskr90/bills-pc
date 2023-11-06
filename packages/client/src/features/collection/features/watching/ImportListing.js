@@ -49,7 +49,7 @@ const ImportListing = (props) => {
     }
     useEffect(() => {
         (async () => {
-            await BillsPcService.getProxyUsers()
+            await BillsPcService.getUsers({ params: { proxy: true } })
                 .then(res => setCreatedProxyUsers(res.data))
                 .catch(err => console.log(err))
         })()
@@ -72,7 +72,7 @@ const ImportListing = (props) => {
     }
     const createNewProxyUser = async (newProxyUser) => {
         try {
-            const { data: { id } } = await BillsPcService.postProxyUser({ data: newProxyUser })
+            const { data: { id } } = await BillsPcService.postUser({ data: newProxyUser, params: { proxy: true } })
             setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
             setExternalListing({ ...externalListing, sellerId: id })
         } catch (err) {

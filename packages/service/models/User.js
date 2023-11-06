@@ -13,10 +13,10 @@ const findProxyByCreatorId = async (userId) => {
     return ProxyUsers
 }
 
-const create = async (proxyUser) => {
+const createProxyUser = async (proxyUser) => {
     let query = `INSERT INTO users (${Object.keys(proxyUser).join(', ')}) 
         VALUES (${Object.keys(proxyUser).map(key => {
-            if (proxyUser[key] === undefined) return 'NULL'
+            if (proxyUser[key] === undefined || proxyUser[key] === null) return 'NULL'
             return `'${proxyUser[key]}'`
         }).join(', ')});
     `   
@@ -34,4 +34,4 @@ const create = async (proxyUser) => {
     }
 }
 
-module.exports = { findProxyByCreatorId, create }
+module.exports = { findProxyByCreatorId, createProxyUser }

@@ -303,19 +303,22 @@ const BillsPcService = {
             data
         })
     },
-    getProxyUsers() {
+    getUsers(config) {
+        const { params } = config
         return axios({
             ...options,
-            url: '/api/v1/proxy-users'
+            url: '/api/v1/users',
+            params
         })
     },
-    postProxyUser(config) {
-        const { data } = config
+    postUser(config) {
+        const { data, params } = config
         return axios({
             ...options,
             method: 'post',
-            url: '/api/v1/proxy-users',
-            data
+            url: '/api/v1/users',
+            data,
+            params
         })
     },
     postListing(config) {

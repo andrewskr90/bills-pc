@@ -1,21 +1,21 @@
 const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
-const { createProxyUser, selectProxyUsers } = require('../../middleware/proxy-user-middleware')
+const { createUser, selectUsers } = require('../../middleware/user-middleware')
 
-const proxyUserRouter = require('express').Router()
+const userRouter = require('express').Router()
 
-proxyUserRouter.get('/',
+userRouter.get('/',
     verifyCookie,
     decodeSessionToken,
-    selectProxyUsers,
+    selectUsers,
     (req, res, next) => {
         res.status(200).json(req.results)
     }
 )
 
-proxyUserRouter.post('/', 
+userRouter.post('/', 
     verifyCookie,
     decodeSessionToken,
-    createProxyUser,
+    createUser,
     (req, res, next) => {
         try {
             res.status(201).json(req.results)
@@ -24,4 +24,4 @@ proxyUserRouter.post('/',
         }
 })
 
-module.exports = proxyUserRouter
+module.exports = userRouter
