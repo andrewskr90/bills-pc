@@ -9,8 +9,9 @@ const getWatching = async (watcherId) => {
     const query = `
         SELECT 
             Listing.id as listingId,
-            ProxyUser.id as sellerId,
-            ProxyUser.name as sellerName,
+            sellers.user_id as sellerId,
+            sellers.user_name as sellerName,
+            watchers.user_id as watcherId,
             collected_cards.collected_card_id,
             collected_products.collected_product_id,
             Listing.${dateWithBackticks},
@@ -51,9 +52,14 @@ const getWatching = async (watcherId) => {
             on ProxyImportItem.collected_card_id = collected_cards.collected_card_id
         LEFT JOIN ProxyImport
             on ProxyImport.id = ProxyImportItem.proxyImportId
-        LEFT JOIN ProxyUser
-            on ProxyUser.id = ProxyImport.proxyUserId
-        WHERE market_prices.created_date > NOW() - INTERVAL 1 DAY
+        LEFT JOIN users as sellers
+            on sellers.user_id = ProxyImport.proxyUserId
+        LEFT JOIN Watching
+            on Watching.listingId = Listing.id
+        LEFT JOIN users as watchers
+            on watchers.user_id = Watching.watcherId
+        WHERE Watching.watcherId = '${watcherId}'
+            AND market_prices.created_date > NOW() - INTERVAL 1 DAY
     `
     const req = { queryQueue: [query] }
     const res = {}

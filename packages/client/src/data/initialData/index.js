@@ -210,8 +210,8 @@ export const initialExternalListing = {
 }
 
 export const initialProxyUser = {
-    id: undefined,
-    name: undefined
+    user_id: undefined,
+    user_name: undefined
 }
 
 export const initialListingValues = {
@@ -231,6 +231,13 @@ export const initialListingValues = {
         id: undefined,
         items: []
     }
+}
+
+export const initialPurchaseListingValues = {
+    sale_id: undefined,
+    sale_seller_id: undefined,
+    sale_purchaser_id: undefined,
+    sale_date: undefined
 }
 
 // export const initialCollectionValues = {

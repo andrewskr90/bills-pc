@@ -62,7 +62,7 @@ const ImportListing = (props) => {
                 <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
                 {searchInput ? (
                     <div style={{ width: '100%' }}>
-                        {!items.find(item => item.name.toLowerCase() === searchInput.toLocaleLowerCase()) ? (<button style={{ width: '100%' }} onClick={() => handleCreateNew(searchInput)}>Create New Seller</button>) : (<></>)}
+                        {!items.find(item => item[searchKey].toLowerCase() === searchInput.toLocaleLowerCase()) ? (<button style={{ width: '100%' }} onClick={() => handleCreateNew(searchInput)}>Create New Seller</button>) : (<></>)}
                         {items.filter(item => item[searchKey].includes(searchInput.toLowerCase()))
                             .map(item => <button style={{ width: '100%' }} onClick={() => handleSelect(item)}>{item[searchKey]}</button>)}
                     </div>
@@ -73,7 +73,7 @@ const ImportListing = (props) => {
     const createNewProxyUser = async (newProxyUser) => {
         try {
             const { data: { id } } = await BillsPcService.postProxyUser({ data: newProxyUser })
-            setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, id }])
+            setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
             setExternalListing({ ...externalListing, sellerId: id })
         } catch (err) {
 
@@ -83,19 +83,20 @@ const ImportListing = (props) => {
     const ProxyUserSelector = () => {
         return (
             externalListing.sellerId ? (
-                <p>{createdProxyUsers.find(user => user.id === externalListing.sellerId).name}</p>
+                <p>{createdProxyUsers.find(user => user.user_id === externalListing.sellerId).user_name}</p>
                 ) : (
                 <Selector 
-                    searchKey="name" 
+                    searchKey="user_name" 
                     items={createdProxyUsers} 
                     handleSelect={((selectedProxyUser) => {
+                        console.log(selectedProxyUser)
                         setExternalListing({
                             ...externalListing,
-                            sellerId: selectedProxyUser.id
+                            sellerId: selectedProxyUser.user_id
                         })
 
                     })} 
-                    handleCreateNew={(name => createNewProxyUser({ name }))}
+                    handleCreateNew={(user_name => createNewProxyUser({ user_name }))}
                 />
             )
         )
