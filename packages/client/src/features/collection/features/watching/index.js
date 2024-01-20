@@ -62,7 +62,7 @@ const Watching = (props) => {
                 />}
             />
             <Route 
-                path="/:id"
+                path="/:id/*"
                 element={<Listing 
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData}

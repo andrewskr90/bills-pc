@@ -209,11 +209,6 @@ export const initialExternalListing = {
     bulkSplits: []
 }
 
-export const initialProxyUser = {
-    user_id: undefined,
-    user_name: undefined
-}
-
 export const initialListingValues = {
     id: undefined,
     sellerId: undefined,
