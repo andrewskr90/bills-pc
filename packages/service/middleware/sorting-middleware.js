@@ -33,7 +33,6 @@ const formatSortings = async (req, res, next) => {
     if (!Array.isArray(req.body)) return next({ message: "Sortings must be provided in the form of an array." })
     if (req.body.length < 1) return next({ message: "No sortings present in request." })
     for (let i=0; i<req.body.length; i++) {
-        console.log(req.body[i])
         req.body[i] = {
             ...createSorting(req.body[i], sorterId),
             sortingSplits: req.body[i].sortingSplits,
@@ -68,7 +67,6 @@ const formatSortings = async (req, res, next) => {
 
         for (let j=0; j<req.body[i].sortingGems.length; j++) {
             // consider the quantity of gem found in sorting
-            console.log(req.body[i])
             for (let k=0; i<req.body[i].sortingGems[j].quantity; k++) {
                 const createdCollectedCard = createCollectedCard(
                     req.body[i].sortingGems[j].card_id, 

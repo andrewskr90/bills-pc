@@ -1,4 +1,5 @@
 const Listing = require('../models/Listing')
+const MarketPrice = require('../models/MarketPrice')
 
 const formatListings = (listingItems) => {    
     const uniqueCollectedCards = {}
@@ -18,7 +19,7 @@ const formatListings = (listingItems) => {
                 uniqueCollectedProducts[item.collected_product_id] = 1
                 return true
             }
-        }
+        } else if (item.bulk_split_id) return true
     })
     mostRecentPriceFiltered.sort((a, b ) => {
         if (a.listingId > b.listingId) return 1
@@ -60,6 +61,15 @@ const formatListings = (listingItems) => {
                                 product_tcgplayer_product_id: item.product_tcgplayer_product_id,
                                 product_foil_only: item.product_foil_only,
                                 market_price_price: parseFloat(item.market_price_price)
+                            }
+                        ]
+                    }
+                } else if (item.bulk_split_id) {
+                    currentLot = {
+                        ...currentLot,
+                        items: [
+                            {
+                               bulk_split_id: item.bulk_split_id
                             }
                         ]
                     }
@@ -125,6 +135,15 @@ const formatListings = (listingItems) => {
                                 product_foil_only: item.product_foil_only,
                                 market_price_price: parseFloat(item.market_price_price)
                             }
+                        ]
+                    }
+                }
+                 else if (item.bulk_split_id) {
+                    currentLot = {
+                        ...currentLot,
+                        items: [
+                            ...currentLot.items,
+                            { bulk_split_id: item.bulk_split_id }
                         ]
                     }
                 }
@@ -170,7 +189,7 @@ const formatListings = (listingItems) => {
                     collectedProduct: { id: item.collected_product_id },
                     lot: { id: item.lotId, items: [] }
                 })
-            } else {
+            } else if (item.product_id) {
                 listings.push({
                     id: item.listingId,
                     sellerId: item.sellerId,
@@ -188,11 +207,51 @@ const formatListings = (listingItems) => {
     return listings
 }
 
+const uniqueCardIdsInListings = (listings) => {
+    const cardId = {}
+    listings.forEach(listing => {
+        cardId[listing.card_v2_id] = 1
+    })
+    return Object.keys(cardId).filter(id => id)
+}
+
+const tiePricesToListings = (listings, cardPrices) => {
+    const priceLib = {}
+    cardPrices.forEach(price => {
+        if (price.market_price_card_id && price.market_price_price) {
+            priceLib[price.market_price_card_id] = {
+                market_price_price: price.market_price_price,
+                market_price_date: price.created_date
+            }
+        }
+    })
+    return listings.map(listing => { 
+        if (listing.card_v2_id && priceLib[listing.card_v2_id]) {
+            const { market_price_date, market_price_price } = priceLib[listing.card_v2_id]
+            return {
+                ...listing, 
+                market_price_date, 
+                market_price_price
+            }
+        }
+        return { 
+            ...listing,
+            market_price_date: undefined,
+            market_price_price: undefined
+        }
+    })
+}
+
 const getListings = async (req, res, next) => {
     if (req.query.watching) {
         try {
             const watchedListings = await Listing.getWatching(req.claims.user_id)
-            req.results = formatListings(watchedListings)
+            const today = new Date()
+            const yesterday = new Date(today)
+            yesterday.setDate(today.getDate()-1)
+            const listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCardIdsInListings(watchedListings), yesterday, today)
+            const watchedListingsWithPrices = tiePricesToListings(watchedListings, listingCardPrices)
+            req.results = formatListings(watchedListingsWithPrices)
         } catch (err) {
             return next(err)
         }

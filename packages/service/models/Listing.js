@@ -14,9 +14,14 @@ const getWatching = async (watcherId) => {
             watchers.user_id as watcherId,
             collected_cards.collected_card_id,
             collected_products.collected_product_id,
+            bulk_splits.bulk_split_id,
             Listing.${dateWithBackticks},
             Listing.price,
             Listing.${descriptionWithBackticks},
+            gift_cards.gift_card_id,
+            gift_products.gift_product_id,
+            gift_bulk_splits.gift_bulk_split_id,
+            Watching.id as watchingId,
             card_v2_id,
             card_v2_name,
             card_v2_number,
@@ -28,9 +33,7 @@ const getWatching = async (watcherId) => {
             product_release_date,
             product_description,
             product_tcgplayer_product_id,
-            Lot.id as lotId,
-            market_prices.market_price_price,
-            market_prices.created_date as market_price_date
+            Lot.id as lotId
         FROM Listing
         LEFT JOIN Lot 
             on Lot.id = Listing.lotId
@@ -46,20 +49,26 @@ const getWatching = async (watcherId) => {
             OR collected_products.collected_product_id = LotItem.collected_product_id
         LEFT JOIN products 
             on products.product_id = collected_products.collected_product_product_id
-        LEFT JOIN market_prices
-            on market_prices.market_price_card_id = cards_v2.card_v2_id
-        LEFT JOIN ProxyImportItem
-            on ProxyImportItem.collected_card_id = collected_cards.collected_card_id
-        LEFT JOIN ProxyImport
-            on ProxyImport.id = ProxyImportItem.proxyImportId
+        LEFT JOIN bulk_splits
+            ON bulk_splits.bulk_split_id = Listing.bulk_split_id
+            OR bulk_splits.bulk_split_id = LotItem.bulk_split_id
+        LEFT JOIN gift_cards
+            ON gift_cards.gift_card_collected_card_id = collected_cards.collected_card_id
+        LEFT JOIN gift_products
+            ON gift_products.gift_product_collected_product_id = collected_products.collected_product_id
+        LEFT JOIN gift_bulk_splits
+            ON gift_bulk_splits.gift_bulk_split_bulk_split_id = bulk_splits.bulk_split_id
+        LEFT JOIN gifts
+            ON gifts.gift_id = gift_cards.gift_card_gift_id
+            OR gifts.gift_id = gift_products.gift_product_gift_id
+            OR gifts.gift_id = gift_bulk_splits.gift_bulk_split_gift_id
         LEFT JOIN users as sellers
-            on sellers.user_id = ProxyImport.proxyUserId
+            on sellers.user_id = gifts.gift_receiver_id
         LEFT JOIN Watching
             on Watching.listingId = Listing.id
         LEFT JOIN users as watchers
             on watchers.user_id = Watching.watcherId
-        WHERE Watching.watcherId = '${watcherId}'
-            AND market_prices.created_date > NOW() - INTERVAL 1 DAY
+        WHERE Watching.watcherId = '${watcherId}';
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -101,7 +110,9 @@ const createExternal = async (listing, watcherId) => {
             listing.cards[idx] = { ...card, collected_card_id }
         })
         queryQueue.push(`${objectsToInsert(collectedCardsToInsert, 'collected_cards')};`)
-        queryQueue.push(`${objectsToInsert(collectedCardNotesToInsert, 'collected_card_notes')};`)
+        if (collectedCardNotesToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(collectedCardNotesToInsert, 'collected_card_notes')};`)
+        }
     }
     if (listing.products.length > 0) {
         // collected products
@@ -127,7 +138,9 @@ const createExternal = async (listing, watcherId) => {
             listing.products[idx] = { ...product, collected_product_id }
         })
         queryQueue.push(`${objectsToInsert(collectedProductsToInsert, 'collected_products')};`)
-        queryQueue.push(`${objectsToInsert(collectedProductNotesToInsert, 'collected_product_notes')};`)
+        if (collectedProductNotesToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(collectedProductNotesToInsert, 'collected_product_notes')};`)
+        }
     }
     if (listing.bulkSplits.length > 0) {
         // bulk splits
@@ -157,52 +170,62 @@ const createExternal = async (listing, watcherId) => {
             bulkSplitLabelAssignmentsToInsert.push(...labelAssignments)
         }
         queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'bulk_splits')};`)  
-        queryQueue.push(`${objectsToInsert(bulkSplitLabelAssignmentsToInsert, 'bulk_split_label_assignments')};`)  
-        queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'bulk_split_notes')};`)  
+        if (bulkSplitLabelAssignmentsToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(bulkSplitLabelAssignmentsToInsert, 'bulk_split_label_assignments')};`)  
+        }
+        if (bulkSplitNotesToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'bulk_split_notes')};`)  
+        }
     }
-    // create proxy import
-    const proxyImportId = uuidV4();
-    const formattedProxyImport = {
-        id: proxyImportId,
-        proxyUserId: listing.sellerId
+    // create gift
+    const gift_id = uuidV4();
+    const formattedGift = {
+        gift_id,
+        gift_receiver_id: listing.sellerId
     }
-    queryQueue.push(`${objectsToInsert([formattedProxyImport], 'ProxyImport')};`)
-    // create proxy import items
-    const proxyImportItemsToInsert = []
+    queryQueue.push(`${objectsToInsert([formattedGift], 'gifts')};`)
+    // create gift cards
+    const giftCardsToInsert = []
     listing.cards.forEach(card => {
         const { collected_card_id } = card
-        const formattedProxyImportCard = {
-            id: uuidV4(),
-            proxyImportId,
-            collected_card_id,
-            collected_product_id: null,
-            bulk_split_id: null
+        const formattedGiftCard = {
+            gift_card_id: uuidV4(),
+            gift_card_gift_id: gift_id,
+            gift_card_collected_card_id: collected_card_id,
         }
-        proxyImportItemsToInsert.push(formattedProxyImportCard)
+        giftCardsToInsert.push(formattedGiftCard)
     })
+    // create gift products
+    const giftProductsToInsert = []
     listing.products.forEach(product => {
         const { collected_product_id } = product
-        const formattedProxyImportProduct = {
-            id: uuidV4(),
-            proxyImportId,
-            collected_card_id: null,
-            collected_product_id,
-            bulk_split_id: null
+        const formattedGiftProduct = {
+            gift_product_id: uuidV4(),
+            gift_product_gift_id: gift_id,
+            gift_product_collected_product_id: collected_product_id,
         }
-        proxyImportItemsToInsert.push(formattedProxyImportProduct)
+        giftProductsToInsert.push(formattedGiftProduct)
     })    
+    // create gift splits
+    const giftSplitsToInsert = []
     listing.bulkSplits.forEach(bulkSplit => {
         const { bulk_split_id } = bulkSplit
-        const formattedProxyImportBulkSplit = {
-            id: uuidV4(),
-            proxyImportId,
-            collected_card_id: null,
-            collected_product_id: null,
-            bulk_split_id
+        const formattedGiftBulkSplit = {
+            gift_bulk_split_id: uuidV4(),
+            gift_bulk_split_gift_id: gift_id,
+            gift_bulk_split_bulk_split_id: bulk_split_id,
         }
-        proxyImportItemsToInsert.push(formattedProxyImportBulkSplit)
+        giftSplitsToInsert.push(formattedGiftBulkSplit)
     })
-    queryQueue.push(`${objectsToInsert(proxyImportItemsToInsert, 'ProxyImportItem')};`)
+    if (giftCardsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftCardsToInsert, 'gift_cards')};`)
+    }
+    if (giftProductsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftProductsToInsert, 'gift_products')};`)
+    }
+    if (giftSplitsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
+    }
     // at this point, all items are imported into proxy user's collection, now create listing with item or lot
     const listingId = uuidV4();
     const { date, price, description } = listing

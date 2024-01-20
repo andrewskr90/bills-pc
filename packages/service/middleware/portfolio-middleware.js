@@ -6,8 +6,6 @@ const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
 const { formatSaleFromPortfolioResult } = require('../utils/sale')
 
-const stringifyDateYYYYMMDD = (date) => date.toISOString().split('T')[0]
-
 const formatInventory = (inventory) => {
     const keys = Object.keys(inventory)
     return keys.map(key => {
@@ -385,21 +383,7 @@ const evaluatePortfolio = async (req, res, next) => {
         }
         return keyMarketDates.reverse()
     }
-    const findCardPricesBetweenDates = async (cardInventory, start, end) => {
-        const formattedInventory = formatInventory(cardInventory)
-        const inventoryCardIds = formattedInventory.map(card => card.card_v2_id)
 
-        try {
-            const keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
-                inventoryCardIds, 
-                stringifyDateYYYYMMDD(start), 
-                stringifyDateYYYYMMDD(end)
-            )
-            return keyDateCardPrices
-        } catch (err) {
-            throw new Error(err)
-        }
-    }
     const calculateDailyBalance = async (startOfDay, cardInventory, productInventory) => {
         const endOfDay = new Date(startOfDay)
         endOfDay.setDate(startOfDay.getDate()+1)
@@ -407,10 +391,15 @@ const evaluatePortfolio = async (req, res, next) => {
         if (Object.keys(cardInventory).length > 0) {
             let keyDateCardPrices
             const formattedInventory = formatInventory(cardInventory)
+            const inventoryCardIds = formattedInventory.map(card => card.card_v2_id)
             try {
-                keyDateCardPrices = await findCardPricesBetweenDates(cardInventory, startOfDay, endOfDay)
+                keyDateCardPrices = await MarketPrice.selectByCardIdsBetweenDates(
+                    inventoryCardIds, 
+                    start, 
+                    end
+                )
             } catch (err) {
-                throw err
+                throw new Error(err)
             }
             keyDateCardPrices.forEach(price => {
                 if (price.market_price_price) {
@@ -430,8 +419,8 @@ const evaluatePortfolio = async (req, res, next) => {
             try {
                 keyDateProductPrices = await MarketPrice.selectByProductIdsBetweenDates(
                     inventoryProductIds, 
-                    stringifyDateYYYYMMDD(startOfDay), 
-                    stringifyDateYYYYMMDD(endOfDay)
+                    startOfDay, 
+                    endOfDay
                 )
             } catch (err) {
                 throw new Error(err)
