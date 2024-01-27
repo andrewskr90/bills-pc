@@ -14,7 +14,9 @@ const UpdatePortfolio = (props) => {
     const { 
         referenceData, 
         setReferenceData,
-        portfolio
+        portfolio,
+        createdProxyUsers,
+        setCreatedProxyUsers
     } = props
     const navigate = useNavigate()
     const location = useLocation()
@@ -42,7 +44,12 @@ const UpdatePortfolio = (props) => {
             />
             <Route 
                 path='/purchase/*'
-                element={<ImportPurchase referenceData={referenceData} setReferenceData={setReferenceData} />}
+                element={<ImportPurchase 
+                    referenceData={referenceData} 
+                    setReferenceData={setReferenceData} 
+                    createdProxyUsers={createdProxyUsers}
+                    setCreatedProxyUsers={setCreatedProxyUsers}
+                />}
             />
             <Route 
                 path='/trade/*'

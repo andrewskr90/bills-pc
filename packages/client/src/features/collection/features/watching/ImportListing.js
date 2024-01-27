@@ -6,11 +6,11 @@ import { initialExternalListing, initialSortingSplitValues } from "../../../../d
 import BulkEditor from "../../../../components/bulk-editor"
 import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem'
+import InputSelect from "../../../../components/input-select"
 
 const ImportListing = (props) => {
-    const { referenceData, setReferenceData } = props
+    const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
     const [externalListing, setExternalListing] = useState(initialExternalListing)
-    const [createdProxyUsers, setCreatedProxyUsers] = useState([])
     const navigate = useNavigate()
     const initialEmptyMessage = "Select item to import"
     const handleSelectItem = (item) => {
@@ -47,29 +47,7 @@ const ImportListing = (props) => {
             console.log(err)
         }
     }
-    useEffect(() => {
-        (async () => {
-            await BillsPcService.getUsers({ params: { proxy: true } })
-                .then(res => setCreatedProxyUsers(res.data))
-                .catch(err => console.log(err))
-        })()
-    }, [])
-    const Selector = (props) => {
-        const { handleSelect, handleCreateNew, items, searchKey } = props
-        const [searchInput, setSearchInput] = useState("")
-        return (
-            <div style={{ width: '200px' }}>
-                <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-                {searchInput ? (
-                    <div style={{ width: '100%' }}>
-                        {!items.find(item => item[searchKey].toLowerCase() === searchInput.toLocaleLowerCase()) ? (<button style={{ width: '100%' }} onClick={() => handleCreateNew(searchInput)}>Create New Seller</button>) : (<></>)}
-                        {items.filter(item => item[searchKey].includes(searchInput.toLowerCase()))
-                            .map(item => <button style={{ width: '100%' }} onClick={() => handleSelect(item)}>{item[searchKey]}</button>)}
-                    </div>
-                ) : (<></>)}
-            </div>
-        )
-    }
+
     const createNewProxyUser = async (newProxyUser) => {
         try {
             const { data: { id } } = await BillsPcService.postUser({ data: newProxyUser, params: { proxy: true } })
@@ -85,7 +63,7 @@ const ImportListing = (props) => {
             externalListing.sellerId ? (
                 <p>{createdProxyUsers.find(user => user.user_id === externalListing.sellerId).user_name}</p>
                 ) : (
-                <Selector 
+                <InputSelect 
                     searchKey="user_name" 
                     items={createdProxyUsers} 
                     handleSelect={((selectedProxyUser) => {
@@ -97,6 +75,7 @@ const ImportListing = (props) => {
 
                     })} 
                     handleCreateNew={(user_name => createNewProxyUser({ user_name }))}
+                    createNewText="Create New Seller"
                 />
             )
         )
@@ -117,7 +96,7 @@ const ImportListing = (props) => {
     const handleEditItem = (itemType, idx) => {
         navigate(`edit/${itemType}/${idx}`)
     }
-    console.log(externalListing)
+
     return <Routes>
             <Route
                 path="/"
@@ -137,7 +116,7 @@ const ImportListing = (props) => {
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column' }}>
                                 Seller
-                                <ProxyUserSelector handleSelectUser={(id) => setExternalListing} />
+                                <ProxyUserSelector />
                             </label>
                         </div>
                         <div style={{ display: 'flex' }}>

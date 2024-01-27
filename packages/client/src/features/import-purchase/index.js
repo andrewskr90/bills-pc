@@ -9,12 +9,15 @@ import PlusButton from '../../components/buttons/plus-button'
 import './assets/importPurchase.less'
 import Button from '../../components/buttons/text-button'
 import BulkEditor from '../../components/bulk-editor'
+import InputSelect from '../../components/input-select'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
     const { 
         referenceData, 
-        setReferenceData
+        setReferenceData,
+        createdProxyUsers,
+        setCreatedProxyUsers
     } = props
     const [addItemOrBulk, setAddItemOrBulk] = useState('item')
     
@@ -143,7 +146,38 @@ const ImportPurchase = (props) => {
         })
         return value
     }
-    
+
+    const createNewProxyUser = async (newProxyUser) => {
+        try {
+            const { data: { id } } = await BillsPcService.postUser({ data: newProxyUser, params: { proxy: true } })
+            setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
+            setPurchaseValues({ ...purchaseValues, sellerId: id })
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    const ProxyUserSelector = () => {
+        return (
+            purchaseValues.sellerId ? (
+                <p>{createdProxyUsers.find(user => user.user_id === purchaseValues.sellerId).user_name}</p>
+                ) : (
+                <InputSelect 
+                    searchKey="user_name" 
+                    items={createdProxyUsers} 
+                    handleSelect={((selectedProxyUser) => {
+                        setPurchaseValues({
+                            ...purchaseValues,
+                            sellerId: selectedProxyUser.user_id
+                        })
+
+                    })} 
+                    handleCreateNew={(user_name => createNewProxyUser({ user_name }))}
+                    createNewText="Create New Seller"
+                />
+            )
+        )
+    }
     return (<div className='page importPurchase'>
         <Routes>
             <Route 
@@ -163,14 +197,15 @@ const ImportPurchase = (props) => {
                         </div>
                         <div className='labelInput vendor'>
                             <label>Vendor</label>
-                            <input 
+                            <ProxyUserSelector />
+                            {/* <input 
                                 id='vendor'
                                 className='vendor'
                                 name='vendor'
                                 type='text'
                                 value={purchaseValues.vendor}
                                 onChange={updatePurchaseValues}
-                            />
+                            /> */}
                         </div>
                     </div>
                     <div className='labelInput purchaserNote'>

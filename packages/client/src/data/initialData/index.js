@@ -84,7 +84,7 @@ export const initialSelectedCollectedCardsValues = {
 
 export const initialPurchaseValues = {
     date: localYYYYMMDD(),
-    vendor: '',
+    sellerId: '',
     items: [],
     bulkSplits: [],
     subtotal: '',

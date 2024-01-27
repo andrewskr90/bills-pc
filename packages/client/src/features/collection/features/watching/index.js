@@ -6,7 +6,7 @@ import BillsPcService from '../../../../api/bills-pc'
 import Listing from './Listing'
 
 const Watching = (props) => {
-    const { referenceData, setReferenceData } = props
+    const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
     const [watching, setWatching] = useState([])
     const navigate = useNavigate()
     useEffect(() => {
@@ -57,6 +57,8 @@ const Watching = (props) => {
             <Route 
                 path="/import/*"
                 element={<ImportListing 
+                    createdProxyUsers={createdProxyUsers}
+                    setCreatedProxyUsers={setCreatedProxyUsers}
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData} 
                 />}
