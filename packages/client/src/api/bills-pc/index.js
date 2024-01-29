@@ -191,6 +191,15 @@ const BillsPcService = {
             url: '/api/v1/sales'
         })
     },
+    postSale({ params, data }) {
+        return axios({
+            ...options, 
+            params,
+            data,
+            method: 'post',
+            url: '/api/v1/sales'
+        })
+    },
     getPortfolio(params) {
         return axios({
             ...options,
@@ -338,7 +347,9 @@ const BillsPcService = {
             url: '/api/v1/listings',
             params
         })
-    }
+    },
+
 }
+
 
 export default BillsPcService

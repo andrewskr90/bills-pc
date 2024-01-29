@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { initialListingValues } from '../../../../data/initialData'
+import PurchaseWatchedListing from './PurchaseWatchedListing'
 
 const Listing = (props) => {
     const { listings } = props
@@ -16,6 +17,7 @@ const Listing = (props) => {
     const handlePurchaseListing = () => {
         navigate('purchase')
     }
+
     return (
         <Routes>
             <Route path='/' element={
@@ -27,7 +29,10 @@ const Listing = (props) => {
                         <button onClick={handlePurchaseListing}>Purchase</button>
                         {listing.lot.id && (
                             <div>
-                                <p>Listing Market Value: {listing.lot.items.reduce((a, c) => a + c.market_price_price, 0)}</p>
+                                <p>Listing Market Value: {listing.lot.items.reduce((a, c) => {
+                                    if (parseInt(c.market_price_price)) return a + c.market_price_price
+                                    return a
+                                }, 0)}</p>
                                 {listing.lot.items.map(item => {
                                     return <div>
                                         <p>{item.card_v2_name || item.product_name}</p>
@@ -51,10 +56,7 @@ const Listing = (props) => {
                     </div>
                 : <></>
             } />
-            <Route path='/purchase' element={<div>
-                <label>Date</label>
-                <input type='date' value={Date.now().toLocaleString()}/>
-            </div>}/>
+            <Route path='/purchase' element={<PurchaseWatchedListing listing={listing} />}/>
         </Routes>
     )
 }

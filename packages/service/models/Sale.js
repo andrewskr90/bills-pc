@@ -1,6 +1,6 @@
-// const { formatSaleResults } = require('../middleware/sale-middleware')
-// const QueueQueries = require('../middleware/QueueQueries')
+const QueueQueries = require('../middleware/QueueQueries')
 const { executeQueries } = require('../db')
+const { v4: uuidV4 } = require('uuid')
 
 const findByUserId = async (req, res, next) => {
     QueueQueries.init(req, res, (err) => {
@@ -12,10 +12,6 @@ const findByUserId = async (req, res, next) => {
     await executeQueries(req, res, (err) => {
         if (err) next(err)
     })
-    formatSaleResults(req, res, (err) => {
-        if (err) next(err)
-    })
-    req.sales = req.results
     next()
 }
 
@@ -34,9 +30,15 @@ const select = async (userId) => {
         sales = req.results
     })
     return sales
+}
 
+const createFromListing = async (sale, purchaserId) => {
+    console.log(sale, sale.listings[0].offer, purchaserId)
+    return uuidV4()
 }
 
 module.exports = { 
     findByUserId, 
-    select }
+    select,
+    createFromListing
+}

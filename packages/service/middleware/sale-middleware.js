@@ -25,7 +25,7 @@ const createGiftNote = (note, giftId, userId) => {
     }
 }
 
-const createSale =(sale, sellerId, purchaserId) => {
+const createSaleObject =(sale, sellerId, purchaserId) => {
     const { date, vendor, subtotal, discount, shipping, taxAmount, total, purchaserNote, sellerNote } = sale
     const saleId = uuidV4()
     return {
@@ -148,7 +148,7 @@ const formatImportPurchase = async (req, res, next) => {
 
     for (let i=0; i<sales.length; i++) {
         const sale = sales[i]
-        const createdSale = createSale(sale, sellerId, purchaserId)
+        const createdSale = createSaleObject(sale, sellerId, purchaserId)
         req.body[i].sale_id = createdSale.sale_id
         if (createdSale.purchaserNote) {
             createdSaleNotes.push(createdSale.purchaserNote)
@@ -364,11 +364,26 @@ const checkPurchaseBulkLabels = async (req, res, next) => {
     next()
 }
 
+const createSale = async (req, res, next) => {
+    if (req.query.listing) {
+        try {
+            const saleId = await Sale.createFromListing(req.body, req.claims.user_id)
+            req.results = { message: "Created.", data: saleId }
+        } catch (err) {
+            return next(err)
+        }
+    } else {
+        return next({ status: 404, message: 'no such route' })
+    }
+    next()
+}
+
 module.exports = { 
     formatImportPurchase,
-     formatSaleResults,
-     formatImportGift,
-     checkPurchaseBulkLabels,
-     createCollectedCard,
-     createCollectedCardNote
+    formatSaleResults,
+    formatImportGift,
+    checkPurchaseBulkLabels,
+    createCollectedCard,
+    createCollectedCardNote, 
+    createSale
 }
