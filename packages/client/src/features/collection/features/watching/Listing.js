@@ -33,7 +33,12 @@ const Listing = (props) => {
                                     if (parseInt(c.market_price_price)) return a + c.market_price_price
                                     return a
                                 }, 0)}</p>
-                                {listing.lot.items.map(item => {
+                                {listing.lot.items
+                                    .sort((a,b) => {
+                                        if (a.market_price_price < b.market_price_price) return 1
+                                        if (a.market_price_price > b.market_price_price) return -1
+                                        return 0
+                                    }).map(item => {
                                     return <div>
                                         <p>{item.card_v2_name || item.product_name}</p>
                                         <p>{item.market_price_price}</p>
