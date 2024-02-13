@@ -16,3 +16,64 @@ export const loginBillsPc = async () => {
     }
 }
 
+export const getPortfolioBillsPc = async (cookies) => {
+    try {
+        const portfolioRes = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/portfolio',
+            headers: { Cookie: cookies }
+        })
+        const portfolio = portfolioRes.data
+        return portfolio
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getProxyUsers = async (cookies) => {
+    try {
+        const proxyUserRes = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/users',
+            params: { proxy: true },
+            headers: { Cookie: cookies }
+        })
+        const proxyUsers = proxyUserRes.data
+        return proxyUsers
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const createProxyUser = async (cookies, data) => {
+    try {
+        const proxyUserRes = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/users',
+            params: { proxy: true },
+            headers: { Cookie: cookies },
+            data
+        })
+        const proxyUsers = proxyUserRes.data
+        return proxyUsers
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const convertSaleItemToListing = async (cookies, data) => {
+    try {
+        return axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/listings',
+            data,
+            params: { convertSaleItems: true },
+            headers: { Cookie: cookies },
+        })
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
