@@ -68,7 +68,7 @@ const getWatching = async (watcherId) => {
             on Watching.listingId = Listing.id
         LEFT JOIN users as watchers
             on watchers.user_id = Watching.watcherId
-        WHERE Watching.watcherId = '${watcherId}';
+        WHERE Watching.watcherId = '${watcherId}' AND Listing.saleId IS NULL;
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -78,6 +78,92 @@ const getWatching = async (watcherId) => {
         watchedListings = req.results
     })
     return watchedListings
+}
+
+const formatListingWithLot = (listing) => {
+    const listingId = uuidV4();
+    const { date, price, description } = listing
+    // create lot
+    const lotId = uuidV4();
+    const formattedLot = {
+        id: lotId,
+    }
+    // create lot items
+    const lotItemsToInsert = []
+    listing.cards.forEach(card => {
+        const { collected_card_id } = card
+        const formattedLotCard = {
+            id: uuidV4(),
+            lotId,
+            collected_card_id,
+            collected_product_id: null,
+            bulk_split_id: null
+        }
+        lotItemsToInsert.push(formattedLotCard)
+    })
+    listing.products.forEach(product => {
+        const { collected_product_id } = product
+        const formattedLotProduct = {
+            id: uuidV4(),
+            lotId,
+            collected_card_id: null,
+            collected_product_id,
+            bulk_split_id: null
+        }
+        lotItemsToInsert.push(formattedLotProduct)
+    })        
+    listing.bulkSplits.forEach(bulkSplit => {
+        const { bulk_split_id } = bulkSplit
+        const formattedLotBulkSplit = {
+            id: uuidV4(),
+            lotId,
+            collected_card_id: null,
+            collected_product_id: null,
+            bulk_split_id
+        }
+        lotItemsToInsert.push(formattedLotBulkSplit)
+    })
+    // create listing
+    const formattedListing = {
+        id: listingId,
+        date,
+        price,
+        description,
+        lotId: lotId,
+        collected_card_id: null,
+        collected_product_id: null,
+        bulk_split_id: null,
+        saleId: null
+    }
+    return { formattedLot, lotItemsToInsert, formattedListing }
+} 
+
+const formatListing = (listing) => {
+    const listingId = uuidV4();
+    const { date, price, description } = listing
+    // create listing
+    const formattedListing = {
+        id: listingId,
+        date,
+        price,
+        description,
+        lotId: null,
+        collected_card_id: null,
+        collected_product_id: null,
+        bulk_split_id: null,
+        saleId: null
+    }
+    if (listing.cards.length === 1) {
+        const { collected_card_id } = listing.cards[0]
+        formattedListing.collected_card_id = collected_card_id
+    } else if (listing.products.length === 1) {
+        const { collected_product_id } = listing.products[0]
+        formattedListing.collected_product_id = collected_product_id
+    } else if (listing.bulkSplits.length === 1) {
+        const { bulk_split_id } = listing.bulkSplits[0]
+        formattedListing.bulk_split_id = bulk_split_id
+    }
+    return formattedListing
 }
 
 const createExternal = async (listing, watcherId) => {
@@ -227,90 +313,46 @@ const createExternal = async (listing, watcherId) => {
         queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
     }
     // at this point, all items are imported into proxy user's collection, now create listing with item or lot
-    const listingId = uuidV4();
-    const { date, price, description } = listing
     if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
-        // create lot
-        const lotId = uuidV4();
-        const formattedLot = {
-            id: lotId,
-        }
+        const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
         queryQueue.push(`${objectsToInsert([formattedLot], 'Lot')};`)
-        // create lot items
-        const lotItemsToInsert = []
-        listing.cards.forEach(card => {
-            const { collected_card_id } = card
-            const formattedLotCard = {
-                id: uuidV4(),
-                lotId,
-                collected_card_id,
-                collected_product_id: null,
-                bulk_split_id: null
-            }
-            lotItemsToInsert.push(formattedLotCard)
-        })
-        listing.products.forEach(product => {
-            const { collected_product_id } = product
-            const formattedLotProduct = {
-                id: uuidV4(),
-                lotId,
-                collected_card_id: null,
-                collected_product_id,
-                bulk_split_id: null
-            }
-            lotItemsToInsert.push(formattedLotProduct)
-        })        
-        listing.bulkSplits.forEach(bulkSplit => {
-            const { bulk_split_id } = bulkSplit
-            const formattedLotBulkSplit = {
-                id: uuidV4(),
-                lotId,
-                collected_card_id: null,
-                collected_product_id: null,
-                bulk_split_id
-            }
-            lotItemsToInsert.push(formattedLotBulkSplit)
-        })
         queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
-        // create listing
-        const formattedListing = {
-            id: listingId,
-            date,
-            price,
-            description,
-            lotId: lotId,
-            collected_card_id: null,
-            collected_product_id: null,
-            bulk_split_id: null
-        }
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
     } else {
-        // create listing
-        const formattedListing = {
-            id: listingId,
-            date,
-            price,
-            description,
-            lotId: null,
-            collected_card_id: null,
-            collected_product_id: null,
-            bulk_split_id: null
-        }
-        if (listing.cards.length === 1) {
-            const { collected_card_id } = listing.cards[0]
-            formattedListing.collected_card_id = collected_card_id
-        } else if (listing.products.length === 1) {
-            const { collected_product_id } = listing.products[0]
-            formattedListing.collected_product_id = collected_product_id
-        } else if (listing.bulkSplits.length === 1) {
-            const { bulk_split_id } = listing.bulkSplits[0]
-            formattedListing.bulk_split_id = bulk_split_id
-        }
+        const formattedListing = formatListing(listing)
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
     }
     // create Watching
-    const formattedWatching = { id: uuidV4(), listingId, watcherId }
+    const formattedWatching = { 
+        id: uuidV4(), 
+        listingId: formattedListing.id, 
+        watcherId 
+    }
     queryQueue.push(`${objectsToInsert([formattedWatching], 'Watching')};`)
+    const req = { queryQueue }
+    const res = {}
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+    })
+    return formattedListing.id
+}
+
+const convertSaleItemsToListings = async (listing) => {
+    const queryQueue = []
+    let listingId
+    if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
+        const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
+        formattedListing.saleId = listing.saleId
+        queryQueue.push(`${objectsToInsert([formattedLot], 'Lot')};`)
+        queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
+        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
+        listingId = formattedListing.id
+    } else {
+        const formattedListing = formatListing(listing)
+        formattedListing.saleId = listing.saleId
+        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
+        listingId = formattedListing.id
+    }
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {
@@ -319,4 +361,4 @@ const createExternal = async (listing, watcherId) => {
     return listingId
 }
 
-module.exports = { getWatching, createExternal }
+module.exports = { getWatching, createExternal, convertSaleItemsToListings }

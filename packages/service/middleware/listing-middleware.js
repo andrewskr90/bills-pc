@@ -269,6 +269,13 @@ const createListing = async (req, res, next) => {
         } catch (err) {
             return next(err)
         }
+    } else if (req.query.convertSaleItems) {
+        try {
+            const listingId = await Listing.convertSaleItemsToListings(req.body)
+            req.results = { message: "Created.", data: listingId }
+        } catch (err) {
+            return next(err)
+        }        
     } else {
         return next({ status: 404, message: 'no such route' })
     }
