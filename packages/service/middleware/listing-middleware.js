@@ -209,25 +209,49 @@ const formatListings = (listingItems) => {
 
 const uniqueCardIdsInListings = (listings) => {
     const cardId = {}
+    const productId = {}
     listings.forEach(listing => {
-        cardId[listing.card_v2_id] = 1
+        if (listing.card_v2_id) {
+            cardId[listing.card_v2_id] = 1
+        } else if (listing.product_id) {
+            productId[listing.product_id] = 1
+        }
     })
-    return Object.keys(cardId).filter(id => id)
+    return {
+        uniqueCards: Object.keys(cardId).filter(id => id),
+        uniqueProducts: Object.keys(productId).filter(id => id)        
+    }
 }
 
-const tiePricesToListings = (listings, cardPrices) => {
-    const priceLib = {}
+const tiePricesToListings = (listings, cardPrices, productPrices) => {
+    const cardPriceLib = {}
+    const productPriceLib = {}
     cardPrices.forEach(price => {
         if (price.market_price_card_id && price.market_price_price) {
-            priceLib[price.market_price_card_id] = {
+            cardPriceLib[price.market_price_card_id] = {
+                market_price_price: price.market_price_price,
+                market_price_date: price.created_date
+            }
+        }
+    })
+    productPrices.forEach(price => {
+        if (price.market_price_product_id && price.market_price_price) {
+            productPriceLib[price.market_price_product_id] = {
                 market_price_price: price.market_price_price,
                 market_price_date: price.created_date
             }
         }
     })
     return listings.map(listing => { 
-        if (listing.card_v2_id && priceLib[listing.card_v2_id]) {
-            const { market_price_date, market_price_price } = priceLib[listing.card_v2_id]
+        if (listing.card_v2_id && cardPriceLib[listing.card_v2_id]) {
+            const { market_price_date, market_price_price } = cardPriceLib[listing.card_v2_id]
+            return {
+                ...listing, 
+                market_price_date, 
+                market_price_price
+            }
+        } else if (listing.product_id && productPriceLib[listing.product_id]) {
+            const { market_price_date, market_price_price } = productPriceLib[listing.product_id]
             return {
                 ...listing, 
                 market_price_date, 
@@ -248,9 +272,17 @@ const getListings = async (req, res, next) => {
             const watchedListings = await Listing.getWatching(req.claims.user_id)
             const today = new Date()
             const yesterday = new Date(today)
+            const { uniqueCards, uniqueProducts } = uniqueCardIdsInListings(watchedListings)
             yesterday.setDate(today.getDate()-1)
-            const listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCardIdsInListings(watchedListings), yesterday, today)
-            const watchedListingsWithPrices = tiePricesToListings(watchedListings, listingCardPrices)
+            let listingCardPrices = []
+            let listingProductPrices = []
+            if (uniqueCards.length > 0) {
+                listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCards, yesterday, today)
+            }
+            if (uniqueProducts.length > 0) {
+                listingProductPrices = await MarketPrice.selectByProductIdsBetweenDates(uniqueProducts, yesterday, today)
+            }
+            const watchedListingsWithPrices = tiePricesToListings(watchedListings, listingCardPrices, listingProductPrices)
             req.results = formatListings(watchedListingsWithPrices)
         } catch (err) {
             return next(err)
