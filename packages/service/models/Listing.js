@@ -340,6 +340,55 @@ const createExternal = async (listing, watcherId) => {
 const convertSaleItemsToListings = async (listing) => {
     const queryQueue = []
     let listingId
+    // create gift
+    const gift_id = uuidV4();
+    const formattedGift = {
+        gift_id,
+        gift_receiver_id: listing.sellerId
+    }
+    queryQueue.push(`${objectsToInsert([formattedGift], 'gifts')};`)
+    // create gift cards
+    const giftCardsToInsert = []
+    listing.cards.forEach(card => {
+        const { collected_card_id } = card
+        const formattedGiftCard = {
+            gift_card_id: uuidV4(),
+            gift_card_gift_id: gift_id,
+            gift_card_collected_card_id: collected_card_id,
+        }
+        giftCardsToInsert.push(formattedGiftCard)
+    })
+    // create gift products
+    const giftProductsToInsert = []
+    listing.products.forEach(product => {
+        const { collected_product_id } = product
+        const formattedGiftProduct = {
+            gift_product_id: uuidV4(),
+            gift_product_gift_id: gift_id,
+            gift_product_collected_product_id: collected_product_id,
+        }
+        giftProductsToInsert.push(formattedGiftProduct)
+    })    
+    // create gift splits
+    const giftSplitsToInsert = []
+    listing.bulkSplits.forEach(bulkSplit => {
+        const { bulk_split_id } = bulkSplit
+        const formattedGiftBulkSplit = {
+            gift_bulk_split_id: uuidV4(),
+            gift_bulk_split_gift_id: gift_id,
+            gift_bulk_split_bulk_split_id: bulk_split_id,
+        }
+        giftSplitsToInsert.push(formattedGiftBulkSplit)
+    })
+    if (giftCardsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftCardsToInsert, 'gift_cards')};`)
+    }
+    if (giftProductsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftProductsToInsert, 'gift_products')};`)
+    }
+    if (giftSplitsToInsert.length > 0) {
+        queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
+    }
     if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
         const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
         formattedListing.saleId = listing.saleId
