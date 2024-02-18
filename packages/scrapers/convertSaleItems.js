@@ -4,6 +4,11 @@ const cookies = await loginBillsPc()
 const portfolio = await getPortfolioBillsPc(cookies)
 const proxyUsers = await getProxyUsers(cookies)
 
+// TODO: convert gifts given to me
+// TODO: check all transactions are formatted (sortings, where did the splits come from)
+
+// delete sale items I converted, and only convert transactions outside of the Watched Listing component
+
 const sellerLib = {}
 for (let i=0; i<portfolio.sales.length; i++) {
     const sale = portfolio.sales[i]
@@ -19,8 +24,9 @@ for (let i=0; i<portfolio.sales.length; i++) {
     if (!sellerLib[saleVendor]) sellerLib[saleVendor] = 1
     else  sellerLib[saleVendor] =  sellerLib[saleVendor] + 1
    
-    let sellerId = proxyUsers.filter(user => user.user_name === saleVendor)[0].user_id
-    
+    const filteredUsers = proxyUsers.filter(user => user.user_name === saleVendor)
+    if (filteredUsers.length > 1) console.log(filteredUsers)
+    let sellerId = filteredUsers[0].user_id
     if (
         sale.sale_id === 'e45a8492-f189-44f3-b698-cf69bfd346bf' || 
         sale.sale_id === 'bb9293d0-5566-4471-9334-a783c92e5473' ||
@@ -41,6 +47,7 @@ for (let i=0; i<portfolio.sales.length; i++) {
             bulkSplits: [],
             saleId: sale.sale_id
         }
+        if (!listing.sellerId) console.log(listing)
         // console.log(listing)
         await convertSaleItemToListing(cookies, listing)
     } else {
@@ -60,6 +67,7 @@ for (let i=0; i<portfolio.sales.length; i++) {
                 bulkSplits: [],
                 saleId: sale.sale_id
             }
+            if (!listing.sellerId) console.log(listing)
             await convertSaleItemToListing(cookies, listing)
         }
         for (let j=0; j<sale.saleProducts.length; j++) {
@@ -76,6 +84,7 @@ for (let i=0; i<portfolio.sales.length; i++) {
                 bulkSplits: [],
                 saleId: sale.sale_id
             }
+            if (!listing.sellerId) console.log(listing)
             await convertSaleItemToListing(cookies, listing)
         }
         for (let j=0; j<sale.saleBulkSplits.length; j++) {
@@ -94,6 +103,7 @@ for (let i=0; i<portfolio.sales.length; i++) {
                 bulkSplits: [{ bulk_split_id: saleBulkSplit.bulk_split_id }],
                 saleId: sale.sale_id
             }
+            if (!listing.sellerId) console.log(listing)
             await convertSaleItemToListing(cookies, listing)
         }
     }
