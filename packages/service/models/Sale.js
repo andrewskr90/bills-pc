@@ -78,7 +78,9 @@ const createFromListing = async (saleBody, purchaserId) => {
     }
     // update listings with accepted offers and sale
     queryQueue.push(`${QueryFormatters.objectsToInsert([sale], 'sales')};`)
-    queryQueue.push(`${QueryFormatters.objectsToInsert(saleNotes, 'sale_notes')};`)
+    if (saleNotes.length > 0) {
+        queryQueue.push(`${QueryFormatters.objectsToInsert(saleNotes, 'sale_notes')};`)
+    }
     if (offers.length > 0) {
         queryQueue.push(QueryFormatters.objectsToInsert(offers, 'Offer'))
         queryQueue.push(offers.map(offer => {

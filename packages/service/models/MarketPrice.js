@@ -12,7 +12,7 @@ const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
             )
         AND created_date >= '${stringifyDateYYYYMMDD(formerDate)}'
         AND created_date < '${stringifyDateYYYYMMDD(latterDate)}'
-        ORDER BY market_price_card_id`
+        ORDER BY market_price_card_id;`
     const req = { queryQueue: [query] }
     const res = {}
     let marketPrices
