@@ -4,7 +4,7 @@ const SaleProduct = require('../models/SaleProduct')
 const SaleCard = require('../models/SaleCard')
 const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
-const { formatSaleFromPortfolioResult } = require('../utils/sale')
+const Listing = require('../models/Listing')
 
 const formatInventory = (inventory) => {
     const keys = Object.keys(inventory)
@@ -37,17 +37,25 @@ const formatInventory = (inventory) => {
 }
 
 const evaluatePortfolio = async (req, res, next) => {
-    const { saleCards, saleProducts, saleBulkSplits, sortingSplits, sortingGems } = req
+    const { 
+        saleCards,
+        saleProducts,
+        saleBulkSplits,
+        sortingSplits,
+        sortingGems,
+        purchasedListings
+    } = req
     let balance = 0
     let revenue = 0
     let profit = 0
     const cardInventory = {}
     const productInventory = {}
     let bulkSplitInventory = []
-    const compileSales = (saleCards, saleProducts, saleBulkSplits) => {
+    const compileSales = (saleCards, saleProducts, saleBulkSplits, listings) => {
         const saleRef = {}
-        saleCards.forEach(card => {
-            const { 
+        console.log(listings[0])
+        listings.forEach(listing => {
+            const {
                 sale_id,
                 sale_seller_id,
                 sale_purchaser_id,
@@ -59,176 +67,154 @@ const evaluatePortfolio = async (req, res, next) => {
                 sale_tax_amount,
                 sale_tax_rate,
                 sale_total,
+
                 card_v2_id,
                 collected_card_id,
                 sale_card_id,
-                sale_card_price
-            } = card
-            if (!saleRef[card.sale_id]) {
-                saleRef[card.sale_id] = {
-                    sale_id,
-                    sale_seller_id,
-                    sale_purchaser_id,
-                    sale_date,
-                    sale_vendor,
-                    sale_subtotal,
-                    sale_discount,
-                    sale_shipping,
-                    sale_tax_amount,
-                    sale_tax_rate,
-                    sale_total,
-                    saleCards: [
-                        {
-                            card_v2_id,
-                            collected_card_id,
-                            sale_id,
-                            sale_card_id,
-                            sale_card_price
-                        }
-                    ],
-                    saleProducts: [],
-                    saleBulkSplits: []
-                }
-            } else {
-                const existingSale = saleRef[card.sale_id]
-                saleRef[card.sale_id] = {
-                    ...existingSale,
-                    saleCards: [
-                        ...existingSale.saleCards,
-                        {
-                            card_v2_id,
-                            collected_card_id,
-                            sale_id,
-                            sale_card_id,
-                            sale_card_price
-                        }
-                    ]
-                }
-            }
-        })
-        saleProducts.forEach(product => {
-            const { 
-                sale_id,
-                sale_seller_id,
-                sale_purchaser_id,
-                sale_date,
-                sale_vendor,
-                sale_subtotal,
-                sale_discount,
-                sale_shipping,
-                sale_tax_amount,
-                sale_tax_rate,
-                sale_total,
+                sale_card_price,
+
                 product_id,
                 collected_product_id,
                 sale_product_id,
-                sale_product_price
-            } = product
-            if (!saleRef[product.sale_id]) {
-                saleRef[product.sale_id] = {
-                    sale_id,
-                    sale_seller_id,
-                    sale_purchaser_id,
-                    sale_date,
-                    sale_vendor,
-                    sale_subtotal,
-                    sale_discount,
-                    sale_shipping,
-                    sale_tax_amount,
-                    sale_tax_rate,
-                    sale_total,
-                    saleCards: [],
-                    saleProducts: [
-                        {
-                            product_id,
-                            collected_product_id,
-                            sale_id,
-                            sale_product_id,
-                            sale_product_price
-                        }
-                    ],
-                    saleBulkSplits: []
-                }
-            } else {
-                const existingSale = saleRef[product.sale_id]
-                saleRef[product.sale_id] = {
-                    ...existingSale,
-                    saleProducts: [
-                        ...existingSale.saleProducts,
-                        {
-                            product_id,
-                            collected_product_id,
-                            sale_id,
-                            sale_product_id,
-                            sale_product_price
-                        }
-                    ]
-                }
-            }
-        })
-        saleBulkSplits.forEach(saleBulkSplit => {
-            const { 
+                sale_product_price,
+
                 bulk_split_id,
                 bulk_split_count,
                 bulk_split_estimate,
                 sale_bulk_split_id,
                 sale_bulk_split_rate,
-                labels,
-                sale_id,
-                sale_seller_id,
-                sale_purchaser_id,
-                sale_date,
-                sale_vendor,
-                sale_subtotal,
-                sale_discount,
-                sale_shipping,
-                sale_tax_amount,
-                sale_tax_rate,
-                sale_total
-            } = saleBulkSplit
-            if (!saleRef[saleBulkSplit.sale_id]) {
-                saleRef[saleBulkSplit.sale_id] = {
-                    sale_id,
-                    sale_seller_id,
-                    sale_purchaser_id,
-                    sale_date,
-                    sale_vendor,
-                    sale_subtotal,
-                    sale_discount,
-                    sale_shipping,
-                    sale_tax_amount,
-                    sale_tax_rate,
-                    sale_total,
-                    saleCards: [],
-                    saleProducts: [],
-                    saleBulkSplits: [
-                        {
-                            bulk_split_id,
-                            bulk_split_count,
-                            bulk_split_estimate,
-                            sale_id,
-                            sale_bulk_split_id,
-                            sale_bulk_split_rate,
-                            labels
-                        }
-                    ]
+                labels
+
+            } = listing
+            if (listing.collected_card_id) {
+                 if (!saleRef[sale_id]) {
+                    saleRef[sale_id] = {
+                        sale_id,
+                        sale_seller_id,
+                        sale_purchaser_id,
+                        sale_date,
+                        sale_vendor,
+                        sale_subtotal,
+                        sale_discount,
+                        sale_shipping,
+                        sale_tax_amount,
+                        sale_tax_rate,
+                        sale_total,
+                        saleCards: [
+                            {
+                                card_v2_id,
+                                collected_card_id,
+                                sale_id,
+                                sale_card_id,
+                                sale_card_price
+                            }
+                        ],
+                        saleProducts: [],
+                        saleBulkSplits: []
+                    }
+                } else {
+                    const existingSale = saleRef[sale_id]
+                    saleRef[sale_id] = {
+                        ...existingSale,
+                        saleCards: [
+                            ...existingSale.saleCards,
+                            {
+                                card_v2_id,
+                                collected_card_id,
+                                sale_id,
+                                sale_card_id,
+                                sale_card_price
+                            }
+                        ]
+                    }
                 }
-            } else {
-                const existingSale = saleRef[saleBulkSplit.sale_id]
-                saleRef[saleBulkSplit.sale_id] = {
-                    ...existingSale,
-                    saleBulkSplits: [
-                        ...existingSale.saleBulkSplits,
-                        {
-                            bulk_split_id,
-                            bulk_split_count,
-                            bulk_split_estimate,
-                            sale_bulk_split_id,
-                            sale_id,
-                            sale_bulk_split_rate,
-                            labels
-                        }
-                    ]
+            } else if (listing.collected_product_id) {
+                if (!saleRef[sale_id]) {
+                    saleRef[sale_id] = {
+                        sale_id,
+                        sale_seller_id,
+                        sale_purchaser_id,
+                        sale_date,
+                        sale_vendor,
+                        sale_subtotal,
+                        sale_discount,
+                        sale_shipping,
+                        sale_tax_amount,
+                        sale_tax_rate,
+                        sale_total,
+                        saleCards: [],
+                        saleProducts: [
+                            {
+                                product_id,
+                                collected_product_id,
+                                sale_id,
+                                sale_product_id,
+                                sale_product_price
+                            }
+                        ],
+                        saleBulkSplits: []
+                    }
+                } else {
+                    const existingSale = saleRef[sale_id]
+                    saleRef[sale_id] = {
+                        ...existingSale,
+                        saleProducts: [
+                            ...existingSale.saleProducts,
+                            {
+                                product_id,
+                                collected_product_id,
+                                sale_id,
+                                sale_product_id,
+                                sale_product_price
+                            }
+                        ]
+                    }
+                }
+            } else if (listing.bulk_split_id) {
+                if (!saleRef[sale_id]) {
+                    saleRef[sale_id] = {
+                        sale_id,
+                        sale_seller_id,
+                        sale_purchaser_id,
+                        sale_date,
+                        sale_vendor,
+                        sale_subtotal,
+                        sale_discount,
+                        sale_shipping,
+                        sale_tax_amount,
+                        sale_tax_rate,
+                        sale_total,
+                        saleCards: [],
+                        saleProducts: [],
+                        saleBulkSplits: [
+                            {
+                                bulk_split_id,
+                                bulk_split_count,
+                                bulk_split_estimate,
+                                sale_id,
+                                sale_bulk_split_id,
+                                sale_bulk_split_rate,
+                                labels
+                            }
+                        ]
+                    }
+                } else {
+                    const existingSale = saleRef[sale_id]
+                    saleRef[sale_id] = {
+                        ...existingSale,
+                        saleBulkSplits: [
+                            ...existingSale.saleBulkSplits,
+                            {
+                                bulk_split_id,
+                                bulk_split_count,
+                                bulk_split_estimate,
+                                sale_bulk_split_id,
+                                sale_id,
+                                sale_bulk_split_rate,
+                                labels
+                            }
+                        ]
+                    }
                 }
             }
         })
@@ -363,7 +349,7 @@ const evaluatePortfolio = async (req, res, next) => {
         })
         return compiledTransactions
     }
-    const compiledSales = compileSales(saleCards, saleProducts, saleBulkSplits)
+    const compiledSales = compileSales(saleCards, saleProducts, saleBulkSplits, purchasedListings)
     const compiledSortings = compileSortings(sortingSplits, sortingGems)
     const transactions = compileTransactions(compiledSales, compiledSortings, req.rips, req.trades)
     const generateKeyMarketDates = (timeFrame) => {
@@ -589,6 +575,7 @@ const getPortfolio = async (req, res, next) => {
         req.saleCards = await SaleCard.select(userId)
         req.saleProducts = await SaleProduct.select(userId)
         req.saleBulkSplits = await SaleBulkSplit.select(userId)
+        // req.purchasedListings = await Listing.getPurchased(userId)
         req.sortingSplits = await SortingSplit.select(userId)
         req.sortingGems = await SortingGem.select(userId)
         next()
