@@ -6,60 +6,6 @@ const { v4: uuidV4 } = require('uuid')
 const dateWithBackticks = '`date`'
 const descriptionWithBackticks = '`description`'
 
-const getPurchased = async (purchaserId) => {
-    // TODO: FIND SELLER OF LISTING ITEM
-    const query = `
-        SELECT 
-            *
-        FROM Listing
-        RIGHT JOIN sales
-            ON sales.sale_id = Listing.saleId
-        LEFT JOIN Lot 
-            on Lot.id = Listing.lotId
-        LEFT JOIN LotItem 
-            on LotItem.lotId = Lot.id
-        LEFT JOIN collected_cards 
-            on collected_cards.collected_card_id = Listing.collected_card_id
-            OR collected_cards.collected_card_id = LotItem.collected_card_id
-        LEFT JOIN cards_v2 
-            on cards_v2.card_v2_id = collected_cards.collected_card_card_id
-        LEFT JOIN collected_products
-            on collected_products.collected_product_id = Listing.collected_product_id
-            OR collected_products.collected_product_id = LotItem.collected_product_id
-        LEFT JOIN products 
-            on products.product_id = collected_products.collected_product_product_id
-        LEFT JOIN bulk_splits
-            ON bulk_splits.bulk_split_id = Listing.bulk_split_id
-            OR bulk_splits.bulk_split_id = LotItem.bulk_split_id
-        LEFT JOIN gift_cards
-            ON gift_cards.gift_card_collected_card_id = collected_cards.collected_card_id
-        LEFT JOIN gift_products
-            ON gift_products.gift_product_collected_product_id = collected_products.collected_product_id
-        LEFT JOIN gift_bulk_splits
-            ON gift_bulk_splits.gift_bulk_split_bulk_split_id = bulk_splits.bulk_split_id
-        LEFT JOIN gifts
-            ON gifts.gift_id = gift_cards.gift_card_gift_id
-            OR gifts.gift_id = gift_products.gift_product_gift_id
-            OR gifts.gift_id = gift_bulk_splits.gift_bulk_split_gift_id
-        LEFT JOIN users as purchasers
-            on purchasers.user_id = sales.sale_purchaser_id
-        LEFT JOIN users as sellers
-            on sellers.user_id = gifts.gift_receiver_id
-        WHERE sales.sale_purchaser_id = '${purchaserId}'
-        GROUP BY collected_cards.collected_card_id, collected_products.collected_product_id
-        ORDER BY gifts.gift_date desc;
-
-    `
-    const req = { queryQueue: [query] }
-    const res = {}
-    let purchasedListings
-    await executeQueries(req, res, (err) => {
-        if (err) throw err
-        purchasedListings = req.results
-    })
-    return purchasedListings
-}
-
 const getWatching = async (watcherId) => {
     const query = `
         SELECT 
@@ -460,13 +406,12 @@ const convertSaleItemsToListings = async (listing) => {
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
         listingId = formattedListing.id
     }
-    console.log(queryQueue)
     const req = { queryQueue }
     const res = {}
-    // await executeQueries(req, res, (err) => {
-    //     if (err) throw err
-    // })
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+    })
     return listingId
 }
 
-module.exports = { getWatching, createExternal, convertSaleItemsToListings, getPurchased }
+module.exports = { getWatching, createExternal, convertSaleItemsToListings }
