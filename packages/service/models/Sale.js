@@ -92,11 +92,10 @@ const createFromListing = async (saleBody, purchaserId) => {
     }).join(' '))
     const req = { queryQueue }
     const res = {}
-    console.log(queryQueue)
-    // await executeQueries(req, res, (err) => {
-    //     if (err) throw new Error(err)
-    //     sales = req.results
-    // })    
+    await executeQueries(req, res, (err) => {
+        if (err) throw new Error(err)
+        sales = req.results
+    })    
     return sale.sale_id
 }
 
