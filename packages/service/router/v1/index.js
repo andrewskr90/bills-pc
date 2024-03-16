@@ -17,8 +17,9 @@ const typeRouter = require('./type-router')
 const rarityRouter = require('./rarity-router')
 const printingRouter = require('./printing-router')
 const bulkSplitRouter = require('./bulk-split-router')
-const sortingRouter = require('./sorting-router'
-)
+const sortingRouter = require('./sorting-router')
+const userRouter = require('./user-router')
+const listingRouter = require('./listing-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -38,5 +39,9 @@ v1Router.use('/rarities', rarityRouter)
 v1Router.use('/printings', printingRouter)
 v1Router.use('/bulk-splits', bulkSplitRouter)
 v1Router.use('/sortings', sortingRouter)
+v1Router.use('/users', userRouter)
+v1Router.use('/listings', listingRouter)
+
+
 
 module.exports = v1Router

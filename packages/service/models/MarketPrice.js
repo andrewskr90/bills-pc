@@ -1,4 +1,5 @@
 const { executeQueries } = require('../db')
+const { stringifyDateYYYYMMDD } = require('../utils/date')
 
 const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
     let query = `SELECT * FROM market_prices 
@@ -9,8 +10,8 @@ const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
                 return `OR market_price_card_id = '${id}' `
             }).join('')}
             )
-        AND created_date >= '${formerDate}'
-        AND created_date < '${latterDate}'
+        AND created_date >= '${stringifyDateYYYYMMDD(formerDate)}'
+        AND created_date < '${stringifyDateYYYYMMDD(latterDate)}'
         ORDER BY market_price_card_id`
     const req = { queryQueue: [query] }
     const res = {}

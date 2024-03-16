@@ -9,16 +9,22 @@ import Header from '../../layouts/header'
 import CategorySelector from '../../components/category-selector'
 import Transactions from './features/transactions'
 import PortfolioAssets from './features/portfolio-assets'
+import Watching from './features/watching'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [portfolio, setPortfolio] = useState(initialPortfolioValues)
+    const [createdProxyUsers, setCreatedProxyUsers] = useState([])
+
     const navigate = useNavigate()
 
     useEffect(() => {
         (async () => { 
             await BillsPcService.getPortfolio({ timeFrame: '2w' })
                 .then(res => setPortfolio(res.data))
+                .catch(err => console.log(err))
+            await BillsPcService.getUsers({ params: { proxy: true } })
+                .then(res => setCreatedProxyUsers(res.data))
                 .catch(err => console.log(err))
         })()
     }, [userClaims])
@@ -31,7 +37,8 @@ const Collection = (props) => {
             <>
                 <Link to='update/purchase'><button>Update Collection</button></Link>
                 <CategorySelector
-                    categories={['assets', 'transactions']} 
+                    basePage="collection"
+                    categories={['assets', 'transactions', 'watching']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -55,7 +62,20 @@ const Collection = (props) => {
                         portfolio={portfolio}
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
+                        createdProxyUsers={createdProxyUsers}
+                        setCreatedProxyUsers={setCreatedProxyUsers}
                      />}
+                />
+                <Route 
+                    path='/watching/*'
+                    element={
+                        <Watching 
+                            createdProxyUsers={createdProxyUsers}
+                            setCreatedProxyUsers={setCreatedProxyUsers}
+                            referenceData={referenceData} 
+                            setReferenceData={setReferenceData} 
+                        />
+                    }
                 />
             </Routes>
         </div>)

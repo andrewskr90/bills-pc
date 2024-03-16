@@ -11,7 +11,6 @@ const insert = (req, res, next) => {
             }], 'bulk_splits')
             req.queryQueue.push(`${query};`)
             split.labels.forEach(label => {
-                console.log('label', label)
                 const { 
                     bulk_split_label_assignment_id, 
                     bulk_split_label_assignment_bulk_split_id,

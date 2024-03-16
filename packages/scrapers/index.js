@@ -1,21 +1,6 @@
 import puppeteer from 'puppeteer-core'
 import axios from 'axios'
-
-const baseurl = process.env.API_BASE_URL
-
-const loginBillsPc = async () => {
-    const loginInfo = {}
-    loginInfo.user = {}
-    loginInfo.user.user_name = 'kyle'
-    loginInfo.user.user_password = process.env.GYM_LEADER_PASS
-    // login and set cookies
-    try {
-        const apiCredentials = await axios.post(`${baseurl}/api/v1/auth/login`, loginInfo)
-        return apiCredentials.headers['set-cookie']
-    } catch (err) {
-        throw new Error(err)
-    }
-}
+import { baseurl, loginBillsPc } from './api/index.js'
 
 const getSetsBillsPc = async (cookies) => {
     try {
@@ -335,7 +320,16 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
     const browser = await puppeteer.launch({
         executablePath: '/usr/bin/chromium-browser',
         headless: true,
-        args: ['--no-sandbox']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
     })
     const page = await browser.newPage()
     // initialize variables
@@ -364,7 +358,7 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
         //  select all product results
         const results = await page.$$('.search-result')
 
-        //  update referenceLib with new items on current page, if any
+        //  update referenceLib with new items on current page, if any--
         referenceLib.page = page
         referenceLib = await gatherPageNewItems(referenceLib, results)
         const cookies = referenceLib.cookies

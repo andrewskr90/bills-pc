@@ -24,6 +24,7 @@ const GymLeader = (props) => {
     return (<div className='gymLeader'>
         <Banner titleText={'Gym Leader'} handleClickBackArrow={handleClickBackArrow}>
             <CategorySelector
+                basePage="gym-leader"
                 categories={gymLeaderNavCategories} 
                 selectCategory={selectCategory} 
             />

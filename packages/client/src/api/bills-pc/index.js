@@ -191,6 +191,15 @@ const BillsPcService = {
             url: '/api/v1/sales'
         })
     },
+    postSale({ params, data }) {
+        return axios({
+            ...options, 
+            params,
+            data,
+            method: 'post',
+            url: '/api/v1/sales'
+        })
+    },
     getPortfolio(params) {
         return axios({
             ...options,
@@ -296,14 +305,51 @@ const BillsPcService = {
     },
     postSortings(config) {
         const { data } = config
-        console.log(data)
         return axios({
             ...options,
             method: 'post',
             url: '/api/v1/sortings',
             data
         })
-    }
+    },
+    getUsers(config) {
+        const { params } = config
+        return axios({
+            ...options,
+            url: '/api/v1/users',
+            params
+        })
+    },
+    postUser(config) {
+        const { data, params } = config
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/users',
+            data,
+            params
+        })
+    },
+    postListing(config) {
+        const { data, params } = config
+        return axios({
+            ...options,
+            method: 'post',
+            url: '/api/v1/listings',
+            data,
+            params
+        })
+    },
+    getListings(config) {
+        const { params } = config
+        return axios({
+            ...options,
+            url: '/api/v1/listings',
+            params
+        })
+    },
+
 }
+
 
 export default BillsPcService

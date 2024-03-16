@@ -84,7 +84,7 @@ export const initialSelectedCollectedCardsValues = {
 
 export const initialPurchaseValues = {
     date: localYYYYMMDD(),
-    vendor: '',
+    sellerId: '',
     items: [],
     bulkSplits: [],
     subtotal: '',
@@ -198,6 +198,42 @@ export const initialSplitLabelFormValues = {
 }
 
 export const initialBulkSplitsValues = []
+
+export const initialExternalListing = {
+    date: undefined,
+    description: undefined,
+    sellerId: undefined,
+    price: undefined,
+    cards: [],
+    products: [],
+    bulkSplits: []
+}
+
+export const initialListingValues = {
+    id: undefined,
+    sellerId: undefined,
+    sellerName: undefined,
+    date: undefined,
+    price: undefined,
+    description: undefined,
+    collectedCard: {
+        id: undefined
+    },
+    collectedProduct: {
+        id: undefined
+    },
+    lot: {
+        id: undefined,
+        items: []
+    }
+}
+
+export const initialPurchaseListingValues = {
+    sale_id: undefined,
+    sale_seller_id: undefined,
+    sale_purchaser_id: undefined,
+    sale_date: undefined
+}
 
 // export const initialCollectionValues = {
 //     userId: '212',

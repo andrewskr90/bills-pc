@@ -8,20 +8,21 @@ import BillsPcService from '../../api/bills-pc'
 import PlusButton from '../../components/buttons/plus-button'
 import './assets/importPurchase.less'
 import Button from '../../components/buttons/text-button'
-import BulkSplitForm from '../../components/bulk-form/components/bulk-split-form'
-import Banner from '../../layouts/banner'
+import BulkEditor from '../../components/bulk-editor'
+import InputSelect from '../../components/input-select'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
     const { 
         referenceData, 
-        setReferenceData 
+        setReferenceData,
+        createdProxyUsers,
+        setCreatedProxyUsers
     } = props
     const [addItemOrBulk, setAddItemOrBulk] = useState('item')
     
     const navigate = useNavigate()
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
-
     const updatePurchaseItem = (editedItem, i) => {
         const updatedPurchaseItems = purchaseValues.items.map((item, j) => {
             if (i === j) {
@@ -123,6 +124,7 @@ const ImportPurchase = (props) => {
                 split
             ]
         })
+        navigate('/gym-leader/collection/update/purchase')
     }
 
     const updateSplitInBulkValues = (updatedSplit, idx) => {
@@ -134,16 +136,48 @@ const ImportPurchase = (props) => {
             ...purchaseValues,
             bulkSplits: updatedBulkSplits
         })
+        navigate('/gym-leader/collection/update/purchase')
     }
 
     const purchaseItemsValue = () => {
         let value = 0
         purchaseValues.items.forEach(item => {
-            value += item.marketValue
+            value += item.quantity*(item.marketValue)
         })
         return value
     }
-    
+
+    const createNewProxyUser = async (newProxyUser) => {
+        try {
+            const { data: { id } } = await BillsPcService.postUser({ data: newProxyUser, params: { proxy: true } })
+            setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
+            setPurchaseValues({ ...purchaseValues, sellerId: id })
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    const ProxyUserSelector = () => {
+        return (
+            purchaseValues.sellerId ? (
+                <p>{createdProxyUsers.find(user => user.user_id === purchaseValues.sellerId).user_name}</p>
+                ) : (
+                <InputSelect 
+                    searchKey="user_name" 
+                    items={createdProxyUsers} 
+                    handleSelect={((selectedProxyUser) => {
+                        setPurchaseValues({
+                            ...purchaseValues,
+                            sellerId: selectedProxyUser.user_id
+                        })
+
+                    })} 
+                    handleCreateNew={(user_name => createNewProxyUser({ user_name }))}
+                    createNewText="Create New Seller"
+                />
+            )
+        )
+    }
     return (<div className='page importPurchase'>
         <Routes>
             <Route 
@@ -163,14 +197,15 @@ const ImportPurchase = (props) => {
                         </div>
                         <div className='labelInput vendor'>
                             <label>Vendor</label>
-                            <input 
+                            <ProxyUserSelector />
+                            {/* <input 
                                 id='vendor'
                                 className='vendor'
                                 name='vendor'
                                 type='text'
                                 value={purchaseValues.vendor}
                                 onChange={updatePurchaseValues}
-                            />
+                            /> */}
                         </div>
                     </div>
                     <div className='labelInput purchaserNote'>
@@ -199,7 +234,7 @@ const ImportPurchase = (props) => {
                             items={purchaseValues.items}
                             referenceData={referenceData}
                         />
-                        <PlusButton handleClick={handleToggleSelectItem} />
+                        <PlusButton handleClick={handleToggleSelectItem} />                                
                     </> : <>
                         <ItemsTable 
                             format='bulk'
@@ -236,7 +271,7 @@ const ImportPurchase = (props) => {
                             <label>Tax</label>
                             <input 
                                 id='taxAmount'
-                                className='taxAmount'
+                                 className='taxAmount'
                                 name='taxAmount'
                                 type='text'
                                 value={purchaseValues.taxAmount}
@@ -291,32 +326,20 @@ const ImportPurchase = (props) => {
             />
             <Route 
                 path='/add-bulk'
-                element={<div className='addPurchaseBulk page'>
-                    <Banner 
-                        titleText={'Add Bulk Split'} 
-                        handleClickBackArrow={() => navigate(-1)} 
-                    />
-                    <BulkSplitForm 
-                        initialSplitValues={purchaseInitialSplitValues}
-                        addSplitToTransaction={addSplitToPurchase}
-                        referenceData={referenceData}
-                    />
-                </div>}
+                element={<BulkEditor 
+                    initialSplitValues={purchaseInitialSplitValues}
+                    addSplitToTransaction={addSplitToPurchase}
+                    referenceData={referenceData}
+                />}
             />
             <Route 
                 path='/edit-bulk/:idx'
-                element={<div className='addPurchaseBulk page'>
-                    <Banner 
-                        titleText={'Edit Bulk Split'} 
-                        handleClickBackArrow={() => navigate(-1)} 
-                    />
-                    <BulkSplitForm 
-                        updateSplitInBulkValues={updateSplitInBulkValues}
-                        referenceData={referenceData}
-                        initialSplitValues={purchaseInitialSplitValues}
-                        purchaseValues={purchaseValues}
-                    />
-                </div>}
+                element={<BulkEditor 
+                    initialSplitValues={purchaseInitialSplitValues}
+                    referenceData={referenceData}
+                    updateSplitInBulkValues={updateSplitInBulkValues}
+                    purchaseValues={purchaseValues}
+                />}
             />
         </Routes>
     </div>)
