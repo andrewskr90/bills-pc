@@ -78,7 +78,9 @@ const createFromListing = async (saleBody, purchaserId) => {
     }
     // update listings with accepted offers and sale
     queryQueue.push(`${QueryFormatters.objectsToInsert([sale], 'sales')};`)
-    queryQueue.push(`${QueryFormatters.objectsToInsert(saleNotes, 'sale_notes')};`)
+    if (saleNotes.length > 0) {
+        queryQueue.push(`${QueryFormatters.objectsToInsert(saleNotes, 'sale_notes')};`)
+    }
     if (offers.length > 0) {
         queryQueue.push(QueryFormatters.objectsToInsert(offers, 'Offer'))
         queryQueue.push(offers.map(offer => {
@@ -90,10 +92,11 @@ const createFromListing = async (saleBody, purchaserId) => {
     }).join(' '))
     const req = { queryQueue }
     const res = {}
-    await executeQueries(req, res, (err) => {
-        if (err) throw new Error(err)
-        sales = req.results
-    })    
+    console.log(queryQueue)
+    // await executeQueries(req, res, (err) => {
+    //     if (err) throw new Error(err)
+    //     sales = req.results
+    // })    
     return sale.sale_id
 }
 
