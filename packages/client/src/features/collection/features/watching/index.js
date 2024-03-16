@@ -24,7 +24,7 @@ const Watching = (props) => {
             <Route 
                 path='/'
                 element={
-                    <div style={{ height: '100%', width: 'full', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ height: '100%', width: 'full', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', paddingBottom: '80px' }}>
                         <p>Import External Listing</p>
                         <PlusButton handleClick={() => navigate('import')} />
                         {watching.map(listing => {

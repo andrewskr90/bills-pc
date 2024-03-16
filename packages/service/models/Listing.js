@@ -314,22 +314,22 @@ const createExternal = async (listing, watcherId) => {
         queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
     }
     // at this point, all items are imported into proxy user's collection, now create listing with item or lot
-    let listingId
+    let formattedListingId
     if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
         const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
         queryQueue.push(`${objectsToInsert([formattedLot], 'Lot')};`)
         queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
-        listingId = formattedListing.id
+        formattedListingId = formattedListing.id
     } else {
         const formattedListing = formatListing(listing)
         queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
-        listingId = formattedListing.id
+        formattedListingId = formattedListing.id
     }
     // create Watching
     const formattedWatching = { 
         id: uuidV4(), 
-        listingId, 
+        listingId: formattedListingId, 
         watcherId 
     }
     queryQueue.push(`${objectsToInsert([formattedWatching], 'Watching')};`)
@@ -338,7 +338,7 @@ const createExternal = async (listing, watcherId) => {
     await executeQueries(req, res, (err) => {
         if (err) throw err
     })
-    return listingId
+    return formattedListingId
 }
 
 const convertSaleItemsToListings = async (listing) => {
