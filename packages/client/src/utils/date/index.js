@@ -27,6 +27,22 @@ export const localYYYYMMDD = () => {
     return `${yyyy}-${mm}-${dd}`
 }
 
+export const localYYYYMMDDhhmmss = () => {
+    const today = new Date()
+    const yyyy = today.getUTCFullYear()
+    let mm = today.getUTCMonth() + 1
+    let dd = today.getUTCDate()
+    if (mm < 10) mm = `0${mm}`
+    if (dd < 10) dd = `0${dd}`
+    let hours = today.getUTCHours()
+    let minutes = today.getUTCMinutes()
+    let seconds = today.getUTCSeconds()
+    if (hours < 10) hours = `0${hours}`
+    if (minutes < 10) minutes = `0${minutes}`
+    if (seconds < 10) seconds = `0${seconds}`
+    return `${yyyy}-${mm}-${dd} ${hours}:${minutes}:${seconds}`
+}
+
 export const formatDate = (dateCode) => {
     const dateParts = dateCode.split('-')
     return `${dateParts[1]}-${dateParts[2].split('T')[0]}-${dateParts[0]}`

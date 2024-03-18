@@ -5,6 +5,9 @@ const SaleCard = require('../models/SaleCard')
 const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
 const Listing = require('../models/Listing')
+const Transaction = require('../models/Transaction')
+
+const { compileLabelComponentsIntoSplits } = require('../utils/bulk-splits')
 
 const formatInventory = (inventory) => {
     const keys = Object.keys(inventory)
@@ -43,7 +46,8 @@ const evaluatePortfolio = async (req, res, next) => {
         saleBulkSplits,
         sortingSplits,
         sortingGems,
-        purchasedListings
+        purchasedListings,
+        portfolioItems
     } = req
     let balance = 0
     let revenue = 0
@@ -51,9 +55,8 @@ const evaluatePortfolio = async (req, res, next) => {
     const cardInventory = {}
     const productInventory = {}
     let bulkSplitInventory = []
-    const compileSales = (saleCards, saleProducts, saleBulkSplits, listings) => {
+    const compileSales = (listings) => {
         const saleRef = {}
-        console.log(listings[0])
         listings.forEach(listing => {
             const {
                 sale_id,
@@ -67,24 +70,20 @@ const evaluatePortfolio = async (req, res, next) => {
                 sale_tax_amount,
                 sale_tax_rate,
                 sale_total,
-
                 card_v2_id,
                 collected_card_id,
                 sale_card_id,
                 sale_card_price,
-
                 product_id,
                 collected_product_id,
                 sale_product_id,
                 sale_product_price,
-
                 bulk_split_id,
                 bulk_split_count,
                 bulk_split_estimate,
                 sale_bulk_split_id,
                 sale_bulk_split_rate,
                 labels
-
             } = listing
             if (listing.collected_card_id) {
                  if (!saleRef[sale_id]) {
@@ -349,7 +348,9 @@ const evaluatePortfolio = async (req, res, next) => {
         })
         return compiledTransactions
     }
-    const compiledSales = compileSales(saleCards, saleProducts, saleBulkSplits, purchasedListings)
+    const compiledBulkSplits = compileLabelComponentsIntoSplits(purchasedListings.filter(listing => listing.bulk_split_id))
+    const splitsWithItems = [...purchasedListings.filter(listing => !listing.bulk_split_id), ...compiledBulkSplits]
+    const compiledSales = compileSales(splitsWithItems)
     const compiledSortings = compileSortings(sortingSplits, sortingGems)
     const transactions = compileTransactions(compiledSales, compiledSortings, req.rips, req.trades)
     const generateKeyMarketDates = (timeFrame) => {
@@ -572,12 +573,13 @@ const combineSplitsWithSales = async (req, res, next) => {
 const getPortfolio = async (req, res, next) => {
     const userId = req.claims.user_id
     try {
-        req.saleCards = await SaleCard.select(userId)
-        req.saleProducts = await SaleProduct.select(userId)
-        req.saleBulkSplits = await SaleBulkSplit.select(userId)
+        // req.saleCards = await SaleCard.select(userId)
+        // req.saleProducts = await SaleProduct.select(userId)
+        // req.saleBulkSplits = await SaleBulkSplit.select(userId)
+        req.portfolioItems = await Transaction.getItems(userId)
         // req.purchasedListings = await Listing.getPurchased(userId)
-        req.sortingSplits = await SortingSplit.select(userId)
-        req.sortingGems = await SortingGem.select(userId)
+        // req.sortingSplits = await SortingSplit.select(userId)
+        // req.sortingGems = await SortingGem.select(userId)
         next()
     } catch (err) {
         next(err)

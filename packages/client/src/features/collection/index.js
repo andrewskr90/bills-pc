@@ -20,9 +20,9 @@ const Collection = (props) => {
 
     useEffect(() => {
         (async () => { 
-            await BillsPcService.getPortfolio({ timeFrame: '2w' })
-                .then(res => setPortfolio(res.data))
-                .catch(err => console.log(err))
+            // await BillsPcService.getPortfolio({ timeFrame: '2w' })
+            //     .then(res => setPortfolio(res.data))
+            //     .catch(err => console.log(err))
             await BillsPcService.getUsers({ params: { proxy: true } })
                 .then(res => setCreatedProxyUsers(res.data))
                 .catch(err => console.log(err))

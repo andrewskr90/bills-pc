@@ -32,8 +32,8 @@ const selectByProductIdsBetweenDates = async (ids, formerDate, latterDate) => {
                 return `OR market_price_product_id = '${id}' `
             }).join('')}
             )
-        AND created_date >= '${formerDate}'
-        AND created_date < '${latterDate}'
+        AND created_date >= '${stringifyDateYYYYMMDD(formerDate)}'
+        AND created_date < '${stringifyDateYYYYMMDD(latterDate)}'
         ORDER BY market_price_product_id`
     const req = { queryQueue: [query] }
     const res = {}

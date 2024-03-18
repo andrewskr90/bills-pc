@@ -53,13 +53,13 @@ const getItems = async (purchaserId) => {
         ) AND s.sale_purchaser_id = '${purchaserId}'	
         UNION
         SELECT
-            g.gift_receiver_id as debit_user_id, 
-            g.gift_date as transaction_date,
-            null as saleId, g.gift_id giftId,
+            g.debit_user_id, 
+            g.transaction_date,
+            null as saleId, g.giftId,
             null as lotId,
-            gc.gift_card_collected_card_id as collected_card_id,
-            gp.gift_product_collected_product_id as collected_product_id,
-            gb.gift_bulk_split_bulk_split_id as bulk_split_id,
+            g.collected_card_id,
+            g.collected_product_id,
+            g.bulk_split_id,
             bsla.bulk_split_label_assignment_id,
             la.label_id,
             lc.label_component_id,
@@ -71,15 +71,42 @@ const getItems = async (purchaserId) => {
             pr.printing_name,
             se.set_v2_id,
             se.set_v2_name
-        FROM gifts g
-        LEFT JOIN gift_cards gc on gc.gift_card_gift_id = g.gift_id
-        LEFT JOIN gift_products gp on gp.gift_product_gift_id = g.gift_id
-        LEFT JOIN gift_bulk_splits gb on gb.gift_bulk_split_gift_id = g.gift_id
-        LEFT JOIN collected_cards cc ON cc.collected_card_id = gc.gift_card_collected_card_id
+        FROM (
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                gc.gift_card_collected_card_id as collected_card_id,
+                null as collected_product_id,
+                null as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_cards gc on gc.gift_card_gift_id = g.gift_id
+            UNION
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                null as collected_card_id,
+                gp.gift_product_collected_product_id as collected_product_id,
+                null as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_products gp on gp.gift_product_gift_id = g.gift_id
+            UNION
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                null as collected_card_id,
+                null as collected_product_id,
+                gb.gift_bulk_split_bulk_split_id as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_bulk_splits gb on gb.gift_bulk_split_gift_id = g.gift_id
+        ) g
+        LEFT JOIN collected_cards cc ON cc.collected_card_id = g.collected_card_id
         LEFT JOIN cards_v2 ca ON ca.card_v2_id = cc.collected_card_card_id
-        LEFT JOIN collected_products cp ON cp.collected_product_id = gp.gift_product_collected_product_id
+        LEFT JOIN collected_products cp ON cp.collected_product_id = g.collected_product_id
         LEFT JOIN products p ON p.product_id = cp.collected_product_product_id
-        LEFT JOIN bulk_splits bs ON bs.bulk_split_id = gb.gift_bulk_split_bulk_split_id
+        LEFT JOIN bulk_splits bs ON bs.bulk_split_id = g.bulk_split_id
         LEFT JOIN bulk_split_label_assignments bsla ON bs.bulk_split_id = bsla.bulk_split_label_assignment_bulk_split_id
         LEFT JOIN labels la ON la.label_id = bsla.bulk_split_label_assignment_label_id
         LEFT JOIN label_components lc on lc.label_component_label_id = la.label_id
@@ -91,10 +118,10 @@ const getItems = async (purchaserId) => {
             se.set_v2_id = lc.label_component_set_v2_id
 
         WHERE (
-            gc.gift_card_collected_card_id is not null OR
-            gp.gift_product_collected_product_id is not null OR
-            gb.gift_bulk_split_bulk_split_id is not null
-        ) AND g.gift_receiver_id = '${purchaserId}'
+            g.collected_card_id is not null OR
+            g.collected_product_id is not null OR
+            g.bulk_split_id is not null
+        ) AND g.debit_user_id = '${purchaserId}'
 
     ), adjTransaction as (    
         SELECT 
@@ -109,17 +136,47 @@ const getItems = async (purchaserId) => {
         JOIN Listing l on l.saleId = s.sale_id
         UNION
         SELECT
-            g.gift_receiver_id as debit_user_id, 
-            g.gift_date as transaction_date,
-            null as saleId, g.gift_id giftId,
-            gc.gift_card_collected_card_id as collected_card_id,
-            gp.gift_product_collected_product_id as collected_product_id,
-            gb.gift_bulk_split_bulk_split_id as bulk_split_id,
+            g.debit_user_id, 
+            g.transaction_date,
+            null as saleId, g.giftId,
+            g.collected_card_id,
+            g.collected_product_id,
+            g.bulk_split_id,
             null as lotId
-        FROM gifts g
-        LEFT JOIN gift_cards gc on gc.gift_card_gift_id = g.gift_id
-        LEFT JOIN gift_products gp on gp.gift_product_gift_id = g.gift_id
-        LEFT JOIN gift_bulk_splits gb on gb.gift_bulk_split_gift_id = g.gift_id	
+        FROM (
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                gc.gift_card_collected_card_id as collected_card_id,
+                null as collected_product_id,
+                null as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_cards gc on gc.gift_card_gift_id = g.gift_id
+            UNION
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                null as collected_card_id,
+                gp.gift_product_collected_product_id as collected_product_id,
+                null as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_products gp on gp.gift_product_gift_id = g.gift_id
+            UNION
+            SELECT
+                g.gift_receiver_id as debit_user_id, 
+                g.gift_date as transaction_date,
+                g.gift_id giftId,
+                null as collected_card_id,
+                null as collected_product_id,
+                gb.gift_bulk_split_bulk_split_id as bulk_split_id
+            FROM gifts g
+            LEFT JOIN gift_bulk_splits gb on gb.gift_bulk_split_gift_id = g.gift_id
+        ) g
+        LEFT JOIN gift_cards gc on gc.gift_card_gift_id = g.giftId
+        LEFT JOIN gift_products gp on gp.gift_product_gift_id = g.giftId
+        LEFT JOIN gift_bulk_splits gb on gb.gift_bulk_split_gift_id = g.giftId	
     )
     SELECT * FROM (
         SELECT 

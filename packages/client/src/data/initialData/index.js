@@ -1,4 +1,4 @@
-import { localYYYYMMDD } from "../../utils/date"
+import { localYYYYMMDDhhmmss } from "../../utils/date"
 
 export const initialReferenceDataValues = {
     sets: [],
@@ -83,7 +83,7 @@ export const initialSelectedCollectedCardsValues = {
 }
 
 export const initialPurchaseValues = {
-    date: localYYYYMMDD(),
+    date: localYYYYMMDDhhmmss(),
     sellerId: '',
     items: [],
     bulkSplits: [],
@@ -98,7 +98,7 @@ export const initialPurchaseValues = {
 }
 
 export const initialImportGiftValues = {
-    date: localYYYYMMDD(),
+    date: localYYYYMMDDhhmmss(),
     giver: '',
     items: [],
     receiverNote: ''
@@ -185,7 +185,7 @@ export const initialSortingSplitValues = {
 export const initialSortingValues = {
     sorting_id: null,
     sorting_bulk_split_id: null,
-    sorting_date: localYYYYMMDD(),
+    sorting_date: localYYYYMMDDhhmmss(),
     sortingSplits: [],
     sortingGems: []
 }

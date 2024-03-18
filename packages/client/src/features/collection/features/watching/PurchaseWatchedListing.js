@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { localYYYYMMDD } from '../../../../utils/date';
+import { localYYYYMMDDhhmmss } from '../../../../utils/date';
 import Button from '../../../../components/buttons/text-button';
 import BillsPcService from '../../../../api/bills-pc'
 
 const PurchaseWatchedListing = ({ listing }) => {
     const [saleBody, setSaleBody] = useState({ 
         id: undefined,
-        date: localYYYYMMDD(), 
+        date: localYYYYMMDDhhmmss(), 
         note: '', 
         discount: 0, 
         tax: 0 , 
