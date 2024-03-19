@@ -4,7 +4,7 @@ import SupportUsTcg from './assets/support-us-tcg.jpg'
 import './assets/supportUs.less'
 
 const SupportUs = () => {
-    const affiliateLink = 'https://tcgplayer.com?utm_campaign=affiliate&utm_medium=BillsPC&utm_source=BillsPC'
+    const affiliateLink = 'tcgplayer.pxf.io/vNKjrd?u=https://tcgplayer.com'
     return (<div className='supportUs'>
         <h2>Support Bill's PC</h2>
         <p>Thank you for considering supporting us! As an affiliate of 

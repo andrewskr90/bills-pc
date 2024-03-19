@@ -52,7 +52,7 @@ const ExpansionItemInfo = (props) => {
                 <div className='besideImg'>
                     <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} />
                     <MarketplaceChart item={targetItem} referenceData={referenceData} />
-                    <div 
+                    {targetItem.marketValue ? <div 
                         className={`valueAndChange ${targetItem.formattedPrices.changes[referenceData.dateRange] > 0 
                             ? 'up' 
                             : targetItem.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
@@ -63,7 +63,9 @@ const ExpansionItemInfo = (props) => {
                             {targetItem.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
                             {targetItem.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
                         </p>
-                    </div>
+                    </div> : (
+                        <p>Price Not Available</p>
+                    )}
                 </div>
             </div>
             <div className='purchaseSection'>

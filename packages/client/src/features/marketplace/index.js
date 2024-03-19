@@ -20,7 +20,7 @@ const Marketplace = (props) => {
 
     return (<div className='marketplace'>
         <Header main title={'Marketplace'}>
-            <Link to='support-us'>Support Us</Link>
+            <Link to='/support-us'>Support Us</Link>
         </Header>
         <Search submitSearch={submitSearch}/>
         <Routes>

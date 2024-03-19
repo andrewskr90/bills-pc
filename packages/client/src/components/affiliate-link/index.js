@@ -8,7 +8,7 @@ const AffiliateLink = (props) => {
     if (width) widthString += width
     return <a 
             target='_blank' 
-            href={`https://tcgplayer.com${pathString}?utm_campaign=affiliate&utm_medium=BillsPC&utm_source=BillsPC`}
+            href={`https://tcgplayer.pxf.io/vNKjrd?u=https://tcgplayer.com${pathString}`}
             style={{ width: widthString }}
         >{children}</a>
 }
