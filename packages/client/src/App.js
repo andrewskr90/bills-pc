@@ -176,7 +176,7 @@ const App = () => {
                         </GymLeaderOnly>}
                     />
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
-                    <Route path='support-us' element={<SupportUs />} />
+                    <Route path='/support-us' element={<SupportUs />} />
                 </Routes>
                 <NavBar />
             </div>
