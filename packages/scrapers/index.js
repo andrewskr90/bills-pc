@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer-core'
 import axios from 'axios'
 import { baseurl, loginBillsPc } from './api/index.js'
+// import { executablePath } from 'puppeteer'
 
 const getSetsBillsPc = async (cookies) => {
     try {
@@ -168,13 +169,13 @@ const gatherPageNewItems = async (referenceLib, results) => {
         // item set id
         const itemSetId = set_.set_v2_id
         // item tcg product id
-        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/a")
+        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/div/div/div/a")
         const itemATagHref = await page.evaluate((element) => element.href, itemATag[0])
         const itemTcgProductId = itemATagHref.split('/')[4]
         // item name
-        const itemNameElement = await results[i].$('.search-result__title')
+        const itemNameElement = await results[i].$('.product-card__title')
         const itemName = await page.evaluate((element) => element.textContent, itemNameElement)
-        const resultRaritySection = await results[i].$$("xpath/./div/a/section/section[@class='search-result__rarity']")
+        const resultRaritySection = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__rarity']")
         // item is card
         if (resultRaritySection.length === 1) {
             // card rarity
@@ -245,20 +246,20 @@ const gatherPageMarketPrices = async (referenceLib, results) => {
         // item set id
         const itemSetId = curSetId
         // item tcg product id
-        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/a")
+        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/div/div/div/a")
         const itemATagHref = await page.evaluate(element => element.href, itemATag[0])
         const itemTcgProductId = parseInt(itemATagHref.split('/')[4])
         // item name
-        const itemNameElement = await results[i].$$('.search-result__title')
+        const itemNameElement = await results[i].$$('.product-card__title')
         const itemName = await page.evaluate(element => element.textContent, itemNameElement[0])
-        const resultRaritySection = await results[i].$$("xpath/./div/a/section/section[@class='search-result__rarity']")
+        const resultRaritySection = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__rarity']")
         // item market price
-        const itemMarketPriceSectionToCheck = await results[i].$$("xpath/./div/a/section/section[@class='search-result__market-price']/section")
+        const itemMarketPriceSectionToCheck = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__market-price']/section")
         // check if market price not available
         const sectionClassNames = await page.evaluate(element => element.className, itemMarketPriceSectionToCheck[0])
         let itemMarketPrice = null
         if (!sectionClassNames.includes('unavailable')) {
-            const itemMarketPriceElement = await itemMarketPriceSectionToCheck[0].$$("xpath/./span[@class='search-result__market-price--value']")
+            const itemMarketPriceElement = await itemMarketPriceSectionToCheck[0].$$("xpath/./span[@class='product-card__market-price--value']")
             let itemMarketPriceString = await page.evaluate(element => element.textContent, itemMarketPriceElement[0])
             itemMarketPriceString = itemMarketPriceString.replace(/\$/g, '')
             itemMarketPriceString = itemMarketPriceString.replace(/\,/g, '')
@@ -279,11 +280,14 @@ const gatherPageMarketPrices = async (referenceLib, results) => {
                     if (matchedCard.length === 0) {
                         console.log(`WARNING: Card with tcgId ${itemTcgProductId} not present in Bills Pc DB. Update bills_pc.cards_v2 with cards from set with id: ${curSetId}.`)
                     } else {
-                        // format card market price
-                        marketPriceToAdd.market_price_card_id = matchedCard[0].card_v2_id
-                        marketPriceToAdd.market_price_price = itemMarketPrice
-                        marketPriceToAdd.market_price_product_id = null
-                        marketPricesToAdd.push(marketPriceToAdd)
+                        // check if there is price to add
+                        if (itemMarketPrice) {
+                            // format card market price
+                            marketPriceToAdd.market_price_card_id = matchedCard[0].card_v2_id
+                            marketPriceToAdd.market_price_price = itemMarketPrice
+                            marketPriceToAdd.market_price_product_id = null
+                            marketPricesToAdd.push(marketPriceToAdd)
+                        }
                     }    
                 } else {
                     console.log(`WARNING: No cards added to current set with id ${curSetId}`)
@@ -298,11 +302,14 @@ const gatherPageMarketPrices = async (referenceLib, results) => {
                     if (matchedProduct.length === 0) {
                         console.log(`WARNING: Product with tcgId ${itemTcgProductId} not present in Bills Pc DB. Update bills_pc.products with products from set with id: ${curSetId}.`)
                     } else {
-                        // format product market price
-                        marketPriceToAdd.market_price_card_id = null
-                        marketPriceToAdd.market_price_price = itemMarketPrice
-                        marketPriceToAdd.market_price_product_id = matchedProduct[0].product_id
-                        marketPricesToAdd.push(marketPriceToAdd)
+                        // check if there is price to add
+                        if (itemMarketPrice) {
+                            // format product market price
+                            marketPriceToAdd.market_price_card_id = null
+                            marketPriceToAdd.market_price_price = itemMarketPrice
+                            marketPriceToAdd.market_price_product_id = matchedProduct[0].product_id
+                            marketPricesToAdd.push(marketPriceToAdd)
+                        }  
                     }    
                 } else {
                     console.log(`WARNING: No products added to current set with id ${curSetId}`)
@@ -319,6 +326,7 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
     const collectionArray = []
     const browser = await puppeteer.launch({
         executablePath: '/usr/bin/chromium-browser',
+        // executablePath: executablePath(), // development
         headless: true,
         args: [
             '--no-sandbox',
