@@ -38,11 +38,11 @@ build from port 7070
     - `docker pull 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app`
     - `docker stop bills-pc-app` stops old container
     - `docker remove bills-pc-app` frees up the name for new container
-    - `docker run -d -p 7070:7070 --env-file .env --name bills-pc-app --network bills-pc <containerId>` this places container on same network as NGINX container, bills-pc. NGINX config references bills-pc-app, which acts like an ip address. This makes naming the container bills-pc-app crucial
+    - `docker run -d -p 7070:7070 --env-file .env --name bills-pc-app --network bills-pc <image>` this places container on same network as NGINX container, bills-pc. NGINX config references bills-pc-app, which acts like an ip address. This makes naming the container bills-pc-app crucial
 
 #### Hints
-- NGINX run command: `docker run -p 80:80 -p 443:443 -v /home/ec2-user/etc/pki/tls/certs:/etc/nginx/certs --network=bills-pc --name bills-pc-nginx <containerId>`
-- market price scraper run command: `docker run -d --restart unless-stopped --env-file .env --name bills-pc-market-price-scraper 043e7b835e06`
+- NGINX run command: `docker run -p 80:80 -p 443:443 -v /home/ec2-user/etc/pki/tls/certs:/etc/nginx/certs --network=bills-pc --name bills-pc-nginx <image>`
+- market price scraper run command: `docker run -d --restart unless-stopped --env-file .env --name bills-pc-market-price-scraper <image>`
 - `docker inspect bills-pc` this shows info on the network, ensuring each container shares the same network, and other important info
 - NGINX container can still be running while the app container is removed and restarted
 - market price scraper does not require to be on the same network, it communicates with the app over https://billspc.io
