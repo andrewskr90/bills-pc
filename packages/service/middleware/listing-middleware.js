@@ -1,34 +1,37 @@
 const Listing = require('../models/Listing')
 const MarketPrice = require('../models/MarketPrice')
 
-const formatListings = (listingItems) => {    
+const formatListings = (listingItems, withPrices) => {    
     const uniqueCollectedCards = {}
     const uniqueCollectedProducts = {}
-    const mostRecentPriceFiltered = listingItems.sort((a, b) => {
-        if (a.market_price_date > b.market_price_date) return -1
-        if (a.market_price_date < b.market_price_date) return 1
-        else return 0
-    }).filter(item => {
-        if (item.collected_card_id) {
-            if (!uniqueCollectedCards[item.collected_card_id]) {
-                uniqueCollectedCards[item.collected_card_id] = 1
-                return true
-            }
-        } else if (item.collected_product_id) {
-            if (!uniqueCollectedProducts[item.collected_product_id]) {
-                uniqueCollectedProducts[item.collected_product_id] = 1
-                return true
-            }
-        } else if (item.bulk_split_id) return true
-    })
-    mostRecentPriceFiltered.sort((a, b ) => {
-        if (a.listingId > b.listingId) return 1
-        if (a.listingId < b.listingId) return -1
-        else return 0
-    })
+    let itemsToFormat = listingItems
+    if (withPrices) {
+        itemsToFormat = listingItems.sort((a, b) => {
+            if (a.market_price_date > b.market_price_date) return -1
+            if (a.market_price_date < b.market_price_date) return 1
+            else return 0
+        }).filter(item => {
+            if (item.collected_card_id) {
+                if (!uniqueCollectedCards[item.collected_card_id]) {
+                    uniqueCollectedCards[item.collected_card_id] = 1
+                    return true
+                }
+            } else if (item.collected_product_id) {
+                if (!uniqueCollectedProducts[item.collected_product_id]) {
+                    uniqueCollectedProducts[item.collected_product_id] = 1
+                    return true
+                }
+            } else if (item.bulk_split_id) return true
+        })
+        itemsToFormat.sort((a, b ) => {
+            if (a.listingId > b.listingId) return 1
+            if (a.listingId < b.listingId) return -1
+            else return 0
+        })
+    }
     const listings = []
     let currentLot = {}
-    mostRecentPriceFiltered.forEach((item, idx) => {
+    itemsToFormat.forEach((item, idx) => {
         if (item.lotId) {
             if (!currentLot.id) {
                 currentLot = { id: item.lotId }
@@ -74,8 +77,8 @@ const formatListings = (listingItems) => {
                         ]
                     }
                 }
-                if (mostRecentPriceFiltered[idx+1]) {
-                    if (mostRecentPriceFiltered[idx+1].listingId !== item.listingId) {
+                if (itemsToFormat[idx+1]) {
+                    if (itemsToFormat[idx+1].listingId !== item.listingId) {
                         listings.push({
                             id: item.listingId,
                             sellerId: item.sellerId,
@@ -147,8 +150,8 @@ const formatListings = (listingItems) => {
                         ]
                     }
                 }
-                if (mostRecentPriceFiltered[idx+1]) {
-                    if (mostRecentPriceFiltered[idx+1].listingId !== item.listingId) {
+                if (itemsToFormat[idx+1]) {
+                    if (itemsToFormat[idx+1].listingId !== item.listingId) {
                         listings.push({
                             id: item.listingId,
                             sellerId: item.sellerId,
@@ -204,7 +207,11 @@ const formatListings = (listingItems) => {
             }
         }
     })
-    return listings
+    return listings.sort((a, b) => {
+        if (a.date > b.date) return -1
+        if (a.date < b.date) return 1
+        return 0
+    })
 }
 
 const uniqueCardIdsInListings = (listings) => {
@@ -246,17 +253,27 @@ const getListings = async (req, res, next) => {
     if (req.query.watching) {
         try {
             const watchedListings = await Listing.getWatching(req.claims.user_id)
-            const today = new Date()
-            const yesterday = new Date(today)
-            yesterday.setDate(today.getDate()-1)
-            const listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCardIdsInListings(watchedListings), yesterday, today)
-            const watchedListingsWithPrices = tiePricesToListings(watchedListings, listingCardPrices)
-            req.results = formatListings(watchedListingsWithPrices)
+            req.results = formatListings(watchedListings, withPrices=false)
         } catch (err) {
             return next(err)
         }
     } else {
         return next({ status: 404, message: 'no such route' })
+    }
+    next()
+}
+
+const getListingById = async (req, res, next) => {
+    try {
+        const listingItems = await Listing.getListingById(req.params.id)
+        const today = new Date()
+        const yesterday = new Date(today)
+        yesterday.setDate(today.getDate()-1)
+        const listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCardIdsInListings(listingItems), yesterday, today)
+        const watchedListingsWithPrices = tiePricesToListings(listingItems, listingCardPrices)
+        req.results = formatListings(watchedListingsWithPrices)
+    } catch (err) {
+        next(err)
     }
     next()
 }
@@ -282,4 +299,4 @@ const createListing = async (req, res, next) => {
     next()
 }
 
-module.exports = { getListings, createListing }
+module.exports = { getListings, createListing, getListingById }
