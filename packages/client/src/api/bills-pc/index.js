@@ -348,6 +348,12 @@ const BillsPcService = {
             params
         })
     },
+    getListingById(id) {
+        return axios({
+            ...options,
+            url: `/api/v1/listings/${id}`
+        })
+    }
 
 }
 

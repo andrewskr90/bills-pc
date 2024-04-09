@@ -68,7 +68,6 @@ const Watching = (props) => {
                 element={<Listing 
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData}
-                    listings={watching}
                 />}
             />
         </Routes>

@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { initialListingValues } from '../../../../data/initialData'
 import PurchaseWatchedListing from './PurchaseWatchedListing'
+import BillsPcService from '../../../../api/bills-pc'
 
 const Listing = (props) => {
-    const { listings } = props
     const [listing, setListing] = useState(initialListingValues)
 
     const navigate = useNavigate()
     const { id } = useParams()
     useEffect(() => {
-        if (listings.length > 0) {
-            setListing(listings.find(listing => listing.id === id))
-        }
-    }, [listings])
+        (async () => {
+            const result = await BillsPcService.getListingById(id)
+            setListing(result.data[0])
+        })()
+    }, [])
     const handlePurchaseListing = () => {
         navigate('purchase')
     }

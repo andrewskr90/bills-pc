@@ -80,6 +80,77 @@ const getWatching = async (watcherId) => {
     return watchedListings
 }
 
+const getListingById = async (listingId) => {
+    const dateWithBackticks = '`date`'
+    const descriptionWithBackticks = '`description`'
+    const query = `
+        SELECT 
+            Listing.id as listingId,
+            sellers.user_id as sellerId,
+            sellers.user_name as sellerName,
+            collected_cards.collected_card_id,
+            collected_products.collected_product_id,
+            bulk_splits.bulk_split_id,
+            Listing.${dateWithBackticks},
+            Listing.price,
+            Listing.${descriptionWithBackticks},
+            gift_cards.gift_card_id,
+            gift_products.gift_product_id,
+            gift_bulk_splits.gift_bulk_split_id,
+            card_v2_id,
+            card_v2_name,
+            card_v2_number,
+            card_v2_rarity,
+            card_v2_tcgplayer_product_id,
+            card_v2_foil_only,
+            product_id,
+            product_name,
+            product_release_date,
+            product_description,
+            product_tcgplayer_product_id,
+            Lot.id as lotId
+        FROM Listing
+        LEFT JOIN Lot 
+            on Lot.id = Listing.lotId
+        LEFT JOIN LotItem 
+            on LotItem.lotId = Lot.id
+        LEFT JOIN collected_cards 
+            on collected_cards.collected_card_id = Listing.collected_card_id
+            OR collected_cards.collected_card_id = LotItem.collected_card_id
+        LEFT JOIN cards_v2 
+            on cards_v2.card_v2_id = collected_cards.collected_card_card_id
+        LEFT JOIN collected_products
+            on collected_products.collected_product_id = Listing.collected_product_id
+            OR collected_products.collected_product_id = LotItem.collected_product_id
+        LEFT JOIN products 
+            on products.product_id = collected_products.collected_product_product_id
+        LEFT JOIN bulk_splits
+            ON bulk_splits.bulk_split_id = Listing.bulk_split_id
+            OR bulk_splits.bulk_split_id = LotItem.bulk_split_id
+        LEFT JOIN gift_cards
+            ON gift_cards.gift_card_collected_card_id = collected_cards.collected_card_id
+        LEFT JOIN gift_products
+            ON gift_products.gift_product_collected_product_id = collected_products.collected_product_id
+        LEFT JOIN gift_bulk_splits
+            ON gift_bulk_splits.gift_bulk_split_bulk_split_id = bulk_splits.bulk_split_id
+        LEFT JOIN gifts
+            ON gifts.gift_id = gift_cards.gift_card_gift_id
+            OR gifts.gift_id = gift_products.gift_product_gift_id
+            OR gifts.gift_id = gift_bulk_splits.gift_bulk_split_gift_id
+        LEFT JOIN users as sellers
+            on sellers.user_id = gifts.gift_receiver_id
+        WHERE Listing.id = '${listingId}';
+    `
+    const req = { queryQueue: [query] }
+    const res = {}
+    let listing
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        listing = req.results
+    })
+    return listing
+}
+
 const formatListingWithLot = (listing) => {
     const listingId = uuidV4();
     const { date, price, description } = listing
@@ -413,4 +484,4 @@ const convertSaleItemsToListings = async (listing) => {
     return listingId
 }
 
-module.exports = { getWatching, createExternal, convertSaleItemsToListings }
+module.exports = { getWatching, createExternal, convertSaleItemsToListings, getListingById }
