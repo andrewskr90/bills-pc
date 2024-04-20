@@ -7,12 +7,14 @@ import BulkEditor from "../../../../components/bulk-editor"
 import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem'
 import InputSelect from "../../../../components/input-select"
+import SelectItems from "../../../../components/select-items"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
     const [externalListing, setExternalListing] = useState(initialExternalListing)
     const navigate = useNavigate()
     const initialEmptyMessage = "Select item to import"
+    const initialEmptyItemsMessage = "Select items to import"
     const handleSelectItem = (item) => {
         if (item.card_id) {
             setExternalListing({
@@ -39,9 +41,30 @@ const ImportListing = (props) => {
         }
         navigate('/gym-leader/collection/watching/import')
     }
+    const handleSelectItems = (items) => {
+        const cardsToAdd = []
+        const productsToAdd = []
+        items.forEach(item => {
+            if (item.card_id) cardsToAdd.push({ ...item, note: '' })
+            else if (item.product_id) productsToAdd.push({ ...item, note: '' })
+        })
+        setExternalListing({
+            ...externalListing,
+            cards: cardsToAdd,
+            products: productsToAdd
+        })
+        navigate('/gym-leader/collection/watching/import')
+    }
+    const formatExternalListing = (listing) => {
+        return {
+            ...listing,
+            cards: listing.cards.map(card => ({ card_id: card.card_id, note: card.note })),
+            products: listing.products.map(product => ({ product_id: product.product_id, note: product.note }))
+        }
+    }
     const handleCreateExternalListing = async () => {
         try {
-            await BillsPcService.postListing({ data: externalListing, params: { external: true } })
+            await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
             navigate('/gym-leader/collection/watching/import')
         } catch (err) {
             console.log(err)
@@ -160,6 +183,7 @@ const ImportListing = (props) => {
                         <div style={{ display: 'flex' }}>
                             <button onClick={() => navigate('add-item')}>Add Item</button>
                             <button onClick={() => navigate('add-bulk')}>Add Bulk</button>
+                            <button onClick={() => navigate('add-lot')}>Add Lot</button>
                         </div>
                         <button onClick={handleCreateExternalListing}>Create Listing</button>
                     </div>
@@ -180,6 +204,15 @@ const ImportListing = (props) => {
                     referenceData={referenceData}
                     addSplitToTransaction={addSplitToTransaction}
                     initialSplitValues={initialSortingSplitValues} 
+                />}
+            />
+            <Route 
+                path='/add-lot'
+                element={<SelectItems
+                    referenceData={referenceData}
+                    setReferenceData={setReferenceData}
+                    handleSelectItems={handleSelectItems}
+                    initialEmptyMessage={initialEmptyItemsMessage}
                 />}
             />
             <Route 

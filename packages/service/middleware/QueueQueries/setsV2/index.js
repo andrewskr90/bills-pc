@@ -1,9 +1,9 @@
 const QueryFormatters = require('../../../utils/queryFormatters')
 
 const insert = (req, res, next) => {
-    const sets= req.body.sets
-    const { columns, values } = QueryFormatters.seperateColumnsValues(sets)
-    req.queryQueue.push(`INSERT INTO sets_v2 (${columns}) VALUES (${values});`)
+    const sets= req.sets
+    const query = QueryFormatters.objectsToInsert(sets, 'sets_v2')
+    req.queryQueue.push(query)
     next()
 }
 

@@ -1,8 +1,8 @@
 .item {
     margin-bottom: 10px;
     display: flex;
-    align-items: center;
-    height: 150px;
+    flex-direction: column;
+    // align-items: center;
     border-radius: 15px;
     border-top: 2px solid #9e9e9e41;
     border-left: 2px solid #9e9e9e41;
@@ -13,6 +13,10 @@
         5px 5px #9e9e9e41;
     width: 44%;
     max-width: 200px;
+    div.imageChartAndValue {
+        display: flex;
+        height: 150px;
+    }
     div.image {
         display: flex;
         justify-content: center;
@@ -87,6 +91,17 @@
             border-radius: 5px;
         }
     }
+    .count {
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        div { 
+            width: 40%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+    }
     
 }
 .item.up {
@@ -100,6 +115,8 @@
         color: rgb(160, 0, 0)
     }
 }
+
+.item.marked { border-color: #6065cb; }
 
 
 @media only screen and (min-width: 600px) {
