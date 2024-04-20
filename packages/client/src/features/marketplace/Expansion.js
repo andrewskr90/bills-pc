@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import MinimalPokeball from '../../assets/images/minimal-pokeball.png'
 
 const Expansion = (props) => {
-    const { referenceDataExpansion } = props
+    const { referenceDataExpansion, handleSelectSet } = props
     const navigate = useNavigate()
     
     let topTenAverage = 'loading...'
@@ -14,13 +14,9 @@ const Expansion = (props) => {
         topTenAverage = referenceDataExpansion.topTenAverage.today ? `$${referenceDataExpansion.topTenAverage.today.toFixed(2)}` : ''
     }
 
-    const handleSelectSet = () => {
-        navigate(referenceDataExpansion.set_v2_id)
-    }
-
     return (<div 
             className='expansion'
-            onClick={handleSelectSet}
+            onClick={() => handleSelectSet(referenceDataExpansion.set_v2_id)}
         >
         <div className='setSymbol'>
             <img src={referenceDataExpansion.set_v2_ptcgio_id ? `https://images.pokemontcg.io/${referenceDataExpansion.set_v2_ptcgio_id}/symbol.png` : MinimalPokeball} />

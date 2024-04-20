@@ -4,7 +4,7 @@ import Expansion from './Expansion'
 import { filterExpansions } from '../../utils/filter'
 
 const ExpansionsMarketplace = (props) => {
-    const { referenceData, setReferenceData } = props
+    const { referenceData, setReferenceData, handleSelectSet } = props
     const sortKey = 'setSort'
     const filterKey = 'expansion'
     const sortMarketSetsCB = (a, b) => {
@@ -63,6 +63,7 @@ const ExpansionsMarketplace = (props) => {
                 .sort(sortMarketSetsCB)
                 .map(referenceDataExpansion => {
                     return <Expansion 
+                        handleSelectSet={handleSelectSet}
                         referenceData={referenceData} 
                         referenceDataExpansion={referenceDataExpansion} 
                     />

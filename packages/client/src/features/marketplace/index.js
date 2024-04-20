@@ -18,6 +18,10 @@ const Marketplace = (props) => {
         navigate(`search?category=${category}&value=${value}`)
     }
 
+    const handleSelectSet = (setId) => {
+        navigate(setId)
+    }
+
     return (<div className='marketplace'>
         <Header main title={'Marketplace'}>
             <Link to='/support-us'>Support Us</Link>
@@ -27,6 +31,7 @@ const Marketplace = (props) => {
             <Route 
                 path='/'
                 element={<ExpansionsMarketplace
+                    handleSelectSet={handleSelectSet}
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}
                 />}

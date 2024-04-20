@@ -5,6 +5,7 @@ import { applyMarketChanges } from '../../utils/market'
 import MarketplaceChart from './MarketplaceChart'
 import { generateDisplayedMarketValue } from '../../utils/market'
 import AffiliateLink from '../../components/affiliate-link'
+import BillsPcService from '../../api/bills-pc'
 
 const ExpansionItemInfo = (props) => {
     const { referenceData, setReferenceData } = props
@@ -22,7 +23,28 @@ const ExpansionItemInfo = (props) => {
                 if (item.card_id === targetItemId || item.product_id === targetItemId) return item
             })
             setTargetItem(applyMarketChanges(filteredTargetItem)[0])
+        } else {
+            (async () => {
+                await BillsPcService.getMarketPrices({ set_v2_id: targetExpansionId})
+                    .then(res => {
+                        setReferenceData({
+                            ...referenceData,
+                            sets: referenceData.sets.map(expansion => {
+                                if (expansion.set_v2_id === targetExpansionId) {
+                                    return {
+                                        ...expansion,
+                                        items: res.data
+                                    }
+                                } else {
+                                    return expansion
+                                }
+                            })
+                        })
+                    })
+                    .catch(err => console.log(err))
+            })()
         }
+
     }, [referenceData])
 
     const handleAddToCollection = () => {
@@ -76,7 +98,7 @@ const ExpansionItemInfo = (props) => {
             </div>
         </>
         :
-        <></>}
+        <>Loading...</>}
     </div>)
 }
 
