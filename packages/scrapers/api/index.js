@@ -77,3 +77,92 @@ export const convertSaleItemToListing = async (cookies, data) => {
     }
 }
 
+export const getListingById = async (cookies, id) => {
+    try {
+        return axios({
+            baseURL: baseurl,
+            url: `/api/v1/listings/${id}`,
+            headers: { Cookie: cookies },
+        })
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getSetsBillsPc = async (cookies, params) => {
+    try {
+        const expansionsRes = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/sets-v2',
+            params,
+            headers: { Cookie: cookies }
+        })
+        const expansions = expansionsRes.data
+        expansions.sort((a, b) => {
+            if (a.set_v2_name < b.set_v2_name) return 1
+            else if (a.set_v2_name > b.set_v2_name) return -1
+            else return 0
+        })
+        return expansions
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const postSetsBillsPc = async (cookies, data) => {
+    try {
+        const postSetsRes = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/sets-v2',
+            data,
+            headers: { Cookie: cookies },
+        })
+        return postSetsRes.data.addedSets
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const patchSetBillsPc = async (cookies, setId, data) => {
+    try {
+        const patchSetRes = await axios({
+            baseURL: baseurl,
+            method: 'patch',
+            url: `/api/v1/sets-v2/${setId}`,
+            data,
+            headers: { Cookie: cookies },
+        })
+        return patchSetRes.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getCardsBillsPc = async (params, cookies) => {
+    try {
+        const billsPcCardsV2 = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/cards-v2',
+            headers: { Cookie: cookies },
+            params
+        })        
+        return billsPcCardsV2.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getProductsBillsPc = async (params, cookies) => {
+    try {
+        const billsPcProducts = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/products',
+            headers: { Cookie: cookies },
+            params
+        })        
+        return billsPcProducts.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}

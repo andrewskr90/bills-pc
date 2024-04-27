@@ -25,10 +25,10 @@ build from port 7070
 #### Local machine
 - merge into master, create a new release/tag
 - build and push new image to aws ECR:
-    - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 529244651941.dkr.ecr.us-west-2.amazonaws.com
-    - docker build -f Docker/bills-pc-app.Dockerfile -t bills-pc-app .
-    - docker tag bills-pc-app:latest 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app:latest
-    - docker push 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app:latest
+    - `aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 529244651941.dkr.ecr.us-west-2.amazonaws.com`
+    - `docker build -f Docker/bills-pc-app.Dockerfile -t bills-pc-app .`
+    - `docker tag bills-pc-app:latest 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app:latest`
+    - `docker push 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app:latest`
 
 #### EC2 instance
 - ssh into instance
