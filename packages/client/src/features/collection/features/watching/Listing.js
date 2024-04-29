@@ -31,7 +31,7 @@ const Listing = (props) => {
                         {listing.lot.id && (
                             <div>
                                 <p>Listing Market Value: {listing.lot.items.reduce((a, c) => {
-                                    if (parseInt(c.market_price_price)) return a + c.market_price_price
+                                    if (parseFloat(c.market_price_price)) return a + parseFloat(c.market_price_price)
                                     return a
                                 }, 0)}</p>
                                 {listing.lot.items
