@@ -80,10 +80,12 @@ const QueryFormatters = {
         let filterStringified = ''
         const keys = Object.keys(filter)
         keys.forEach((key, index) => {
+            let value = filter[key]
+            if (value.includes("'")) value = value.split("'").join("''")
             if (index === keys.length -1) {
-                filterStringified += `${key}='${filter[key]}'`
+                filterStringified += `${key}='${value}'`
             } else {
-                filterStringified += `${key}='${filter[key]}' AND `
+                filterStringified += `${key}='${value}' AND `
             }
         })
         return filterStringified
@@ -101,6 +103,8 @@ const QueryFormatters = {
                 //escape apostrophes
                 let escapedApostrophe = accentsRemoved.replace(/'/g, "''")
                 value = `'${escapedApostrophe}'`
+            } else {
+                value = object[key]
             }
             if (index === keys.length -1) {
                 stringForSetStatement += `${key}=${value}`

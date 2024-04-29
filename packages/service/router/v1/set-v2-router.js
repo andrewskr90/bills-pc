@@ -35,7 +35,7 @@ setV2Router.post('/',
         res.status(201).json(results)
 })
 
-setV2Router.put('/:set_v2_id',
+setV2Router.patch('/:set_v2_id',
     verifyCookie,
     decodeSessionToken,
     gymLeaderOnly,

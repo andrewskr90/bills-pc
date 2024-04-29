@@ -21,8 +21,8 @@ const select = (req, res, next) => {
 
 const update = (req, res, next) => {
     const set_v2_id = req.params.set_v2_id
-    const updatedSet = req.body
-    const setStatement = QueryFormatters.formatSetStatement(updatedSet)
+    const patchedValues = req.body
+    const setStatement = QueryFormatters.formatSetStatement(patchedValues)
     const query = `UPDATE sets_v2 SET ${setStatement} WHERE set_v2_id='${set_v2_id}'`
     req.queryQueue.push(query)
     next()

@@ -1,54 +1,7 @@
 import puppeteer from 'puppeteer-core'
 import axios from 'axios'
-import { baseurl, loginBillsPc } from './api/index.js'
+import { baseurl, getSetsBillsPc, loginBillsPc, getCardsBillsPc, getProductsBillsPc } from './api/index.js'
 // import { executablePath } from 'puppeteer'
-
-const getSetsBillsPc = async (cookies) => {
-    try {
-        const expansionsRes = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/sets-v2',
-            headers: { Cookie: cookies }
-        })
-        const expansions = expansionsRes.data
-        expansions.sort((a, b) => {
-            if (a.set_v2_name < b.set_v2_name) return -1
-            else if (a.set_v2_name > b.set_v2_name) return 1
-            else return 0
-        })
-        return expansions
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const getCardsBillsPc = async (expansion, cookies) => {
-    try {
-        const billsPcCardsV2 = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/cards-v2',
-            headers: { Cookie: cookies },
-            params: { card_v2_set_id: expansion.set_v2_id }
-        })        
-        return billsPcCardsV2.data
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const getProductsBillsPc = async (expansion, cookies) => {
-    try {
-        const billsPcProducts = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/products',
-            headers: { Cookie: cookies },
-            params: { product_set_id: expansion.set_v2_id }
-        })        
-        return billsPcProducts.data
-    } catch (err) {
-        throw new Error(err)
-    }
-}
 
 const getMarketPricesBillsPc = async (cookies, parameters) => {
     try {
@@ -378,7 +331,7 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
             try {
                 await addCardsBillsPc(cardsToAdd, cookies, set_)
                 //  update referenceData with newly added cards
-                const currentSetCards = await getCardsBillsPc(set_, cookies)
+                const currentSetCards = await getCardsBillsPc({ card_v2_set_id: set_.set_v2_id }, cookies)
                 referenceLib.currentSetCards = currentSetCards
             } catch (err) {
                 console.log(err)
@@ -390,7 +343,7 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
             try {
                 await addProductsBillsPc(productsToAdd, cookies, set_)
                 //  update referenceData with newly added products
-                const currentSetProducts = await getProductsBillsPc(set_, cookies)
+                const currentSetProducts = await getProductsBillsPc({ product_set_id: set_.set_v2_id }, cookies)
                 referenceLib.currentSetProducts = currentSetProducts
             } catch (err) {
                 console.log(err)
@@ -419,8 +372,8 @@ const marketScraper = async () => {
         let currentSetCards
         let currentSetProducts
         try {
-            currentSetCards = await getCardsBillsPc(setsToSearch[i], cookies)
-            currentSetProducts = await getProductsBillsPc(setsToSearch[i], cookies)
+            currentSetCards = await getCardsBillsPc({ card_v2_set_id: setsToSearch[i].set_v2_id }, cookies)
+            currentSetProducts = await getProductsBillsPc({ product_set_id: setsToSearch[i].set_v2_id }, cookies)
         } catch (err) {
             throw new Error(err)
         }
@@ -434,12 +387,15 @@ const marketScraper = async () => {
             } catch (err) {
                 throw new Error(err)
             }
+            console.log('cardMarketPrice', cardMarketPrice)
             if (cardMarketPrice.length > 0) {
                 const mostRecentPriceDate = cardMarketPrice[0].created_date.split('T')[0]
                 const todaysDate = new Date()
                 todaysDate.setHours(0,0,0,0)
 
                 // check if most recent date matches todays date
+                console.log('mostRecentPriceDate', mostRecentPriceDate)
+                console.log('todaysDate', todaysDate)
                 if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
                     console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
                     continue
