@@ -20,6 +20,10 @@ const bulkSplitRouter = require('./bulk-split-router')
 const sortingRouter = require('./sorting-router')
 const userRouter = require('./user-router')
 const listingRouter = require('./listing-router')
+const itemRouter = require('./item-router')
+const languageRouter = require('./language-router')
+const conditionRouter = require('./condition-router')
+const skuRouter = require('./sku-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -41,6 +45,10 @@ v1Router.use('/bulk-splits', bulkSplitRouter)
 v1Router.use('/sortings', sortingRouter)
 v1Router.use('/users', userRouter)
 v1Router.use('/listings', listingRouter)
+v1Router.use('/items', itemRouter)
+v1Router.use('/languages', languageRouter)
+v1Router.use('/conditions', conditionRouter)
+v1Router.use('/skus', skuRouter)
 
 
 

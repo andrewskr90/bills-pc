@@ -1,185 +1,159 @@
 import dotenv from 'dotenv'
-import axios from 'axios'
-import { getListingById, loginBillsPc, getSetsBillsPc, patchSetBillsPc, postSetsBillsPc, getCardsBillsPc, getProductsBillsPc } from './api/index.js'
+import { loginBillsPc, getSetsBillsPc, postSetsBillsPc, postItemsBillsPc, getItemsBillsPc, getLanguagesBillsPc, getPrintingsBillsPc, getConditionsBillsPc, getSkusBillsPc, postSkusBillsPc } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
 dotenv.config()
 
-const buildTCGPReferenceData = async () => {
-    const languages = await axios(`/catalog/categories/${categoryId}/languages`, tcgpapiConfig)
-    const printings = await axios(`/catalog/categories/${categoryId}/printings`, tcgpapiConfig)
-    const conditions = await axios(`/catalog/categories/${categoryId}/conditions`, tcgpapiConfig)
-    const referenceData = { languages: {}, printings: {}, conditions: {} }   
-    languages.data.results.forEach(l => referenceData.languages[l.languageId] = { name: l.name, abbr: l.abbr })
-    printings.data.results.forEach(p => referenceData.printings[p.printingId] = { name: p.name, displayOrder: p.displayOrder })
-    conditions.data.results.forEach(c => referenceData.conditions[c.conditionId] = { name: c.name, displayOrder: c.displayOrder, abbr: c.abbreviation })
-    return referenceData
-}
-
-const main = async () => {
+const catalogueSync = async () => {
     // login bills pc
     const cookies = await loginBillsPc()
     // login tcgp
     const apiToken = await TCGPAPI.authenticate()
-    let moreExpansions = true
+
+    const buildTCGPReferenceData = async () => {
+        const tcgp_languages = await TCGPAPI.languages(apiToken)
+        const tcgp_printings = await TCGPAPI.printings(apiToken)
+        const tcgp_conditions = await TCGPAPI.conditions(apiToken)
+        const bpc_languages = await getLanguagesBillsPc(cookies)  
+        const bpc_printings = await getPrintingsBillsPc(cookies)  
+        const bpc_conditions = await getConditionsBillsPc(cookies)  
+        const referenceData = {
+            tcgp: { languages: {}, printings: {}, conditions: {} },
+            bpc: { languages: {}, printings: {}, conditions: {} }
+        } 
+        tcgp_languages.forEach(l => {
+            referenceData.tcgp.languages[l.languageId] = { 
+                bpcId: bpc_languages.find(bpc_l => bpc_l.tcgpId === l.languageId).id,
+                ...l 
+            }
+        })
+        tcgp_printings.forEach(p => {
+            referenceData.tcgp.printings[p.printingId] = { 
+                bpcId: bpc_printings.find(bpc_p => bpc_p.printing_tcgp_printing_id === p.printingId).printing_id,
+                ...p
+            }
+        })
+        tcgp_conditions.forEach(c => {
+            referenceData.tcgp.conditions[c.conditionId] = { 
+                bpcId: bpc_conditions.find(bpc_c => bpc_c.condition_tcgp_condition_id === c.conditionId).condition_id,
+                ...c
+            }
+        })
+        bpc_languages.forEach(x => referenceData.bpc.languages[x.id] = { ...x })
+        bpc_printings.forEach(x => referenceData.bpc.printings[x.printing_id] = { ...x })
+        bpc_conditions.forEach(x => referenceData.bpc.conditions[x.condition_id] = { ...x })
+
+
+    return referenceData
+}
+    const referenceData = await buildTCGPReferenceData()
+    let moreGroups = true
     let expOffset = 0
-    while (moreExpansions) {
-        const currentPageExpansions = await TCGPAPI.expansions(apiToken, expOffset)
-        if (currentPageExpansions.length === 0) moreExpansions = false
-        for (let i=0; i<currentPageExpansions.length; i++) {
-            let bpc_curExpansion = undefined
-            const tcgp_curExpansion = currentPageExpansions[i]
-            const bpcExpansionsByGroupId = await getSetsBillsPc(cookies, { set_v2_tcgplayer_set_id: tcgp_curExpansion.groupId })
-            // if there are no bpc exp with that groupId
-            if (bpcExpansionsByGroupId.length === 0) {
-                const bpcExpansionsByName = await getSetsBillsPc(cookies, { set_v2_name: tcgp_curExpansion.name })
-                // if there are no bpc exp with that name
-                if (bpcExpansionsByName.length === 0) {
+
+    while (moreGroups) {
+        try {
+            const currentPageGroups = await TCGPAPI.groups(apiToken, expOffset)
+            if (currentPageGroups.length === 0) {
+                moreGroups = false
+            }
+            for (let i=0; i<currentPageGroups.length; i++) {
+                const tcgp_curGroup = currentPageGroups[i]
+                console.log(`Group name: ${tcgp_curGroup.name}`)
+                let bpc_curExpansion = undefined
+                const bpcExpansionsByGroupId = await getSetsBillsPc(cookies, { set_v2_tcgplayer_set_id: tcgp_curGroup.groupId })
+                // if there are no bpc set with that groupId
+                if (bpcExpansionsByGroupId.length === 0) {
                     // create the new set
                     const newSet = { 
-                        set_v2_name: tcgp_curExpansion.name, 
-                        set_v2_tcgplayer_set_id: tcgp_curExpansion.groupId 
+                        set_v2_name: tcgp_curGroup.name, 
+                        set_v2_tcgplayer_set_id: tcgp_curGroup.groupId 
                     }
                     const postedSets = await postSetsBillsPc(cookies, [newSet])
+                    console.log('Group has been added as set to bpc')
                     bpc_curExpansion = {
                         set_v2_id: postedSets[0].set_v2_id,
                         ...newSet
                     }
-                    console.log('new set added: ', newSet.set_v2_name)
                 } else {
-                    // update bpc set with tcgp groupId
-                    bpc_curExpansion = bpcExpansionsByName[0]
-                    await patchSetBillsPc(cookies, bpc_curExpansion.set_v2_id, { set_v2_tcgplayer_set_id: tcgp_curExpansion.groupId })
+                    bpc_curExpansion = bpcExpansionsByGroupId[0]
                 }
-            } else {
-                bpc_curExpansion = bpcExpansionsByGroupId[0]
-            }
-            const bpc_curCards = await getCardsBillsPc({ card_v2_set_id: bpc_curExpansion.set_v2_id }, cookies)
-            const bpc_curProducts = await getProductsBillsPc({ product_set_id: bpc_curExpansion.set_v2_id }, cookies)
-            const bpc_item_lookup = {}
-            bpc_curCards.forEach(card => bpc_item_lookup[card.card_v2_tcgplayer_product_id] = card)
-            bpc_curProducts.forEach(product => bpc_item_lookup[product.product_tcgplayer_product_id] = product)
-            // create sku string to concatinate later
-            let skus = ''
-            let moreItems = true
-            let itemOffset = 0
-            while (moreItems) {
-                const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curExpansion.groupId, expOffset)
-                if (currentPageItems.length === 0) moreItems = false
-                for (let i=0; i<currentPageItems.length; i++) {
+                const bpc_curExpansionItems = await getItemsBillsPc({ setId: bpc_curExpansion.set_v2_id }, cookies)
+                const bpc_curSetItemLookup = {}
+                bpc_curExpansionItems.forEach(item => bpc_curSetItemLookup[item.tcgpId] = item)
 
-
-                    const tcgp_curItem = currentPageItems[i]
-                    console.log(tcgp_curItem)
-                    let bpc_curItem = bpc_item_lookup[tcgp_curItem.productId]
-                    if (bpc_curItem) {
-                        // check if item exists in bpc under wrong set
-                        
-                        // const bpcCardsByTCGPId = await getCardsBillsPc({ card_v2_tcgplayer_product_id: tcgp_curItem.productId }, cookies)
-                        // if (bpcCardsByTCGPId.length !== 0) {
-                        //     // console.log(bpcCardsByTCGPId)
-                        // } else {
-                        //     const bpcProductsByTCGPId = await getProductsBillsPc({ product_tcgplayer_product_id: tcgp_curItem.productId }, cookies)
-                        //     // console.log(bpcProductsByTCGPId)
-                        // }
-                        // // if there are no bpc exp with that name
-                        // if (bpcExpansionsByName.length === 0) {
-                        //     // create the new set
-                        //     const newSet = { 
-                        //         set_v2_name: tcgp_curItem.name, 
-                        //         set_v2_tcgplayer_set_id: tcgp_curItem.groupId 
-                        //     }
-                        //     const postedSets = await postSetsBillsPc(cookies, [newSet])
-                        //     bpc_curItem = {
-                        //         set_v2_id: postedSets[0].set_v2_id,
-                        //         ...newSet
-                        //     }
-                        //     console.log('new set added: ', newSet.set_v2_name)
-                        // } else {
-                        //     bpc_curItem = bpcExpansionsByName[0]
-                        // }
+                let moreItems = true
+                let itemOffset = 0
+                let newItemCount = 0
+                let newSkuCount = 0
+                while (moreItems) {
+                    const pageNewItems = []
+                    try {
+                        const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
+                        if (currentPageItems.length === 0) {
+                            moreItems = false
+                            continue
+                        }
+                        for (let i=0; i<currentPageItems.length; i++) {
+                            const curItem = currentPageItems[i]
+                            if (!bpc_curSetItemLookup[curItem.productId]) {
+                                const newItem = { setId: bpc_curExpansion.set_v2_id, name: curItem.name, tcgpId: curItem.productId }
+                                pageNewItems.push(newItem)
+                            }
+                        }
+                        if (pageNewItems.length > 0) {
+                            const ids = await postItemsBillsPc(pageNewItems, cookies)
+                            newItemCount += pageNewItems.length
+                            // update lookup with new items
+                            for (let i=0; i<pageNewItems.length; i++) {
+                                bpc_curSetItemLookup[pageNewItems[i].tcgpId] = {
+                                    id: ids[i],
+                                    ...pageNewItems[i]
+                                }
+                            }
+                        }
+                        for (let i=0; i<currentPageItems.length; i++) {
+                            const itemNewSkus = []
+                            const curItem = currentPageItems[i]
+                            const bpcItemId = bpc_curSetItemLookup[curItem.productId].id
+                            const bpc_itemSkus = await getSkusBillsPc({ itemId: bpcItemId }, cookies)
+                            const bpc_curSetItemSkuLookup = {}
+                            bpc_itemSkus.forEach(sku => bpc_curSetItemSkuLookup[sku.tcgpId] = sku)
+                            const tcgp_itemSkus = await TCGPAPI.skus(apiToken, curItem.productId)
+                            for (let j=0; j<tcgp_itemSkus.length; j++) {
+                                const tcgpSku = tcgp_itemSkus[j]
+                                if (!bpc_curSetItemSkuLookup[tcgpSku.skuId]) {
+                                    const bpcConditionId = referenceData.tcgp.conditions[tcgpSku.conditionId].bpcId
+                                    const bpcPrintingId = referenceData.tcgp.printings[tcgpSku.printingId].bpcId
+                                    const bpcLanguageId = referenceData.tcgp.languages[tcgpSku.languageId].bpcId
+                                    const newSku = {
+                                        tcgpId: tcgpSku.skuId,
+                                        itemId: bpcItemId,
+                                        conditionId: bpcConditionId,
+                                        printingId: bpcPrintingId,
+                                        languageId: bpcLanguageId
+                                    }
+                                    itemNewSkus.push(newSku)
+                                }
+                            }
+                            if (itemNewSkus.length > 0) {
+                                await postSkusBillsPc(itemNewSkus, cookies)
+                                newSkuCount += itemNewSkus.length
+                            }
+                        }
+                    } catch (err) {
+                        if (err.status !== 404) console.log(err)
+                        moreItems = false
                     }
-                    // console.log(bpc_curItem)
+                    itemOffset += 10
                 }
-                // for each item in tcgp set
-                    // ** sync item information **
-                    // find item by tcgp item id
-                    // if tcgp item id is not present in bpc
-                        // add item into bpc
-                    // if item info in bpc doesnt match tcgp info
-                        // update bpc info
-                    // get skus from tcgp
-                    // for each item sku
-                        // if sku is not present in bpc
-                            // add sku into bpc
-                        // if sku details not correct in bpc
-                            // update bpc sku
-                        // add sku id to sku string
+                if (newItemCount > 0) console.log(`Added ${newItemCount} new items`)
+                if (newSkuCount > 0) console.log(`Added ${newSkuCount} new skus`)
             }
-            // if length of sku string is too long
-                // get tcgp prices with multiple api calls
-            // get tcgp prices from sku string
-            // add prices into bpc
+        } catch (err) {
+            if (err.status !== 404) console.log(err)
+            moreGroups = false
         }
         expOffset += 10
     }
-
-
-
-
-
-
-
-    // const cookies = await loginBillsPc()
-    // const listingId = 'a817bf7b-b261-4415-87ae-7ef726ec560e'
-    // const listing = await getListingById(cookies, listingId)
-    // const items = listing.data[0].lot.items
-    // const categoriesParams = { limit: 3, sortOrder: 'categoryId' }
-    // const categories = await axios.get('/catalog/categories', { ...tcgpapiConfig, params: categoriesParams })
-
-    // const tcgpReferenceData = await buildTCGPReferenceData()
-    // const groupsRes = await axios.get(`/catalog/categories/${categoryId}/groups?offset=20`, tcgpapiConfig)
-    // const groups = groupsRes.data.results
-    // const profiles = {
-    //     '10': 'Normal',
-    //     '11': 'Holofoil',
-    //     '77': 'Reverse Holofoil',
-    //     '10,77': 'Normal,Reverse Holofoil',
-    //     '10,11,77': 'Normal,Holofoil,Reverse Holofoil',
-    //     '11,77': 'Holofoil,Reverse Holofoil',
-    //     '10,11': 'Normal,Holofoil'
-    // }
-    // for (let i=0; i<groups.length; i++) {
-    //     const group = groups[i]
-    //     console.log('Group: ', group.name)
-    //     let offset = 0
-    //     let previousPageFull = true
-    //     while (previousPageFull) {
-    //         try {
-    //             const productsRes = await axios.get(`/catalog/products?groupId=${group.groupId}&offset=${offset}`, tcgpapiConfig)
-    //             const products = productsRes.data.results
-    //             // let commaSeperatedSKUs = ''
-    //             for (let j=0; j<products.length; j++) {
-    //                 const { productId } = products[j]
-    //                 const skusRes = await axios.get(`/catalog/products/${productId}/skus`, tcgpapiConfig)
-    //                 const skus = skusRes.data.results
-    //                 const printingArray = []
-    //                 for (let k=0; k<skus.length; k++) {
-    //                     const sku = skus[k]
-    //                     if (!printingArray.includes(sku.printingId)) printingArray.push(sku.printingId)
-    //                 }
-    //                 const printingProfile = printingArray.sort((a,b) => a-b).join(',')
-    //                 if (!profiles[printingProfile]) profiles[printingProfile] = printingArray.map(id => tcgpReferenceData.printings[id].name).join(',')
-    //                 // if (j<products.length-1) commaSeperatedSKUs += ','
-    //             }
-    //             // const getMarketPricesBySKUs = await axios.get(`/pricing/sku/${commaSeperatedSKUs}`, tcgpapiConfig)
-
-    //             offset += 10
-    //         } catch (err) {
-    //             console.log(err.response.data.errors)
-    //             previousPageFull = false
-    //         }
-    //     }
-    // }
-    // console.log(profiles)
 }
-main()
+
+export default catalogueSync;

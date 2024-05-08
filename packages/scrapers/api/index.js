@@ -166,3 +166,100 @@ export const getProductsBillsPc = async (params, cookies) => {
         throw new Error(err)
     }
 }
+
+export const postItemsBillsPc = async (data, cookies) => {
+    try {
+        const billsPcItems = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/items',
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcItems.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getItemsBillsPc = async (params, cookies) => {
+    try {
+        const billsPcItems = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/items',
+            headers: { Cookie: cookies },
+            params
+        })        
+        return billsPcItems.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getLanguagesBillsPc = async (cookies) => {
+    try {
+        const billsPcLanguages = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/languages',
+            headers: { Cookie: cookies },
+        })        
+        return billsPcLanguages.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getPrintingsBillsPc = async (cookies) => {
+    try {
+        const billsPcPrintings = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/printings',
+            headers: { Cookie: cookies },
+        })        
+        return billsPcPrintings.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getConditionsBillsPc = async (cookies) => {
+    try {
+        const billsPcConditions = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/conditions',
+            headers: { Cookie: cookies },
+        })        
+        return billsPcConditions.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const getSkusBillsPc = async (params, cookies) => {
+    try {
+        const billsPcSkus = await axios({
+            baseURL: baseurl,
+            url: '/api/v1/skus',
+            headers: { Cookie: cookies },
+            params
+        })        
+        return billsPcSkus.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}
+
+export const postSkusBillsPc = async (data, cookies) => {
+    try {
+        const billsPcSkus = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/skus',
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcSkus.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}

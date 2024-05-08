@@ -36,9 +36,9 @@ export default {
             throw new Error(err)
         }
     },
-    async expansions(apiToken, offset) {
+    async groups(apiToken, offset) {
         try {
-            const expansionsRes = await axios({
+            const groupsRes = await axios({
                 ...tcgpapiConfig,
                 url: `/catalog/categories/${categoryId}/groups`,
                 params: { offset },
@@ -46,7 +46,7 @@ export default {
                     Authorization: `bearer ${apiToken}`
                 }
             })
-            return expansionsRes.data.results
+            return groupsRes.data.results
         } catch (err) {
             throw new Error(err)
         }
@@ -63,20 +63,76 @@ export default {
             })
             return itemsRes.data.results
         } catch (err) {
-            throw new Error(err)
+            throw err.response
         }
     },
-    async skus(apiToken, productId, groupId, offset) {
+    async skus(apiToken, productId) {
         try {
             const skusRes = await axios({
                 ...tcgpapiConfig,
                 url: `/catalog/products/${productId}/skus`,
-                params: { groupId, offset },
                 headers: {
                     Authorization: `bearer ${apiToken}`
                 }
             })
             return skusRes.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
+    async pricesBySkus(apiToken, skus) {
+        try {
+            const pricingRes = await axios({
+                ...tcgpapiConfig,
+                url: `/pricing/sku/${skus}`,
+                // params: { groupId, offset },
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }
+            })
+            return pricingRes.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
+    async languages(apiToken) {
+        try {
+            const languages = await axios({
+                ...tcgpapiConfig,
+                url: `/catalog/categories/${categoryId}/languages`,
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }                
+            })
+            return languages.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
+    async printings(apiToken) {
+        try {
+            const printings = await axios({
+                ...tcgpapiConfig,
+                url: `/catalog/categories/${categoryId}/printings`,
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }                
+            })
+            return printings.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
+    async conditions(apiToken) {
+        try {
+            const conditions = await axios({
+                ...tcgpapiConfig,
+                url: `/catalog/categories/${categoryId}/conditions`,
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }                
+            })
+            return conditions.data.results
         } catch (err) {
             throw new Error(err)
         }

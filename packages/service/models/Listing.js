@@ -103,6 +103,8 @@ const getListingById = async (listingId) => {
             card_v2_rarity,
             card_v2_tcgplayer_product_id,
             card_v2_foil_only,
+            set_v2_id,
+            set_v2_name,
             product_id,
             product_name,
             product_release_date,
@@ -119,6 +121,8 @@ const getListingById = async (listingId) => {
             OR collected_cards.collected_card_id = LotItem.collected_card_id
         LEFT JOIN cards_v2 
             on cards_v2.card_v2_id = collected_cards.collected_card_card_id
+        LEFT JOIN sets_v2
+            on cards_v2.card_v2_set_id = sets_v2.set_v2_id
         LEFT JOIN collected_products
             on collected_products.collected_product_id = Listing.collected_product_id
             OR collected_products.collected_product_id = LotItem.collected_product_id

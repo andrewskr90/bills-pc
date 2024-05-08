@@ -387,15 +387,12 @@ const marketScraper = async () => {
             } catch (err) {
                 throw new Error(err)
             }
-            console.log('cardMarketPrice', cardMarketPrice)
             if (cardMarketPrice.length > 0) {
                 const mostRecentPriceDate = cardMarketPrice[0].created_date.split('T')[0]
                 const todaysDate = new Date()
                 todaysDate.setHours(0,0,0,0)
 
                 // check if most recent date matches todays date
-                console.log('mostRecentPriceDate', mostRecentPriceDate)
-                console.log('todaysDate', todaysDate)
                 if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
                     console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
                     continue
