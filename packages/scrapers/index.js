@@ -1,4 +1,3 @@
-import dotenv from 'dotenv'
 import { 
     loginBillsPc,
     getSetsBillsPc,
@@ -13,7 +12,6 @@ import {
     postPricesBillsPc
 } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
-dotenv.config()
 
 const catalogueSync = async () => {
     // login bills pc
@@ -180,6 +178,7 @@ const catalogueSync = async () => {
                 }
                 if (newItemCount > 0) console.log(`Added ${newItemCount} new items`)
                 if (newSkuCount > 0) console.log(`Added ${newSkuCount} new skus`)
+                if (newPriceCount > 0) console.log(`Added ${newPriceCount} new market prices`)
             }
         } catch (err) {
             if (err.status !== 404) console.log(err)
