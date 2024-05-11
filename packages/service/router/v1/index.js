@@ -24,6 +24,7 @@ const itemRouter = require('./item-router')
 const languageRouter = require('./language-router')
 const conditionRouter = require('./condition-router')
 const skuRouter = require('./sku-router')
+const tcgpMarketPriceRouter = require('./tcgp-market-price-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -49,6 +50,7 @@ v1Router.use('/items', itemRouter)
 v1Router.use('/languages', languageRouter)
 v1Router.use('/conditions', conditionRouter)
 v1Router.use('/skus', skuRouter)
+v1Router.use('/tcgp-market-prices', tcgpMarketPriceRouter)
 
 
 

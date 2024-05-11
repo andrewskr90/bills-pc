@@ -263,3 +263,18 @@ export const postSkusBillsPc = async (data, cookies) => {
         throw new Error(err)
     }
 }
+
+export const postPricesBillsPc = async (data, cookies) => {
+    try {
+        const billsPcPostedPrices = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/tcgp-market-prices',
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcPostedPrices.data
+    } catch (err) {
+        throw new Error(err)
+    }
+}

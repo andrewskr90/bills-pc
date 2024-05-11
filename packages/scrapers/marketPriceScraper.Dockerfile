@@ -10,4 +10,4 @@ COPY ./ .
 
 RUN yarn
 
-CMD ["node", "index.js"]
+CMD ["node", "marketPriceScraper.js"]
