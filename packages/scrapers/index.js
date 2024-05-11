@@ -1,466 +1,199 @@
-import puppeteer from 'puppeteer-core'
-import axios from 'axios'
-import { baseurl, getSetsBillsPc, loginBillsPc, getCardsBillsPc, getProductsBillsPc } from './api/index.js'
-// import { executablePath } from 'puppeteer'
+import { 
+    loginBillsPc,
+    getSetsBillsPc,
+    postSetsBillsPc,
+    postItemsBillsPc,
+    getItemsBillsPc,
+    getLanguagesBillsPc,
+    getPrintingsBillsPc,
+    getConditionsBillsPc,
+    getSkusBillsPc,
+    postSkusBillsPc,
+    postPricesBillsPc
+} from './api/index.js'
+import TCGPAPI from './api/tcgp.js'
 
-const getMarketPricesBillsPc = async (cookies, parameters) => {
-    try {
-        const billsPcMarketPrices = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/market-prices',
-            headers: { Cookie: cookies },
-            params: parameters
-        })
-        return billsPcMarketPrices.data
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const getMarketPricesByCardIdBillsPc = async (cookies, cardId, parameters) => {
-    try {
-        const billsPcMarketPricesByCardId = await axios({
-            baseURL: baseurl,
-            url: `/api/v1/market-prices/card-id/${cardId}`,
-            headers: { Cookie: cookies },
-            params: parameters
-        })
-        return billsPcMarketPricesByCardId.data
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const getMarketPricesByProductIdBillsPc = async (cookies, productId, parameters) => {
-    try {
-        const billsPcMarketPricesByProductId = await axios({
-            baseURL: baseurl,
-            url: `/api/v1/market-prices/product-id/${productId}`,
-            headers: { Cookie: cookies },
-            params: parameters
-        })
-        return billsPcMarketPricesByProductId.data
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const addMarketPricesBillsPc = async (marketPricesToAdd, cookies, set_) => {
-    // add market prices to bills_pc
-    try {
-        const addedMarketPrices = await axios({
-            method: 'post',
-            baseURL: baseurl,
-            url: '/api/v1/market-prices',
-            data: marketPricesToAdd,
-            headers: { Cookie: cookies }
-        })
-        console.log(addedMarketPrices.status)
-        console.log(`----------added ${marketPricesToAdd.length} prices from ${set_.set_v2_name}----------`)
-    } catch (err) {
-        console.log(`--DEBUG: Attempted to add these items: ${marketPricesToAdd}`)
-        throw new Error(err)
-    }
-}
-
-const addCardsBillsPc = async (cardsToAdd, cookies, set_) => {
-    try {
-        const addedCards = await axios({
-            method: 'post',
-            baseURL: baseurl,
-            url: 'api/v1/cards-v2',
-            data: cardsToAdd,
-            headers: { Cookie: cookies }
-        })
-        console.log(addedCards.status)
-        console.log(`added ${cardsToAdd.length} from ${set_.set_v2_name}`)
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const addProductsBillsPc = async (productsToAdd, cookies, set_) => {
-    try {
-        const addedProducts = await axios({
-            method: 'post',
-            baseURL: baseurl,
-            url: 'api/v1/products',
-            data: productsToAdd,
-            headers: { Cookie: cookies }
-        })
-        console.log(addedProducts.status)
-        console.log(`added ${productsToAdd.length} from ${set_.set_v2_name}`)
-    } catch (err) {
-        throw new Error(err)
-    }
-}
-
-const formatSetNameForUrl = (set_) => {
-    // format set name to match webpage url
-    let curSetName = set_.set_v2_name
-    curSetName = curSetName.replace(/\(/g, "")
-        .replace(/\)/g, "")
-        .replace(/\ /g, '-')
-        .replace(/\---/g, '-')
-        .replace(/\--/g, '-')
-        .replace(/\'/g, '')
-        .replace(/\:/g, '')
-        .replace(/\&/g, 'and')
-    return curSetName.toLowerCase()
-}
-
-const gatherPageNewItems = async (referenceLib, results) => {
-    const currentSetCards = referenceLib.currentSetCards
-    const currentSetProducts = referenceLib.currentSetProducts
-    const currentSetCardsLib = referenceLib.currentSetCardsLib
-    const currentSetProductsLib = referenceLib.currentSetProductsLib
-    const cardsToAdd = referenceLib.cardsToAdd
-    const productsToAdd = referenceLib.productsToAdd
-    const set_ = referenceLib.set_
-    const page = referenceLib.page
-    for (let i=0; i<results.length; i++) {
-        // item set id
-        const itemSetId = set_.set_v2_id
-        // item tcg product id
-        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/div/div/div/a")
-        const itemATagHref = await page.evaluate((element) => element.href, itemATag[0])
-        const itemTcgProductId = itemATagHref.split('/')[4]
-        // item name
-        const itemNameElement = await results[i].$('.product-card__title')
-        const itemName = await page.evaluate((element) => element.textContent, itemNameElement)
-        const resultRaritySection = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__rarity']")
-        // item is card
-        if (resultRaritySection.length === 1) {
-            // card rarity
-            const cardRaritySection = await resultRaritySection[0].$$('xpath/./span[1]')
-            let cardRarity = null
-            if (cardRaritySection.length === 1) {
-                const cardRarityElement = cardRaritySection[0]
-                cardRarity = await page.evaluate(element => element.textContent, cardRarityElement)
-            }
-            // card number
-            const cardNumberSection = await resultRaritySection[0].$$('xpath/./span[3]')
-            let cardNumber = null
-            if (cardNumberSection.length === 1) {
-                const cardNumberElement = cardNumberSection[0]
-                cardNumber = await page.evaluate(element => element.textContent, cardNumberElement)
-            }
-            if (!currentSetCardsLib[parseInt(itemTcgProductId)]) {
-                // format card
-                const cardToAdd = {}
-                cardToAdd.card_v2_set_id = itemSetId
-                cardToAdd.card_v2_name = itemName
-                cardToAdd.card_v2_number = cardNumber
-                cardToAdd.card_v2_rarity = cardRarity
-                cardToAdd.card_v2_tcgplayer_product_id = parseInt(itemTcgProductId)
-                cardToAdd.card_v2_foil_only = null
-                console.log(`**found NEW CARD, ${cardToAdd.card_v2_name}, tcgId:${cardToAdd.card_v2_tcgplayer_product_id}`)                    
-                cardsToAdd.push(cardToAdd)
-                currentSetCards.push(cardToAdd)
-                currentSetCardsLib[cardToAdd.card_v2_tcgplayer_product_id] = 1
-            }
-        } else {
-            // format product
-            const productToAdd = {}
-            productToAdd.product_set_id = itemSetId
-            productToAdd.product_name = itemName
-            productToAdd.product_release_date = null
-            productToAdd.product_description = null
-            productToAdd.product_tcgplayer_product_id = parseInt(itemTcgProductId)
-            if  (!currentSetProductsLib[productToAdd.product_tcgplayer_product_id]) {
-                console.log(`**found NEW PRODUCT, ${productToAdd.product_name}, tcgId:${productToAdd.product_tcgplayer_product_id}`)
-                productsToAdd.push(productToAdd)
-                currentSetProducts.push(productToAdd)
-                currentSetProductsLib[productToAdd.product_tcgplayer_product_id] = 1
-            }
-        }
-    }
-
-    referenceLib.currentSetCards = currentSetCards
-    referenceLib.currentSetProducts = currentSetProducts
-    referenceLib.currentSetCardsLib = currentSetCardsLib
-    referenceLib.currentSetProductsLib = currentSetProductsLib
-    referenceLib.cardsToAdd = cardsToAdd
-    referenceLib.productsToAdd = productsToAdd
-    return referenceLib
-}
-
-const gatherPageMarketPrices = async (referenceLib, results) => {
-    // initialize variables
-    const set_ = referenceLib.set_
-    const currentSetCards = referenceLib.currentSetCards
-    const currentSetProducts = referenceLib.currentSetProducts
-    const marketPricesToAdd = referenceLib.marketPricesToAdd
-    const visitedItems = referenceLib.visitedItems
-    const curSetId = set_.set_v2_id
-    const page = referenceLib.page
-    // format and add each item market price to bills_pc db
-    for (let i=0; i<results.length; i++) {
-        // item set id
-        const itemSetId = curSetId
-        // item tcg product id
-        const itemATag = await results[i].$$("xpath/./div[@class='search-result__content']/div/div/div/a")
-        const itemATagHref = await page.evaluate(element => element.href, itemATag[0])
-        const itemTcgProductId = parseInt(itemATagHref.split('/')[4])
-        // item name
-        const itemNameElement = await results[i].$$('.product-card__title')
-        const itemName = await page.evaluate(element => element.textContent, itemNameElement[0])
-        const resultRaritySection = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__rarity']")
-        // item market price
-        const itemMarketPriceSectionToCheck = await results[i].$$("xpath/./div/div/div/div/a/section/section[@class='product-card__market-price']/section")
-        // check if market price not available
-        const sectionClassNames = await page.evaluate(element => element.className, itemMarketPriceSectionToCheck[0])
-        let itemMarketPrice = null
-        if (!sectionClassNames.includes('unavailable')) {
-            const itemMarketPriceElement = await itemMarketPriceSectionToCheck[0].$$("xpath/./span[@class='product-card__market-price--value']")
-            let itemMarketPriceString = await page.evaluate(element => element.textContent, itemMarketPriceElement[0])
-            itemMarketPriceString = itemMarketPriceString.replace(/\$/g, '')
-            itemMarketPriceString = itemMarketPriceString.replace(/\,/g, '')
-            itemMarketPrice = parseFloat(itemMarketPriceString)
-        }
-        const marketPriceToAdd = {}
-        // make sure item not visited
-        if (!visitedItems[itemTcgProductId]) {
-            // add item to visitedItems
-            visitedItems[itemTcgProductId] = 1
-            // item is card
-            if (resultRaritySection.length === 1) {
-                // find card_v2_id
-                if (currentSetCards.length > 0) {
-                    const matchedCard = currentSetCards.filter(card => {
-                        return card.card_v2_tcgplayer_product_id === itemTcgProductId
-                    })
-                    if (matchedCard.length === 0) {
-                        console.log(`WARNING: Card with tcgId ${itemTcgProductId} not present in Bills Pc DB. Update bills_pc.cards_v2 with cards from set with id: ${curSetId}.`)
-                    } else {
-                        // check if there is price to add
-                        if (itemMarketPrice) {
-                            // format card market price
-                            marketPriceToAdd.market_price_card_id = matchedCard[0].card_v2_id
-                            marketPriceToAdd.market_price_price = itemMarketPrice
-                            marketPriceToAdd.market_price_product_id = null
-                            marketPricesToAdd.push(marketPriceToAdd)
-                        }
-                    }    
-                } else {
-                    console.log(`WARNING: No cards added to current set with id ${curSetId}`)
-                }
-            // item is product
-            } else {
-                // find product_id
-                if (currentSetProducts.length > 0) {
-                    const matchedProduct = currentSetProducts.filter(product => {
-                        return product.product_tcgplayer_product_id === itemTcgProductId
-                    })
-                    if (matchedProduct.length === 0) {
-                        console.log(`WARNING: Product with tcgId ${itemTcgProductId} not present in Bills Pc DB. Update bills_pc.products with products from set with id: ${curSetId}.`)
-                    } else {
-                        // check if there is price to add
-                        if (itemMarketPrice) {
-                            // format product market price
-                            marketPriceToAdd.market_price_card_id = null
-                            marketPriceToAdd.market_price_price = itemMarketPrice
-                            marketPriceToAdd.market_price_product_id = matchedProduct[0].product_id
-                            marketPricesToAdd.push(marketPriceToAdd)
-                        }  
-                    }    
-                } else {
-                    console.log(`WARNING: No products added to current set with id ${curSetId}`)
-                }
-            }
-        }
-    }
-    referenceLib.marketPricesToAdd = marketPricesToAdd
-    referenceLib.visitedItems = visitedItems
-    return referenceLib
-}
-
-const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPrices, gatherPageNewItems) => {
-    const collectionArray = []
-    const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser',
-        // executablePath: executablePath(), // development
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--single-process',
-            '--disable-gpu'
-        ]
-    })
-    const page = await browser.newPage()
-    // initialize variables
-    let pageNum = 1
-    let notLastPage = true   
-    const curSetName = formatSetNameForUrl(referenceLib.set_)
-    // skipping dp training kit blue and gold until I can confirm they should be removed
-    if (curSetName === 'dp-training-kit-1-blue' || curSetName === 'dp-training-kit-1-gold') {
-        console.log('deprecated set', curSetName)
-        return referenceLib
-    }
-    while (notLastPage) {
-        let category = 'pokemon'
-        if (curSetName === 'pokemon-international-storage-albums') {
-            category = 'storage-albums'
-        }
-        // open product page with driver, using current set and current page
-        const setUrl = `https://www.tcgplayer.com/search/${category}/${curSetName}?Price_Condition=Less+Than&advancedSearch=true&productLineName=${category}&view=grid&setName=${curSetName}&page=${pageNum}`
-        await page.goto(setUrl)
-        await page.setViewport({width: 1080, height: 1024})
-        const nextPageElement = await page.waitForSelector('aria/Next page')
-        const nextPageButtonClasses = await page.evaluate(element => element.classList, nextPageElement)
-        if (Object.values(nextPageButtonClasses).indexOf('is-disabled') > -1) {
-            notLastPage = false
-        }
-        //  select all product results
-        const results = await page.$$('.search-result')
-
-        //  update referenceLib with new items on current page, if any--
-        referenceLib.page = page
-        referenceLib = await gatherPageNewItems(referenceLib, results)
-        const cookies = referenceLib.cookies
-        const set_ = referenceLib.set_
-
-        //  add any new cards to bills pc
-        const cardsToAdd = referenceLib.cardsToAdd
-        if (cardsToAdd.length > 0) {
-            try {
-                await addCardsBillsPc(cardsToAdd, cookies, set_)
-                //  update referenceData with newly added cards
-                const currentSetCards = await getCardsBillsPc({ card_v2_set_id: set_.set_v2_id }, cookies)
-                referenceLib.currentSetCards = currentSetCards
-            } catch (err) {
-                console.log(err)
-            }
-        }
-        //  add any new products to bills pc
-        const productsToAdd = referenceLib.productsToAdd
-        if (productsToAdd.length > 0) {
-            try {
-                await addProductsBillsPc(productsToAdd, cookies, set_)
-                //  update referenceData with newly added products
-                const currentSetProducts = await getProductsBillsPc({ product_set_id: set_.set_v2_id }, cookies)
-                referenceLib.currentSetProducts = currentSetProducts
-            } catch (err) {
-                console.log(err)
-            }
-        }
-
-        //  reset cards and products to add arrays
-        referenceLib.cardsToAdd = []
-        referenceLib.productsToAdd = []
-
-        //  update referenceLib with page market prices, including the new items from current page
-        referenceLib = await gatherPageMarketPrices(referenceLib, results)
-        pageNum = (parseInt(pageNum) + 1).toString()
-    }
-    await browser.close()
-    return referenceLib
-}
-
-const marketScraper = async () => {
+const catalogueSync = async () => {
+    // login bills pc
     const cookies = await loginBillsPc()
-    const setsToSearch = await getSetsBillsPc(cookies)
+    // login tcgp
+    const apiToken = await TCGPAPI.authenticate()
 
-    for (let i=0; i< setsToSearch.length; i++) {
-        console.log(`------------------------Scraping Market Prices: ${setsToSearch[i].set_v2_name}------------------------`)
-        //  get set cards and products from bills_pc
-        let currentSetCards
-        let currentSetProducts
-        try {
-            currentSetCards = await getCardsBillsPc({ card_v2_set_id: setsToSearch[i].set_v2_id }, cookies)
-            currentSetProducts = await getProductsBillsPc({ product_set_id: setsToSearch[i].set_v2_id }, cookies)
-        } catch (err) {
-            throw new Error(err)
-        }
-        //  check if current set has been scraped already today
-        if (currentSetCards.length > 0) {
-            const firstCardId = currentSetCards[0].card_v2_id
-            const parameters = { limit: 1 }
-            let cardMarketPrice
-            try {
-                cardMarketPrice = await getMarketPricesByCardIdBillsPc(cookies, firstCardId, parameters)
-            } catch (err) {
-                throw new Error(err)
+    const buildTCGPReferenceData = async () => {
+        const tcgp_languages = await TCGPAPI.languages(apiToken)
+        const tcgp_printings = await TCGPAPI.printings(apiToken)
+        const tcgp_conditions = await TCGPAPI.conditions(apiToken)
+        const bpc_languages = await getLanguagesBillsPc(cookies)  
+        const bpc_printings = await getPrintingsBillsPc(cookies)  
+        const bpc_conditions = await getConditionsBillsPc(cookies)  
+        const referenceData = {
+            tcgp: { languages: {}, printings: {}, conditions: {} },
+            bpc: { languages: {}, printings: {}, conditions: {} }
+        } 
+        tcgp_languages.forEach(l => {
+            referenceData.tcgp.languages[l.languageId] = { 
+                bpcId: bpc_languages.find(bpc_l => bpc_l.tcgpId === l.languageId).id,
+                ...l 
             }
-            console.log('cardMarketPrice', cardMarketPrice)
-            if (cardMarketPrice.length > 0) {
-                const mostRecentPriceDate = cardMarketPrice[0].created_date.split('T')[0]
-                const todaysDate = new Date()
-                todaysDate.setHours(0,0,0,0)
-
-                // check if most recent date matches todays date
-                console.log('mostRecentPriceDate', mostRecentPriceDate)
-                console.log('todaysDate', todaysDate)
-                if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
-                    console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
-                    continue
-                }
-            }
-        //  just in case current set only has sealed product i.e. World Championship Decks
-        } else if (currentSetProducts.length > 0) {
-            const firstProductId = currentSetProducts[0].product_id
-            const parameters = { limit: 1 }
-            let productMarketPrice
-            try {
-                productMarketPrice = await getMarketPricesByProductIdBillsPc(cookies, firstProductId, parameters)
-            } catch (err) {
-                throw new Error(err)
-            }
-            if (productMarketPrice.length > 0) {
-                const mostRecentPriceDate = productMarketPrice[0].created_date.split('T')[0]
-                const todaysDate = new Date()
-                todaysDate.setHours(0,0,0,0)
-                //  check if most recent date matches todays date
-                if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
-                    console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
-                    continue
-                }
-            }
-        }
-        //  building currentSet Cards and Products from addItemsFromTcgPlayer
-        const currentSetCardsLib = {}
-        const currentSetProductsLib = {}
-
-        //  flag cards as visited
-        currentSetCards.forEach(card => {
-            const cardTcgId = card.card_v2_tcgplayer_product_id
-            currentSetCardsLib[cardTcgId] = 1
         })
-        //  flag products as visited
-        currentSetProducts.forEach(product => {
-            const productTcgId = product.product_tcgplayer_product_id
-            currentSetProductsLib[productTcgId] = 1
+        tcgp_printings.forEach(p => {
+            referenceData.tcgp.printings[p.printingId] = { 
+                bpcId: bpc_printings.find(bpc_p => bpc_p.printing_tcgp_printing_id === p.printingId).printing_id,
+                ...p
+            }
         })
-        let referenceLib = {}
-        referenceLib.set_ = setsToSearch[i]
-        referenceLib.currentSetCards = currentSetCards
-        referenceLib.currentSetProducts = currentSetProducts
-        referenceLib.marketPricesToAdd = []
-        referenceLib.visitedItems = {}
-        //  referenceLib variables needed for addItemsFromTcgPlayer
-        referenceLib.currentSetCardsLib = currentSetCardsLib
-        referenceLib.currentSetProductsLib = currentSetProductsLib
-        referenceLib.cardsToAdd = []
-        referenceLib.productsToAdd = []
-        referenceLib.cookies = cookies
+        tcgp_conditions.forEach(c => {
+            referenceData.tcgp.conditions[c.conditionId] = { 
+                bpcId: bpc_conditions.find(bpc_c => bpc_c.condition_tcgp_condition_id === c.conditionId).condition_id,
+                ...c
+            }
+        })
+        bpc_languages.forEach(x => referenceData.bpc.languages[x.id] = { ...x })
+        bpc_printings.forEach(x => referenceData.bpc.printings[x.printing_id] = { ...x })
+        bpc_conditions.forEach(x => referenceData.bpc.conditions[x.condition_id] = { ...x })
+        return referenceData
+    }
+    const referenceData = await buildTCGPReferenceData()
+    let moreGroups = true
+    let expOffset = 0
+
+    while (moreGroups) {
         try {
-            referenceLib = await processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gatherPageNewItems)
-            const marketPricesToAdd = referenceLib.marketPricesToAdd
-            if (marketPricesToAdd.length > 0) {
-                await addMarketPricesBillsPc(marketPricesToAdd, cookies, setsToSearch[i])
+            const currentPageGroups = await TCGPAPI.groups(apiToken, expOffset)
+            if (currentPageGroups.length === 0) {
+                moreGroups = false
+            }
+            for (let i=0; i<currentPageGroups.length; i++) {
+                const tcgp_curGroup = currentPageGroups[i]
+                console.log(`Group name: ${tcgp_curGroup.name}`)
+                let bpc_curExpansion = undefined
+                const bpcExpansionsByGroupId = await getSetsBillsPc(cookies, { set_v2_tcgplayer_set_id: tcgp_curGroup.groupId })
+                // if there are no bpc set with that groupId
+                if (bpcExpansionsByGroupId.length === 0) {
+                    // create the new set
+                    const newSet = { 
+                        set_v2_name: tcgp_curGroup.name, 
+                        set_v2_tcgplayer_set_id: tcgp_curGroup.groupId 
+                    }
+                    const postedSets = await postSetsBillsPc(cookies, [newSet])
+                    console.log('Group has been added as set to bpc')
+                    bpc_curExpansion = {
+                        set_v2_id: postedSets[0].set_v2_id,
+                        ...newSet
+                    }
+                } else {
+                    bpc_curExpansion = bpcExpansionsByGroupId[0]
+                }
+                const bpc_curExpansionItems = await getItemsBillsPc({ setId: bpc_curExpansion.set_v2_id }, cookies)
+                const bpc_curSetItemLookup = {
+                    items: {},
+                    skus: {}
+                }
+                bpc_curExpansionItems.forEach(item => bpc_curSetItemLookup.items[item.tcgpId] = item)
+
+                let moreItems = true
+                let itemOffset = 0
+                let newItemCount = 0
+                let newSkuCount = 0
+                let newPriceCount = 0
+                while (moreItems) {
+                    const pageNewItems = []
+                    try {
+                        const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
+                        if (currentPageItems.length === 0) {
+                            moreItems = false
+                            continue
+                        }
+                        for (let i=0; i<currentPageItems.length; i++) {
+                            const curItem = currentPageItems[i]
+                            if (!bpc_curSetItemLookup.items[curItem.productId]) {
+                                const newItem = { setId: bpc_curExpansion.set_v2_id, name: curItem.name, tcgpId: curItem.productId }
+                                pageNewItems.push(newItem)
+                            }
+                        }
+                        if (pageNewItems.length > 0) {
+                            const ids = await postItemsBillsPc(pageNewItems, cookies)
+                            newItemCount += pageNewItems.length
+                            // update lookup with new items
+                            for (let i=0; i<pageNewItems.length; i++) {
+                                bpc_curSetItemLookup.items[pageNewItems[i].tcgpId] = {
+                                    id: ids[i],
+                                    ...pageNewItems[i]
+                                }
+                            }
+                        }
+                        let currentPageSkus = ''
+
+                        const bpc_curSetItemPageSkuLookup = {}
+                        for (let i=0; i<currentPageItems.length; i++) {
+                            const itemNewSkus = []
+                            const curItem = currentPageItems[i]
+                            const bpcItemId = bpc_curSetItemLookup.items[curItem.productId].id
+                            const bpc_itemSkus = await getSkusBillsPc({ itemId: bpcItemId }, cookies)
+                            bpc_itemSkus.forEach(sku => bpc_curSetItemPageSkuLookup[sku.tcgpId] = sku)
+                            const tcgp_itemSkus = await TCGPAPI.skus(apiToken, curItem.productId)
+                            for (let j=0; j<tcgp_itemSkus.length; j++) {
+                                const tcgpSku = tcgp_itemSkus[j]
+                                currentPageSkus += `${tcgpSku.skuId}`
+                                if (i === currentPageItems.length-1 && j === tcgp_itemSkus.length-1) {
+                                } else {
+                                    currentPageSkus += ','
+                                }
+                                if (!bpc_curSetItemPageSkuLookup[tcgpSku.skuId]) {
+                                    const bpcConditionId = referenceData.tcgp.conditions[tcgpSku.conditionId].bpcId
+                                    const bpcPrintingId = referenceData.tcgp.printings[tcgpSku.printingId].bpcId
+                                    const bpcLanguageId = referenceData.tcgp.languages[tcgpSku.languageId].bpcId
+                                    const newSku = {
+                                        tcgpId: tcgpSku.skuId,
+                                        itemId: bpcItemId,
+                                        conditionId: bpcConditionId,
+                                        printingId: bpcPrintingId,
+                                        languageId: bpcLanguageId
+                                    }
+                                    itemNewSkus.push(newSku)
+                                }
+                            }
+                            if (itemNewSkus.length > 0) {
+                                const ids = await postSkusBillsPc(itemNewSkus, cookies)
+                                newSkuCount += itemNewSkus.length
+
+                                // update lookup with new skus
+                                for (let i=0; i<itemNewSkus.length; i++) {
+                                    bpc_curSetItemPageSkuLookup[itemNewSkus[i].tcgpId] = { id: ids[i], ...itemNewSkus[i]}
+                                }
+                            }
+                        }
+                        const tcgpPrices = await TCGPAPI.pricesBySkus(apiToken, currentPageSkus)
+                        const nonZeroPrices = tcgpPrices.filter(price => price.marketPrice)
+                        const formattedMarketPrices = nonZeroPrices.map(price => ({ skuId: bpc_curSetItemPageSkuLookup[price.skuId].id, price: price.marketPrice }))
+                        if (formattedMarketPrices.length > 0) {
+                            await postPricesBillsPc(formattedMarketPrices, cookies)
+                            newPriceCount += formattedMarketPrices.length
+                        }
+                    } catch (err) {
+                        if (err.status !== 404) console.log(err)
+                        moreItems = false
+                    }
+                    itemOffset += 10
+                }
+                if (newItemCount > 0) console.log(`Added ${newItemCount} new items`)
+                if (newSkuCount > 0) console.log(`Added ${newSkuCount} new skus`)
+                if (newPriceCount > 0) console.log(`Added ${newPriceCount} new market prices`)
             }
         } catch (err) {
-            throw new Error(err)
+            if (err.status !== 404) console.log(err)
+            moreGroups = false
         }
+        expOffset += 10
     }
 }
 
 const startScraper = async () => {
+    const now = new Date()
+    const midnight = new Date()
+    midnight.setDate(midnight.getDate()+1)
+    midnight.setUTCHours(0,0,0,0)
+    const timeUntilMidnight = midnight-now
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
@@ -472,8 +205,9 @@ const startScraper = async () => {
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
+    
+   await catalogueSync()
 
-    await marketScraper()
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
@@ -486,11 +220,6 @@ const startScraper = async () => {
     console.log('------------------------------------------------------------------------------------------------------------')
     console.log('------------------------------------------------------------------------------------------------------------')
 
-    const now = new Date()
-    const midnight = new Date()
-    midnight.setDate(midnight.getDate()+1)
-    midnight.setUTCHours(0,0,0,0)
-    const timeUntilMidnight = midnight-now
     await setTimeout(async () => {
         await startScraper()
     }, timeUntilMidnight)

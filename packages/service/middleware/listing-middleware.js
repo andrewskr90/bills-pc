@@ -47,6 +47,8 @@ const formatListings = (listingItems, withPrices) => {
                                 card_v2_rarity: item.card_v2_rarity,
                                 card_v2_tcgplayer_product_id: item.card_v2_tcgplayer_product_id,
                                 card_v2_foil_only: item.card_v2_foil_only,
+                                set_v2_id: item.set_v2_id,
+                                set_v2_name: item.set_v2_name,
                                 market_price_price: parseFloat(item.market_price_price)
                             }
                         ]
@@ -63,6 +65,8 @@ const formatListings = (listingItems, withPrices) => {
                                 product_description: item.product_description,
                                 product_tcgplayer_product_id: item.product_tcgplayer_product_id,
                                 product_foil_only: item.product_foil_only,
+                                set_v2_id: item.set_v2_id,
+                                set_v2_name: item.set_v2_name,
                                 market_price_price: parseFloat(item.market_price_price)
                             }
                         ]
@@ -119,6 +123,8 @@ const formatListings = (listingItems, withPrices) => {
                                 card_v2_rarity: item.card_v2_rarity,
                                 card_v2_tcgplayer_product_id: item.card_v2_tcgplayer_product_id,
                                 card_v2_foil_only: item.card_v2_foil_only,
+                                set_v2_id: item.set_v2_id,
+                                set_v2_name: item.set_v2_name,
                                 market_price_price: parseFloat(item.market_price_price)
                             }
                         ]
@@ -136,6 +142,8 @@ const formatListings = (listingItems, withPrices) => {
                                 product_description: item.product_description,
                                 product_tcgplayer_product_id: item.product_tcgplayer_product_id,
                                 product_foil_only: item.product_foil_only,
+                                set_v2_id: item.set_v2_id,
+                                set_v2_name: item.set_v2_name,
                                 market_price_price: parseFloat(item.market_price_price)
                             }
                         ]
