@@ -9,9 +9,12 @@ import {
     getConditionsBillsPc,
     getSkusBillsPc,
     postSkusBillsPc,
-    postPricesBillsPc
+    postPricesBillsPc,
+    patchItemByFilterBillsPc
 } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const catalogueSync = async () => {
     // login bills pc
@@ -96,10 +99,12 @@ const catalogueSync = async () => {
                 let newItemCount = 0
                 let newSkuCount = 0
                 let newPriceCount = 0
+                let updatedItemCount = 0
+
                 while (moreItems) {
                     const pageNewItems = []
                     try {
-                        const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
+                        let currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
                         if (currentPageItems.length === 0) {
                             moreItems = false
                             continue
@@ -112,13 +117,31 @@ const catalogueSync = async () => {
                             }
                         }
                         if (pageNewItems.length > 0) {
-                            const ids = await postItemsBillsPc(pageNewItems, cookies)
-                            newItemCount += pageNewItems.length
-                            // update lookup with new items
-                            for (let i=0; i<pageNewItems.length; i++) {
-                                bpc_curSetItemLookup.items[pageNewItems[i].tcgpId] = {
-                                    id: ids[i],
-                                    ...pageNewItems[i]
+                            try {
+                                const ids = await postItemsBillsPc(pageNewItems, cookies)
+                                newItemCount += pageNewItems.length
+                                // update lookup with new items
+                                for (let i=0; i<pageNewItems.length; i++) {
+                                    bpc_curSetItemLookup.items[pageNewItems[i].tcgpId] = {
+                                        id: ids[i],
+                                        ...pageNewItems[i]
+                                    }
+                                }
+                            } catch (err) {
+                                if (err.response.status === 422) {
+                                    if (err.response.data.message.includes('Item.tcgpId')) {
+                                        const duplicateId = parseInt(err.response.data.message
+                                            .split(`Duplicate entry '`)[1].split(`' for key 'Item.tcgpId'`)[0])
+                                        try {
+                                            const itemToUpdate = pageNewItems.find(item => item.tcgpId === duplicateId)
+                                            await patchItemByFilterBillsPc({ tcgpId: duplicateId }, { setId: itemToUpdate.setId }, cookies)
+                                            updatedItemCount += 1
+                                        } catch (err) {
+                                            console.log(err)
+                                            // remove item to stop further errors
+                                            currentPageItems = currentPageItems.filter(item => item.productId !== duplicateId)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -179,6 +202,7 @@ const catalogueSync = async () => {
                 if (newItemCount > 0) console.log(`Added ${newItemCount} new items`)
                 if (newSkuCount > 0) console.log(`Added ${newSkuCount} new skus`)
                 if (newPriceCount > 0) console.log(`Added ${newPriceCount} new market prices`)
+                if (updatedItemCount > 0) console.log(`Updated ${updatedItemCount} items`)
             }
         } catch (err) {
             if (err.status !== 404) console.log(err)

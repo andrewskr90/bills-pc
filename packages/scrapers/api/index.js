@@ -1,4 +1,6 @@
 import axios from "axios"
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const baseurl = process.env.API_BASE_URL
 
@@ -12,7 +14,7 @@ export const loginBillsPc = async () => {
         const apiCredentials = await axios.post(`${baseurl}/api/v1/auth/login`, loginInfo)
         return apiCredentials.headers['set-cookie']
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -26,7 +28,7 @@ export const getPortfolioBillsPc = async (cookies) => {
         const portfolio = portfolioRes.data
         return portfolio
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -41,7 +43,7 @@ export const getProxyUsers = async (cookies) => {
         const proxyUsers = proxyUserRes.data
         return proxyUsers
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -58,7 +60,7 @@ export const createProxyUser = async (cookies, data) => {
         const proxyUsers = proxyUserRes.data
         return proxyUsers
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -73,7 +75,7 @@ export const convertSaleItemToListing = async (cookies, data) => {
             headers: { Cookie: cookies },
         })
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -85,7 +87,7 @@ export const getListingById = async (cookies, id) => {
             headers: { Cookie: cookies },
         })
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -105,7 +107,7 @@ export const getSetsBillsPc = async (cookies, params) => {
         })
         return expansions
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -120,7 +122,7 @@ export const postSetsBillsPc = async (cookies, data) => {
         })
         return postSetsRes.data.addedSets
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -135,7 +137,7 @@ export const patchSetBillsPc = async (cookies, setId, data) => {
         })
         return patchSetRes.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -149,7 +151,7 @@ export const getCardsBillsPc = async (params, cookies) => {
         })        
         return billsPcCardsV2.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -163,7 +165,7 @@ export const getProductsBillsPc = async (params, cookies) => {
         })        
         return billsPcProducts.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -178,7 +180,7 @@ export const postItemsBillsPc = async (data, cookies) => {
         })        
         return billsPcItems.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -192,7 +194,7 @@ export const getItemsBillsPc = async (params, cookies) => {
         })        
         return billsPcItems.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -205,7 +207,7 @@ export const getLanguagesBillsPc = async (cookies) => {
         })        
         return billsPcLanguages.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -218,7 +220,7 @@ export const getPrintingsBillsPc = async (cookies) => {
         })        
         return billsPcPrintings.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -231,7 +233,7 @@ export const getConditionsBillsPc = async (cookies) => {
         })        
         return billsPcConditions.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -245,7 +247,7 @@ export const getSkusBillsPc = async (params, cookies) => {
         })        
         return billsPcSkus.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -260,7 +262,7 @@ export const postSkusBillsPc = async (data, cookies) => {
         })        
         return billsPcSkus.data
     } catch (err) {
-        throw new Error(err)
+        throw err
     }
 }
 
@@ -275,6 +277,22 @@ export const postPricesBillsPc = async (data, cookies) => {
         })        
         return billsPcPostedPrices.data
     } catch (err) {
-        throw new Error(err)
+        throw err
+    }
+}
+
+export const patchItemByFilterBillsPc = async (params, data, cookies) => {
+    try {
+        const billsPcUpdatedItem = await axios({
+            baseURL: baseurl,
+            method: 'patch',
+            url: '/api/v1/items',
+            params,
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcUpdatedItem.data
+    } catch (err) {
+        throw err
     }
 }
