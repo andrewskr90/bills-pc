@@ -67,6 +67,7 @@ const SelectItems = (props) => {
     const convertToItemArray = () => {
         return Object.keys(lotItemCounts).reduce((prev, itemId) => {
             const cur = lotItemCounts[itemId]
+            if (cur.count === 0) return [...prev]
             if (cur.count > 1) {
                 const items = []
                 for (let i=0; i<cur.count; i++) {
