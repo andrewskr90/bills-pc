@@ -41,6 +41,15 @@ const Listing = (props) => {
                                 </select>
                                 {listing.lot.items
                                     .sort((a,b) => {
+                                        let aName = 'card_v2_name'
+                                        let bName = 'card_v2_name'
+                                        if (a.product_name) aName = 'product_name'
+                                        if (b.product_name) bName = 'product_name'
+                                        if (a[aName] < b[bName]) return -1
+                                        if (a[aName] > b[bName]) return 1
+                                        return 0
+                                    })
+                                    .sort((a,b) => {
                                         let aSortKey = sortKey
                                         let bSortKey = sortKey
                                         if (sortKey === 'name') {
