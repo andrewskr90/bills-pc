@@ -6,7 +6,7 @@ import BillsPcService from '../../../../api/bills-pc'
 
 const Listing = (props) => {
     const [listing, setListing] = useState(initialListingValues)
-
+    const [sortKey, setSortKey] = useState('market_price_price')
     const navigate = useNavigate()
     const { id } = useParams()
     useEffect(() => {
@@ -34,10 +34,23 @@ const Listing = (props) => {
                                     if (parseFloat(c.market_price_price)) return a + parseFloat(c.market_price_price)
                                     return a
                                 }, 0)}</p>
+                                <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+                                    <option value='market_price_price'>Market Value</option>
+                                    <option value='set_v2_name'>Set</option>
+                                    <option value='name'>Name</option>
+                                </select>
                                 {listing.lot.items
                                     .sort((a,b) => {
-                                        if (a.market_price_price < b.market_price_price) return 1
-                                        if (a.market_price_price > b.market_price_price) return -1
+                                        let aSortKey = sortKey
+                                        let bSortKey = sortKey
+                                        if (sortKey === 'name') {
+                                            if (a.card_v2_name) aSortKey = 'card_v2_name'
+                                            else aSortKey = 'product_name'
+                                            if (b.card_v2_name) bSortKey = 'card_v2_name'
+                                            else bSortKey = 'product_name'
+                                        }
+                                        if (a[aSortKey] < b[bSortKey]) return sortKey === 'market_price_price' ? 1 : -1
+                                        if (a[aSortKey] > b[bSortKey]) return sortKey === 'market_price_price' ? -1 : 1
                                         return 0
                                     }).map(item => {
                                     return <div>
