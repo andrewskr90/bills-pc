@@ -13,8 +13,17 @@ const create = async (itemArray) => {
     queryQueue.push(query)
     const req = { queryQueue }
     const res = {}
-    await executeQueries(req, res, (err) => {
-        if (err) throw err
+    await executeQueries(req, res, (err) => {        
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') { 
+                err = {
+                    ...err,
+                    status: 422,
+                    message: err.sqlMessage
+                }
+            }
+            throw err
+        }
     })
     return formattedItemArray.map(item => item.id)
 }
@@ -49,4 +58,16 @@ const select = async () => {
     return items
 }
 
-module.exports = { create, selectBy, select }
+const patchByTcgpId = async (tcgpId, values) => {
+    const query = `UPDATE Item SET ${Object.keys(values).map((value, idx) => {
+        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''} WHERE tcgpId = '${tcgpId}'`
+    })}`
+    const req = { queryQueue: [query] }
+    const res = {}
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        return req.results
+    })
+}
+
+module.exports = { create, selectBy, select, patchByTcgpId }
