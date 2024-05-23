@@ -93,6 +93,7 @@ const App = () => {
             const typesResponse = await BillsPcService.getTypes()
             const printingsResponse = await BillsPcService.getPrintings()
             const expansionsResponse = await BillsPcService.getSetsV2()
+            const conditionsResponse = await BillsPcService.getConditions()
             setUserClaims(fetchedUserClaims)
             setReferenceData({
                 ...referenceData,
@@ -102,7 +103,8 @@ const App = () => {
                     rarities: raritiesResponse.data,
                     types: typesResponse.data,
                     printings: printingsResponse.data,
-                    expansions: expansionsResponse.data
+                    expansions: expansionsResponse.data,
+                    conditions: conditionsResponse.data
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),

@@ -353,6 +353,12 @@ const BillsPcService = {
             ...options,
             url: `/api/v1/listings/${id}`
         })
+    },
+    getConditions() {
+        return axios({
+            ...options,
+            url: 'api/v1/conditions'
+        })
     }
 
 }
