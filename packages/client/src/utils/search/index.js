@@ -12,7 +12,7 @@ export const searchForItems = async (category, searchValue) => {
     const conditionedValue = conditionSearchString(searchValue)
     if (category === 'all' || category === 'cards') {
         if (conditionedValue === '') {
-            await BillsPcService.getCardsV2WithValues()
+            await BillsPcService.getItemsWithValues()
                 .then(res => marketSearchResults = [
                     ...marketSearchResults,
                     ...res.data
@@ -20,7 +20,7 @@ export const searchForItems = async (category, searchValue) => {
                 .catch(err => console.log(err))
 
         } else {
-            await BillsPcService.getCardsV2WithValues({ searchValue: conditionedValue })
+            await BillsPcService.getItemsWithValues({ searchValue: conditionedValue })
                     .then(res => marketSearchResults = [
                     ...marketSearchResults,
                     ...res.data

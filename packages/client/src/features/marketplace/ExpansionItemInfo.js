@@ -74,16 +74,16 @@ const ExpansionItemInfo = (props) => {
                 <div className='besideImg'>
                     <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} />
                     <MarketplaceChart item={targetItem} referenceData={referenceData} />
-                    {targetItem.marketValue ? <div 
-                        className={`valueAndChange ${targetItem.formattedPrices.changes[referenceData.dateRange] > 0 
+                    {targetItem.marketValue[targetItem.printings[0]] ? <div 
+                        className={`valueAndChange ${targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] > 0 
                             ? 'up' 
-                            : targetItem.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}`
+                            : targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] ? 'down' : ''}`
                         }
                     >
-                        <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue)}</p>
+                        <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue[targetItem.printings[0]])}</p>
                         <p className='percentChange'>
-                            {targetItem.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
-                            {targetItem.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
+                            {targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] > 0 ? '+' : ''}
+                            {targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange].toFixed(2)}%
                         </p>
                     </div> : (
                         <p>Price Not Available</p>

@@ -359,7 +359,14 @@ const BillsPcService = {
             ...options,
             url: 'api/v1/conditions'
         })
-    }
+    },
+    getItemsWithValues(filter) {
+        return axios({
+            ...options,
+            url:'/api/v1/items/values',
+            params: filter
+        })
+    },
 
 }
 

@@ -142,7 +142,7 @@ const ImportPurchase = (props) => {
     const purchaseItemsValue = () => {
         let value = 0
         purchaseValues.items.forEach(item => {
-            value += item.quantity*(item.marketValue)
+            value += item.quantity*(item.marketValue[item.printings[0]])
         })
         return value
     }

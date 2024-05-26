@@ -6,7 +6,7 @@ const MarketplaceChart = (props) => {
     const { item, referenceData } = props
     const itemId = item.card_id || item.product_id
     let rangeKey = referenceData.dateRange
-    const itemPercentChange = item.formattedPrices.changes[referenceData.dateRange]
+    const itemPercentChange = item.formattedPrices[item.printings[0]].changes[referenceData.dateRange]
 
     return (<div className='marketplaceChart'>
         {itemPercentChange
@@ -14,10 +14,10 @@ const MarketplaceChart = (props) => {
         <Line 
             datasetIdKey={itemId}
             data={{
-                labels: item.formattedPrices.prices[rangeKey].map(price => price[0]).reverse(),
+                labels: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[0]).reverse(),
                 datasets: [{
                     id: itemId,
-                    data: item.formattedPrices.prices[rangeKey].map(price => price[1]).reverse(),
+                    data: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[1]).reverse(),
                     spanGaps: true,
                     tension: 0.3,
                     radius: 0,

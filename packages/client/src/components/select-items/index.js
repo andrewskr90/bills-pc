@@ -91,7 +91,7 @@ const SelectItems = (props) => {
     return (<div className='selectItems page'>
         <Banner titleText={'Add Lot'} handleClickBackArrow={handleClickBackArrow} />
         <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => lotItemCounts[itemId].count + prev, 0)}</p>
-        <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => (lotItemCounts[itemId].item.marketValue * lotItemCounts[itemId].count) + prev, 0)}</p>
+        <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => (lotItemCounts[itemId].item.marketValue[lotItemCounts[itemId].printings[0]] * lotItemCounts[itemId].count) + prev, 0)}</p>
         <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>
         <div className='itemFinder'>
             <div style={{ display: 'flex' }}>

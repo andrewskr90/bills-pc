@@ -31,55 +31,37 @@ const selectByProductId = (req, res, next) => {
 }
 
 const selectBySetId = (req, res, next) => {
-    let query = `SELECT 
-        GROUP_CONCAT('[',UNIX_TIMESTAMP(m.created_date), ',', m.market_price_price,']' ORDER BY m.created_date DESC SEPARATOR ',') as market_price_prices,
-        NULL AS product_id,
-        NULL AS product_name,
-        NULL AS product_release_date,
-        NULL AS product_description,
-        c.card_v2_tcgplayer_product_id as tcgplayer_product_id,
-        c.card_v2_id,
-        c.card_v2_name,
-        c.card_v2_number,
-        c.card_v2_rarity,
-        c.card_v2_foil_only,
+    let query = `
+    SELECT 
+        GROUP_CONCAT('[',UNIX_TIMESTAMP(m.date), ',', m.price,']' ORDER BY m.date DESC) as prices,
+        i.id,
+        i.name,
+        i.tcgpId,
         s.set_v2_id,
         s.set_v2_name,
         s.set_v2_ptcgio_id,
         s.set_v2_release_date,
-        s.set_v2_series
-    FROM market_prices as m
-    LEFT JOIN cards_v2 as c
-        ON c.card_v2_id = m.market_price_card_id
+        s.set_v2_series,
+        c.condition_id,
+        c.condition_name,
+        p.printing_id,
+        p.printing_name,
+        p.printing_tcgp_printing_id
+    FROM MarketPrice as m
+    LEFT JOIN SKU
+        ON SKU.id = m.skuId
+    LEFT JOIN conditions c
+        ON c.condition_id = SKU.conditionId
+    LEFT JOIN printings p
+        ON p.printing_id = SKU.printingId
+    LEFT JOIN Item as i
+        ON i.id = SKU.itemId
     LEFT JOIN sets_v2 as s
-        ON  s.set_v2_id = c.card_v2_set_id
+        ON  s.set_v2_id = i.setId
     WHERE s.set_v2_id = '${req.params.set_v2_id}'
-    GROUP BY card_v2_id
-    UNION
-    SELECT 
-        GROUP_CONCAT('[',UNIX_TIMESTAMP(m2.created_date), ',', m2.market_price_price,']' ORDER BY m2.created_date DESC) as market_price_prices,
-        p2.product_id,
-        p2.product_name,
-        p2.product_release_date,
-        p2.product_description,
-        p2.product_tcgplayer_product_id as tcgplayer_product_id,
-        NULL AS card_v2_id,
-        NULL AS card_v2_name,
-        NULL AS card_v2_number,
-        NULL AS card_v2_rarity,
-        NULL AS card_v2_foil_only,
-        s2.set_v2_id,
-        s2.set_v2_name,
-        s2.set_v2_ptcgio_id,
-        s2.set_v2_release_date,
-        s2.set_v2_series
-    FROM market_prices as m2
-    LEFT JOIN products as p2
-        ON p2.product_id = m2.market_price_product_id
-    LEFT JOIN sets_v2 as s2
-        ON  s2.set_v2_id = p2.product_set_id
-    WHERE s2.set_v2_id = '${req.params.set_v2_id}'
-    GROUP BY product_id;`
+        AND (c.condition_id = '0655c457-ff60-11ee-b8b9-0efd996651a9' OR c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9')
+    GROUP BY SKU.id
+    ORDER BY i.name asc, p.printing_tcgp_printing_id asc;`
     req.queryQueue.push(query)
     next()
 }

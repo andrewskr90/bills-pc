@@ -14,9 +14,9 @@ const Item = (props) => {
     return (
         <div 
             onClick={handleSelectItem ? () => handleSelectItem(item) : undefined} 
-            className={`item ${item.formattedPrices.changes[referenceData.dateRange] > 0 
+            className={`item ${item.formattedPrices[item.printings[0]].changes[referenceData.dateRange] > 0 
                 ? 'up' 
-                : item.formattedPrices.changes[referenceData.dateRange] ? 'down' : ''}
+                : item.formattedPrices[item.printings[0]].changes[referenceData.dateRange] ? 'down' : ''}
             `
         }>
         <div className='imageChartAndValue'>
@@ -24,7 +24,7 @@ const Item = (props) => {
                 {loadImage 
                 ?
                 <img 
-                    src={`https://product-images.tcgplayer.com/fit-in/656x656/${item.tcgplayer_product_id}.jpg`} 
+                    src={`https://product-images.tcgplayer.com/fit-in/656x656/${item.tcgpId}.jpg`} 
                     onError={handleImageError} 
                 />
                 :
@@ -32,15 +32,15 @@ const Item = (props) => {
                 }
             </div>
             <div className='chartAndValue'>
-                {item.marketValue
+                {item.marketValue[item.printings[0]]
                 ?
                 <>
                 <MarketplaceChart item={item} referenceData={referenceData} />
                 <div className='valueAndChange'>
-                    <p className='marketValue'>${generateDisplayedMarketValue(item.marketValue)}</p>
+                    <p className='marketValue'>${generateDisplayedMarketValue(item.marketValue[item.printings[0]])}</p>
                     <p className='percentChange'>
-                        {item.formattedPrices.changes[referenceData.dateRange] > 0 ? '+' : ''}
-                        {item.formattedPrices.changes[referenceData.dateRange].toFixed(2)}%
+                        {item.formattedPrices[item.printings[0]].changes[referenceData.dateRange] > 0 ? '+' : ''}
+                        {item.formattedPrices[item.printings[0]].changes[referenceData.dateRange].toFixed(2)}%
                     </p>
                 </div>
                 </>

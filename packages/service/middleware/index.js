@@ -23,16 +23,17 @@ const checkReqBody = (req, res, next) => {
 const formatItems = (req, res, next) => {
     req.results = req.results.map(item => {
         return {
-            card_id: item.card_v2_id,
-            name: item.card_v2_name || item.product_name,
-            number: item.card_v2_number,
-            rarity: item.card_v2_rarity,
-            foil_only: item.card_v2_foil_only,
-            product_id: item.product_id,
-            release_date: item.product_release_date,
-            description: item.product_description,
-            market_prices: item.market_price_prices,
-            tcgplayer_product_id: item.tcgplayer_product_id,
+            id: item.id,
+            name: item.name,
+            // number: item.card_v2_number,
+            // rarity: item.card_v2_rarity,
+            // foil_only: item.card_v2_foil_only,
+            // product_id: item.product_id,
+            // release_date: item.product_release_date,
+            // description: item.product_description,
+            prices: item.prices,
+            tcgpId: item.tcgpId,
+            printings: item.printings,
             set: {
                 id: item.set_v2_id,
                 name: item.set_v2_name,

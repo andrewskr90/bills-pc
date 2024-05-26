@@ -1,7 +1,9 @@
 const formatMarketPricesFromConcat = (req, res, next) => {
-    const formattedMarketPricesFromConcat = req.results.map((item, i) => {
-        if (item.market_price_prices) {
-            const commaSplit = item.market_price_prices.split(',')
+    const itemPriceLookup = {}
+    const itemLookup = {}
+    const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
+        if (itemPrinting.prices) {
+            const commaSplit = itemPrinting.prices.split(',')
             const datesAndPrices = []
             let tempArray = []
             commaSplit.forEach(str => {
@@ -14,13 +16,27 @@ const formatMarketPricesFromConcat = (req, res, next) => {
                     tempArray = []
                 }
             })
-            return {
-                ...item,
-                market_price_prices: datesAndPrices
+            if (itemPriceLookup[itemPrinting.id]) {
+                itemPriceLookup[itemPrinting.id] = {
+                    ...itemPriceLookup[itemPrinting.id],
+                    [itemPrinting.printing_name]: datesAndPrices
+                }
+            } else {
+                itemPriceLookup[itemPrinting.id] = {
+                    [itemPrinting.printing_name]: datesAndPrices
+                }
             }
-        } else {
-            return item
+            
         }
+        if (itemLookup[itemPrinting.id]) return false
+        itemLookup[itemPrinting.id] = 1
+        return true
+    }).map(item => {
+        return {
+                ...item,
+                prices: itemPriceLookup[item.id],
+                printings: Object.keys(itemPriceLookup[item.id])
+            }
     })
     req.results = formattedMarketPricesFromConcat
     next()
