@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Item from '../item'
 import Search from '../../features/search'
 import { searchForItems } from '../../utils/search'
@@ -26,9 +26,9 @@ const SelectItem = (props) => {
     const filterKey = 'market'
     const navigate = useNavigate()
 
-    const submitSearch = (relayedSearch) => {
+    const submitSearch = (value) => {
         setLoading(true)
-        searchForItems(relayedSearch.category, relayedSearch.value)
+        searchForItems(value)
             .then(res => {
                 setEmptyMessage('No results found.')
                 setSearchedItems(res.data)
@@ -58,8 +58,7 @@ const SelectItem = (props) => {
             <ItemContainer emptyMessage={emptyMessage} loading={loading}>
                 {applyMarketChanges(
                     filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
-                    const item_id = item.card_id || item.product_id
-                    return <Item key={item_id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
+                    return <Item key={item.id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
                 })}
             </ItemContainer>
         </div>

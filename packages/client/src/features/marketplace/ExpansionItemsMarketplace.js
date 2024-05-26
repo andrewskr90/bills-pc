@@ -16,8 +16,7 @@ const ExpansionItemsMarketplace = (props) => {
 
     const handleSelectItem = (item) => {
         const expansionId = item.set.id
-        const itemId = item.card_id || item.product_id
-        navigate(`/market/${expansionId}/${itemId}`)
+        navigate(`/market/${expansionId}/${item.id}`)
     }
 
     return (<div className='expansionItemsMarketplace'>

@@ -6,7 +6,6 @@ import './assets/item.less'
 const Item = (props) => {
     const { item, referenceData, handleSelectItem, countConfig } = props
     const [loadImage, setLoadImage] = useState(true)
-    const item_id = item.card_id || item.product_id
     const handleImageError = () => {
         setLoadImage(false)
     }
@@ -51,7 +50,7 @@ const Item = (props) => {
         {countConfig !== undefined && (
             <div className='count'>
                 <button onClick={() => countConfig.handleSubtractItem(item)}>-</button>
-                <div>{countConfig.handleFindCount(item_id) ? countConfig.handleFindCount(item_id) : ''}</div>
+                <div>{countConfig.handleFindCount(item.id) ? countConfig.handleFindCount(item.id) : ''}</div>
                 <button onClick={() => countConfig.handleAddItem(item)}>+</button>
             </div>
         )}

@@ -38,7 +38,7 @@ const Transaction = (props) => {
         </div>
         {transactionType === 'purchase' ? <>
             <p>{transaction.sale_total}</p>
-            <p>{transaction.saleCards.length + transaction.saleProducts.length + transaction.saleBulkSplits.length} item(s)</p>
+            <p>{transaction.saleItems.length + transaction.saleBulkSplits.length} item(s)</p>
         </> : <></>}
         {transactionType === 'sorting' ? <>
             <p>Sorted {transaction.sortingSplits.length} bulk splits</p>

@@ -8,6 +8,7 @@ import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem'
 import InputSelect from "../../../../components/input-select"
 import SelectItems from "../../../../components/select-items"
+import { getSkusBillsPc } from "../../../../../../scrapers/api"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
@@ -16,55 +17,35 @@ const ImportListing = (props) => {
     const initialEmptyMessage = "Select item to import"
     const initialEmptyItemsMessage = "Select items to import"
     const handleSelectItem = (item) => {
-        if (item.card_id) {
-            setExternalListing({
-                ...externalListing,
-                cards: [
-                    ...externalListing.cards,
-                    {
-                        ...item,
-                        note: ''
-                    }
-                ]
-            })
-        } else if (item.product_id) {
-            setExternalListing({
-                ...externalListing,
-                products: [
-                    ...externalListing.products,
-                    {
-                        ...item,
-                        note: ''
-                    }
-                ]
-            })
-        }
+        setExternalListing({
+            ...externalListing,
+            items: [
+                ...externalListing.items,
+                {
+                    ...item,
+                    note: ''
+                }
+            ]
+        })
         navigate('/gym-leader/collection/watching/import')
     }
     const handleSelectItems = (items) => {
-        const cardsToAdd = []
-        const productsToAdd = []
-        items.forEach(item => {
-            if (item.card_id) cardsToAdd.push({ ...item, note: '' })
-            else if (item.product_id) productsToAdd.push({ ...item, note: '' })
-        })
+        // item selector will need to include printing and condition options
+        // creating listing, items can either have bpc or tcgp ids. csv will use tcgp
+        // or should the front end fetch bpc ids, probably this. api call that only sends the csv
+        // and responds with an array formatted just like `add lot to purchase`
+        // this will deprecate the cards_v2 and products tables, I should possibly create a new user
+        // and reformat my kyle user data later. full date time transactions should be created too.
         setExternalListing({
             ...externalListing,
-            cards: cardsToAdd,
-            products: productsToAdd
+            items: items.map(item => ({ ...item, note: '', printing: undefined, condition: undefined }))
         })
         navigate('/gym-leader/collection/watching/import')
     }
-    const formatExternalListing = (listing) => {
-        return {
-            ...listing,
-            cards: listing.cards.map(card => ({ card_id: card.card_id, note: card.note })),
-            products: listing.products.map(product => ({ product_id: product.product_id, note: product.note }))
-        }
-    }
+
     const handleCreateExternalListing = async () => {
         try {
-            await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
+            await BillsPcService.postListing({ data: externalListing, params: { external: true } })
             navigate('/gym-leader/collection/watching/import')
         } catch (err) {
             console.log(err)
@@ -153,25 +134,16 @@ const ImportListing = (props) => {
                             <textarea type='text' value={externalListing.description} onChange={(e) => setExternalListing({ ...externalListing, description: e.target.value })}/>
                         </label>
 
-                        {externalListing.cards.length + 
-                        externalListing.products.length +
+                        {externalListing.items.length + 
                         externalListing.bulkSplits.length > 1  ? (
                             <p>Lot Items</p> 
                         ) : (
                             <p>Item</p>
                         )}
-                        {externalListing.cards.map((card, idx) => {
-                            console.log(card)
+                        {externalListing.items.map((item, idx) => {
                             return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
-                                {card.name}
-                                <img src={editPNG} onClick={() => handleEditItem('card', idx)} />
-                            </div>)
-                        })}
-                        {externalListing.products.map((product, idx) => {
-                            console.log(product)
-                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
-                                <p>{product.name}</p>
-                                <img src={editPNG} onClick={() => handleEditItem('product', idx)} />
+                                {item.name}
+                                <img src={editPNG} onClick={() => handleEditItem('item', idx)} />
                             </div>)
                         })}
                         {externalListing.bulkSplits.map((split, idx) => {

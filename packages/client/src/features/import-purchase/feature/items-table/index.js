@@ -22,11 +22,10 @@ const ItemsTable = (props) => {
                 <th className='quantity'>Qty</th>
                 <th className='edit'></th>
             </tr>
-            {items.map((card, idx) => {
-                const { card_v2_id } = card
+            {items.map((item, idx) => {
                 return <>
                     <tr className='spacer'></tr>
-                    <tr key ={card_v2_id} className='tableItem'>
+                    <tr key ={item.id} className='tableItem'>
                         <td className='name'>{items[idx].name}</td>
                         <td className='price'>{items[idx].retail}</td>
                         <td className='quantity'>{items[idx].quantity}</td>

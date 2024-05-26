@@ -20,7 +20,7 @@ const ExpansionItemInfo = (props) => {
             const filteredTargetItem = referenceData.sets.filter(expansion => {
                 return expansion.set_v2_id === targetExpansionId
             })[0].items.filter(item => {
-                if (item.card_id === targetItemId || item.product_id === targetItemId) return item
+                if (item.id === targetItemId) return item
             })
             setTargetItem(applyMarketChanges(filteredTargetItem)[0])
         } else {
@@ -65,7 +65,7 @@ const ExpansionItemInfo = (props) => {
                     {loadImage
                     ?
                     <img 
-                        src={`https://product-images.tcgplayer.com/fit-in/656x656/${targetItem.tcgplayer_product_id}.jpg`} 
+                        src={`https://product-images.tcgplayer.com/fit-in/656x656/${targetItem.tcgpId}.jpg`} 
                         onError={handleImageError} 
                     />
                     :
@@ -92,7 +92,7 @@ const ExpansionItemInfo = (props) => {
             </div>
             <div className='purchaseSection'>
                 <p>Support Bill's PC!</p>
-                <AffiliateLink path={`/product/${targetItem.tcgplayer_product_id}`}>
+                <AffiliateLink path={`/product/${targetItem.tcgpId}`}>
                     <button className='affiliateLinkToItem' onClick={handleAddToCollection}>Buy On TCGplayer</button>
                 </AffiliateLink>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Item from '../item'
 import Search from '../../features/search'
 import { searchForItems } from '../../utils/search'
@@ -12,7 +12,6 @@ import { generateMarketItemSortCB } from '../../utils/sort'
 import { useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
 import ExpansionsMarketplace from '../../features/marketplace/ExpansionsMarketplace'
-import ExpansionItemsMarketplace from '../../features/marketplace/ExpansionItemsMarketplace'
 import ExpansionItems from '../../features/marketplace/ExpansionItems'
 
 const SelectItems = (props) => {
@@ -33,17 +32,15 @@ const SelectItems = (props) => {
     const navigate = useNavigate()
 
     const handleAddItem = (item) => {
-        const itemId = item.card_id || item.product_id
-        if (lotItemCounts[itemId]) {
-            if (lotItemCounts[itemId].count) setLotItemCounts({ ...lotItemCounts, [itemId]: { ...lotItemCounts[itemId], count: lotItemCounts[itemId].count +1 } })
-            else setLotItemCounts({ ...lotItemCounts, [itemId]: { item, count: 1 } })
+        if (lotItemCounts[item.id]) {
+            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count +1 } })
+            else setLotItemCounts({ ...lotItemCounts, [item.id]: { item, count: 1 } })
         }
-        else setLotItemCounts({ ...lotItemCounts, [itemId]: { item, count: 1 } })
+        else setLotItemCounts({ ...lotItemCounts, [item.id]: { item, count: 1 } })
     }
     const handleSubtractItem = (item) => {
-        const itemId = item.card_id || item.product_id
-        if (lotItemCounts[itemId]) {
-            if (lotItemCounts[itemId].count) setLotItemCounts({ ...lotItemCounts, [itemId]: { ...lotItemCounts[itemId], count: lotItemCounts[itemId].count - 1 } })
+        if (lotItemCounts[item.id]) {
+            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count - 1 } })
         } 
     }
 
@@ -111,9 +108,8 @@ const SelectItems = (props) => {
                     <ItemContainer emptyMessage={emptyMessage} loading={loading}>
                         {applyMarketChanges(
                             filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
-                            const item_id = item.card_id || item.product_id
                             return <Item 
-                                key={item_id} 
+                                key={item.id} 
                                 item={item} 
                                 referenceData={referenceData} 
                                 countConfig={countConfig} 

@@ -2,10 +2,8 @@ import { localYYYYMMDD } from "../../utils/date"
 
 export const initialReferenceDataValues = {
     sets: [],
-    cards: [],
     expansionFilters: [],
     expansionItemFilters: [],
-    products: [],
     rarities: [],
     marketSearchResults: [],
     bulk: {

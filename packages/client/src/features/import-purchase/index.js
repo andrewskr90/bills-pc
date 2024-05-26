@@ -70,7 +70,7 @@ const ImportPurchase = (props) => {
     
     const removeItemFromPurchase = (itemId) => {
         const filteredArray = purchaseValues.items.filter(item => {
-            if (itemId === item.card_id || itemId === item.product_id) {
+            if (itemId === item.id) {
                 return false
             } else {
                 return true
@@ -80,24 +80,11 @@ const ImportPurchase = (props) => {
             ...purchaseValues,
             items: filteredArray
         })
-    } 
-
-    const formatImportPurchaseValues = (purchaseValues) => {
-        const saleItems = purchaseValues.items
-        const cards = saleItems.filter(item => item.card_id)
-        const products = saleItems.filter(item => item.product_id)
-        const bulkSplits = purchaseValues.bulkSplits
-        return {
-            ...purchaseValues,
-            cards,
-            products,
-            bulkSplits
-        }
     }
 
     const handleUpdateCollection = (e) => {
         e.preventDefault()
-        BillsPcService.postTransactionSales([formatImportPurchaseValues(purchaseValues)])
+        BillsPcService.postTransactionSales([{ ...purchaseValues }])
             .then(res => {
                 setPurchaseValues({
                     ...initialPurchaseValues,

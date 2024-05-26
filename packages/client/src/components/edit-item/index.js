@@ -18,7 +18,7 @@ const EditItem = (props) => {
 
     const handleDeleteItem = (e) => {
         e.preventDefault()
-        const itemId = purchaseValues.items[itemIndex].card_id || purchaseValues.items[itemIndex].product_id
+        const itemId = purchaseValues.items[itemIndex].id
         removeItemFromPurchase(itemId)
         navigate(buildPreviousRoute(location, 2))
     }
@@ -41,7 +41,7 @@ const EditItem = (props) => {
             {
                 elements: [
                     {
-                        id: purchaseValues.items[itemIndex].card_id || purchaseValues.items[itemIndex].product_id,
+                        id: purchaseValues.items[itemIndex].id,
                         title: 'price',
                         type: 'input',
                         width: 60,
@@ -50,7 +50,7 @@ const EditItem = (props) => {
                         value: itemValues.retail
                     },
                     {
-                        id: purchaseValues.items[itemIndex].card_id || purchaseValues.items[itemIndex].product_id,
+                        id: purchaseValues.items[itemIndex].id,
                         title: 'quantity',
                         type: 'input',
                         width: 40,
@@ -63,7 +63,7 @@ const EditItem = (props) => {
             {
                 elements: [
                     {
-                        id: purchaseValues.items[itemIndex].card_id || purchaseValues.items[itemIndex].product_id,
+                        id: purchaseValues.items[itemIndex].id,
                         title: 'note',
                         type: 'input',
                         width: 100,
@@ -106,7 +106,7 @@ const EditItem = (props) => {
 
     return (<div className='editItem page'>
         <Banner titleText={'Edit Item'} handleClickBackArrow={handleClickBackArrow} />
-        <img className='itemImage' src={`https://product-images.tcgplayer.com/fit-in/656x656/${purchaseValues.items[itemIndex].tcgplayer_product_id}.jpg`}/>
+        <img className='itemImage' src={`https://product-images.tcgplayer.com/fit-in/656x656/${purchaseValues.items[itemIndex].tcgpId}.jpg`}/>
         <h3 className='itemName'>{purchaseValues.items[itemIndex].name}</h3>
         <p className='expansionName'>{purchaseValues.items[itemIndex].set.name}</p>
         <Form config={formConfig} />

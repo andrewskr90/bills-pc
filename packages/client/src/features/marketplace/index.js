@@ -1,6 +1,5 @@
 import React from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import BillsPcService from '../../api/bills-pc'
 import ExpansionsMarketplace from './ExpansionsMarketplace'
 import ExpansionItemsMarketplace from './ExpansionItemsMarketplace'
 import Search from '../search'
@@ -13,9 +12,8 @@ const Marketplace = (props) => {
     const { referenceData, setReferenceData } = props
     const navigate = useNavigate()
 
-    const submitSearch = async (relayedValues) => {
-        const { category, value } = relayedValues
-        navigate(`search?category=${category}&value=${value}`)
+    const submitSearch = async (value) => {
+        navigate(`search?value=${value}`)
     }
 
     const handleSelectSet = (setId) => {

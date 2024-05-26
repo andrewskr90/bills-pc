@@ -23,8 +23,8 @@ const SearchResults = (props) => {
         const verifiedParams = eligableMarketSearchParams(location)
         setSearchValue(verifiedParams.value)
         if (verifiedParams) {
-            const { category, value } = verifiedParams
-            searchForItems(category, value)
+            const { value } = verifiedParams
+            searchForItems(value)
                 .then(res => {
                     setReferenceData({
                         ...referenceData,
@@ -42,8 +42,7 @@ const SearchResults = (props) => {
 
     const handleSelectItem = (item) => {
         const expansionId = item.set.id
-        const itemId = item.card_id || item.product_id
-        navigate(`/market/${expansionId}/${itemId}`)
+        navigate(`/market/${expansionId}/${item.id}`)
     }
 
     return (<div className='searchResults'>

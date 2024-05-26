@@ -40,14 +40,10 @@ const Watching = (props) => {
                                                 <p>${listing.price}</p>
                                                 <p>
                                                     {listing.lot.id 
-                                                    ? 
-                                                    `${listing.lot.items.length} Item Lot` 
-                                                    : 
-                                                    listing.collectedCard.id 
                                                         ? 
-                                                        listing.collectedCard.card_v2_name
+                                                        `${listing.lot.items.length} Item Lot` 
                                                         : 
-                                                        listing.collectedProduct.product_name
+                                                        listing.CollectedItem.name 
                                                     }
                                                 </p>
                                             </div>

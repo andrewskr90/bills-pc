@@ -4,7 +4,6 @@ import { Line } from 'react-chartjs-2'
 
 const MarketplaceChart = (props) => {
     const { item, referenceData } = props
-    const itemId = item.card_id || item.product_id
     let rangeKey = referenceData.dateRange
     const itemPercentChange = item.formattedPrices[item.printings[0]].changes[referenceData.dateRange]
 
@@ -12,11 +11,11 @@ const MarketplaceChart = (props) => {
         {itemPercentChange
         ?
         <Line 
-            datasetIdKey={itemId}
+            datasetIdKey={item.id}
             data={{
                 labels: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[0]).reverse(),
                 datasets: [{
-                    id: itemId,
+                    id: item.id,
                     data: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[1]).reverse(),
                     spanGaps: true,
                     tension: 0.3,

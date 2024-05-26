@@ -41,46 +41,26 @@ const Listing = (props) => {
                                 </select>
                                 {listing.lot.items
                                     .sort((a,b) => {
-                                        let aName = 'card_v2_name'
-                                        let bName = 'card_v2_name'
-                                        if (a.product_name) aName = 'product_name'
-                                        if (b.product_name) bName = 'product_name'
-                                        if (a[aName] < b[bName]) return -1
-                                        if (a[aName] > b[bName]) return 1
+                                        if (a.name < b.name) return -1
+                                        if (a.name > b.name) return 1
                                         return 0
                                     })
                                     .sort((a,b) => {
-                                        let aSortKey = sortKey
-                                        let bSortKey = sortKey
-                                        if (sortKey === 'name') {
-                                            if (a.card_v2_name) aSortKey = 'card_v2_name'
-                                            else aSortKey = 'product_name'
-                                            if (b.card_v2_name) bSortKey = 'card_v2_name'
-                                            else bSortKey = 'product_name'
-                                        }
-                                        if (a[aSortKey] < b[bSortKey]) return sortKey === 'market_price_price' ? 1 : -1
-                                        if (a[aSortKey] > b[bSortKey]) return sortKey === 'market_price_price' ? -1 : 1
+                                        if (a[sortKey] < b[sortKey]) return sortKey === 'market_price_price' ? 1 : -1
+                                        if (a[sortKey] > b[sortKey]) return sortKey === 'market_price_price' ? -1 : 1
                                         return 0
                                     }).map(item => {
                                     return <div>
-                                        <p>{item.card_v2_name || item.product_name}</p>
+                                        <p>{item.id}</p>
                                         <p>{item.market_price_price}</p>
                                     </div>
                                 })}
                             </div>
                         )}
-                        {listing.collectedCard.id && (
-                            <div>
-                                <p>{listing.collectedCard.card_v2_name}</p>
-                                <p>{listing.collectedCard.market_price_price}</p>
-                            </div>
-                        )}
-                        {listing.collectedCard.id && (
-                            <div>
-                                <p>{listing.collectedProduct.product_name}</p>
-                                <p>{listing.collectedProduct.market_price_price}</p>
-                            </div>
-                        )}
+                        <div>
+                            <p>{listing.collectedItem.name}</p>
+                            <p>{listing.collectedItem.market_price_price}</p>
+                        </div>
                     </div>
                 : <></>
             } />

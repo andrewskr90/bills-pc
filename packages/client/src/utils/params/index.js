@@ -15,8 +15,5 @@ export const eligableMarketSearchParams = (location) => {
     if (!location.search) return false
     const parsedParams = parseParams(location.search)
     if (!parsedParams.value) return false
-    if (parsedParams.category !== 'cards' && parsedParams.category !== 'products') {
-        parsedParams.category = 'all'
-    }
     return parsedParams
 }

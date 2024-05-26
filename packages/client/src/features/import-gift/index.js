@@ -20,20 +20,9 @@ const ImportGift = (props) => {
         })
     }
 
-    const seperateCardsAndProducts = (transactionValues) => {
-        const transactionItems = transactionValues.items
-        const transactionCards = transactionItems.filter(item => item.card_id)
-        const transactionProducts = transactionItems.filter(item => item.product_id)
-        return {
-            ...transactionValues,
-            cards: transactionCards,
-            products: transactionProducts
-        }
-    }
-
     const handleUpdateCollection = (e) => {
         e.preventDefault()
-        BillsPcService.postTransactionGifts([seperateCardsAndProducts(importGiftValues)])
+        BillsPcService.postTransactionGifts([{ ...importGiftValues }])
             .then(res => {
                 setImportGiftValues({
                     ...initialImportGiftValues,
@@ -74,7 +63,7 @@ const ImportGift = (props) => {
 
     const removeItemFromImportGift = (itemId) => {
         const filteredArray = importGiftValues.items.filter(item => {
-            if (itemId === item.card_id || itemId === item.product_id) {
+            if (itemId === item.id) {
                 return false
             } else {
                 return true
