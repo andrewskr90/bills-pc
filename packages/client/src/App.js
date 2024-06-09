@@ -100,11 +100,11 @@ const App = () => {
                 sets: formattedExpansions(fetchedExpansions),
                 rarities: fetchedRarities,
                 bulk: {
-                    rarities: raritiesResponse.data,
-                    types: typesResponse.data,
-                    printings: printingsResponse.data,
-                    expansions: expansionsResponse.data,
-                    conditions: conditionsResponse.data
+                    rarity: raritiesResponse.data,
+                    type: typesResponse.data,
+                    printing: printingsResponse.data,
+                    set: expansionsResponse.data,
+                    condition: conditionsResponse.data
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),

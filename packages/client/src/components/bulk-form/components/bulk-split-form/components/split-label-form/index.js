@@ -61,30 +61,32 @@ const SplitLabelForm = (props) => {
                 let keyDisplay
                 let optionValueKey
                 let optionNameKey
-                if (key === 'rarities') {
+                if (key === 'rarity') {
                     keyDisplay = 'Rarities'
                     optionValueKey = 'rarity_id'
                     optionNameKey = 'rarity_name'
                 }
-                if (key === 'types') {
+                if (key === 'type') {
                     keyDisplay = 'Types'
                     optionValueKey = 'type_id'
                     optionNameKey = 'type_name'
                 }
-                if (key === 'printings') {
+                if (key === 'printing') {
                     keyDisplay = 'Printings'
                     optionValueKey = 'printing_id'
                     optionNameKey = 'printing_name'
                 }
-                if (key === 'expansions') {
+                if (key === 'set') {
                     keyDisplay = 'Expansions'
                     optionValueKey = 'set_v2_id'
                     optionNameKey = 'set_v2_name'
                 }
+                console.log(referenceData)
                 return <div className='row'>
                     <div className='labelInput'>
                         <label>{keyDisplay}</label>
                         {splitLabelFormValues[key].map((value, idx) => {
+
                             return <select key={idx} name={key} value={splitLabelFormValues[key][idx]} onChange={(e) => handleChangeSplitLabelValues(e, idx)}>
                                 {[ { [optionValueKey]: null, [optionNameKey]: '--Select--' }, ...referenceData.bulk[key]].map(option => {
                                     return <option value={option[optionValueKey]}>{option[optionNameKey]}</option>

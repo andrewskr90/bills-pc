@@ -61,7 +61,7 @@ const SearchResults = (props) => {
         ?
         <ItemContainer>
             {applyMarketChanges(filterMarketItems(referenceData.marketSearchResults, referenceData.filter.market)).sort(generateMarketItemSortCB(referenceData, sortKey)).map(result => {
-                return <Item referenceData={referenceData} item={result} handleSelectItem={handleSelectItem} />
+                return <Item key={result.id} referenceData={referenceData} item={result} handleSelectItem={handleSelectItem} />
             })}
         </ItemContainer>
         :

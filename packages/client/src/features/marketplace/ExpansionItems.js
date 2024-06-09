@@ -56,7 +56,9 @@ const ExpansionItems = (props) => {
             <ItemContainer>
                 {applyMarketChanges(filterMarketItems(matchSetToId(referenceData.sets, selectedSetId).items, referenceData.filter.market))
                     .sort(generateMarketItemSortCB(referenceData, sortKey))
-                    .map(item => <Item referenceData={referenceData} item={item} handleSelectItem={handleSelectItem} countConfig={countConfig} />)
+                    .map(item => {
+                        return <Item key={item.id} referenceData={referenceData} item={item} handleSelectItem={handleSelectItem} countConfig={countConfig} />
+                    })
                 }
             </ItemContainer>
             :

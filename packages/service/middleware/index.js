@@ -34,6 +34,7 @@ const formatItems = (req, res, next) => {
             prices: item.prices,
             tcgpId: item.tcgpId,
             printings: item.printings,
+            sealed: item.sealed,
             set: {
                 id: item.set_v2_id,
                 name: item.set_v2_name,

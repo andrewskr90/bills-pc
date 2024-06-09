@@ -7,10 +7,10 @@ export const initialReferenceDataValues = {
     rarities: [],
     marketSearchResults: [],
     bulk: {
-        rarities: [],
-        types: [],
-        printings: [],
-        expansions: []
+        rarity: [],
+        type: [],
+        printing: [],
+        set: []
     },
     dateRange: 'week',
     setSort: {
@@ -189,21 +189,20 @@ export const initialSortingValues = {
 }
 
 export const initialSplitLabelFormValues = {
-    rarities: [null],
-    types: [null],
-    printings: [null],
-    expansions: [null]
+    rarity: [null],
+    type: [null],
+    printing: [null],
+    set: [null]
 }
 
 export const initialBulkSplitsValues = []
 
 export const initialExternalListing = {
-    date: undefined,
+    time: undefined,
     description: undefined,
     sellerId: undefined,
     price: undefined,
-    cards: [],
-    products: [],
+    items: [],
     bulkSplits: []
 }
 

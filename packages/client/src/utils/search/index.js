@@ -10,20 +10,10 @@ export const conditionSearchString = (value) => {
 export const searchForItems = async (searchValue) => {
     let marketSearchResults = []
     const conditionedValue = conditionSearchString(searchValue)
-    if (conditionedValue === '') {
-        await BillsPcService.getItemsWithValues()
-            .then(res => marketSearchResults = [
-                ...marketSearchResults,
-                ...res.data
-            ])
-            .catch(err => console.log(err))
-
-    } else {
-        await BillsPcService.getItemsWithValues({ searchValue: conditionedValue })
-                .then(res => marketSearchResults = [
-                ...marketSearchResults,
-                ...res.data
-            ])
+    if (conditionedValue !== '') {
+        marketSearchResults = await BillsPcService.getItemsWithValues({ searchValue: conditionedValue })
+                .then(res => res.data)
+                .catch(err => console.log(err))
     }
     return { data: marketSearchResults }
 }

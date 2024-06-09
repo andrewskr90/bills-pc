@@ -11,6 +11,7 @@ const ExpansionItemInfo = (props) => {
     const { referenceData, setReferenceData } = props
     const [targetItem, setTargetItem] = useState()
     const [loadImage, setLoadImage] = useState(true)
+    const [selectedPrinting, setSelectedPrinting] = useState()
     const params = useParams()
     const targetExpansionId = params['setId']
     const targetItemId = params['itemId']
@@ -23,6 +24,7 @@ const ExpansionItemInfo = (props) => {
                 if (item.id === targetItemId) return item
             })
             setTargetItem(applyMarketChanges(filteredTargetItem)[0])
+            setSelectedPrinting(filteredTargetItem[0].printings[0])
         } else {
             (async () => {
                 await BillsPcService.getMarketPrices({ set_v2_id: targetExpansionId})
@@ -73,23 +75,26 @@ const ExpansionItemInfo = (props) => {
                 </div>
                 <div className='besideImg'>
                     <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} />
-                    <MarketplaceChart item={targetItem} referenceData={referenceData} />
-                    {targetItem.marketValue[targetItem.printings[0]] ? <div 
-                        className={`valueAndChange ${targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] > 0 
+                    <MarketplaceChart id={targetItem.id} prices={targetItem.formattedPrices} printing={selectedPrinting} referenceData={referenceData} />
+                    {targetItem.marketValue[selectedPrinting] ? <div 
+                        className={`valueAndChange ${targetItem.formattedPrices[selectedPrinting].changes[referenceData.dateRange] > 0 
                             ? 'up' 
-                            : targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] ? 'down' : ''}`
+                            : targetItem.formattedPrices[selectedPrinting].changes[referenceData.dateRange] ? 'down' : ''}`
                         }
                     >
-                        <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue[targetItem.printings[0]])}</p>
+                        <p className='marketValue'>${generateDisplayedMarketValue(targetItem.marketValue[selectedPrinting])}</p>
                         <p className='percentChange'>
-                            {targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange] > 0 ? '+' : ''}
-                            {targetItem.formattedPrices[targetItem.printings[0]].changes[referenceData.dateRange].toFixed(2)}%
+                            {targetItem.formattedPrices[selectedPrinting].changes[referenceData.dateRange] > 0 ? '+' : ''}
+                            {targetItem.formattedPrices[selectedPrinting].changes[referenceData.dateRange].toFixed(2)}%
                         </p>
                     </div> : (
                         <p>Price Not Available</p>
                     )}
                 </div>
             </div>
+            <select value={selectedPrinting} onChange={(e) => setSelectedPrinting(e.target.value)}>
+                {targetItem.printings.map(printing => <option value={printing}>{referenceData.bulk.printing.find(p => p.printing_id === printing).printing_name}</option>)}
+            </select>
             <div className='purchaseSection'>
                 <p>Support Bill's PC!</p>
                 <AffiliateLink path={`/product/${targetItem.tcgpId}`}>

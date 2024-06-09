@@ -19,11 +19,11 @@ const formatMarketPricesFromConcat = (req, res, next) => {
             if (itemPriceLookup[itemPrinting.id]) {
                 itemPriceLookup[itemPrinting.id] = {
                     ...itemPriceLookup[itemPrinting.id],
-                    [itemPrinting.printing_name]: datesAndPrices
+                    [itemPrinting.printing_id]: datesAndPrices
                 }
             } else {
                 itemPriceLookup[itemPrinting.id] = {
-                    [itemPrinting.printing_name]: datesAndPrices
+                    [itemPrinting.printing_id]: datesAndPrices
                 }
             }
             
@@ -35,7 +35,8 @@ const formatMarketPricesFromConcat = (req, res, next) => {
         return {
                 ...item,
                 prices: itemPriceLookup[item.id],
-                printings: Object.keys(itemPriceLookup[item.id])
+                printings: Object.keys(itemPriceLookup[item.id]),
+                sealed: item.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9'
             }
     })
     req.results = formattedMarketPricesFromConcat

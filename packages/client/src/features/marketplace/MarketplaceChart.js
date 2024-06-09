@@ -3,20 +3,20 @@ import ChartJS from 'chart.js/auto'
 import { Line } from 'react-chartjs-2'
 
 const MarketplaceChart = (props) => {
-    const { item, referenceData } = props
+    const { id, prices, printing, referenceData } = props
     let rangeKey = referenceData.dateRange
-    const itemPercentChange = item.formattedPrices[item.printings[0]].changes[referenceData.dateRange]
+    const itemPercentChange = prices[printing].changes[referenceData.dateRange]
 
     return (<div className='marketplaceChart'>
         {itemPercentChange
         ?
         <Line 
-            datasetIdKey={item.id}
+            datasetIdKey={id}
             data={{
-                labels: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[0]).reverse(),
+                labels: prices[printing].prices[rangeKey].map(price => price[0]).reverse(),
                 datasets: [{
-                    id: item.id,
-                    data: item.formattedPrices[item.printings[0]].prices[rangeKey].map(price => price[1]).reverse(),
+                    id: id,
+                    data: prices[printing].prices[rangeKey].map(price => price[1]).reverse(),
                     spanGaps: true,
                     tension: 0.3,
                     radius: 0,

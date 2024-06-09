@@ -32,9 +32,10 @@ const selectWithValues = (req, res, next) => {
     if (Object.keys(req.query).length > 0) {
         if (req.query.searchValue) {
             query += QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'i.name')
+            query += ` AND (c.condition_id = '0655c457-ff60-11ee-b8b9-0efd996651a9' OR c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9')`
         }
     }
-    query += ' GROUP BY SKU.id;'
+    query += ' GROUP BY SKU.id ORDER BY s.set_v2_name, i.name, p.printing_tcgp_printing_id, c.condition_tcgp_condition_id;'
     req.queryQueue.push(query)
     next()
 }

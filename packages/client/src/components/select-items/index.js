@@ -31,22 +31,26 @@ const SelectItems = (props) => {
     const filterKey = 'market'
     const navigate = useNavigate()
 
-    const handleAddItem = (item) => {
+    const handleAddItem = (item, printing) => {
         if (lotItemCounts[item.id]) {
-            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count +1 } })
-            else setLotItemCounts({ ...lotItemCounts, [item.id]: { item, count: 1 } })
+            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count +1, printing } })
+            else setLotItemCounts({ ...lotItemCounts, [item.id]: { ...item, count: 1, printing } })
         }
-        else setLotItemCounts({ ...lotItemCounts, [item.id]: { item, count: 1 } })
+        else setLotItemCounts({ ...lotItemCounts, [item.id]: { ...item, count: 1, printing } })
     }
-    const handleSubtractItem = (item) => {
+    const handleSubtractItem = (item, printing) => {
         if (lotItemCounts[item.id]) {
-            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count - 1 } })
+            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count - 1, printing } })
         } 
+    }
+
+    const handleChangePrinting = (item, printing) => {
+        if (lotItemCounts[item.id]) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], printing }})
     }
 
     const submitSearch = (relayedSearch) => {
         setLoading(true)
-        searchForItems(relayedSearch.category, relayedSearch.value)
+        searchForItems(relayedSearch)
             .then(res => {
                 setEmptyMessage('No results found.')
                 setSearchedItems(res.data)
@@ -68,27 +72,35 @@ const SelectItems = (props) => {
             if (cur.count > 1) {
                 const items = []
                 for (let i=0; i<cur.count; i++) {
-                    items.push(cur.item)
+                    items.push(cur)
                 }
                 return [...prev, ...items]
             }
-            return [...prev, cur.item]
+            return [...prev, cur]
         }, [])
     }
 
     const handleFindCount = (item_id) => {
         return lotItemCounts[item_id] ? lotItemCounts[item_id].count : undefined
     }
+    const handleFindPrinting = (item_id) => {
+        return lotItemCounts[item_id] ? lotItemCounts[item_id].printing : undefined
+    }
     const countConfig = {
         handleAddItem,
         handleSubtractItem,
+        handleChangePrinting,
         handleFindCount,
+        handleFindPrinting
     }
 
     return (<div className='selectItems page'>
         <Banner titleText={'Add Lot'} handleClickBackArrow={handleClickBackArrow} />
         <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => lotItemCounts[itemId].count + prev, 0)}</p>
-        <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => (lotItemCounts[itemId].item.marketValue[lotItemCounts[itemId].printings[0]] * lotItemCounts[itemId].count) + prev, 0)}</p>
+        <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
+            return (lotItemCounts[itemId].marketValue[lotItemCounts[itemId].printing] * lotItemCounts[itemId].count) + prev
+            }, 0)}
+        </p>
         <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>
         <div className='itemFinder'>
             <div style={{ display: 'flex' }}>
@@ -107,13 +119,15 @@ const SelectItems = (props) => {
                     />
                     <ItemContainer emptyMessage={emptyMessage} loading={loading}>
                         {applyMarketChanges(
-                            filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
-                            return <Item 
-                                key={item.id} 
-                                item={item} 
-                                referenceData={referenceData} 
-                                countConfig={countConfig} 
-                            />
+                            filterMarketItems(searchedItems, referenceData.filter[filterKey]))
+                                .sort(generateMarketItemSortCB(referenceData, sortKey))
+                                .map(item => {
+                                    return <Item 
+                                        key={item.id} 
+                                        item={item} 
+                                        referenceData={referenceData} 
+                                        countConfig={countConfig} 
+                                    />
                         })}
                     </ItemContainer>
                 </>
