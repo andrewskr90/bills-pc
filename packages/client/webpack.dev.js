@@ -9,5 +9,12 @@ module.exports = merge(common, {
         static: './dist',
         hot: true,
         compress: true
-    }
+    },
+    resolve: {
+        fallback: {
+            path: require.resolve("path-browserify"),
+            os: require.resolve("path-browserify"),
+            crypto: require.resolve("path-browserify")
+        }
+  }
 })
