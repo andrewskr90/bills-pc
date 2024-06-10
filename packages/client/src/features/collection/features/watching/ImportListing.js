@@ -8,7 +8,6 @@ import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem'
 import InputSelect from "../../../../components/input-select"
 import SelectItems from "../../../../components/select-items"
-import { getSkusBillsPc } from "../../../../../../scrapers/api"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
@@ -30,22 +29,49 @@ const ImportListing = (props) => {
         navigate('/gym-leader/collection/watching/import')
     }
     const handleSelectItems = (items) => {
-        // item selector will need to include printing and condition options
-        // creating listing, items can either have bpc or tcgp ids. csv will use tcgp
-        // or should the front end fetch bpc ids, probably this. api call that only sends the csv
-        // and responds with an array formatted just like `add lot to purchase`
-        // this will deprecate the cards_v2 and products tables, I should possibly create a new user
-        // and reformat my kyle user data later. full date time transactions should be created too.
         setExternalListing({
             ...externalListing,
-            items: items.map(item => ({ ...item, note: '', printing: undefined, condition: undefined }))
+            items: items.map(item => ({ 
+                ...item, note: '', 
+                condition: item.sealed 
+                    ? referenceData.bulk.condition.find(cond => cond.condition_name === 'Unopened').condition_id 
+                    : referenceData.bulk.condition.find(cond => cond.condition_name === 'Near Mint').condition_id,
+                printing: item.printing
+            }))
         })
         navigate('/gym-leader/collection/watching/import')
     }
 
-    const handleCreateExternalListing = async () => {
+    const convertLocalToUTC = (local) => {
+        const utcDate = new Date(local)
+        return`${
+            utcDate.getUTCFullYear()}-${
+            (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
+            utcDate.getUTCDate().toString().padStart(2, '0')}T${
+            utcDate.getUTCHours().toString().padStart(2, '0')}:${
+            utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
+            utcDate.getUTCSeconds().toString().padStart(2, '0')
+        }`
+    }
+    const formatExternalListing = (listing) => {
+        return {
+            ...listing,
+            time: convertLocalToUTC(listing.time),
+            items: listing.items.map(item => { 
+                const { id, printing, condition, note } = item
+                return {
+                    id, 
+                    printing,
+                    condition,
+                    note
+                }
+            }),
+        }
+    }
+    const handleCreateExternalListing = async () => {   
         try {
-            await BillsPcService.postListing({ data: externalListing, params: { external: true } })
+            
+            await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
             navigate('/gym-leader/collection/watching/import')
         } catch (err) {
             console.log(err)
@@ -101,6 +127,18 @@ const ImportListing = (props) => {
         navigate(`edit/${itemType}/${idx}`)
     }
 
+    const updateSplitInBulkValues = (updatedSplit, updatedIdx) => {
+        const adjustedSplits = externalListing.bulkSplits.map((split, i) => {
+            if (i=== parseInt(updatedIdx)) return updatedSplit
+            return split
+        })
+        setExternalListing({
+            ...externalListing,
+            bulkSplits: adjustedSplits
+        })
+        navigate('/gym-leader/collection/watching/import')
+    }
+    
     return <Routes>
             <Route
                 path="/"
@@ -115,8 +153,8 @@ const ImportListing = (props) => {
                         <p>External Listing</p>
                         <div style={{ display: 'flex' }}>
                             <label style={{ display: 'flex', flexDirection: 'column' }}>
-                                Date
-                                <input type="date" value={externalListing.date} onChange={(e) => setExternalListing({ ...externalListing, date: e.target.value })} />
+                                Time
+                                <input type="datetime-local" value={externalListing.time} onChange={(e) => setExternalListing({ ...externalListing, time: e.target.value })} />
                             </label>
                             <label style={{ display: 'flex', flexDirection: 'column' }}>
                                 Seller
@@ -141,8 +179,15 @@ const ImportListing = (props) => {
                             <p>Item</p>
                         )}
                         {externalListing.items.map((item, idx) => {
-                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around' }}>
-                                {item.name}
+                            return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around', paddingBottom: '4px' }}>
+                                <div style={{ display: 'flex ', alignItems: 'start', flexDirection: 'column', width: '90%' }}>
+                                    {item.name}
+                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                                        <p>{referenceData.bulk.condition.find(c => c.condition_id === item.condition).condition_name}</p>
+                                        <p>--</p>
+                                        <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printing).printing_name}</p>
+                                    </div>
+                                </div>
                                 <img src={editPNG} onClick={() => handleEditItem('item', idx)} />
                             </div>)
                         })}
@@ -188,8 +233,18 @@ const ImportListing = (props) => {
                 />}
             />
             <Route 
+                path='/edit/bulkSplit/:idx'
+                element={<BulkEditor 
+                    referenceData={referenceData}
+                    updateSplitInBulkValues={updateSplitInBulkValues}
+                    purchaseValues={externalListing}
+                    initialSplitValues={initialSortingSplitValues}
+                />}
+            />
+            <Route 
                 path='/edit/:itemType/:idx'
                 element={<EditListingItem 
+                    referenceData={referenceData}
                     listing={externalListing}
                     setListing={setExternalListing}
                 />}

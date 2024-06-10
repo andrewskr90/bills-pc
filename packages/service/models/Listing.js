@@ -4,71 +4,58 @@ const { objectsToInsert } = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
 
 const getWatching = async (watcherId) => {
-    const dateWithBackticks = '`date`'
+    const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            Listing.id as listingId,
+            V3_Listing.id as listingId,
             sellers.user_id as sellerId,
             sellers.user_name as sellerName,
             watchers.user_id as watcherId,
-            collected_cards.collected_card_id,
-            collected_products.collected_product_id,
-            bulk_splits.bulk_split_id,
-            Listing.${dateWithBackticks},
-            Listing.price,
-            Listing.${descriptionWithBackticks},
-            gift_cards.gift_card_id,
-            gift_products.gift_product_id,
-            gift_bulk_splits.gift_bulk_split_id,
-            Watching.id as watchingId,
-            card_v2_id,
-            card_v2_name,
-            card_v2_number,
-            card_v2_rarity,
-            card_v2_tcgplayer_product_id,
-            card_v2_foil_only,
-            product_id,
-            product_name,
-            product_release_date,
-            product_description,
-            product_tcgplayer_product_id,
-            Lot.id as lotId
-        FROM Listing
-        LEFT JOIN Lot 
-            on Lot.id = Listing.lotId
-        LEFT JOIN LotItem 
-            on LotItem.lotId = Lot.id
-        LEFT JOIN collected_cards 
-            on collected_cards.collected_card_id = Listing.collected_card_id
-            OR collected_cards.collected_card_id = LotItem.collected_card_id
-        LEFT JOIN cards_v2 
-            on cards_v2.card_v2_id = collected_cards.collected_card_card_id
-        LEFT JOIN collected_products
-            on collected_products.collected_product_id = Listing.collected_product_id
-            OR collected_products.collected_product_id = LotItem.collected_product_id
-        LEFT JOIN products 
-            on products.product_id = collected_products.collected_product_product_id
-        LEFT JOIN bulk_splits
-            ON bulk_splits.bulk_split_id = Listing.bulk_split_id
-            OR bulk_splits.bulk_split_id = LotItem.bulk_split_id
-        LEFT JOIN gift_cards
-            ON gift_cards.gift_card_collected_card_id = collected_cards.collected_card_id
-        LEFT JOIN gift_products
-            ON gift_products.gift_product_collected_product_id = collected_products.collected_product_id
-        LEFT JOIN gift_bulk_splits
-            ON gift_bulk_splits.gift_bulk_split_bulk_split_id = bulk_splits.bulk_split_id
-        LEFT JOIN gifts
-            ON gifts.gift_id = gift_cards.gift_card_gift_id
-            OR gifts.gift_id = gift_products.gift_product_gift_id
-            OR gifts.gift_id = gift_bulk_splits.gift_bulk_split_gift_id
+            V3_CollectedItem.id as collectedItemId,
+            V3_BulkSplit.id as bulkSplitId,
+            V3_Listing.${timeWithBackticks} as listingTime,
+            V3_ListingPrice.price as listingPrice,
+            V3_ListingPrice.time as listingPriceTime,
+            V3_Listing.${descriptionWithBackticks} as listingDescription,
+            V3_Gift.id as giftId,
+            V3_Watching.id as watchingId,
+            Item.id as itemId,
+            Item.name as itemName,
+            Item.tcgpId as itemTcgpId,
+            V3_Lot.id as lotId
+        FROM V3_Listing
+        LEFT JOIN V3_ListingPrice
+            on V3_ListingPrice.listingId = V3_Listing.id
+        LEFT JOIN V3_Lot 
+            on V3_Lot.id = V3_Listing.lotId
+        LEFT JOIN V3_LotEdit
+            on V3_LotEdit.lotId = V3_Lot.id
+        LEFT JOIN V3_LotInsert
+            on V3_LotInsert.lotEditId = V3_LotEdit.id
+        LEFT JOIN V3_LotRemoval
+            on V3_LotRemoval.lotEditId = V3_LotEdit.id
+        LEFT JOIN V3_CollectedItem 
+            on V3_CollectedItem.id = V3_Listing.collectedItemId
+            OR V3_CollectedItem.id = V3_LotInsert.collectedItemId
+            OR V3_CollectedItem.id = V3_LotRemoval.collectedItemId
+        LEFT JOIN Item 
+            on Item.id = V3_CollectedItem.itemId
+        LEFT JOIN V3_BulkSplit
+            on V3_BulkSplit.id = V3_Listing.bulkSplitId
+            OR V3_BulkSplit.id = V3_LotInsert.bulkSplitId
+            OR V3_BulkSplit.id = V3_LotRemoval.bulkSplitId
+        LEFT JOIN V3_Gift
+            ON V3_Gift.collectedItemId = V3_CollectedItem.id
+            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
+            OR V3_Gift.lotId = V3_Lot.id
         LEFT JOIN users as sellers
-            on sellers.user_id = gifts.gift_receiver_id
-        LEFT JOIN Watching
-            on Watching.listingId = Listing.id
+            on sellers.user_id = V3_Gift.recipientId
+        LEFT JOIN V3_Watching
+            on V3_Watching.listingId = V3_Listing.id
         LEFT JOIN users as watchers
-            on watchers.user_id = Watching.watcherId
-        WHERE Watching.watcherId = '${watcherId}' AND Listing.saleId IS NULL;
+            on watchers.user_id = V3_Watching.watcherId
+        WHERE V3_Watching.watcherId = '${watcherId}' AND V3_Listing.saleId IS NULL;
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -81,69 +68,60 @@ const getWatching = async (watcherId) => {
 }
 
 const getListingById = async (listingId) => {
-    const dateWithBackticks = '`date`'
+    const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            Listing.id as listingId,
+            V3_Listing.id as listingId,
             sellers.user_id as sellerId,
             sellers.user_name as sellerName,
-            collected_cards.collected_card_id,
-            collected_products.collected_product_id,
-            bulk_splits.bulk_split_id,
-            Listing.${dateWithBackticks},
-            Listing.price,
-            Listing.${descriptionWithBackticks},
-            gift_cards.gift_card_id,
-            gift_products.gift_product_id,
-            gift_bulk_splits.gift_bulk_split_id,
-            card_v2_id,
-            card_v2_name,
-            card_v2_number,
-            card_v2_rarity,
-            card_v2_tcgplayer_product_id,
-            card_v2_foil_only,
-            set_v2_id,
-            set_v2_name,
-            product_id,
-            product_name,
-            product_release_date,
-            product_description,
-            product_tcgplayer_product_id,
-            Lot.id as lotId
-        FROM Listing
-        LEFT JOIN Lot 
-            on Lot.id = Listing.lotId
-        LEFT JOIN LotItem 
-            on LotItem.lotId = Lot.id
-        LEFT JOIN collected_cards 
-            on collected_cards.collected_card_id = Listing.collected_card_id
-            OR collected_cards.collected_card_id = LotItem.collected_card_id
-        LEFT JOIN cards_v2 
-            on cards_v2.card_v2_id = collected_cards.collected_card_card_id
+            V3_CollectedItem.id as collectedItemId,
+            V3_CollectedItem.printingId as printingId,
+            V3_Appraisal.conditionId as conditionId,
+            SKU.id as skuId,
+            V3_BulkSplit.id as bulkSplitId,
+            V3_Listing.${timeWithBackticks} as listingTime,
+            V3_ListingPrice.price as listingPrice,
+            V3_ListingPrice.time as listingPriceTime,
+            V3_Listing.${descriptionWithBackticks},
+            Item.id as itemId,
+            Item.name as name,
+            Item.tcgpId as tcgpId,
+            V3_Lot.id as lotId,
+            sets_v2.set_v2_id as setId,
+            sets_v2.set_v2_name as setName
+        FROM V3_Listing
+        LEFT JOIN V3_ListingPrice
+            on V3_ListingPrice.listingId = V3_Listing.id
+        LEFT JOIN V3_Lot 
+            on V3_Lot.id = V3_Listing.lotId
+        LEFT JOIN V3_LotEdit
+            on V3_LotEdit.lotId = V3_Lot.id
+        LEFT JOIN V3_LotInsert
+            on V3_LotInsert.lotEditId = V3_LotEdit.id
+        LEFT JOIN V3_CollectedItem 
+            on V3_CollectedItem.id = V3_Listing.collectedItemId
+            OR V3_CollectedItem.id = V3_LotInsert.collectedItemId
+        LEFT JOIN V3_Appraisal
+            on V3_Appraisal.collectedItemId = V3_CollectedItem.id
+        LEFT JOIN Item 
+            on Item.id = V3_CollectedItem.itemId
+        LEFT JOIN SKU
+            on SKU.itemId = Item.id
+            AND SKU.printingId = V3_CollectedItem.printingId
+            AND SKU.conditionId = V3_Appraisal.conditionId
         LEFT JOIN sets_v2
-            on cards_v2.card_v2_set_id = sets_v2.set_v2_id
-        LEFT JOIN collected_products
-            on collected_products.collected_product_id = Listing.collected_product_id
-            OR collected_products.collected_product_id = LotItem.collected_product_id
-        LEFT JOIN products 
-            on products.product_id = collected_products.collected_product_product_id
-        LEFT JOIN bulk_splits
-            ON bulk_splits.bulk_split_id = Listing.bulk_split_id
-            OR bulk_splits.bulk_split_id = LotItem.bulk_split_id
-        LEFT JOIN gift_cards
-            ON gift_cards.gift_card_collected_card_id = collected_cards.collected_card_id
-        LEFT JOIN gift_products
-            ON gift_products.gift_product_collected_product_id = collected_products.collected_product_id
-        LEFT JOIN gift_bulk_splits
-            ON gift_bulk_splits.gift_bulk_split_bulk_split_id = bulk_splits.bulk_split_id
-        LEFT JOIN gifts
-            ON gifts.gift_id = gift_cards.gift_card_gift_id
-            OR gifts.gift_id = gift_products.gift_product_gift_id
-            OR gifts.gift_id = gift_bulk_splits.gift_bulk_split_gift_id
+            on Item.setId = sets_v2.set_v2_id
+        LEFT JOIN V3_BulkSplit
+            ON V3_BulkSplit.id = V3_Listing.bulkSplitId
+            OR V3_BulkSplit.id = V3_LotInsert.bulkSplitId
+        LEFT JOIN V3_Gift
+            ON V3_Gift.collectedItemId = V3_CollectedItem.id
+            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
+            OR V3_Gift.lotId = V3_Lot.id
         LEFT JOIN users as sellers
-            on sellers.user_id = gifts.gift_receiver_id
-        WHERE Listing.id = '${listingId}';
+            on sellers.user_id = V3_Gift.recipientId
+        WHERE V3_Listing.id = '${listingId}';
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -241,178 +219,200 @@ const formatListing = (listing) => {
     return formattedListing
 }
 
+const convertLocalToUTC = (local) => {
+    const utcDate = new Date(local)
+    return`${
+        utcDate.getUTCFullYear()}-${
+        (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
+        utcDate.getUTCDate().toString().padStart(2, '0')}T${
+        utcDate.getUTCHours().toString().padStart(2, '0')}:${
+        utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
+        utcDate.getUTCSeconds().toString().padStart(2, '0')
+    }`
+}
+
 const createExternal = async (listing, watcherId) => {
     const queryQueue = []
-    if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) === 0) {
+    if ((listing.items.length + listing.bulkSplits.length) === 0) {
         throw new Error("No item(s) specified within listing.")
     }
+    const now = new Date()
     // create collected items
-    // collected cards
-    if (listing.cards.length > 0) {
-        const collectedCardsToInsert = []
-        const collectedCardNotesToInsert = []
-        listing.cards.forEach((card, idx) => {
-            const collected_card_id = uuidV4()
-            const formattedCard = {
-                collected_card_id,
-                collected_card_card_id: card.card_id,
+    if (listing.items.length > 0) {
+        const collectedItemsToInsert = []
+        const appraisalsToInsert = []
+        const collectedItemNotesToInsert = []
+        listing.items.forEach((item, idx) => {
+            const collectedItemId = uuidV4()
+            const formattedItem = {
+                id: collectedItemId,
+                itemId: item.id,
+                printingId: item.printing
             }
-            if (card.note) {
-                const collected_card_note_id = uuidV4()
-                const formattedCollectedCardNote = {
-                    collected_card_note_id, 
-                    collected_card_note_collected_card_id: collected_card_id, 
-                    collected_card_note_user_id: watcherId,
-                    collected_card_note_note: card.note
+            const appraisalId = uuidV4()
+            const formattedAppraisal = {
+                id: appraisalId,
+                collectedItemId,
+                conditionId: item.condition,
+                appraiserId: listing.sellerId,
+                time: listing.time
+            }
+            if (item.note) {
+                const itemNoteId = uuidV4()
+                const formattedCollectedItemNote = {
+                    id: itemNoteId, 
+                    collectedItemId, 
+                    takerId: watcherId,
+                    note: item.note,
+                    time: convertLocalToUTC(now)
                 }
-                collectedCardNotesToInsert.push(formattedCollectedCardNote)
+
+                collectedItemNotesToInsert.push(formattedCollectedItemNote)
             }
-            collectedCardsToInsert.push(formattedCard)
-            listing.cards[idx] = { ...card, collected_card_id }
+            collectedItemsToInsert.push(formattedItem)
+            appraisalsToInsert.push(formattedAppraisal)
+            listing.items[idx] = { ...item, collectedItemId }
         })
-        queryQueue.push(`${objectsToInsert(collectedCardsToInsert, 'collected_cards')};`)
-        if (collectedCardNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(collectedCardNotesToInsert, 'collected_card_notes')};`)
-        }
-    }
-    if (listing.products.length > 0) {
-        // collected products
-        const collectedProductsToInsert = []
-        const collectedProductNotesToInsert = []
-        listing.products.forEach((product, idx) => {
-            const collected_product_id = uuidV4()
-            const formattedProduct = {
-                collected_product_id,
-                collected_product_product_id: product.product_id,
-            }
-            if (product.note) {
-                const collected_product_note_id = uuidV4()
-                const formattedCollectedProductNote = {
-                    collected_product_note_id, 
-                    collected_product_note_collected_product_id: collected_product_id, 
-                    collected_product_note_user_id: watcherId,
-                    collected_product_note_note: product.note
-                }
-                collectedProductNotesToInsert.push(formattedCollectedProductNote)
-            }            
-            collectedProductsToInsert.push(formattedProduct)
-            listing.products[idx] = { ...product, collected_product_id }
-        })
-        queryQueue.push(`${objectsToInsert(collectedProductsToInsert, 'collected_products')};`)
-        if (collectedProductNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(collectedProductNotesToInsert, 'collected_product_notes')};`)
+        queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
+        queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
+        if (collectedItemNotesToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`)
         }
     }
     if (listing.bulkSplits.length > 0) {
         // bulk splits
         const bulkSplitsToInsert = []
-        const bulkSplitLabelAssignmentsToInsert = []
+        const bulkSplitLabelsToInsert = []
         const bulkSplitNotesToInsert = []
         for (let i=0; i<listing.bulkSplits.length; i++) {
-            const bulk_split_id = uuidV4()
+            const bulkSplitId = uuidV4()
             const formattedBulkSplit = {
-                bulk_split_id,
-                bulk_split_count: listing.bulkSplits[i].count,
-                bulk_split_estimate: listing.bulkSplits[i].estimate
+                id: bulkSplitId,
+                count: listing.bulkSplits[i].count,
+                estimate: listing.bulkSplits[i].estimate
             }
             if (listing.bulkSplits[i].note) {
-                const bulk_split_note_id = uuidV4()
+                const bulkSplitNoteId = uuidV4()
                 const formattedBulkSplitNote = {
-                    bulk_split_note_id, 
-                    bulk_split_note_bulk_split_id: bulk_split_id, 
-                    bulk_split_note_user_id: watcherId,
-                    bulk_split_note_note: listing.bulkSplits[i].note
+                    id: bulkSplitNoteId, 
+                    bulkSplitId, 
+                    takerId: watcherId,
+                    note: listing.bulkSplits[i].note,
+                    time: convertLocalToUTC(now)
                 }
                 bulkSplitNotesToInsert.push(formattedBulkSplitNote)
             }             
-            listing.bulkSplits[i] = { ...listing.bulkSplits[i], bulk_split_id }
-            const labelAssignments = await fetchOrCreateLabelIds(listing.bulkSplits[i])
+            listing.bulkSplits[i] = { ...listing.bulkSplits[i], bulkSplitId }
+            const bulkSplitLabels = await fetchOrCreateLabelIds(listing.bulkSplits[i])
             bulkSplitsToInsert.push(formattedBulkSplit)
-            bulkSplitLabelAssignmentsToInsert.push(...labelAssignments)
+            bulkSplitLabelsToInsert.push(...bulkSplitLabels)
         }
-        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'bulk_splits')};`)  
-        if (bulkSplitLabelAssignmentsToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(bulkSplitLabelAssignmentsToInsert, 'bulk_split_label_assignments')};`)  
+        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)  
+        if (bulkSplitLabelsToInsert.length > 0) {
+            queryQueue.push(`${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`)  
         }
         if (bulkSplitNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'bulk_split_notes')};`)  
+            queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`)  
         }
     }
+    let collectedItemId = undefined
+    let bulkSplitId = undefined
+    let lotId = undefined
+    // if lot
+    if ((listing.items.length + listing.bulkSplits.length) > 1) {
+        const formattedLotInsertsToInsert = []
+        // create V3_Lot
+        lotId = uuidV4();
+        const formattedLot = {
+            id: lotId
+        }
+        // create V3_LotEdit
+        const lotEditId = uuidV4()
+        const formattedLotEdit = {
+            id: lotEditId,
+            lotId,
+            time: listing.time
+        }
+        // create V3_LotInsert
+        listing.items.forEach((item, index) => {
+            const { collectedItemId } = item
+            const lotInsertId = uuidV4()
+            const formattedLotInsert = {
+                id: lotInsertId,
+                lotEditId,
+                collectedItemId,
+                index
+            }
+            formattedLotInsertsToInsert.push(formattedLotInsert)
+        })
+        listing.bulkSplits.forEach((bulkSplit, idx) => {
+            const { bulkSplitId } = bulkSplit
+            const lotInsertId = uuidV4()
+            const index = idx + listing.items.length
+            const formattedLotInsert = {
+                id: lotInsertId,
+                lotEditId,
+                bulkSplitId,
+                index
+            }
+            formattedLotInsertsToInsert.push(formattedLotInsert)
+        })
+        queryQueue.push(`${objectsToInsert([formattedLot], 'V3_Lot')};`)  
+        queryQueue.push(`${objectsToInsert([formattedLotEdit], 'V3_LotEdit')};`)  
+        queryQueue.push(`${objectsToInsert(formattedLotInsertsToInsert, 'V3_LotInsert')};`)  
+    } else if (listing.items.length > 0) {
+        collectedItemId = listing.items[0].collectedItemId
+    } else if (listing.bulkSplits.length > 0) {
+        bulkSplitId = listing.bulkSplits[0].bulkSplitId
+    }
+
     // create gift
-    const gift_id = uuidV4();
+    const giftId = uuidV4();
     const formattedGift = {
-        gift_id,
-        gift_receiver_id: listing.sellerId
+        id: giftId,
+        recipientId: listing.sellerId,
+        collectedItemId,
+        bulkSplitId,
+        lotId,
+        time: listing.time
     }
-    queryQueue.push(`${objectsToInsert([formattedGift], 'gifts')};`)
-    // create gift cards
-    const giftCardsToInsert = []
-    listing.cards.forEach(card => {
-        const { collected_card_id } = card
-        const formattedGiftCard = {
-            gift_card_id: uuidV4(),
-            gift_card_gift_id: gift_id,
-            gift_card_collected_card_id: collected_card_id,
-        }
-        giftCardsToInsert.push(formattedGiftCard)
-    })
-    // create gift products
-    const giftProductsToInsert = []
-    listing.products.forEach(product => {
-        const { collected_product_id } = product
-        const formattedGiftProduct = {
-            gift_product_id: uuidV4(),
-            gift_product_gift_id: gift_id,
-            gift_product_collected_product_id: collected_product_id,
-        }
-        giftProductsToInsert.push(formattedGiftProduct)
-    })    
-    // create gift splits
-    const giftSplitsToInsert = []
-    listing.bulkSplits.forEach(bulkSplit => {
-        const { bulk_split_id } = bulkSplit
-        const formattedGiftBulkSplit = {
-            gift_bulk_split_id: uuidV4(),
-            gift_bulk_split_gift_id: gift_id,
-            gift_bulk_split_bulk_split_id: bulk_split_id,
-        }
-        giftSplitsToInsert.push(formattedGiftBulkSplit)
-    })
-    if (giftCardsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftCardsToInsert, 'gift_cards')};`)
+    queryQueue.push(`${objectsToInsert([formattedGift], 'V3_Gift')};`)
+    // create listing
+    const listingId = uuidV4()
+    const formattedListing = {
+        id: listingId,
+        collectedItemId,
+        bulkSplitId,
+        lotId,
+        description: listing.description,
+        saleId: undefined,
+        time: listing.time
     }
-    if (giftProductsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftProductsToInsert, 'gift_products')};`)
+    queryQueue.push(`${objectsToInsert([formattedListing], 'V3_Listing')};`)
+    // create ListingPrice
+    const listingPriceId = uuidV4()
+    const formattedListingPrice = {
+        id: listingPriceId,
+        listingId,
+        price: listing.price,
+        time: listing.time
     }
-    if (giftSplitsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
-    }
-    // at this point, all items are imported into proxy user's collection, now create listing with item or lot
-    let formattedListingId
-    if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
-        const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
-        queryQueue.push(`${objectsToInsert([formattedLot], 'Lot')};`)
-        queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
-        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
-        formattedListingId = formattedListing.id
-    } else {
-        const formattedListing = formatListing(listing)
-        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
-        formattedListingId = formattedListing.id
-    }
+    queryQueue.push(`${objectsToInsert([formattedListingPrice], 'V3_ListingPrice')};`)
     // create Watching
+    const watchingId = uuidV4()
     const formattedWatching = { 
-        id: uuidV4(), 
-        listingId: formattedListingId, 
-        watcherId 
+        id: watchingId, 
+        listingId, 
+        watcherId
     }
-    queryQueue.push(`${objectsToInsert([formattedWatching], 'Watching')};`)
+    queryQueue.push(`${objectsToInsert([formattedWatching], 'V3_Watching')};`)
     const req = { queryQueue }
     const res = {}
+    console.log(queryQueue)
     await executeQueries(req, res, (err) => {
         if (err) throw err
     })
-    return formattedListingId
+    return listingId
 }
 
 const convertSaleItemsToListings = async (listing) => {

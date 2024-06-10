@@ -1,73 +1,29 @@
 const Listing = require('../models/Listing')
 const MarketPrice = require('../models/MarketPrice')
 
-const formatListings = (listingItems, withPrices) => {    
-    const uniqueCollectedCards = {}
-    const uniqueCollectedProducts = {}
+const formatListings = (listingItems) => {    
     let itemsToFormat = listingItems
-    if (withPrices) {
-        itemsToFormat = listingItems.sort((a, b) => {
-            if (a.market_price_date > b.market_price_date) return -1
-            if (a.market_price_date < b.market_price_date) return 1
-            else return 0
-        }).filter(item => {
-            if (item.collected_card_id) {
-                if (!uniqueCollectedCards[item.collected_card_id]) {
-                    uniqueCollectedCards[item.collected_card_id] = 1
-                    return true
-                }
-            } else if (item.collected_product_id) {
-                if (!uniqueCollectedProducts[item.collected_product_id]) {
-                    uniqueCollectedProducts[item.collected_product_id] = 1
-                    return true
-                }
-            } else if (item.bulk_split_id) return true
-        })
-        itemsToFormat.sort((a, b ) => {
-            if (a.listingId > b.listingId) return 1
-            if (a.listingId < b.listingId) return -1
-            else return 0
-        })
-    }
     const listings = []
     let currentLot = {}
+
     itemsToFormat.forEach((item, idx) => {
         if (item.lotId) {
             if (!currentLot.id) {
                 currentLot = { id: item.lotId }
-                if (item.card_v2_id) {
+                if (item.itemId) {
                     currentLot = {
                         ...currentLot,
                         items: [
                             {
-                                collected_card_id: item.collected_card_id,
-                                card_v2_id: item.card_v2_id,
-                                card_v2_name: item.card_v2_name,
-                                card_v2_number: item.card_v2_number,
-                                card_v2_rarity: item.card_v2_rarity,
-                                card_v2_tcgplayer_product_id: item.card_v2_tcgplayer_product_id,
-                                card_v2_foil_only: item.card_v2_foil_only,
-                                set_v2_id: item.set_v2_id,
-                                set_v2_name: item.set_v2_name,
-                                market_price_price: parseFloat(item.market_price_price)
-                            }
-                        ]
-                    }
-                } else if (item.product_id) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            {
-                                collected_product_id: item.collected_product_id,
-                                product_id: item.product_id,
-                                product_name: item.product_name,
-                                product_release_date: item.product_release_date,
-                                product_description: item.product_description,
-                                product_tcgplayer_product_id: item.product_tcgplayer_product_id,
-                                product_foil_only: item.product_foil_only,
-                                set_v2_id: item.set_v2_id,
-                                set_v2_name: item.set_v2_name,
-                                market_price_price: parseFloat(item.market_price_price)
+                                collectedItemId: item.collectedItemId,
+                                itemId: item.itemId,
+                                name: item.name,
+                                tcgpId: item.tcgpId,
+                                setId: item.setId,
+                                setName: item.setName,
+                                printingId: item.printingId,    
+                                conditionId: item.conditionId,
+                                marketPrice: parseFloat(item.marketPrice)
                             }
                         ]
                     }
@@ -87,11 +43,10 @@ const formatListings = (listingItems, withPrices) => {
                             id: item.listingId,
                             sellerId: item.sellerId,
                             sellerName: item.sellerName,
-                            date: item.date,
-                            price: parseFloat(item.price),
+                            time: item.listingTime,
+                            listingPrice: item.listingPrice,
                             description: item.description,
-                            collectedCard: { id: undefined },
-                            collectedProduct: { id: undefined},
+                            collectedItem: { id: undefined },
                             lot: { ...currentLot }  
                         })
                         currentLot = {}
@@ -101,55 +56,33 @@ const formatListings = (listingItems, withPrices) => {
                         id: item.listingId,
                         sellerId: item.sellerId,
                         sellerName: item.sellerName,
-                        date: item.date,
-                        price: parseFloat(item.price),
+                        time: item.listingTime,
+                        listingPrice: item.listingPrice,
                         description: item.description,
-                        collectedCard: { id: undefined },
-                        collectedProduct: { id: undefined},
+                        collectedItem: { id: undefined },
                         lot: { ...currentLot }  
                     })
                 }
             } else {
-                if (item.card_v2_id) {
+                if (item.itemId) {
                     currentLot = {
                         ...currentLot,
                         items: [
                             ...currentLot.items,
                             {
-                                collected_card_id: item.collected_card_id,
-                                card_v2_id: item.card_v2_id,
-                                card_v2_name: item.card_v2_name,
-                                card_v2_number: item.card_v2_number,
-                                card_v2_rarity: item.card_v2_rarity,
-                                card_v2_tcgplayer_product_id: item.card_v2_tcgplayer_product_id,
-                                card_v2_foil_only: item.card_v2_foil_only,
-                                set_v2_id: item.set_v2_id,
-                                set_v2_name: item.set_v2_name,
-                                market_price_price: parseFloat(item.market_price_price)
+                                collectedItemId: item.collectedItemId,
+                                itemId: item.itemId,
+                                name: item.name,
+                                tcgpId: item.tcgpId,
+                                setId: item.setId,
+                                setName: item.setName,
+                                printingId: item.printingId,    
+                                conditionId: item.conditionId,
+                                marketPrice: parseFloat(item.marketPrice)
                             }
                         ]
                     }
-                } else if (item.product_id) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            ...currentLot.items,
-                            {
-                                collected_product_id: item.collected_product_id,
-                                product_id: item.product_id,
-                                product_name: item.product_name,
-                                product_release_date: item.product_release_date,
-                                product_description: item.product_description,
-                                product_tcgplayer_product_id: item.product_tcgplayer_product_id,
-                                product_foil_only: item.product_foil_only,
-                                set_v2_id: item.set_v2_id,
-                                set_v2_name: item.set_v2_name,
-                                market_price_price: parseFloat(item.market_price_price)
-                            }
-                        ]
-                    }
-                }
-                 else if (item.bulk_split_id) {
+                } else if (item.bulk_split_id) {
                     currentLot = {
                         ...currentLot,
                         items: [
@@ -164,11 +97,10 @@ const formatListings = (listingItems, withPrices) => {
                             id: item.listingId,
                             sellerId: item.sellerId,
                             sellerName: item.sellerName,
-                            date: item.date,
-                            price: parseFloat(item.price),
+                            time: item.listingTime,
+                            listingPrice: item.listingPrice,
                             description: item.description,
-                            collectedCard: { id: undefined },
-                            collectedProduct: { id: undefined},
+                            collectedItem: { id: undefined },
                             lot: { ...currentLot }  
                         })
                         currentLot = {}
@@ -178,81 +110,64 @@ const formatListings = (listingItems, withPrices) => {
                         id: item.listingId,
                         sellerId: item.sellerId,
                         sellerName: item.sellerName,
-                        date: item.date,
-                        price: parseFloat(item.price),
+                        time: item.listingTime,
+                        listingPrice: item.listingPrice,
                         description: item.description,
-                        collectedCard: { id: undefined },
-                        collectedProduct: { id: undefined},
+                        collectedItem: { id: undefined },
                         lot: { ...currentLot }  
                     })
                 }
             }
         } else {
-            if (item.card_v2_id) {
-                listings.push({
-                    id: item.listingId,
-                    sellerId: item.sellerId,
-                    sellerName: item.sellerName,
-                    date: item.date,
-                    price: parseFloat(item.price),
-                    description: item.description,
-                    collectedCard: { ...item, id: item.collected_card_id },
-                    collectedProduct: { id: item.collected_product_id },
-                    lot: { id: item.lotId, items: [] }
-                })
-            } else if (item.product_id) {
-                listings.push({
-                    id: item.listingId,
-                    sellerId: item.sellerId,
-                    sellerName: item.sellerName,
-                    date: item.date,
-                    price: parseFloat(item.price),
-                    description: item.description,
-                    collectedCard: { id: item.collected_card_id },
-                    collectedProduct: { ...item, id: item.collected_product_id },
-                    lot: { id: item.lotId, items: [] }                
-                })
-            }
+            listings.push({
+                id: item.listingId,
+                sellerId: item.sellerId,
+                sellerName: item.sellerName,
+                time: item.listingTime,
+                marketPrice: parseFloat(item.marketPrice),
+                description: item.description,
+                collectedItem: { ...item, id: item.collectedItemId },
+                bulkSplitId: { id: item.bulk_split_id },
+                lot: { id: item.lotId, items: [] }
+            })
         }
     })
     return listings.sort((a, b) => {
-        if (a.date > b.date) return -1
-        if (a.date < b.date) return 1
+        if (a.time > b.time) return -1
+        if (a.time < b.time) return 1
         return 0
     })
 }
 
-const uniqueCardIdsInListings = (listings) => {
-    const cardId = {}
-    listings.forEach(listing => {
-        cardId[listing.card_v2_id] = 1
-    })
-    return Object.keys(cardId).filter(id => id)
+const uniqueItemPrintingConditionInListings = (listingItems) => {
+    return listingItems.filter(item => item.itemId).map(item => ({
+        itemId: item.itemId,
+        conditionId: item.conditionId,
+        printingId: item.printingId
+    }))
 }
 
-const tiePricesToListings = (listings, cardPrices) => {
+const tiePricesToListings = (listings, itemPrices) => {
     const priceLib = {}
-    cardPrices.forEach(price => {
-        if (price.market_price_card_id && price.market_price_price) {
-            priceLib[price.market_price_card_id] = {
-                market_price_price: price.market_price_price,
-                market_price_date: price.created_date
-            }
+    itemPrices.forEach(itemPrice => {
+        if (itemPrice.itemId && itemPrice.marketPrice) {
+            const { marketPrice, marketPriceDate } = itemPrice
+            priceLib[itemPrice.skuId] = { marketPrice, marketPriceDate }
         }
     })
     return listings.map(listing => { 
-        if (listing.card_v2_id && priceLib[listing.card_v2_id]) {
-            const { market_price_date, market_price_price } = priceLib[listing.card_v2_id]
+        if (listing.itemId && priceLib[listing.skuId]) {
+            const { marketPriceDate, marketPrice } = priceLib[listing.skuId]
             return {
                 ...listing, 
-                market_price_date, 
-                market_price_price
+                marketPriceDate, 
+                marketPrice
             }
         }
         return { 
             ...listing,
-            market_price_date: undefined,
-            market_price_price: undefined
+            marketPriceDate: undefined,
+            marketPrice: undefined
         }
     })
 }
@@ -261,7 +176,7 @@ const getListings = async (req, res, next) => {
     if (req.query.watching) {
         try {
             const watchedListings = await Listing.getWatching(req.claims.user_id)
-            req.results = formatListings(watchedListings, withPrices=false)
+            req.results = formatListings(watchedListings)
         } catch (err) {
             return next(err)
         }
@@ -277,8 +192,8 @@ const getListingById = async (req, res, next) => {
         const today = new Date()
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
-        const listingCardPrices = await MarketPrice.selectByCardIdsBetweenDates(uniqueCardIdsInListings(listingItems), yesterday, today)
-        const watchedListingsWithPrices = tiePricesToListings(listingItems, listingCardPrices)
+        const listingItemPrices = await MarketPrice.selectByItemIdsBetweenDates(uniqueItemPrintingConditionInListings(listingItems), yesterday, today)
+        const watchedListingsWithPrices = tiePricesToListings(listingItems, listingItemPrices)
         req.results = formatListings(watchedListingsWithPrices)
     } catch (err) {
         next(err)
