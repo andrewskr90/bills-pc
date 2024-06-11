@@ -10,7 +10,8 @@ export const initialReferenceDataValues = {
         rarity: [],
         type: [],
         printing: [],
-        set: []
+        set: [],
+        condition: []
     },
     dateRange: 'week',
     setSort: {
