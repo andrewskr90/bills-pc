@@ -15,8 +15,7 @@ const getWatching = async (watcherId) => {
             V3_CollectedItem.id as collectedItemId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,
-            V3_ListingPrice.price as listingPrice,
-            V3_ListingPrice.time as listingPriceTime,
+            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks} as listingDescription,
             V3_Gift.id as giftId,
             V3_Watching.id as watchingId,
@@ -55,7 +54,8 @@ const getWatching = async (watcherId) => {
             on V3_Watching.listingId = V3_Listing.id
         LEFT JOIN users as watchers
             on watchers.user_id = V3_Watching.watcherId
-        WHERE V3_Watching.watcherId = '${watcherId}' AND V3_Listing.saleId IS NULL;
+        WHERE V3_Watching.watcherId = '${watcherId}' AND V3_Listing.saleId IS NULL
+        Group by V3_CollectedItem.id;
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -75,14 +75,14 @@ const getListingById = async (listingId) => {
             V3_Listing.id as listingId,
             sellers.user_id as sellerId,
             sellers.user_name as sellerName,
+            sellers.proxyCreatorId,
             V3_CollectedItem.id as collectedItemId,
             V3_CollectedItem.printingId as printingId,
             V3_Appraisal.conditionId as conditionId,
             SKU.id as skuId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,
-            V3_ListingPrice.price as listingPrice,
-            V3_ListingPrice.time as listingPriceTime,
+            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks},
             Item.id as itemId,
             Item.name as name,
@@ -121,7 +121,8 @@ const getListingById = async (listingId) => {
             OR V3_Gift.lotId = V3_Lot.id
         LEFT JOIN users as sellers
             on sellers.user_id = V3_Gift.recipientId
-        WHERE V3_Listing.id = '${listingId}';
+        WHERE V3_Listing.id = '${listingId}'
+        Group by V3_CollectedItem.id;
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -488,4 +489,23 @@ const convertSaleItemsToListings = async (listing) => {
     return listingId
 }
 
-module.exports = { getWatching, createExternal, convertSaleItemsToListings, getListingById }
+const createPrice = async ({ listingId, price }) => {
+    const queryQueue = []
+    const now = new Date()
+    const id = uuidV4()
+    const listingPriceToInsert = {
+        id,
+        listingId,
+        price,
+        time: convertLocalToUTC(now)
+    }
+    queryQueue.push(`${objectsToInsert([listingPriceToInsert], 'V3_ListingPrice')};`)
+    const req = { queryQueue }
+    const res = {}
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+    })
+    return id
+}
+
+module.exports = { getWatching, createExternal, convertSaleItemsToListings, getListingById, createPrice }

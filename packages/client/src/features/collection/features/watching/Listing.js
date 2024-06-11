@@ -3,8 +3,10 @@ import { Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { initialListingValues } from '../../../../data/initialData'
 import PurchaseWatchedListing from './PurchaseWatchedListing'
 import BillsPcService from '../../../../api/bills-pc'
+import EditWatchedListing from './EditWatchedListing'
 
 const Listing = (props) => {
+    const { referenceData } = props
     const [listing, setListing] = useState(initialListingValues)
     const [sortKey, setSortKey] = useState('marketPrice')
     const navigate = useNavigate()
@@ -18,6 +20,7 @@ const Listing = (props) => {
     const handlePurchaseListing = () => {
         navigate('purchase')
     }
+    const handleEditListing = () => navigate('edit')
 
     return (
         <Routes>
@@ -26,7 +29,8 @@ const Listing = (props) => {
                     <div style={{ height: '100%', overflow: 'auto', marginBottom: '64px' }}>
                         <p>{listing.time}</p>
                         <p>{listing.sellerName}</p>
-                        <p>{listing.listingPrice}</p>
+                        <p>{parseFloat(listing.listingPrices[0][1])}</p>
+                        <button onClick={handleEditListing}>Edit</button>
                         <button onClick={handlePurchaseListing}>Purchase</button>
                         {listing.lot.id && (
                             <div>
@@ -50,21 +54,36 @@ const Listing = (props) => {
                                         if (a[sortKey] > b[sortKey]) return sortKey === 'marketPrice' ? -1 : 1
                                         return 0
                                     }).map(item => {
-                                    return <div>
+                                    return <div style={{ marginBottom: '8px' }}>
                                         <p>{item.name}</p>
-                                        <p>{item.marketPrice}</p>
+                                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                                            <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
+                                            <p>--</p>
+                                            <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printingId).printing_name}</p>
+                                            <p>--</p>
+                                            <p>{item.marketPrice}</p>
+                                        </div>
                                     </div>
                                 })}
                             </div>
                         )}
-                        <div>
-                            <p>{listing.collectedItem.name}</p>
-                            <p>{listing.collectedItem.marketPrice}</p>
-                        </div>
+                        {listing.collectedItem.id && (
+                            <div style={{ marginBottom: '8px' }}>
+                                <p>{listing.collectedItem.name}</p>
+                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                                    <p>{referenceData.bulk.condition.find(c => c.condition_id === listing.collectedItem.conditionId).condition_name}</p>
+                                    <p>--</p>
+                                    <p>{referenceData.bulk.printing.find(p => p.printing_id === listing.collectedItem.printingId).printing_name}</p>
+                                    <p>--</p> 
+                                    <p>{listing.collectedItem.marketPrice}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 : <></>
             } />
             <Route path='/purchase' element={<PurchaseWatchedListing listing={listing} />}/>
+            <Route path='/edit' element={<EditWatchedListing listing={listing} />}/>            
         </Routes>
     )
 }

@@ -1,21 +1,11 @@
+const { parseGroupConcat } = require("../utils")
+
 const formatMarketPricesFromConcat = (req, res, next) => {
     const itemPriceLookup = {}
     const itemLookup = {}
     const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
         if (itemPrinting.prices) {
-            const commaSplit = itemPrinting.prices.split(',')
-            const datesAndPrices = []
-            let tempArray = []
-            commaSplit.forEach(str => {
-                const splitStr = str.split('')
-                if (splitStr[0] === '[') {
-                    tempArray.push(parseInt(splitStr.filter(letter => letter !== '[').join('')))
-                } else {
-                    tempArray.push(parseFloat(splitStr.filter(letter => letter !== ']').join('')))
-                    datesAndPrices.push(tempArray)
-                    tempArray = []
-                }
-            })
+            const datesAndPrices = parseGroupConcat(itemPrinting.prices)
             if (itemPriceLookup[itemPrinting.id]) {
                 itemPriceLookup[itemPrinting.id] = {
                     ...itemPriceLookup[itemPrinting.id],

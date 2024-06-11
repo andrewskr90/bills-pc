@@ -37,7 +37,7 @@ const Watching = (props) => {
                                             <div>
                                                 <p>{listing.date}</p>
                                                 <p>{listing.sellerName}</p>
-                                                <p>${listing.price}</p>
+                                                <p>${parseFloat(listing.listingPrices[0][1])}</p>
                                                 <p>
                                                     {listing.lot.id 
                                                         ? 

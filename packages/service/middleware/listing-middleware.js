@@ -1,5 +1,6 @@
 const Listing = require('../models/Listing')
 const MarketPrice = require('../models/MarketPrice')
+const { parseGroupConcat } = require('../utils')
 
 const formatListings = (listingItems) => {    
     let itemsToFormat = listingItems
@@ -46,6 +47,7 @@ const formatListings = (listingItems) => {
                             time: item.listingTime,
                             listingPrice: item.listingPrice,
                             description: item.description,
+                            listingPrices: parseGroupConcat(item.listingPrices),
                             collectedItem: { id: undefined },
                             lot: { ...currentLot }  
                         })
@@ -59,6 +61,7 @@ const formatListings = (listingItems) => {
                         time: item.listingTime,
                         listingPrice: item.listingPrice,
                         description: item.description,
+                        listingPrices: parseGroupConcat(item.listingPrices),
                         collectedItem: { id: undefined },
                         lot: { ...currentLot }  
                     })
@@ -100,6 +103,7 @@ const formatListings = (listingItems) => {
                             time: item.listingTime,
                             listingPrice: item.listingPrice,
                             description: item.description,
+                            listingPrices: parseGroupConcat(item.listingPrices),
                             collectedItem: { id: undefined },
                             lot: { ...currentLot }  
                         })
@@ -113,6 +117,7 @@ const formatListings = (listingItems) => {
                         time: item.listingTime,
                         listingPrice: item.listingPrice,
                         description: item.description,
+                        listingPrices: parseGroupConcat(item.listingPrices),
                         collectedItem: { id: undefined },
                         lot: { ...currentLot }  
                     })
@@ -124,8 +129,9 @@ const formatListings = (listingItems) => {
                 sellerId: item.sellerId,
                 sellerName: item.sellerName,
                 time: item.listingTime,
-                marketPrice: parseFloat(item.marketPrice),
+                listingPrice: item.listingPrice,
                 description: item.description,
+                listingPrices: parseGroupConcat(item.listingPrices),
                 collectedItem: { ...item, id: item.collectedItemId },
                 bulkSplitId: { id: item.bulk_split_id },
                 lot: { id: item.lotId, items: [] }
