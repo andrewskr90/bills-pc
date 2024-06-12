@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginForm from '../../features/authenticate/LoginForm';
+import LoginForm from '../../features/authenticate/LoginForm/index.jsx';
 
 const GymLeaderOnly = (props) => {
     const { userClaims, setUserClaims } = props

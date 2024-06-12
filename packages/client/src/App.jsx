@@ -8,10 +8,10 @@ import BillsPcService from './api/bills-pc'
 import { initialReferenceDataValues } from './data/initialData'
 import './styles/App.less'
 import RegisterForm from './features/authenticate/RegisterForm'
-import SupportUs from '../src/pages/SupportUs'
+import SupportUs from './pages/SupportUs'
 import Collection from './features/collection'
 import GymLeader from './pages/gym-leader'
-import GymLeaderOnly from './utils/auth/GymLeaderOnly'
+import GymLeaderOnly from './utils/auth/GymLeaderOnly.jsx'
 
 let initialData = false
 

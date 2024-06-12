@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { BILLS_PC_API } from '../../../../../config'
+import config from '../../../../../config'
+const { BILLS_PC_API } = config
 
 const { options } = BILLS_PC_API
 

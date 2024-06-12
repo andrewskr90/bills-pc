@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import BillsPcService from '../../../../api/bills-pc'
-import { referenceData } from '../../../../../../service/middleware/QueueQueries'
 
 const EditWatchedListing = (props) => {
-    const { listing } = props
+    const { listing, referenceData } = props
     const [updatedPrice, setUpdatedPrice] = useState(listing.listingPrice)
 
     const handleUpdatePrice = async () => {
