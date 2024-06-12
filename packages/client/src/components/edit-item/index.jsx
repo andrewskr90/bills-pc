@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import Form from '../form'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import Banner from '../../layouts/banner'
+import React, { useState } from 'react'
+import Form from '../form/index.jsx'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Banner from '../../layouts/banner/index.jsx'
 import { buildPreviousRoute, parseLastRouteParameter } from '../../utils/location'
 import './assets/editItem.less'
 

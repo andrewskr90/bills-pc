@@ -1,5 +1,5 @@
 import React from 'react'
-import BackArrow from '../../components/buttons/back-arrow'
+import BackArrow from '../../components/buttons/back-arrow/index.jsx'
 import './assets/banner.less'
 
 const Banner = ({ children, titleText, handleClickBackArrow }) => {

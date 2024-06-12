@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import RarityForm from '../rarity-form'
-import Button from '../../../../../../components/buttons/text-button'
+import RarityForm from '../rarity-form/index.jsx'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../../../api/bills-pc'
 
 const RarityCard = (props) => {

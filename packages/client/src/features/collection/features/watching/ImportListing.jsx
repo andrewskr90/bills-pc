@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
-import SelectItem from "../../../../components/select-item"
+import SelectItem from "../../../../components/select-item/index.jsx"
 import BillsPcService from "../../../../api/bills-pc"
 import { initialExternalListing, initialSortingSplitValues } from "../../../../data/initialData"
-import BulkEditor from "../../../../components/bulk-editor"
+import BulkEditor from "../../../../components/bulk-editor/index.jsx"
 import editPNG from '../../assets/edit.png'
-import EditListingItem from './EditListingItem'
-import InputSelect from "../../../../components/input-select"
-import SelectItems from "../../../../components/select-items"
+import EditListingItem from './EditListingItem.jsx'
+import InputSelect from "../../../../components/input-select/index.jsx"
+import SelectItems from "../../../../components/select-items/index.jsx"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props

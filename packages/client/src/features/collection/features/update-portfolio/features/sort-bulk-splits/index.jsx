@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
-import ItemContainer from '../../../../../../components/item-container'
-import BulkSplit from '../../../../BulkSplit'
-import SortBulkSplit from './SortBulkSplit'
+import ItemContainer from '../../../../../../components/item-container/index.jsx'
+import BulkSplit from '../../../../BulkSplit.jsx'
+import SortBulkSplit from './SortBulkSplit.jsx'
 
 const SortBulkSplits = (props) => {
     const { referenceData, portfolio, setPortfolio, setReferenceData } = props

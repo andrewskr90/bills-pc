@@ -1,6 +1,6 @@
 import React from 'react'
-import Banner from '../../layouts/banner'
-import BulkSplitForm from '../bulk-form/components/bulk-split-form'
+import Banner from '../../layouts/banner/index.jsx'
+import BulkSplitForm from '../bulk-form/components/bulk-split-form/index.jsx'
 import { useNavigate } from 'react-router-dom'
 
 const BulkEditor = (props) => {

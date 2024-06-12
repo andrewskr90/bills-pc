@@ -1,5 +1,5 @@
 import React from 'react'
-import Transaction from './components/Transaction'
+import Transaction from './components/Transaction.jsx'
 
 const Transactions = (props) => {
     const { portfolio, userClaims } = props

@@ -1,12 +1,12 @@
 import React from 'react'
-import Banner from '../../../../layouts/banner'
+import Banner from '../../../../layouts/banner/index.jsx'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import './assets/updatePortfolio.less'
-import ImportPurchase from '../../../import-purchase'
-import CategorySelector from '../../../../components/category-selector'
+import ImportPurchase from '../../../import-purchase/index.jsx'
+import CategorySelector from '../../../../components/category-selector/index.jsx'
 import { buildPreviousRoute } from '../../../../utils/location'
-import ImportGift from '../../../import-gift'
-import SortBulkSplits from './features/sort-bulk-splits'
+import ImportGift from '../../../import-gift/index.jsx'
+import SortBulkSplits from './features/sort-bulk-splits/index.jsx'
 
 const updatePortfolioCategories = ['import', 'purchase', 'sort', 'trade', 'sale', 'export']
 

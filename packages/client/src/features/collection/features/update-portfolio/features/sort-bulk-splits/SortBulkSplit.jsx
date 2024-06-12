@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { compileBulkLabels } from '../../../../utils/bulk'
-import ItemsTable from '../../../../../import-purchase/feature/items-table'
-import PlusButton from '../../../../../../components/buttons/plus-button'
-import Banner from '../../../../../../layouts/banner'
-import BulkSplitForm from '../../../../../../components/bulk-form/components/bulk-split-form'
-import Button from '../../../../../../components/buttons/text-button'
+import ItemsTable from '../../../../../import-purchase/feature/items-table/index.jsx'
+import PlusButton from '../../../../../../components/buttons/plus-button/index.jsx'
+import Banner from '../../../../../../layouts/banner/index.jsx'
+import BulkSplitForm from '../../../../../../components/bulk-form/components/bulk-split-form/index.jsx'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 import { initialSortingSplitValues, initialSortingValues } from '../../../../../../data/initialData'
 import BillsPcService from '../../../../../../api/bills-pc'
-import SelectItem from '../../../../../../components/select-item'
+import SelectItem from '../../../../../../components/select-item/index.jsx'
 
 const SortBulkSplit = (props) => {
     const { portfolio, referenceData, setReferenceData } = props

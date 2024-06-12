@@ -2,9 +2,9 @@ import React, { useEffect } from 'react'
 import { generateMarketItemSortCB } from '../../utils/sort'
 import { filterMarketItems } from '../../utils/filter'
 import { applyMarketChanges } from '../../utils/market'
-import Toolbar from '../../layouts/toolbar'
-import ItemContainer from '../../components/item-container'
-import Item from '../../components/item'
+import Toolbar from '../../layouts/toolbar/index.jsx'
+import ItemContainer from '../../components/item-container/index.jsx'
+import Item from '../../components/item/index.jsx'
 import BillsPcService from '../../api/bills-pc'
 
 const ExpansionItems = (props) => {

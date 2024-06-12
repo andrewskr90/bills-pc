@@ -1,6 +1,5 @@
 import React from 'react'
-import LoginForm from '../features/authenticate/LoginForm'
-import RegisterForm from '../features/authenticate/RegisterForm'
+import LoginForm from '../features/authenticate/LoginForm/index.jsx'
 
 const Login = (props) => {
     const { setUserClaims } = props

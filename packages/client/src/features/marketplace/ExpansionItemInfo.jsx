@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import RangeSelector from '../../components/range-selector'
+import RangeSelector from '../../components/range-selector/index.jsx'
 import { applyMarketChanges } from '../../utils/market'
-import MarketplaceChart from './MarketplaceChart'
+import MarketplaceChart from './MarketplaceChart.jsx'
 import { generateDisplayedMarketValue } from '../../utils/market'
-import AffiliateLink from '../../components/affiliate-link'
+import AffiliateLink from '../../components/affiliate-link/index.jsx'
 import BillsPcService from '../../api/bills-pc'
 
 const ExpansionItemInfo = (props) => {

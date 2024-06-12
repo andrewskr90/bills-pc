@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useNavigate } from "react-router-dom"
-import PlusButton from '../../../../components/buttons/plus-button'
-import ImportListing from './ImportListing'
+import PlusButton from '../../../../components/buttons/plus-button/index.jsx'
+import ImportListing from './ImportListing.jsx'
 import BillsPcService from '../../../../api/bills-pc'
-import Listing from './Listing'
+import Listing from './Listing.jsx'
 
 const Watching = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props

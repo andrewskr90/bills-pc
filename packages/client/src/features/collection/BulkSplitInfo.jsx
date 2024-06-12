@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { compileBulkLabels } from './utils/bulk'
 import { useNavigate, useParams } from 'react-router-dom'
-import Transaction from "./features/transactions/components/Transaction"
-import Button from '../../components/buttons/text-button'
+import Transaction from "./features/transactions/components/Transaction.jsx"
+import Button from '../../components/buttons/text-button/index.jsx'
 
 const  BulkSplitInfo = (props) => {
     const { portfolio, userClaims } = props

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import './assets/index.less'
-import SplitLabelForm from './components/split-label-form'
-import SplitLabelsTable from './components/split-labels-table'
+import SplitLabelForm from './components/split-label-form/index.jsx'
+import SplitLabelsTable from './components/split-labels-table/index.jsx'
 import { useParams, useNavigate } from 'react-router-dom'
 import { initialSplitLabelFormValues } from '../../../../data/initialData'
-import Button from '../../../buttons/text-button'
+import Button from '../../../buttons/text-button/index.jsx'
 
 const BulkSplitForm = (props) => {
     const { 

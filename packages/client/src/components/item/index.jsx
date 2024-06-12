@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import MarketplaceChart from '../../features/marketplace/MarketplaceChart'
+import MarketplaceChart from '../../features/marketplace/MarketplaceChart.jsx'
 import { generateDisplayedMarketValue } from '../../utils/market'
 import './assets/item.less'
 

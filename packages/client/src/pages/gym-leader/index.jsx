@@ -1,15 +1,15 @@
 import React from 'react'
-import Banner from '../../layouts/banner'
-import CategorySelector from '../../components/category-selector'
+import Banner from '../../layouts/banner/index.jsx'
+import CategorySelector from '../../components/category-selector/index.jsx'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
-import TypeTools from './features/type-tools'
-import RarityTools from './features/rarity-tools'
-import PrintingTools from './features/printing-tools'
+import TypeTools from './features/type-tools/index.jsx'
+import RarityTools from './features/rarity-tools/index.jsx'
+import PrintingTools from './features/printing-tools/index.jsx'
 
 const gymLeaderNavCategories = ['types', 'rarities', 'printings']
 
-const GymLeader = (props) => {
+const GymLeader = () => {
     const navigate = useNavigate()
     const location = useLocation()
 

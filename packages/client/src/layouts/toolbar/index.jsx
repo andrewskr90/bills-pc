@@ -1,7 +1,7 @@
 import React from 'react'
-import Filter from '../../components/filter'
-import Sort from '../../components/sort'
-import RangeSelector from '../../components/range-selector'
+import Filter from '../../components/filter/index.jsx'
+import Sort from '../../components/sort/index.jsx'
+import RangeSelector from '../../components/range-selector/index.jsx'
 import './assets/toolbar.less'
 
 const Toolbar = (props) => {

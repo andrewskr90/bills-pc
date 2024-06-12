@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import TypeForm from '../type-form'
-import Button from '../../../../../../components/buttons/text-button'
+import TypeForm from '../type-form/index.jsx'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../../../api/bills-pc'
 
 const TypeCard = (props) => {

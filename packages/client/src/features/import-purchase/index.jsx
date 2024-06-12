@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import ItemsTable from './feature/items-table'
+import ItemsTable from './feature/items-table/index.jsx'
 import { initialPurchaseValues, purchaseInitialSplitValues } from '../../data/initialData'
-import SelectItem from '../../components/select-item'
-import EditItem from '../../components/edit-item'
+import SelectItem from '../../components/select-item/index.jsx'
+import EditItem from '../../components/edit-item/index.jsx'
 import BillsPcService from '../../api/bills-pc'
-import PlusButton from '../../components/buttons/plus-button'
+import PlusButton from '../../components/buttons/plus-button/index.jsx'
 import './assets/importPurchase.less'
-import Button from '../../components/buttons/text-button'
-import BulkEditor from '../../components/bulk-editor'
-import InputSelect from '../../components/input-select'
+import Button from '../../components/buttons/text-button/index.jsx'
+import BulkEditor from '../../components/bulk-editor/index.jsx'
+import InputSelect from '../../components/input-select/index.jsx'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)

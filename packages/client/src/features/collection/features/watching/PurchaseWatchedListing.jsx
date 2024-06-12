@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { localYYYYMMDD } from '../../../../utils/date';
-import Button from '../../../../components/buttons/text-button';
+import Button from '../../../../components/buttons/text-button/index.jsx';
 import BillsPcService from '../../../../api/bills-pc'
 
 const PurchaseWatchedListing = ({ listing }) => {

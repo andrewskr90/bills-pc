@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react"
-import { Link, Route, Routes, useNavigate, useParams } from "react-router-dom"
-import ItemContainer from "../../../../components/item-container"
-import BulkSplitInfo from "../../BulkSplitInfo"
-import Button from "../../../../components/buttons/text-button"
-import BulkSplit from "../../BulkSplit"
+import React from "react"
+import { Link, Route, Routes, useNavigate } from "react-router-dom"
+import ItemContainer from "../../../../components/item-container/index.jsx"
+import BulkSplitInfo from "../../BulkSplitInfo.jsx"
+import BulkSplit from "../../BulkSplit.jsx"
 const PortfolioAssets = (props) => {
     const { portfolio, userClaims } = props 
     const navigate = useNavigate()

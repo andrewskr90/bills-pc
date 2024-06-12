@@ -1,8 +1,8 @@
 import React from 'react'
 import { useParams, useLocation, Routes, Route, useNavigate} from 'react-router-dom'
-import PreviousRoutes from '../../layouts/previous-routes'
-import ExpansionItemInfo from './ExpansionItemInfo'
-import ExpansionItems from './ExpansionItems'
+import PreviousRoutes from '../../layouts/previous-routes/index.jsx'
+import ExpansionItemInfo from './ExpansionItemInfo.jsx'
+import ExpansionItems from './ExpansionItems.jsx'
 
 const ExpansionItemsMarketplace = (props) => {
     const {

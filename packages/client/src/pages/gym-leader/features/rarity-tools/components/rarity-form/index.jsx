@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Button from '../../../../../../components/buttons/text-button'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 import './assets/index.less'
 
 const RarityForm = (props) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../../../../../../components/buttons/text-button'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 
 const initialRarityGroupFormValues = {
     name: null,

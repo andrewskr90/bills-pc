@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../../../../components/buttons/text-button'
 import BillsPcService from '../../../../api/bills-pc'
 import './assets/index.less'
-import RarityForm from './components/rarity-form'
-import RarityManager from './features/rarity-manager'
-import RarityGroupManager from './features/rarity-group-manager'
+import RarityManager from './features/rarity-manager/index.jsx'
+import RarityGroupManager from './features/rarity-group-manager/index.jsx'
 
 const RarityTools = (props) => {
     const [rarities, setRarities] = useState([])

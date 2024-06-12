@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation, useParams, Link } from 'react-router-dom'
-import InDevelopment from './pages/InDevelopment'
-import Login from './pages/Login'
-import Marketplace from './features/marketplace'
-import NavBar from './layouts/NavBar'
+import InDevelopment from './pages/InDevelopment.jsx'
+import Login from './pages/Login.jsx'
+import Marketplace from './features/marketplace/index.jsx'
+import NavBar from './layouts/NavBar.jsx'
 import BillsPcService from './api/bills-pc'
 import { initialReferenceDataValues } from './data/initialData'
 import './styles/App.less'
-import RegisterForm from './features/authenticate/RegisterForm'
-import SupportUs from './pages/SupportUs'
-import Collection from './features/collection'
-import GymLeader from './pages/gym-leader'
+import SupportUs from './pages/SupportUs.jsx'
+import Collection from './features/collection/index.jsx'
+import GymLeader from './pages/gym-leader/index.jsx'
 import GymLeaderOnly from './utils/auth/GymLeaderOnly.jsx'
 
 let initialData = false
@@ -144,7 +143,7 @@ const App = () => {
                         element={<RegisterForm />}
                     /> */}
                     <Route path='/market/*' 
-                        element={<Marketplace 
+                        element={<Marketplace
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData}
                         />} 

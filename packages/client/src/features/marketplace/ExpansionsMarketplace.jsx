@@ -1,6 +1,6 @@
 import React from 'react'
-import Toolbar from '../../layouts/toolbar'
-import Expansion from './Expansion'
+import Toolbar from '../../layouts/toolbar/index.jsx'
+import Expansion from './Expansion.jsx'
 import { filterExpansions } from '../../utils/filter'
 
 const ExpansionsMarketplace = (props) => {

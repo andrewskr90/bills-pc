@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Route, Routes, Link, useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
-import LoginForm from '../authenticate/LoginForm'
+import LoginForm from '../authenticate/LoginForm/index.jsx'
 import { initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.less'
-import UpdatePortfolio from './features/update-portfolio'
-import Header from '../../layouts/header'
-import CategorySelector from '../../components/category-selector'
-import Transactions from './features/transactions'
-import PortfolioAssets from './features/portfolio-assets'
-import Watching from './features/watching'
+import UpdatePortfolio from './features/update-portfolio/index.jsx'
+import Header from '../../layouts/header/index.jsx'
+import CategorySelector from '../../components/category-selector/index.jsx'
+import Transactions from './features/transactions/index.jsx'
+import PortfolioAssets from './features/portfolio-assets/index.jsx'
+import Watching from './features/watching/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props

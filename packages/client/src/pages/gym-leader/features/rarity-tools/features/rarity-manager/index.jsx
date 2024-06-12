@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import BillsPcService from '../../../../../../api/bills-pc'
 import './assets/index.less'
-import Button from '../../../../../../components/buttons/text-button'
-import RarityForm from '../../components/rarity-form'
-import RarityCard from '../../components/rarity-card'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
+import RarityForm from '../../components/rarity-form/index.jsx'
+import RarityCard from '../../components/rarity-card/index.jsx'
 
 const initialRarityFormValues = {
     rarity_id: '',

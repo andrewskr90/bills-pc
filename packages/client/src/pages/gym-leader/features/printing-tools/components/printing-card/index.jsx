@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import PrintingForm from '../printing-form'
-import Button from '../../../../../../components/buttons/text-button'
+import PrintingForm from '../printing-form/index.jsx'
+import Button from '../../../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../../../api/bills-pc'
 
 const PrintingCard = (props) => {

@@ -1,5 +1,5 @@
 import React from 'react'
-import SplitLabel from '../split-label'
+import SplitLabel from '../split-label/index.jsx'
 
 
 const SplitLabelsTable = (props) => {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import PreviousRoutes from '../../../../layouts/previous-routes'
-import Item from '../../../../components/item'
+import PreviousRoutes from '../../../../layouts/previous-routes/index.jsx'
+import Item from '../../../../components/item/index.jsx'
 import { applyMarketChanges } from '../../../../utils/market'
 import { generateMarketItemSortCB } from '../../../../utils/sort'
 import { filterMarketItems } from '../../../../utils/filter'
 import { eligableMarketSearchParams } from '../../../../utils/params'
 import '../../assets/marketplace.less'
-import Toolbar from '../../../../layouts/toolbar'
-import ItemContainer from '../../../../components/item-container'
+import Toolbar from '../../../../layouts/toolbar/index.jsx'
+import ItemContainer from '../../../../components/item-container/index.jsx'
 import { searchForItems } from '../../../../utils/search'
 
 const SearchResults = (props) => {

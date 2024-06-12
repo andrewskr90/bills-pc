@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { initialListingValues } from '../../../../data/initialData'
-import PurchaseWatchedListing from './PurchaseWatchedListing'
+import PurchaseWatchedListing from './PurchaseWatchedListing.jsx'
 import BillsPcService from '../../../../api/bills-pc'
-import EditWatchedListing from './EditWatchedListing'
+import EditWatchedListing from './EditWatchedListing.jsx'
 
 const Listing = (props) => {
     const { referenceData } = props

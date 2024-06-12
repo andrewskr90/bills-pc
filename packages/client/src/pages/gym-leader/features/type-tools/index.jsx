@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../../../../components/buttons/text-button'
+import Button from '../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../api/bills-pc'
 import './assets/index.less'
-import TypeForm from './components/type-form'
-import TypeCard from './components/type-card'
+import TypeForm from './components/type-form/index.jsx'
+import TypeCard from './components/type-card/index.jsx'
 
 const initialTypeFormValues = {
     type_id: '',

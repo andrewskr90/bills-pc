@@ -1,5 +1,5 @@
 import React from "react"
-import AffiliateLink from "../components/affiliate-link"
+import AffiliateLink from "../components/affiliate-link/index.jsx"
 import SupportUsTcg from './assets/support-us-tcg.jpg'
 import './assets/supportUs.less'
 

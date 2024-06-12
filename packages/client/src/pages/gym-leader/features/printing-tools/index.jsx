@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../../../../components/buttons/text-button'
+import Button from '../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../api/bills-pc'
 import './assets/index.less'
-import PrintingForm from './components/printing-form'
-import PrintingCard from './components/printing-card'
+import PrintingForm from './components/printing-form/index.jsx'
+import PrintingCard from './components/printing-card/index.jsx'
 
 const initialPrintingFormValues = {
     printing_id: '',

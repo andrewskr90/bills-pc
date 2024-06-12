@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { initialImportGiftValues } from '../../data/initialData'
-import Form from '../../components/form'
-import ItemsTable from '../import-purchase/feature/items-table'
-import PlusButton from '../../components/buttons/plus-button'
+import Form from '../../components/form/index.jsx'
+import ItemsTable from '../import-purchase/feature/items-table/index.jsx'
+import PlusButton from '../../components/buttons/plus-button/index.jsx'
 import { Route, Routes, useNavigate } from 'react-router-dom'
-import SelectItem from '../../components/select-item'
-import EditItem from '../../components/edit-item'
+import SelectItem from '../../components/select-item/index.jsx'
+import EditItem from '../../components/edit-item/index.jsx'
 import BillsPcService from '../../api/bills-pc'
 
 const ImportGift = (props) => {
