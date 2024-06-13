@@ -30,7 +30,7 @@ const EditWatchedListing = (props) => {
                             <div>
                                 <p>{item.name}</p>
                                 <p>--</p>
-                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.condition).condition_name}</p>
+                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
                             </div>
                         )
                     })}
