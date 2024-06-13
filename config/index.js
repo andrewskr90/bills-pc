@@ -11,15 +11,6 @@ const config = {
     PTCGIO_API: {
         baseURL: 'https://api.pokemontcg.io/v2'
     },
-    BILLS_PC_API: {
-        options: {
-            withCredentials: true,
-        }
-    }
-}
-
-if (process.env.NODE_ENV === 'development') {
-    config.BILLS_PC_API.options.baseURL = 'http://localhost:7070'
 }
 
 module.exports = config
