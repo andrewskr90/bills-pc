@@ -83,7 +83,7 @@ const Listing = (props) => {
                 : <></>
             } />
             <Route path='/purchase' element={<PurchaseWatchedListing listing={listing} />}/>
-            <Route path='/edit' element={<EditWatchedListing listing={listing} />}/>            
+            <Route path='/edit' element={<EditWatchedListing listing={listing} referenceData={referenceData} />}/>            
         </Routes>
     )
 }
