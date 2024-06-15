@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { parseLocationPathname } from '../../utils/location'
-import './assets/previousRoutes.less'
+import './assets/previousRoutes.css'
 
 const PreviousRoutes = (props) => {
     const { location, referenceData } = props

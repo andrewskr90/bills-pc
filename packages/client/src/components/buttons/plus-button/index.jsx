@@ -1,6 +1,6 @@
 import React from 'react'
 import PlusSVG from './assets/Plus.svg'
-import './assets/plusButton.less'
+import './assets/plusButton.css'
 
 const PlusButton = (props) => {
     const { handleClick } = props

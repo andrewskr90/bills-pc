@@ -1,7 +1,7 @@
 import React from 'react'
 import Banner from '../../../../layouts/banner/index.jsx'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import './assets/updatePortfolio.less'
+import './assets/updatePortfolio.css'
 import ImportPurchase from '../../../import-purchase/index.jsx'
 import CategorySelector from '../../../../components/category-selector/index.jsx'
 import { buildPreviousRoute } from '../../../../utils/location'

@@ -1,6 +1,6 @@
 import React from 'react'
 import BackArrowPNG from './assets/backArrow.png'
-import './assets/backArrow.less'
+import './assets/backArrow.css'
 
 const BackArrow = (props) => {
     const { handleClickBackArrow } = props

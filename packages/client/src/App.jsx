@@ -6,7 +6,7 @@ import Marketplace from './features/marketplace/index.jsx'
 import NavBar from './layouts/NavBar.jsx'
 import BillsPcService from './api/bills-pc'
 import { initialReferenceDataValues } from './data/initialData'
-import './styles/App.less'
+import './index.css'
 import SupportUs from './pages/SupportUs.jsx'
 import Collection from './features/collection/index.jsx'
 import GymLeader from './pages/gym-leader/index.jsx'
@@ -134,10 +134,10 @@ const App = () => {
         }
     }, [topTenLoaded])
     
-        return (<>
+        return (<div className="h-screen">
             {initialData
             ?
-            <div className='app'>
+            <div className='flex flex-col items-center relative px-1 h-full sm:p-0 sm:w-3/6 sm:m-auto'>
                 <Routes>
                     {/* <Route path='/register' 
                         element={<RegisterForm />}
@@ -182,12 +182,12 @@ const App = () => {
                 <NavBar />
             </div>
             :
-            <div className='appLoading'>
-                <h1>Bill's PC</h1>
-                <div className='loadingGradient'>Loading...</div>
+            <div className='appLoading h-full flex flex-col justify-center items-center'>
+                <h1 className='text-xl text-blue'>Bill's PC</h1>
+                <div className='loadingGradient w-3/5 h-5'>Loading...</div>
             </div>    
             }
-        </>)
+        </div>)
 }
 
 export default App

@@ -3,7 +3,7 @@ import Form from '../form/index.jsx'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Banner from '../../layouts/banner/index.jsx'
 import { buildPreviousRoute, parseLastRouteParameter } from '../../utils/location'
-import './assets/editItem.less'
+import './assets/editItem.css'
 
 const EditItem = (props) => {
     const { purchaseValues, updatePurchaseItem, removeItemFromPurchase, includeRetail } = props

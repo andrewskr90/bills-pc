@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import FilterModal from './FilterModal.jsx'
 import { countFilters } from '../../utils/filter'
-import './assets/filter.less'
+import './assets/filter.css'
 
 const Filter = (props) => {
     const { 

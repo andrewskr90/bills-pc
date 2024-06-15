@@ -1,0 +1,16 @@
+.rarityManager {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 100px;
+}
+.rarityManager .rarity {
+    box-shadow: 2px 2px 4px grey;
+    margin-bottom: 10px;
+    display: flex;
+}
+.rarityManager .rarity .name, .parentName {
+    display: flex;
+    flex-direction: column;
+}

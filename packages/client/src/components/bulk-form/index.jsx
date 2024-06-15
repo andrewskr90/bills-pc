@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './assets/index.less'
+import './assets/index.css'
 import BulkSplitForm from './components/bulk-split-form'
 import Form from '../form'
 import BluePencil from '../../assets/BluePencil.png'

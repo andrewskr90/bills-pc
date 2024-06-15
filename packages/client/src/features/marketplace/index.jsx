@@ -6,7 +6,7 @@ import Search from '../search/index.jsx'
 import SearchResults from './features/search-results/index.jsx'
 import Header from '../../layouts/header/index.jsx'
 import { Link } from 'react-router-dom'
-import './assets/marketplace.less'
+import './assets/marketplace.css'
 
 const Marketplace = (props) => {
     const { referenceData, setReferenceData } = props

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './assets/search.less'
+import './assets/search.css'
 
 const Search = (props) => {
     const { submitSearch } = props

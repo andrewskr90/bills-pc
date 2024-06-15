@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../../../components/buttons/text-button/index.jsx'
 import BillsPcService from '../../../../api/bills-pc'
-import './assets/index.less'
+import './assets/index.css'
 import PrintingForm from './components/printing-form/index.jsx'
 import PrintingCard from './components/printing-card/index.jsx'
 

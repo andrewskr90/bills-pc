@@ -1,0 +1,24 @@
+.itemsTable {
+    width: 100%;
+    margin-top: 10px;
+}
+.itemsTable tr {
+    height: 40px;
+    text-align: center;
+    display: flex;
+}
+.itemsTable tr th { font-size: 14px; }
+.itemsTable tr th, td {
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+}
+.itemsTable tr .name { width: 60%; }
+.itemsTable tr .price { width: 20%; }
+.itemsTable tr .quantity { width: 10%; }
+.itemsTable tr .edit { width: 10%; }
+.itemsTable tr.spacer { height: 10px; }
+.itemsTable tr.tableItem {
+    box-shadow: 0 2px 4px 0px lightgray;
+    border-radius: 10px;
+}

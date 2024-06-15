@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { parseSlugAfter } from '../../utils/location'
-import './assets/categorySelector.less'
+import './assets/categorySelector.css'
 
 const CategorySelector = (props) => {
     const location = useLocation()

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import MarketplaceChart from '../../features/marketplace/MarketplaceChart.jsx'
 import { generateDisplayedMarketValue } from '../../utils/market'
-import './assets/item.less'
+import './assets/item.css'
 
 const Item = (props) => {
     const { item, referenceData, handleSelectItem, countConfig } = props

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import EditPNG from '../../../collection/assets/edit.png'
-import './assets/itemsTable.less'
+import './assets/itemsTable.css'
 
 const ItemsTable = (props) => {
     const { items, format } = props

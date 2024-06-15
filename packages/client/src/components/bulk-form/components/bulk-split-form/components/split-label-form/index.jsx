@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './assets/index.less'
+import './assets/index.css'
 import Button from '../../../../../buttons/text-button/index.jsx'
 
 const SplitLabelForm = (props) => {

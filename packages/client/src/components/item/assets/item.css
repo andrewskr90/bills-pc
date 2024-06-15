@@ -1,0 +1,120 @@
+.item {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    /* // align-items: center; */
+    border-radius: 15px;
+    border-top: 2px solid #9e9e9e41;
+    border-left: 2px solid #9e9e9e41;
+    box-shadow: 1px 1px #9e9e9e41,
+        2px 2px #9e9e9e41,
+        3px 3px #9e9e9e41,
+        4px 4px #9e9e9e41,
+        5px 5px #9e9e9e41;
+    width: 44%;
+    max-width: 200px;
+}
+.item div.imageChartAndValue {
+    display: flex;
+    height: 150px;
+}
+.item div.image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+    height: 100%;
+}
+.item div.image img {
+    max-height: 95%;
+    max-width: 90%;
+    border-radius: 5px;
+}
+.item div.image .unavailable {
+    display: flex;
+    align-items: center;
+    height: 85%;
+    width: 90%;
+    background-color: rgb(236, 236, 236);
+    font-size: 12px;
+    padding: 2px;
+    text-align: center;
+    border-radius: 5px;
+    margin: 4px;
+}
+.item div.chartAndValue {
+    color: #6065CB;
+    margin-top: 5px;
+    width: 40%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.item div.chartAndValue .marketplaceChart {
+    height: 35%;
+    width: 90%;
+    padding: 2px 0;
+}
+.item div.chartAndValue .marketplaceChart .unavailable {
+    background-color: #6065cb30;
+    color: #6065CB;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+.item div.chartAndValue div.valueAndChange {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 40%;
+    width: 90%;
+}
+.item div.chartAndValue div.valueAndChange .marketValue {
+    font-size: 18px;
+}
+.item div.chartAndValue div.valueAndChange .percentChange {
+    font-size: 14px;
+}
+.item div.chartAndValue .unavailable {
+    background-color: #6065cb30;
+    /* // color: #6065CB; */
+    display: flex;
+    align-items: center;
+    height: 50%;
+    width: 90%;
+    font-size: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+.item .count {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+}
+.item .count div { 
+    width: 40%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+.item.up .valueAndChange {
+    color: rgb(0, 180, 0)
+}
+.item.down .valueAndChange {
+    color: rgb(160, 0, 0)
+}
+
+.item.marked { border-color: #6065cb; }
+
+
+@media only screen and (min-width: 600px) {
+    .item {
+        width: 30%;
+    }
+}

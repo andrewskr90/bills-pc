@@ -1,5 +1,5 @@
 import React from 'react'
-import './assets/rangeSelector.less'
+import './assets/rangeSelector.css'
 
 const RangeSelector = (props) => {
     const { referenceData, setReferenceData } = props

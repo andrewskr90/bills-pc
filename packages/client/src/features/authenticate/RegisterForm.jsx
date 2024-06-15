@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
-import './assets/registerForm.less'
+import './assets/registerForm.css'
 
 const initialFormValues = {
     user_name: '',

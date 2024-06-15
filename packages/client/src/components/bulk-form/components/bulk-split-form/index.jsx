@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import './assets/index.less'
 import SplitLabelForm from './components/split-label-form/index.jsx'
 import SplitLabelsTable from './components/split-labels-table/index.jsx'
 import { useParams, useNavigate } from 'react-router-dom'

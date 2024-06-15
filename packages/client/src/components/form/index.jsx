@@ -1,5 +1,5 @@
 import React from 'react'
-import './assets/form.less'
+import './assets/form.css'
 import Button from '../buttons/text-button/index.jsx'
 
 const Form = (props) => {

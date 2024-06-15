@@ -1,5 +1,5 @@
 import React from 'react'
-import './assets/button.less'
+import './assets/button.css'
 
 const Button = (props) => {
     const { children, onClick, variation, color, disabled, style } = props

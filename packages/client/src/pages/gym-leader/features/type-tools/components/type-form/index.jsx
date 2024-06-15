@@ -1,6 +1,6 @@
 import React from 'react'
 import Button from '../../../../../../components/buttons/text-button/index.jsx'
-import './assets/index.less'
+import './assets/index.css'
 const TypeForm = (props) => {
     const { 
         types,

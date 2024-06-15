@@ -1,0 +1,38 @@
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 5px;
+}
+form .labelInput {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+form .child { margin-top: 20px; }
+form .paddingRight { padding-right: 5px; }
+form label {
+    font-size: 16px;
+    text-transform: capitalize;
+}
+form input {
+    border: none;
+    background-color: lightgray;
+    padding: 5px;
+}
+form select {
+    width: 100%;
+}
+form .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+form button {
+    margin: 20px;
+    text-transform: capitalize;
+}

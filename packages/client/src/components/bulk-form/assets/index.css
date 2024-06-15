@@ -1,0 +1,24 @@
+.bulkForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.bulkForm .bulkSplitsTable .bulkSplit {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 0;
+}
+.bulkForm .bulkSplitsTable .bulkSplit .count {
+    width: 10%;
+    text-align: center;
+}
+.bulkForm .bulkSplitsTable .bulkSplit .labels {
+    width: 80%;
+    text-align: center;
+}
+.bulkForm .bulkSplitsTable .bulkSplit .edit {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+}

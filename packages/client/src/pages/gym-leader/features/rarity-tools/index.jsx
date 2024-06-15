@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import BillsPcService from '../../../../api/bills-pc'
-import './assets/index.less'
+import './assets/index.css'
 import RarityManager from './features/rarity-manager/index.jsx'
 import RarityGroupManager from './features/rarity-group-manager/index.jsx'
 

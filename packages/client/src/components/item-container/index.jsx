@@ -1,5 +1,5 @@
 import React from 'react'
-import './assets/itemContainer.less'
+import './assets/itemContainer.css'
 
 const ItemContainer = ({ children, loading, emptyMessage }) => {
 

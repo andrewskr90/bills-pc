@@ -1,0 +1,12 @@
+.loginForm {
+    margin-top: 50px;
+    width: 350px;
+}
+.loginForm button {
+    margin-top: 20px;
+}
+.loginForm .registerSuggestion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

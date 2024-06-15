@@ -1,7 +1,7 @@
 import React from "react"
 import AffiliateLink from "../components/affiliate-link/index.jsx"
 import SupportUsTcg from './assets/support-us-tcg.jpg'
-import './assets/supportUs.less'
+import './assets/supportUs.css'
 
 const SupportUs = () => {
     const affiliateLink = 'tcgplayer.pxf.io/vNKjrd?u=https://tcgplayer.com'

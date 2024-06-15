@@ -1,5 +1,5 @@
 import React from 'react'
-import './assets/sort.less'
+import './assets/sort.css'
 
 const Sort = (props) => {
     const { referenceData, setReferenceData, sortKey } = props

@@ -1,6 +1,6 @@
 import React from 'react'
 import BluePencil from '../../../../../../assets/BluePencil.png'
-import './assets/index.less'
+import './assets/index.css'
 import { formatLabel } from '../../../../utils'
 
 const SplitLabel = (props) => {
