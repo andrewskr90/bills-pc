@@ -47,9 +47,9 @@ const selectBySetId = (req, res, next) => {
         p.printing_id,
         p.printing_name,
         p.printing_tcgp_printing_id
-    FROM MarketPrice as m
-    LEFT JOIN SKU
-        ON SKU.id = m.skuId
+    FROM SKU
+    LEFT JOIN MarketPrice as m
+        ON m.skuId = SKU.id
     LEFT JOIN conditions c
         ON c.condition_id = SKU.conditionId
     LEFT JOIN printings p
@@ -61,7 +61,7 @@ const selectBySetId = (req, res, next) => {
     WHERE s.set_v2_id = '${req.params.set_v2_id}'
         AND (c.condition_id = '0655c457-ff60-11ee-b8b9-0efd996651a9' OR c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9')
     GROUP BY SKU.id
-    ORDER BY i.name asc, p.printing_tcgp_printing_id asc;`
+    ORDER BY i.name asc, p.printing_tcgp_printing_id, c.condition_tcgp_condition_id;`
     req.queryQueue.push(query)
     next()
 }
