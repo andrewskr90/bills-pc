@@ -4,19 +4,16 @@ const formatMarketPricesFromConcat = (req, res, next) => {
     const itemPriceLookup = {}
     const itemLookup = {}
     const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
-        if (itemPrinting.prices) {
-            const datesAndPrices = parseGroupConcat(itemPrinting.prices)
-            if (itemPriceLookup[itemPrinting.id]) {
-                itemPriceLookup[itemPrinting.id] = {
-                    ...itemPriceLookup[itemPrinting.id],
-                    [itemPrinting.printing_id]: datesAndPrices
-                }
-            } else {
-                itemPriceLookup[itemPrinting.id] = {
-                    [itemPrinting.printing_id]: datesAndPrices
-                }
+        const datesAndPrices = itemPrinting.prices ? parseGroupConcat(itemPrinting.prices) : []
+        if (itemPriceLookup[itemPrinting.id]) {
+            itemPriceLookup[itemPrinting.id] = {
+                ...itemPriceLookup[itemPrinting.id],
+                [itemPrinting.printing_id]: datesAndPrices
             }
-            
+        } else {
+            itemPriceLookup[itemPrinting.id] = {
+                [itemPrinting.printing_id]: datesAndPrices
+            }
         }
         if (itemLookup[itemPrinting.id]) return false
         itemLookup[itemPrinting.id] = 1

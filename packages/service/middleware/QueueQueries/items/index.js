@@ -18,9 +18,9 @@ const selectWithValues = (req, res, next) => {
         p.printing_id,
         p.printing_name,
         p.printing_tcgp_printing_id
-    FROM MarketPrice as m
-    LEFT JOIN SKU
-        ON SKU.id = m.skuId
+    FROM SKU
+    LEFT JOIN MarketPrice as m
+        ON m.skuId = SKU.id
     LEFT JOIN conditions c
         ON c.condition_id = SKU.conditionId
     LEFT JOIN printings p
