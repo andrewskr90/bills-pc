@@ -6,7 +6,7 @@ import BillsPcService from '../../../../api/bills-pc'
 import EditWatchedListing from './EditWatchedListing.jsx'
 
 const Listing = (props) => {
-    const { referenceData } = props
+    const { referenceData, setReferenceData } = props
     const [listing, setListing] = useState(initialListingValues)
     const [sortKey, setSortKey] = useState('marketPrice')
     const navigate = useNavigate()
@@ -83,7 +83,11 @@ const Listing = (props) => {
                 : <></>
             } />
             <Route path='/purchase' element={<PurchaseWatchedListing listing={listing} />}/>
-            <Route path='/edit' element={<EditWatchedListing listing={listing} referenceData={referenceData} />}/>            
+            <Route path='/edit/*' element={<>
+                {listing.id ? (
+                    <EditWatchedListing listing={listing} referenceData={referenceData} setReferenceData={setReferenceData} />
+                ) : (<>loading...</>)}
+            </>} />            
         </Routes>
     )
 }

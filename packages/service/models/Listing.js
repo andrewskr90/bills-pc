@@ -70,6 +70,7 @@ const getWatching = async (watcherId) => {
 const getListingById = async (listingId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
+    const indexWithBackticks = '`index`'
     const query = `
         SELECT 
             V3_Listing.id as listingId,
@@ -79,6 +80,7 @@ const getListingById = async (listingId) => {
             V3_CollectedItem.id as collectedItemId,
             V3_CollectedItem.printingId as printingId,
             V3_Appraisal.conditionId as conditionId,
+            V3_LotInsert.index as ${indexWithBackticks},
             SKU.id as skuId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,

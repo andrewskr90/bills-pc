@@ -376,6 +376,15 @@ const BillsPcService = {
             data: { price, listingId },
             url: `/api/v1/listing-prices/`
         })
+    },
+    createLotEdit({ data, params }) {
+        return axios({
+            ...options,
+            method: 'post',
+            data,
+            params,
+            url: `/api/v1/lot-edits`
+        })
     }
 }
 

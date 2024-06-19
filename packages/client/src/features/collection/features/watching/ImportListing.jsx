@@ -8,6 +8,7 @@ import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem.jsx'
 import InputSelect from "../../../../components/input-select/index.jsx"
 import SelectItems from "../../../../components/select-items/index.jsx"
+import { convertLocalToUTC } from "../../../../utils/date/index.js"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
@@ -42,17 +43,6 @@ const ImportListing = (props) => {
         navigate('/gym-leader/collection/watching/import')
     }
 
-    const convertLocalToUTC = (local) => {
-        const utcDate = new Date(local)
-        return`${
-            utcDate.getUTCFullYear()}-${
-            (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
-            utcDate.getUTCDate().toString().padStart(2, '0')}T${
-            utcDate.getUTCHours().toString().padStart(2, '0')}:${
-            utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
-            utcDate.getUTCSeconds().toString().padStart(2, '0')
-        }`
-    }
     const formatExternalListing = (listing) => {
         return {
             ...listing,

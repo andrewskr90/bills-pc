@@ -212,7 +212,7 @@ export const initialListingValues = {
     sellerId: undefined,
     sellerName: undefined,
     date: undefined,
-    price: undefined,
+    listingPrices: [],
     description: undefined,
     collectedCard: {
         id: undefined
