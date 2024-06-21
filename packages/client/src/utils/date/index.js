@@ -31,3 +31,15 @@ export const formatDate = (dateCode) => {
     const dateParts = dateCode.split('-')
     return `${dateParts[1]}-${dateParts[2].split('T')[0]}-${dateParts[0]}`
 }
+
+export const convertLocalToUTC = (local) => {
+    const utcDate = new Date(local)
+    return`${
+        utcDate.getUTCFullYear()}-${
+        (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
+        utcDate.getUTCDate().toString().padStart(2, '0')}T${
+        utcDate.getUTCHours().toString().padStart(2, '0')}:${
+        utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
+        utcDate.getUTCSeconds().toString().padStart(2, '0')
+    }`
+}

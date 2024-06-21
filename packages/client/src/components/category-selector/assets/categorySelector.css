@@ -1,0 +1,20 @@
+.categorySelector {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 30px;
+}
+.categorySelector .category {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: grey;
+    /* // border-bottom: 1px solid grey; */
+    text-transform: capitalize;
+}
+.categorySelector .category.selected {
+    color: #6065cb;
+    border-bottom: 2px solid #6065cb;
+    font-weight: 600;
+}

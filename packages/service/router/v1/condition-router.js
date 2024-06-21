@@ -4,8 +4,6 @@ const Condition = require('../../models/Condition')
 
 
 conditionRouter.get('/', 
-    verifyCookie,
-    decodeSessionToken,
     async (req, res, next) => {
         try {
             const results = await Condition.find()

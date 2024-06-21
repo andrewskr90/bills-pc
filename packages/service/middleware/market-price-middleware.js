@@ -1,26 +1,30 @@
+const { parseGroupConcat } = require("../utils")
+
 const formatMarketPricesFromConcat = (req, res, next) => {
-    const formattedMarketPricesFromConcat = req.results.map((item, i) => {
-        if (item.market_price_prices) {
-            const commaSplit = item.market_price_prices.split(',')
-            const datesAndPrices = []
-            let tempArray = []
-            commaSplit.forEach(str => {
-                const splitStr = str.split('')
-                if (splitStr[0] === '[') {
-                    tempArray.push(parseInt(splitStr.filter(letter => letter !== '[').join('')))
-                } else {
-                    tempArray.push(parseFloat(splitStr.filter(letter => letter !== ']').join('')))
-                    datesAndPrices.push(tempArray)
-                    tempArray = []
-                }
-            })
-            return {
-                ...item,
-                market_price_prices: datesAndPrices
+    const itemPriceLookup = {}
+    const itemLookup = {}
+    const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
+        const datesAndPrices = itemPrinting.prices ? parseGroupConcat(itemPrinting.prices) : []
+        if (itemPriceLookup[itemPrinting.id]) {
+            itemPriceLookup[itemPrinting.id] = {
+                ...itemPriceLookup[itemPrinting.id],
+                [itemPrinting.printing_id]: datesAndPrices
             }
         } else {
-            return item
+            itemPriceLookup[itemPrinting.id] = {
+                [itemPrinting.printing_id]: datesAndPrices
+            }
         }
+        if (itemLookup[itemPrinting.id]) return false
+        itemLookup[itemPrinting.id] = 1
+        return true
+    }).map(item => {
+        return {
+                ...item,
+                prices: itemPriceLookup[item.id],
+                printings: Object.keys(itemPriceLookup[item.id]),
+                sealed: item.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9'
+            }
     })
     req.results = formattedMarketPricesFromConcat
     next()

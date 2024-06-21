@@ -2,17 +2,16 @@ import { localYYYYMMDD } from "../../utils/date"
 
 export const initialReferenceDataValues = {
     sets: [],
-    cards: [],
     expansionFilters: [],
     expansionItemFilters: [],
-    products: [],
     rarities: [],
     marketSearchResults: [],
     bulk: {
-        rarities: [],
-        types: [],
-        printings: [],
-        expansions: []
+        rarity: [],
+        type: [],
+        printing: [],
+        set: [],
+        condition: []
     },
     dateRange: 'week',
     setSort: {
@@ -191,21 +190,20 @@ export const initialSortingValues = {
 }
 
 export const initialSplitLabelFormValues = {
-    rarities: [null],
-    types: [null],
-    printings: [null],
-    expansions: [null]
+    rarity: [null],
+    type: [null],
+    printing: [null],
+    set: [null]
 }
 
 export const initialBulkSplitsValues = []
 
 export const initialExternalListing = {
-    date: undefined,
+    time: undefined,
     description: undefined,
     sellerId: undefined,
     price: undefined,
-    cards: [],
-    products: [],
+    items: [],
     bulkSplits: []
 }
 
@@ -214,7 +212,7 @@ export const initialListingValues = {
     sellerId: undefined,
     sellerName: undefined,
     date: undefined,
-    price: undefined,
+    listingPrices: [],
     description: undefined,
     collectedCard: {
         id: undefined

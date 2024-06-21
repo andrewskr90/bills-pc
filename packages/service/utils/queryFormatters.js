@@ -7,10 +7,14 @@ const QueryFormatters = {
         let columns = "("
         keys.sort()
         keys.forEach((key, i) => {
+            let conditionedKey = key
+            if (conditionedKey === 'index') {
+                conditionedKey = '`index`'
+            }
             if (i !== keys.length -1) {
-                columns += `${key}, `
+                columns += `${conditionedKey}, `
             } else {
-                columns += `${key})`
+                columns += `${conditionedKey})`
             }
         })
         query += `${columns} VALUES `

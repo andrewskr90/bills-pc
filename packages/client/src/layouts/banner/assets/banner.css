@@ -1,0 +1,21 @@
+.banner {
+    padding: 0 5px 5px 5px;
+    background-color: #ecedff;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.banner .backAndTitle {
+    height: 50px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-shrink: 0;
+}
+.banner .backAndTitle .banner .backArrow {
+    position: fixed;
+    left: 2%;
+}

@@ -1,0 +1,410 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Titillium+Web&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* end of CSS reset */
+/* #D1495B red
+#edae49 yellow
+#30638e blue */
+
+* {
+    box-sizing: border-box;
+    padding:0;
+    max-width:100%;
+}
+
+body {
+	background-color: white;
+	font-family: 'Inter', sans-serif;  margin: 0;
+	/* font-weight: 900; */
+}
+
+p {
+  	font-size: 16px;
+}
+
+h1 {
+	font-family: 'Titillium Web', sans-serif;
+	font-weight: 600;
+	font-size: 45px;
+}
+
+h2 {
+  	font-size: 30px;
+    font-weight: 400;
+}
+
+h3 {
+  	font-size: 18px;
+}
+
+label {
+ 	font-size: 20px;
+}
+
+div {
+  	width: 100%;
+}
+
+div {
+    width: 100%;
+}
+
+input, select, textarea {
+    background-color: #D3D3D3;
+}
+
+.home {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 2200px;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+}
+
+.modalBackground {
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	left: 0;
+	top: 0;
+	background-color: rgba(0,0,0,0.6);
+}
+.modalBackground .modalContent {
+    width: 95%;
+    /* this height/margin combo works with iphone 12 safari */
+    height: 630px; 
+    margin: 30px auto;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 5px;
+}
+.modalBackground button {
+    margin-bottom: 10px;
+    margin-top: auto;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.emptyCollection .link {
+	width: 100%;
+	margin: 10%;
+}
+
+.emptyCollection .link button {
+  	width: 40%;
+}
+
+.navBar {
+	position: fixed;
+	bottom: 0;
+	height: 7%;
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+}
+
+.navBar .link {
+	display: flex;
+	flex-direction: column;
+	margin: 0 1% 3% 1%;
+	border-radius: 50px;
+	width: 150px;
+	font-size: 5vw;
+	font-weight: 300;
+	border: #6065CB solid 4px;
+	color: #6065CB;
+	background-color: white;
+	height: 80%;
+}
+
+.link.selected {
+	background-color: #6065CB;
+	color: white;
+}
+
+button.selected {
+	box-shadow: inset 2px 2px 10px 4px #5c1f27;
+}
+
+.hidden {
+  	display: none !important;
+}
+
+.bold {
+  	font-weight: bold;
+}
+
+.link {
+	width: 25%;
+	text-decoration: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+a {
+  text-decoration: none;
+}
+a:visited {
+  text-decoration: none;
+  color: inherit;
+}
+.loginPage {
+	height: 80vh;
+	width: 100%;
+	margin-top: 75px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.formInputs {
+  	width: 50%;
+}
+
+input {
+	font-size: 20px;
+	width: 100%;
+	margin-top: 12px;
+}
+
+select {
+	font-size: 20px;
+}
+
+option {
+  	font-size: 10px;
+}
+
+button {
+    font-family: 'Inter', sans-serif;  margin: 0;
+    font-size: 20px;
+    text-decoration: none;
+    background-color: #6065cb;
+    color: #FBFAF5;
+    padding: 5px 10px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+button:hover {
+  	cursor: pointer;
+}
+
+.error {
+  	color: red;
+}
+
+/* ***Component Styles*** */
+
+  .inDevelopment {
+    margin-top: 200px;
+    height: 500px;
+    text-align: center;
+    color: #6065CB;
+    display: flex;
+    flex-direction: column;
+  }
+.inDevelopment ul {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.inDevelopment ul li {
+    list-style-type: circle;
+}
+
+  ::-webkit-scrollbar {
+    /* hides sidescroll on filterBubble div */
+    display: none; 
+  }
+
+.loadingGradient {
+    background: linear-gradient(90deg, rgba(200, 76, 76, 0.3), white, #6065cb30, white, rgba(42, 163, 0, 0.3));
+    background-size: 1000%;
+    animation: gradient 5s ease infinite;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #6065CB;
+    height: 40px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0px 0px 4px rgb(71, 71, 71);
+    border-color: black;
+    padding: 0 10px;
+}
+.header h1 {
+    font-size: 28px;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* _________________________________________________
+_________________________________________________
+_________________________________________________
+            Desktop Responsive Styles
+_________________________________________________
+_________________________________________________
+_________________________________________________ */
+
+@media only screen and (min-width: 600px) {
+    h3 {
+      font-size: 20px;
+    }
+    .loginPage {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .loginPage .loginForm {
+        width: 400px;
+    }
+    h1 {
+      font-size: 80px;
+    }
+    .navBar .link {
+        font-size: 30px;
+        width: 200px;
+        margin-bottom: 1%;
+    }
+    header {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      padding: 0 10%;
+    }
+    header p {
+        font-size: 16px;
+    }
+    .modalBackground .modalContent{
+        width: 600px;
+        height: 550px;
+        margin: 100px auto;
+    }
+    /* AddItemModal */
+    div.addItemModal div.modalContent {
+        width: 600px;
+    }
+    div.addItemModal div.modalContent div.addCardToTransaction div.cardFilter div.filterResults div.filterResult p {
+        font-size: 16px;
+        padding: 4px;
+    }
+    /* // desktop scrollbar styles */
+    /* width */
+    ::-webkit-scrollbar {
+        display: block;
+        width: 10px;
+        height: 5px;
+    }
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+    }
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #b1b1b1;
+    }
+}

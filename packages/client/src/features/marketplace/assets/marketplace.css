@@ -1,0 +1,305 @@
+.marketplace {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.setSelector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    width: 500px;
+}
+.setSelector select {
+    font-size: 16px;
+    text-align: center;
+    margin-top: 0;
+}
+.setSelector option {
+    border: solid 1px black;
+}
+
+.filterBubbles {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    white-space: nowrap;
+    padding-top: 10px;
+}
+.filterBubbles .filterBubble {
+    height: 24px;
+    padding: 4px;
+    width: max-content;
+    margin: 4px 4px;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: solid 1px #6065CB;
+    border-radius: 25px;
+}
+.filterBubbles .filterBubble p {
+    color: #6065CB;
+    margin: 0 4px;
+    font-size: 12px;
+}
+.filterBubbles .filterBubble button {
+    background: none;
+    width: 18px;
+    height: 16px;
+    border-radius: 25px;
+    background-color: white;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6065CB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filterBubble.active {
+    background-color: #6065CB;
+}
+.filterBubble.active p {
+    color: white;
+}
+
+.filterModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.filterModal .filterSection p {
+    padding: 4px;
+}
+.filterModal .filterSection .filterBubbles {
+    padding: 4px 0;
+    border-bottom: solid black 1px;
+    flex-wrap: wrap;
+}
+.filterModal .filterSection .filterBubbles .filterBubble {
+    margin-bottom: 4px;
+}
+.filterModal .clearAndClose {
+    margin-top: auto;
+    width: 100%;;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.title {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+.title h3 {
+    font-weight: 500;
+}
+.title p {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.loadingExpansionItems {
+    margin: auto;
+    margin-top: 50px;
+    width: 60%;
+}
+
+.expansionItemInfo {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 100px;
+}
+.expansionItemInfo .name {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 10px 0;
+    text-align: center;
+}
+.expansionItemInfo .imageAndData {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    /* // height: 180px;
+    // padding: 20px; */
+}
+.expansionItemInfo .imageAndData .image {
+    display: flex; flex-direction: row; align-items: center; justify-content: center;
+    width: 30%;
+}
+.expansionItemInfo .imageAndData .image img { 
+    max-width: 90%; 
+}
+.expansionItemInfo .imageAndData .image .unavailable {
+    display: flex;
+    align-items: center;
+    width: 90%;
+    height: 100%;
+    background-color: rgb(236, 236, 236);
+    font-size: 24px;
+    text-align: center;
+    border-radius: 5px;
+    margin: 4px;
+}
+.expansionItemInfo .imageAndData .besideImg {
+    color: #6065CB;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 50%;
+    height: 100%;
+}
+.expansionItemInfo .imageAndData .besideImg .marketplaceChart {
+    padding: 15px;
+    width: 100%;
+}
+.expansionItemInfo .imageAndData .besideImg .marketplaceChart .unavailable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.expansionItemInfo .imageAndData .besideImg .valueAndChange {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.expansionItemInfo .imageAndData .besideImg .valueAndChange .marketValue {
+    font-size: 24px;
+    font-weight: 500;
+}
+.expansionItemInfo .imageAndData .besideImg .valueAndChange.up {
+    color: rgb(0, 180, 0)
+}
+.expansionItemInfo .imageAndData .besideImg .valueAndChange.down {
+    color: #a00000
+}
+.expansionItemInfo .purchaseSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+}
+.expansionItemInfo .purchaseSection .affiliateLinkToItem {
+    padding: 5px;
+    margin-left: 15px;
+    height: auto;
+}
+.expansionsMarketplace .expansions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 100px;
+}
+.expansionsMarketplace .expansions .expansion {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    background-color: #6065cb30;
+    border-radius: 10px;
+    margin-top: 10px;
+    position: relative;
+}
+.expansionsMarketplace .expansions .expansion .setSymbol {
+    width: 12%;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    margin-left: 2%;
+}
+.expansionsMarketplace .expansions .expansion .setSymbol img {
+    max-width: 40px;
+    max-height: 40px;
+}
+.expansionsMarketplace .expansions .expansion .setName {
+    width: 60%;
+    font-weight: 500;
+    text-align: center;
+}
+.expansionsMarketplace .expansions .expansion .valueAndChange {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 20%;
+    height: 80%;
+    border-radius: 10px;
+}
+.expansionsMarketplace .expansions .expansion .valueAndChange .top10Avg {
+    font-size: 12px;
+}
+.expansionsMarketplace .expansions .expansion .valueAndChange p.marketValue {
+    font-size: 18px;
+    font-weight: 600;
+    color: #6065cb
+}
+.expansionsMarketplace .expansions .expansion .valueAndChange.loadingGradient p.marketValue {
+    font-size: 14px;
+}
+.expansionsMarketplace .expansions .expansion.up {
+    background-color: rgba(42, 163, 0, 0.3);
+}
+.expansionsMarketplace .expansions .expansion.up .valueAndChange {
+    color: rgb(0, 180, 0);
+}
+.expansionsMarketplace .expansions .expansion.down {
+    background-color: rgba(200, 76, 76, 0.3);
+}
+.expansionsMarketplace .expansions .expansion.down .valueAndChange {
+    color: rgb(160, 0, 0);
+}
+
+
+/* // _________________________________________________
+// _________________________________________________
+// _________________________________________________
+//              Desktop Responsive Styles
+// _________________________________________________
+// _________________________________________________
+// _________________________________________________ */
+
+
+@media only screen and (min-width: 600px) {
+    .marketplace {
+        justify-content: center;
+        width: 600px;
+        margin-top: 60px;
+    }
+    .setSelector {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .setSelector select {
+        width: 400px;
+    }
+    .expansionItemsMarketplace, .searchResults {
+        display: flex;
+        flex-direction: column;
+    }
+    .expansionItemsMarketplace, .searchResults .previousRoutes {
+        width: 80%;
+    }
+    .expansionItemsMarketplace, .searchResults .expansionItemInfo div.imageAndData {
+        height: 300px;
+    }
+    .expansionItemsMarketplace, .searchResults .expansionItemInfo div.imageAndData .image {
+        justify-content: start;
+    }
+    .expansionItemsMarketplace, .searchResults .expansionItemInfo div.imageAndData .image img {
+        max-height: 400px;
+    }
+}

@@ -1,0 +1,14 @@
+.editItem {
+    padding-bottom: 100px;
+}
+.editItem .itemImage {
+    width: 250px;
+    margin-bottom: 10px;
+}
+.editItem .itemName {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+.editItem .expansionName {
+    margin-bottom: 10px;
+}

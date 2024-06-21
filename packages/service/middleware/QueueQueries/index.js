@@ -25,6 +25,7 @@ const sortings = require('./sortings')
 const sortingSplits = require('./sortingSplits')
 const sortingGems = require('./sortingGems')
 const giftBulkSplits = require('./giftBulkSplits')
+const items = require('./items')
 
 const init = (req, res, next) => {
     req.queryQueue = []
@@ -59,5 +60,6 @@ module.exports = {
     sortings,
     sortingSplits,
     sortingGems,
-    giftBulkSplits
+    giftBulkSplits,
+    items
 }

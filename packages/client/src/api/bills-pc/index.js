@@ -1,5 +1,7 @@
 import axios from 'axios'
-import { BILLS_PC_API } from '../../../../../config'
+import config from '../../../config'
+
+const { BILLS_PC_API } = config
 
 const { options } = BILLS_PC_API
 
@@ -353,8 +355,37 @@ const BillsPcService = {
             ...options,
             url: `/api/v1/listings/${id}`
         })
+    },
+    getConditions() {
+        return axios({
+            ...options,
+            url: 'api/v1/conditions'
+        })
+    },
+    getItemsWithValues(filter) {
+        return axios({
+            ...options,
+            url:'/api/v1/items/values',
+            params: filter
+        })
+    },
+    createListingPrice({ listingId, price }) {
+        return axios({
+            ...options,
+            method: 'post',
+            data: { price, listingId },
+            url: `/api/v1/listing-prices/`
+        })
+    },
+    createLotEdit({ data, params }) {
+        return axios({
+            ...options,
+            method: 'post',
+            data,
+            params,
+            url: `/api/v1/lot-edits`
+        })
     }
-
 }
 
 
