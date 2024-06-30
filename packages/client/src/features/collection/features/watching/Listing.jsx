@@ -14,7 +14,7 @@ const Listing = (props) => {
     useEffect(() => {
         (async () => {
             const result = await BillsPcService.getListingById(id)
-            setListing(result.data[0])
+            setListing(result.data)
         })()
     }, [])
     const handlePurchaseListing = () => {
@@ -27,7 +27,7 @@ const Listing = (props) => {
             <Route path='/' element={
                 listing.id ? 
                     <div style={{ height: '100%', overflow: 'auto', marginBottom: '64px' }}>
-                        <p>{listing.time}</p>
+                        <p>{listing.listingTime}</p>
                         <p>{listing.sellerName}</p>
                         <p>{parseFloat(listing.listingPrices[0][1])}</p>
                         <button onClick={handleEditListing}>Edit</button>

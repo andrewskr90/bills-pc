@@ -1,179 +1,118 @@
 const Listing = require('../models/Listing')
+const LotEdit = require('../models/LotEdit')
+const CollectedItem = require('../models/CollectedItem')
 const MarketPrice = require('../models/MarketPrice')
+const { buildLotFromId } = require('./lot-middleware')
 const { parseGroupConcat } = require('../utils')
 
-const formatListings = (listingItems) => {    
-    let itemsToFormat = listingItems
-    const listings = []
-    let currentLot = {}
-
-    itemsToFormat.forEach((item, idx) => {
-        if (item.lotId) {
-            if (!currentLot.id) {
-                currentLot = { id: item.lotId }
-                if (item.itemId) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            {
-                                collectedItemId: item.collectedItemId,
-                                itemId: item.itemId,
-                                name: item.name,
-                                tcgpId: item.tcgpId,
-                                setId: item.setId,
-                                index: item.index,
-                                setName: item.setName,
-                                printingId: item.printingId,    
-                                conditionId: item.conditionId,
-                                marketPrice: parseFloat(item.marketPrice)
-                            }
-                        ]
-                    }
-                } else if (item.bulk_split_id) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            {
-                               bulk_split_id: item.bulk_split_id
-                            }
-                        ]
-                    }
-                }
-                if (itemsToFormat[idx+1]) {
-                    if (itemsToFormat[idx+1].listingId !== item.listingId) {
-                        listings.push({
-                            id: item.listingId,
-                            sellerId: item.sellerId,
-                            sellerName: item.sellerName,
-                            time: item.listingTime,
-                            listingPrice: item.listingPrice,
-                            description: item.description,
-                            listingPrices: parseGroupConcat(item.listingPrices),
-                            collectedItem: { id: undefined },
-                            lot: { ...currentLot }  
-                        })
-                        currentLot = {}
-                    }
-                } else {
-                    listings.push({
-                        id: item.listingId,
-                        sellerId: item.sellerId,
-                        sellerName: item.sellerName,
-                        time: item.listingTime,
-                        listingPrice: item.listingPrice,
-                        description: item.description,
-                        listingPrices: parseGroupConcat(item.listingPrices),
-                        collectedItem: { id: undefined },
-                        lot: { ...currentLot }  
-                    })
-                }
-            } else {
-                if (item.itemId) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            ...currentLot.items,
-                            {
-                                collectedItemId: item.collectedItemId,
-                                itemId: item.itemId,
-                                name: item.name,
-                                tcgpId: item.tcgpId,
-                                setId: item.setId,
-                                index: item.index,
-                                setName: item.setName,
-                                printingId: item.printingId,    
-                                conditionId: item.conditionId,
-                                marketPrice: parseFloat(item.marketPrice)
-                            }
-                        ]
-                    }
-                } else if (item.bulk_split_id) {
-                    currentLot = {
-                        ...currentLot,
-                        items: [
-                            ...currentLot.items,
-                            { bulk_split_id: item.bulk_split_id }
-                        ]
-                    }
-                }
-                if (itemsToFormat[idx+1]) {
-                    if (itemsToFormat[idx+1].listingId !== item.listingId) {
-                        listings.push({
-                            id: item.listingId,
-                            sellerId: item.sellerId,
-                            sellerName: item.sellerName,
-                            time: item.listingTime,
-                            listingPrice: item.listingPrice,
-                            description: item.description,
-                            listingPrices: parseGroupConcat(item.listingPrices),
-                            collectedItem: { id: undefined },
-                            lot: { ...currentLot }  
-                        })
-                        currentLot = {}
-                    }
-                } else {
-                    listings.push({
-                        id: item.listingId,
-                        sellerId: item.sellerId,
-                        sellerName: item.sellerName,
-                        time: item.listingTime,
-                        listingPrice: item.listingPrice,
-                        description: item.description,
-                        listingPrices: parseGroupConcat(item.listingPrices),
-                        collectedItem: { id: undefined },
-                        lot: { ...currentLot }  
-                    })
-                }
-            }
-        } else {
-            listings.push({
-                id: item.listingId,
-                sellerId: item.sellerId,
-                sellerName: item.sellerName,
-                time: item.listingTime,
-                listingPrice: item.listingPrice,
-                description: item.description,
-                listingPrices: parseGroupConcat(item.listingPrices),
-                collectedItem: { ...item, id: item.collectedItemId },
-                bulkSplitId: { id: item.bulk_split_id },
-                lot: { id: item.lotId, items: [] }
-            })
-        }
+const formatParsedDatePriceArray = (datePriceArray) => {
+    return datePriceArray.map(array => {
+        return array.map((value, idx) => {
+            if (idx === 0) return parseInt(value)
+            return parseFloat(value)
+        })
     })
-    return listings.sort((a, b) => {
+}
+
+const parseThenFormatListingPrices = (unparsedListingPrices) => {
+    return formatParsedDatePriceArray(parseGroupConcat(unparsedListingPrices))
+}
+
+const  formatListings = (listings) => {    
+    return listings.map((listing) => {
+        const { 
+            id,
+            sellerId,
+            sellerName,
+            listingTime,
+            listingDescription: description,
+            listingPrices,
+            collectedItemId,
+            bulkSplitId,
+            lotId 
+        } = listing
+        return {
+            id,
+            sellerId,
+            sellerName,
+            listingTime,
+            description,
+            listingPrices: parseThenFormatListingPrices(listingPrices),
+            collectedItem: { id: collectedItemId },
+            bulkSplitId: { id: bulkSplitId },
+            lot: { id: lotId },
+        }
+    }).sort((a, b) => {
         if (a.time > b.time) return -1
         if (a.time < b.time) return 1
         return 0
     })
 }
 
+const formatItem = (item) => {
+    return {
+        collectedItemId: item.collectedItemId,
+        itemId: item.itemId,
+        name: item.name,
+        tcgpId: item.tcgpId,
+        setId: item.setId,
+        index: item.index,
+        setName: item.setName,
+        printingId: item.printingId,  
+        conditionId: item.appraisals[0][1],
+        appraisals: item.appraisals,
+        marketPrice: item.marketPrice ? parseFloat(item.marketPrice) : undefined,
+        marketPriceDate: item.marketPriceDate
+    }
+}
+
+const formatItems = (items) => {
+    return items.map(lotItem => {
+        if (lotItem.itemId) {
+            return formatItem(lotItem)
+        } else if (lotItem.bulkSplitId) {
+            return { bulkSplitId: item.bulkSplitId }
+        }
+    })
+}
+
+
 const uniqueItemPrintingConditionInListings = (listingItems) => {
     return listingItems.filter(item => item.itemId).map(item => ({
         itemId: item.itemId,
-        conditionId: item.conditionId,
+        conditionId: item.appraisals[0][1],
         printingId: item.printingId
     }))
 }
 
-const tiePricesToListings = (listings, itemPrices) => {
+const tiePricesToItems = (items, itemPrices) => {
     const priceLib = {}
     itemPrices.forEach(itemPrice => {
         if (itemPrice.itemId && itemPrice.marketPrice) {
-            const { marketPrice, marketPriceDate } = itemPrice
-            priceLib[itemPrice.skuId] = { marketPrice, marketPriceDate }
+            const { marketPrice, marketPriceDate, itemId, printingId, conditionId } = itemPrice
+            priceLib[itemId] = {}
+            priceLib[itemId][printingId] = {}
+            priceLib[itemId][printingId][conditionId] = { marketPrice, marketPriceDate }
         }
     })
-    return listings.map(listing => { 
-        if (listing.itemId && priceLib[listing.skuId]) {
-            const { marketPriceDate, marketPrice } = priceLib[listing.skuId]
-            return {
-                ...listing, 
-                marketPriceDate, 
-                marketPrice
+    return items.map(item => { 
+        const { itemId, printingId, appraisals } = item
+        const conditionId = appraisals[0][1]
+        if (priceLib[itemId]) {
+            if (priceLib[itemId][printingId]) {
+                if (priceLib[itemId][printingId][conditionId]) {
+                    const { marketPriceDate, marketPrice } = priceLib[itemId][printingId][conditionId]
+                    return {
+                        ...item, 
+                        marketPriceDate, 
+                        marketPrice
+                    }
+                }
             }
+
         }
         return { 
-            ...listing,
+            ...item,
             marketPriceDate: undefined,
             marketPrice: undefined
         }
@@ -196,13 +135,47 @@ const getListings = async (req, res, next) => {
 
 const getListingById = async (req, res, next) => {
     try {
-        const listingItems = await Listing.getListingById(req.params.id)
+        const listing = await Listing.getListingById(req.params.id)
         const today = new Date()
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
-        const listingItemPrices = await MarketPrice.selectByItemIdsBetweenDates(uniqueItemPrintingConditionInListings(listingItems), yesterday, today)
-        const watchedListingsWithPrices = tiePricesToListings(listingItems, listingItemPrices)
-        req.results = formatListings(watchedListingsWithPrices)
+        if (listing.lotId) {
+            let lotItems = await buildLotFromId(listing.lotId)
+            const lotItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
+                uniqueItemPrintingConditionInListings(lotItems), 
+                yesterday, 
+                today
+            )
+            const lotItemsWithPrices = tiePricesToItems(lotItems, lotItemsPrices)
+            const formattedLotItems = formatItems(lotItemsWithPrices)
+            const formattedListing = formatListings([listing])[0]
+            req.results = {
+                ...formattedListing,
+                lot: {
+                    ...formattedListing.lot,
+                    items: formattedLotItems
+                }
+            }
+        } else if (listing.collectedItemId) {
+            const formattedListing = formatListings([listing])[0]
+            const collectedItem = await CollectedItem.getById(formattedListing.collectedItem.id)
+            const itemPrices = await MarketPrice.selectByItemIdsBetweenDates(
+                [collectedItem],
+                yesterday,
+                today
+            )
+            const itemWithPrices = tiePricesToItems([collectedItem], itemPrices)[0]
+            const formattedItem = formatItem(itemWithPrices)
+            req.results = {
+                ...formattedListing,
+                collectedItem: {
+                    ...formattedListing.collectedItem,
+                    ...formattedItem,
+                }
+            }
+        } else if (listing.bulkSplitId) {
+            // TODO
+        }
     } catch (err) {
         next(err)
     }

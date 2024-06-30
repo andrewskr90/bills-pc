@@ -214,15 +214,15 @@ export const initialListingValues = {
     date: undefined,
     listingPrices: [],
     description: undefined,
-    collectedCard: {
-        id: undefined
-    },
-    collectedProduct: {
+    collectedItem: {
         id: undefined
     },
     lot: {
         id: undefined,
         items: []
+    },
+    bulkSplit: {
+        id: undefined
     }
 }
 
