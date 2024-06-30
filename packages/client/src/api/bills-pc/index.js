@@ -221,7 +221,7 @@ const BillsPcService = {
     getTypes() {
         return axios({
             ...options,
-            url: 'api/v1/types'
+            url: '/api/v1/types'
         })
     },
     updateType({ type }) {
@@ -251,7 +251,7 @@ const BillsPcService = {
     getRarities() {
         return axios({
             ...options,
-            url: 'api/v1/rarities'
+            url: '/api/v1/rarities'
         })
     },
     updateRarity({ rarity }) {
@@ -281,7 +281,7 @@ const BillsPcService = {
     getPrintings() {
         return axios({
             ...options,
-            url: 'api/v1/printings'
+            url: '/api/v1/printings'
         })
     },
     updatePrinting({ printing }) {
@@ -302,7 +302,7 @@ const BillsPcService = {
     getBulkSplits() {
         return axios({
             ...options,
-            url: 'api/v1/bulk-splits'
+            url: '/api/v1/bulk-splits'
         })
     },
     postSortings(config) {
@@ -359,7 +359,7 @@ const BillsPcService = {
     getConditions() {
         return axios({
             ...options,
-            url: 'api/v1/conditions'
+            url: '/api/v1/conditions'
         })
     },
     getItemsWithValues(filter) {
