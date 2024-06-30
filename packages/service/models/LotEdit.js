@@ -9,16 +9,49 @@ const getById = async (id) => {
             le.id as lotEditId,
             le.time as lotEditTime,
             li.id as lotInsertId,
-            li.collectedItemId as insertedCollectedItemId,
+            null as lotRemovalId,
+            li.collectedItemId,
+            c.itemId,
+            i.name,
+            i.tcgpId,
+            s.set_v2_id as setId,
+            s.set_v2_name as setName,
+            c.printingId,
+            GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
-            li.index as ${indexWithBackticks},
-            lr.id as lotRemovalId,
-            lr.collectedItemId as removedCollectedItemId,
-            lr.bulkSplitId
+            li.index as ${indexWithBackticks}
         FROM V3_LotEdit le
         LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
-        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id
+        LEFT JOIN V3_CollectedItem c on c.id = li.collectedItemId
+        LEFT JOIN Item i on i.id = c.itemId
+        LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        LEFT JOIN V3_Appraisal a
+            on a.collectedItemId = c.id
         WHERE le.id = '${id}'
+        GROUP BY c.id
+        UNION
+        SELECT
+            le.id as lotEditId,
+            le.time as lotEditTime,
+            null as lotInsertId,
+            lr.id as lotRemovalId,
+            lr.collectedItemId,
+            c.itemId,
+            i.name,
+            i.tcgpId,
+            s.set_v2_id as setId,
+            s.set_v2_name as setName,
+            c.printingId,
+            null as appraisals,
+            lr.bulkSplitId,
+            null as ${indexWithBackticks}
+        FROM V3_LotEdit le
+        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id
+        LEFT JOIN V3_CollectedItem c on c.id = lr.collectedItemId
+        LEFT JOIN Item i on i.id = c.itemId
+        LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        WHERE le.id = '${id}'
+        GROUP BY c.id
     `
     const queryQueue = [query]
     const req = { queryQueue }
@@ -35,11 +68,11 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
     const { lotId, time, lotInserts, lotRemovals } = lotEdit
     const queryQueue = []
     // create collected items
-    if (lotEdit.lotInserts.length > 0) {
+    if (lotInserts.length > 0) {
         const collectedItemsToInsert = []
         const appraisalsToInsert = []
         const collectedItemNotesToInsert = []
-        lotEdit.lotInserts.forEach((item, idx) => {
+        lotInserts.forEach((item, idx) => {
             const { itemId, printingId, conditionId, note } = item
             const collectedItemId = uuidV4()
             const formattedItem = {
@@ -68,7 +101,7 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
             }
             collectedItemsToInsert.push(formattedItem)
             appraisalsToInsert.push(formattedAppraisal)
-            lotEdit.lotInserts[idx] = { ...item, collectedItemId }
+            lotInserts[idx] = { ...item, collectedItemId }
         })
         queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
         queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
@@ -84,9 +117,8 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
     }
     // create V3_LotInsert
     const formattedLotInserts = []
-    lotEdit.lotInserts.forEach((item) => {
+    lotInserts.forEach((item) => {
         const { collectedItemId, index } = item
-        console.log(item)
         const lotInsertId = uuidV4()
         const formattedLotInsert = {
             id: lotInsertId,
@@ -98,7 +130,7 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
     })
     // create V3_LotRemoval
     const formattedLotRemovals = []
-    lotEdit.lotRemovals.forEach((item) => {
+    lotRemovals.forEach((item) => {
         const { collectedItemId } = item
         const lotRemovalId = uuidV4()
         const formattedLotInsert = {

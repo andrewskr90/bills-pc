@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import BillsPcService from '../../../../api/bills-pc'
 import EditSavedListingItem from './EditSavedListingItem'
 import ListingItemToInsert from './ListingItemToInsert'
@@ -11,11 +11,13 @@ const EditWatchedListing = (props) => {
     const [updatedPrice, setUpdatedPrice] = useState(listing.listingPrices[0][1])
     const [insertedItems, setInsertedItems] = useState([])
     const [deletedCollectedItemIds, setDeletedCollectedItemIds] = useState([])
+    const [timeOfPriceUpdate, setTimeOfPriceUpdate] = useState()
     const [timeOfUpdate, setTimeOfUpdate] = useState()
     const navigate = useNavigate()
     const handleUpdatePrice = async () => {
         try {
-            await BillsPcService.createListingPrice({ listingId: listing.id, price: updatedPrice })
+            const data = { listingId: listing.id, price: updatedPrice, time: convertLocalToUTC(timeOfPriceUpdate) }
+            await BillsPcService.createListingPrice({ data })
         } catch (err) {
             console.log(err)
         }
@@ -82,6 +84,10 @@ const EditWatchedListing = (props) => {
                 listing ? <div className='pb-20'>
                     <div>
                         <p>Price</p>
+                        <label style={{ display: 'flex', flexDirection: 'column' }}>
+                            Time of update
+                            <input type="datetime-local" value={timeOfPriceUpdate} onChange={(e) => setTimeOfPriceUpdate(e.target.value)} />
+                        </label>
                         <input 
                             type="number" 
                             value={updatedPrice} 
