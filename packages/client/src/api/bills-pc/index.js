@@ -369,11 +369,11 @@ const BillsPcService = {
             params: filter
         })
     },
-    createListingPrice({ listingId, price }) {
+    createListingPrice({ data }) {
         return axios({
             ...options,
             method: 'post',
-            data: { price, listingId },
+            data,
             url: `/api/v1/listing-prices/`
         })
     },

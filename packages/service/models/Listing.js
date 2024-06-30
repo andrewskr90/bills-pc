@@ -8,42 +8,29 @@ const getWatching = async (watcherId) => {
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            V3_Listing.id as listingId,
+            V3_Listing.id,
             sellers.user_id as sellerId,
             sellers.user_name as sellerName,
             watchers.user_id as watcherId,
             V3_CollectedItem.id as collectedItemId,
             V3_BulkSplit.id as bulkSplitId,
+            V3_Lot.id as lotId,
             V3_Listing.${timeWithBackticks} as listingTime,
             GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks} as listingDescription,
             V3_Gift.id as giftId,
-            V3_Watching.id as watchingId,
-            Item.id as itemId,
-            Item.name as itemName,
-            Item.tcgpId as itemTcgpId,
-            V3_Lot.id as lotId
+            V3_Watching.id as watchingId
         FROM V3_Listing
         LEFT JOIN V3_ListingPrice
             on V3_ListingPrice.listingId = V3_Listing.id
         LEFT JOIN V3_Lot 
             on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_LotEdit
-            on V3_LotEdit.lotId = V3_Lot.id
-        LEFT JOIN V3_LotInsert
-            on V3_LotInsert.lotEditId = V3_LotEdit.id
-        LEFT JOIN V3_LotRemoval
-            on V3_LotRemoval.lotEditId = V3_LotEdit.id
         LEFT JOIN V3_CollectedItem 
             on V3_CollectedItem.id = V3_Listing.collectedItemId
-            OR V3_CollectedItem.id = V3_LotInsert.collectedItemId
-            OR V3_CollectedItem.id = V3_LotRemoval.collectedItemId
         LEFT JOIN Item 
             on Item.id = V3_CollectedItem.itemId
         LEFT JOIN V3_BulkSplit
             on V3_BulkSplit.id = V3_Listing.bulkSplitId
-            OR V3_BulkSplit.id = V3_LotInsert.bulkSplitId
-            OR V3_BulkSplit.id = V3_LotRemoval.bulkSplitId
         LEFT JOIN V3_Gift
             ON V3_Gift.collectedItemId = V3_CollectedItem.id
             OR V3_Gift.bulkSplitId = V3_BulkSplit.id
@@ -55,7 +42,7 @@ const getWatching = async (watcherId) => {
         LEFT JOIN users as watchers
             on watchers.user_id = V3_Watching.watcherId
         WHERE V3_Watching.watcherId = '${watcherId}' AND V3_Listing.saleId IS NULL
-        Group by V3_CollectedItem.id;
+        Group by V3_Listing.id;
     `
     const req = { queryQueue: [query] }
     const res = {}
@@ -70,17 +57,15 @@ const getWatching = async (watcherId) => {
 const getListingById = async (listingId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
-    const indexWithBackticks = '`index`'
     const query = `
         SELECT 
-            V3_Listing.id as listingId,
+            V3_Listing.id,
             sellers.user_id as sellerId,
             sellers.user_name as sellerName,
             sellers.proxyCreatorId,
             V3_CollectedItem.id as collectedItemId,
             V3_CollectedItem.printingId as printingId,
             V3_Appraisal.conditionId as conditionId,
-            V3_LotInsert.index as ${indexWithBackticks},
             SKU.id as skuId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,
@@ -97,13 +82,8 @@ const getListingById = async (listingId) => {
             on V3_ListingPrice.listingId = V3_Listing.id
         LEFT JOIN V3_Lot 
             on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_LotEdit
-            on V3_LotEdit.lotId = V3_Lot.id
-        LEFT JOIN V3_LotInsert
-            on V3_LotInsert.lotEditId = V3_LotEdit.id
         LEFT JOIN V3_CollectedItem 
             on V3_CollectedItem.id = V3_Listing.collectedItemId
-            OR V3_CollectedItem.id = V3_LotInsert.collectedItemId
         LEFT JOIN V3_Appraisal
             on V3_Appraisal.collectedItemId = V3_CollectedItem.id
         LEFT JOIN Item 
@@ -116,7 +96,6 @@ const getListingById = async (listingId) => {
             on Item.setId = sets_v2.set_v2_id
         LEFT JOIN V3_BulkSplit
             ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-            OR V3_BulkSplit.id = V3_LotInsert.bulkSplitId
         LEFT JOIN V3_Gift
             ON V3_Gift.collectedItemId = V3_CollectedItem.id
             OR V3_Gift.bulkSplitId = V3_BulkSplit.id
@@ -133,7 +112,7 @@ const getListingById = async (listingId) => {
         if (err) throw err
         listing = req.results
     })
-    return listing
+    return listing[0]
 }
 
 const formatListingWithLot = (listing) => {
@@ -411,7 +390,6 @@ const createExternal = async (listing, watcherId) => {
     queryQueue.push(`${objectsToInsert([formattedWatching], 'V3_Watching')};`)
     const req = { queryQueue }
     const res = {}
-    console.log(queryQueue)
     await executeQueries(req, res, (err) => {
         if (err) throw err
     })

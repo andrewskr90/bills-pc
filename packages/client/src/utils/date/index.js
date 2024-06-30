@@ -34,6 +34,15 @@ export const formatDate = (dateCode) => {
 
 export const convertLocalToUTC = (local) => {
     const utcDate = new Date(local)
+    if (
+        isNaN(parseInt(utcDate.getUTCFullYear())) ||
+        isNaN(parseInt(utcDate.getUTCMonth())) ||
+        isNaN(parseInt(utcDate.getUTCDate())) ||
+        isNaN(parseInt(utcDate.getUTCHours())) ||
+        isNaN(parseInt(utcDate.getUTCMinutes())) ||
+        isNaN(parseInt(utcDate.getUTCMonth())) ||
+        isNaN(parseInt(utcDate.getUTCSeconds()))
+    ) return undefined
     return`${
         utcDate.getUTCFullYear()}-${
         (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${

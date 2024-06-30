@@ -35,15 +35,19 @@ const Watching = (props) => {
                                     return (
                                         <div style={{ width: 'full', display: 'flex', alignItems: 'center' }}>
                                             <div>
-                                                <p>{listing.date}</p>
+                                                <p>{listing.listingTime}</p>
                                                 <p>{listing.sellerName}</p>
                                                 <p>${parseFloat(listing.listingPrices[0][1])}</p>
                                                 <p>
-                                                    {listing.lot.id 
+                                                    {listing.lot.id
                                                         ? 
-                                                        `${listing.lot.items.length} Item Lot` 
+                                                        `Item Lot` 
                                                         : 
-                                                        listing.CollectedItem.name 
+                                                        listing.collectedItem.id
+                                                            ?
+                                                            `Item`
+                                                            :
+                                                            `Bulk` 
                                                     }
                                                 </p>
                                             </div>

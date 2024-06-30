@@ -1,7 +1,7 @@
 const { executeQueries } = require("../db")
+const { sortLotTransactions } = require("../utils/lot")
 
 const getByLotId = async (lotId) => {
-    const indexWithBackticks = '`index`'
     const query = `
     SELECT 
         lo.id, 
@@ -51,7 +51,7 @@ const getByLotId = async (lotId) => {
         if (err) throw err
         transactions = req.results
     })
-    return transactions
+    return sortLotTransactions(transactions)
 }
 
 module.exports = { getByLotId }

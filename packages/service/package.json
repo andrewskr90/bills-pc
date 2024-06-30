@@ -6,7 +6,7 @@
   "author": "andrewskr90",
   "license": "MIT",
   "scripts": {
-    "server": "nodemon index.js",
+    "server": "set TZ=utc && nodemon index.js",
     "start": "node index.js",
     "dbdev": "nodemon ./db",
     "test": "echo testing service"
