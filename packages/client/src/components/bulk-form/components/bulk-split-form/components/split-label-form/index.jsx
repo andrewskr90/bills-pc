@@ -81,7 +81,6 @@ const SplitLabelForm = (props) => {
                     optionValueKey = 'set_v2_id'
                     optionNameKey = 'set_v2_name'
                 }
-                console.log(referenceData)
                 return <div className='row'>
                     <div className='labelInput'>
                         <label>{keyDisplay}</label>

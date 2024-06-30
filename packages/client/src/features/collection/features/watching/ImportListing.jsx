@@ -87,7 +87,6 @@ const ImportListing = (props) => {
                     searchKey="user_name" 
                     items={createdProxyUsers} 
                     handleSelect={((selectedProxyUser) => {
-                        console.log(selectedProxyUser)
                         setExternalListing({
                             ...externalListing,
                             sellerId: selectedProxyUser.user_id

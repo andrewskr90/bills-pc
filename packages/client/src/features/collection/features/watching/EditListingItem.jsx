@@ -40,7 +40,7 @@ const EditListingItem = (props) => {
         })
     }
     const { condition, printing } = referenceData.bulk
-    console.log(condition, printing)
+
     return (listing[`${itemType}s`].length > idx ? 
         <div>
             <label>Note</label>

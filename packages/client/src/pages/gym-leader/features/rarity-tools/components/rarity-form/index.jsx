@@ -29,7 +29,6 @@ const RarityForm = (props) => {
 
     const handleUpdateRarity = (e) => {
         e.preventDefault()
-        console.log(rarityFormValues)
         updateRarity(rarityFormValues)
     }
     

@@ -33,7 +33,6 @@ const RegisterForm = () => {
                 setFormValues(initialFormValues)
                 navigate('/collection')
             }).catch(err => {
-                console.log(err.response)
                 setErrorMessage(err.response.data.message)
             })
     }
