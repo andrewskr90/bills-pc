@@ -1,123 +1,159 @@
-import React, { useEffect, useState } from 'react';
-import { localYYYYMMDD } from '../../../../utils/date';
+import React, { useState } from 'react';
+import { convertLocalToUTC } from '../../../../utils/date';
 import Button from '../../../../components/buttons/text-button/index.jsx';
 import BillsPcService from '../../../../api/bills-pc'
 
+const initialOfferValues = { amount: undefined, accepted: false, rejected: false }
+const initialDiscountValues = { amount: undefined, percentage: undefined }
+
 const PurchaseWatchedListing = ({ listing }) => {
-    const [saleBody, setSaleBody] = useState({ 
-        id: undefined,
-        date: localYYYYMMDD(), 
-        note: '', 
-        discount: 0, 
-        tax: 0 , 
-        shipping: 0,
-        listings: [],
+    const [sale, setSale] = useState({ 
+        shipping: undefined, 
+        tax: undefined, 
+        time: undefined,
+        discounts: [],
+        notes: []
     })
-
-    useEffect(() => {
-        setSaleBody({
-            ...saleBody,
-            listings: [{ 
-                id: listing.id, 
-                sellerId: listing.sellerId, 
-                price: listing.price,
-                offer: undefined
-            }]
-
-        })
-    }, [listing])
-
-    const handleChange = (e) => {
-        setSaleBody({
-            ...saleBody,
+    const [acceptedOffer, setAcceptedOffer] = useState(false)
+    const [offer, setOffer] = useState(initialOfferValues)
+    const [listingDiscount, setListingDiscount] = useState(initialDiscountValues)
+    const [saleDiscount, setSaleDiscount] = useState(initialDiscountValues)
+    const [saleNote, setSaleNote] = useState(undefined)
+    const handleChangeSale = (e) => {
+        setSale({
+            ...sale,
             [e.target.name]: e.target.value
         })
     }
-
-    const handleChangeListingOffer = (e, listingId) => {
-        setSaleBody({
-            ...saleBody,
-            listings: saleBody.listings.map(listing => {
-                if (listing.id !== listingId) return listing
-                return {
-                    ...listing,
-                    offer: {
-                        ...listing.offer,
-                        [e.target.name]: e.target.value
-                    }
-                }
-            })
+    const toggleAcceptedOffer = () => {
+        if (acceptedOffer) {
+            setOffer(initialOfferValues)
+        }
+        setAcceptedOffer(!acceptedOffer)
+    }
+    const handleChangeListingOffer = (e) => {
+        setOffer({
+            ...offer,
+            [e.target.name]: e.target.value,
+            accepted: true
+        })
+    }
+    const handleChangeListingDiscount = (e) => {
+        setListingDiscount({
+            ...listingDiscount,
+            [e.target.name]: e.target.value
+        })
+    }
+    const handleChangeSaleDiscount = (e) => {
+        setSaleDiscount({
+            ...saleDiscount,
+            [e.target.name]: e.target.value
         })
     }
 
     const handleConfirmPurchase = async (e) => {
         e.preventDefault();
-        await BillsPcService.postSale({ 
-            data: saleBody, 
-            params: { listing: true } 
-        }). then(res => console.log(res))
-        .catch(err => console.log(err))
+        const data = {
+            sale: {
+                ...sale,
+                time: convertLocalToUTC(sale.time),
+                discounts: saleDiscount.amount ? [saleDiscount] : [],
+                notes: saleNote ? [{ note: saleNote }] : []
+            },
+            listing: {
+                id: listing.id,
+                discounts: listingDiscount.amount ? [listingDiscount] : [],
+                offers: offer.amount ? [offer] : []
+            }
+        }
+        const params = { listing: true }
+        await BillsPcService.postSale({ data, params })
+            .then(res => console.log(res))
+            .catch(err => console.log(err))
     }
 
     return (
         listing.id ? (<>
-            <form style={{ marginTop: '20px' }}>  
+            <form className='mt-5 mb-24' style={{ marginTop: '20px' }}>  
                 <h3>Purchase Listing</h3>
                 <div style={{ marginTop: '10px' }}>
-                    <label>Date</label>
+                    <label>Time</label>
                     <input 
-                        id='date'
-                        name='date'
-                        type='date'
-                        value={saleBody.date}
-                        onChange={handleChange}
+                        id='time'
+                        name='time'
+                        type='datetime-local'
+                        value={sale.time}
+                        onChange={handleChangeSale}
                     />
                 </div>
-                {saleBody.listings.map((listing, idx) => (
-                    <div key={idx}>
+                <div>
+                    <div style={{ display: 'flex', marginTop: '10px' }}>
+                        <label>Listing Price</label>
+                        <p>{listing.price}</p>
+                    </div>
+                    <div className='flex flex-grow-0 mt-3'>
+                        <label>An offer was accepted</label>
+                        <input 
+                            type="checkbox"
+                            onChange={toggleAcceptedOffer}
+                            checked={acceptedOffer} 
+                        />
+                    </div>
+                    {acceptedOffer && (
                         <div style={{ display: 'flex', marginTop: '10px' }}>
-                            <label>Listing Price</label>
-                            <p>{listing.price}</p>
-                        </div>
-                        <div style={{ display: 'flex', marginTop: '10px' }}>
-                            <label>An offer was accepted</label>
+                            <label>Offer Price</label>
                             <input 
-                                type="checkbox"
-                                onChange={() => {
-                                    setSaleBody({
-                                        ...saleBody,
-                                        listings: saleBody.listings.map(prevListing => {
-                                            if (prevListing.id !== listing.id) return prevListing
-                                            return {
-                                                ...prevListing,
-                                                offer: prevListing.offer === undefined ? { amount: listing.price } : undefined
-                                            }
-                                        })
-                                    })
-                                }}
-                                checked={listing.offer !== undefined} 
+                                name="amount"
+                                type="number"
+                                value={offer.amount}
+                                onChange={handleChangeListingOffer}
                             />
                         </div>
-                        {listing.offer !== undefined && (
-                            <div style={{ display: 'flex', marginTop: '10px' }}>
-                                <label>Offer Price</label>
-                                <input 
-                                    name="amount"
-                                    type="number"
-                                    value={listing.offer.amount}
-                                    onChange={(e) => handleChangeListingOffer(e, listing.id)}
-                                />
-                            </div>
-                        )}
-                    </div>
-                ))}
-                <div style={{ marginTop: '10px' }}>
+                    )}
+                </div>
+                <div className='mt-3'>
+                    <label>Listing Discount</label>
+                    <input 
+                        name="amount"
+                        type="number"
+                        value={listingDiscount.amount}
+                        onChange={handleChangeListingDiscount}
+                    />
+                </div>
+                <div className='mt-3'>
+                    <label>Sale Discount</label>
+                    <input 
+                        name="amount"
+                        type="number"
+                        value={saleDiscount.amount}
+                        onChange={handleChangeSaleDiscount}
+                    />
+                </div>
+                <div className='mt-3'>
+                    <label>Shipping</label>
+                    <input 
+                        name="shipping"
+                        type="number"
+                        value={sale.shipping}
+                        onChange={handleChangeSale}
+                    />
+                </div>
+                <div className='mt-3'>
+                    <label>Tax</label>
+                    <input 
+                        name="tax"
+                        type="number"
+                        value={sale.tax}
+                        onChange={handleChangeSale}
+                    />
+                </div>
+                <div className='mt-3'>
                     <label>Purchase Note</label>
                     <input 
                         name='note'
                         type='text'
-                        value={saleBody.note}
-                        onChange={handleChange}
+                        value={saleNote}
+                        onChange={(e) => setSaleNote(e.target.value)}
                     />
                 </div>
                 <Button 

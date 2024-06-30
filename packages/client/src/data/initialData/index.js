@@ -214,6 +214,7 @@ export const initialListingValues = {
     date: undefined,
     listingPrices: [],
     description: undefined,
+    discounts: [],
     collectedItem: {
         id: undefined
     },
