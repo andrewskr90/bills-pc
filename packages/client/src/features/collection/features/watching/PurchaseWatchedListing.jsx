@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { convertLocalToUTC } from '../../../../utils/date';
 import Button from '../../../../components/buttons/text-button/index.jsx';
 import BillsPcService from '../../../../api/bills-pc'
+import { useNavigate } from 'react-router-dom';
 
 const initialOfferValues = { amount: undefined, accepted: false, rejected: false }
 const initialDiscountValues = { amount: undefined, percentage: undefined }
@@ -19,6 +20,7 @@ const PurchaseWatchedListing = ({ listing }) => {
     const [listingDiscount, setListingDiscount] = useState(initialDiscountValues)
     const [saleDiscount, setSaleDiscount] = useState(initialDiscountValues)
     const [saleNote, setSaleNote] = useState(undefined)
+    const navigate = useNavigate()
     const handleChangeSale = (e) => {
         setSale({
             ...sale,
@@ -68,7 +70,10 @@ const PurchaseWatchedListing = ({ listing }) => {
         }
         const params = { listing: true }
         await BillsPcService.postSale({ data, params })
-            .then(res => console.log(res))
+            .then(res => {
+                console.log(res)
+                navigate('/gym-leader/collection/watching')
+            })
             .catch(err => console.log(err))
     }
 

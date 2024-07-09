@@ -62,7 +62,11 @@ const ImportListing = (props) => {
         try {
             
             await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
-            navigate('/gym-leader/collection/watching/import')
+                .then(res => {
+                    console.log(res)
+                    navigate('/gym-leader/collection/watching')
+                })
+                .catch(err => console.log(err))
         } catch (err) {
             console.log(err)
         }

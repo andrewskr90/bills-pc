@@ -18,6 +18,11 @@ const EditWatchedListing = (props) => {
         try {
             const data = { listingId: listing.id, price: updatedPrice, time: convertLocalToUTC(timeOfPriceUpdate) }
             await BillsPcService.createListingPrice({ data })
+                .then(res => {
+                    console.log(res)
+                    navigate('/gym-leader/collection/watching')
+                })
+                .catch(err => console.log(err))
         } catch (err) {
             console.log(err)
         }
