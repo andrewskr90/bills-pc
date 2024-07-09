@@ -2,6 +2,7 @@ const { executeQueries } = require('../db')
 const { stringifyDateYYYYMMDD } = require('../utils/date')
 
 const selectByItemIdsBetweenDates = async (items, formerDate, latterDate) => {
+    if (items.length === 0) return []
     const dateWithTicks = '`date`'
     let query = `
         SELECT 

@@ -71,7 +71,7 @@ const formatItems = (items) => {
         if (lotItem.itemId) {
             return formatItem(lotItem)
         } else if (lotItem.bulkSplitId) {
-            return { bulkSplitId: item.bulkSplitId }
+            return { bulkSplitId: lotItem.bulkSplitId }
         }
     })
 }
@@ -96,6 +96,8 @@ const tiePricesToItems = (items, itemPrices) => {
         }
     })
     return items.map(item => { 
+        if (item.bulkSplitId) return item
+
         const { itemId, printingId, appraisals } = item
         const conditionId = appraisals[0][1]
         if (priceLib[itemId]) {
@@ -135,14 +137,15 @@ const getListings = async (req, res, next) => {
 
 const getListingById = async (req, res, next) => {
     try {
-        const listing = await Listing.getListingById(req.params.id)
+        const listing = await Listing.getById(req.params.id)
         const today = new Date()
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
         if (listing.lotId) {
             let lotItems = await buildLotFromId(listing.lotId)
+            const lotCollectedItems = lotItems.filter(li => li.collectedItemId)
             const lotItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
-                uniqueItemPrintingConditionInListings(lotItems), 
+                uniqueItemPrintingConditionInListings(lotCollectedItems), 
                 yesterday, 
                 today
             )

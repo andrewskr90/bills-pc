@@ -20,7 +20,7 @@ const createLotEdit = async (req, res, next) => {
         const userId = req.claims.user_id
         const lotTransactions = await Transaction.getByLotId(lotId)
         const mostRecentAcquirer = findMostRecentAcquirer(lotTransactions)
-        if (mostRecentAcquirer.ownerId !== userId && mostRecentAcquirer.proxyOwnerId !== userId) {
+        if (mostRecentAcquirer.ownerId !== userId && mostRecentAcquirer.ownerProxyCreatorId !== userId) {
             return next({ status: 400, message: 'User does not have permission to update.' })
         }
         const lastLotTransaction = lotTransactions[lotTransactions.length-1]

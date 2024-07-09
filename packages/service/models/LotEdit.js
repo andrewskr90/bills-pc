@@ -20,15 +20,16 @@ const getById = async (id) => {
             GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
             li.index as ${indexWithBackticks}
-        FROM V3_LotEdit le
-        LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
+        FROM V3_LotInsert li
+        LEFT JOIN V3_LotEdit le on le.id = li.lotEditId
         LEFT JOIN V3_CollectedItem c on c.id = li.collectedItemId
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        LEFT JOIN V3_BulkSplit bs on bs.id = li.bulkSplitId
         LEFT JOIN V3_Appraisal a
             on a.collectedItemId = c.id
         WHERE le.id = '${id}'
-        GROUP BY c.id
+        GROUP BY li.id
         UNION
         SELECT
             le.id as lotEditId,
@@ -45,13 +46,14 @@ const getById = async (id) => {
             null as appraisals,
             lr.bulkSplitId,
             null as ${indexWithBackticks}
-        FROM V3_LotEdit le
-        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id
+        FROM V3_LotRemoval lr 
+        LEFT JOIN V3_LotEdit le on le.id = lr.lotEditId
         LEFT JOIN V3_CollectedItem c on c.id = lr.collectedItemId
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        LEFT JOIN V3_BulkSplit bs on bs.id = lr.bulkSplitId
         WHERE le.id = '${id}'
-        GROUP BY c.id
+        GROUP BY lr.id
     `
     const queryQueue = [query]
     const req = { queryQueue }

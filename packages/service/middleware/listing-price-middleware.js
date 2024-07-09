@@ -8,7 +8,7 @@ const createListingPrice = async (req, res, next) => {
         if (!time) return next({ status: 400, message: 'Time of price update required.' })
 
         const userId = req.claims.user_id
-        const listing = await Listing.getListingById(listingId)
+        const listing = await Listing.getById(listingId)
         const { sellerId, proxyCreatorId, listingPrices, listingTime } = listing
         if (userId !== sellerId && userId !== proxyCreatorId) return next({ status: 400, message: 'User does not have permission to update' })
         const newPriceTime = new Date(time)

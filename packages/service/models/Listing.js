@@ -2,6 +2,44 @@ const { executeQueries } = require('../db/index')
 const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { objectsToInsert } = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
+const Transaction = require('./Transaction')
+const LotEdit = require('../models/LotEdit')
+
+const findMostRecentTransfer = async (transactions, listing) => {
+    // for each transaction
+    for (let i=transactions.length-1; i>-1; i--) {
+        const transaction = transactions[i]
+        if (transaction.ownerId || transaction.ownerProxyCreatorId) return transaction
+        // if lot removal
+        if (transaction.lotEditId) {
+            // TODO test complex transaction history (i.e. card that was added to then removed from lot)
+            const lotEditItems = await LotEdit.getById(transaction.lotEditId)
+            const lotTransactions = await Transaction.getByLotId(transaction.lotId)
+            for (let j=lotTransactions.length-1; j>-1; j--) {
+                const lotTransaction = lotTransactions[j]
+                if (lotTransaction.time < transaction.time) {
+
+                }
+            }
+        }
+    }
+    // transfer hasnt been found, find more transactions based on current state
+    if (listing.collectedItemId) {
+        const transactions = await Transaction.getByCollectedItemId(listing.collectedItemId)
+        return await findMostRecentTransfer(transactions, listing)
+        // find itemTransactions before date
+    } else if (listing.bulkSplitId) {
+        // find bulk split transactions before date
+        return false
+    } else if (listing.lotId) {
+        // find lot transactions
+        const transactions = await Transaction.getByLotId(listing.lotId)
+        return await findMostRecentTransfer(transactions, listing)
+    } else {
+        return false
+    }
+    // add transactions to stack, in order
+}
 
 const getWatching = async (watcherId) => {
     const timeWithBackticks = '`time`'
@@ -9,8 +47,6 @@ const getWatching = async (watcherId) => {
     const query = `
         SELECT 
             V3_Listing.id,
-            sellers.user_id as sellerId,
-            sellers.user_name as sellerName,
             watchers.user_id as watcherId,
             V3_CollectedItem.id as collectedItemId,
             V3_BulkSplit.id as bulkSplitId,
@@ -18,7 +54,6 @@ const getWatching = async (watcherId) => {
             V3_Listing.${timeWithBackticks} as listingTime,
             GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks} as listingDescription,
-            V3_Gift.id as giftId,
             V3_Watching.id as watchingId
         FROM V3_Listing
         LEFT JOIN V3_ListingPrice
@@ -31,12 +66,6 @@ const getWatching = async (watcherId) => {
             on Item.id = V3_CollectedItem.itemId
         LEFT JOIN V3_BulkSplit
             on V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Gift
-            ON V3_Gift.collectedItemId = V3_CollectedItem.id
-            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
-            OR V3_Gift.lotId = V3_Lot.id
-        LEFT JOIN users as sellers
-            on sellers.user_id = V3_Gift.recipientId
         LEFT JOIN V3_Watching
             on V3_Watching.listingId = V3_Listing.id
         LEFT JOIN users as watchers
@@ -51,18 +80,27 @@ const getWatching = async (watcherId) => {
         if (err) throw err
         watchedListings = req.results
     })
-    return watchedListings
+    const withAddedSellers = []
+    for (let i=0; i<watchedListings.length; i++) {
+        const listing = watchedListings[i]
+        const mostRecentTransfer = await findMostRecentTransfer([], listing)
+        withAddedSellers.push({
+            ...listing,
+            sellerId: mostRecentTransfer.ownerId,
+            sellerName: mostRecentTransfer.ownerName,
+            proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
+        })
+    }
+    return withAddedSellers
 }
 
-const getListingById = async (listingId) => {
+
+const getById = async (listingId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
             V3_Listing.id,
-            sellers.user_id as sellerId,
-            sellers.user_name as sellerName,
-            sellers.proxyCreatorId,
             V3_CollectedItem.id as collectedItemId,
             V3_CollectedItem.printingId as printingId,
             V3_Appraisal.conditionId as conditionId,
@@ -96,23 +134,23 @@ const getListingById = async (listingId) => {
             on Item.setId = sets_v2.set_v2_id
         LEFT JOIN V3_BulkSplit
             ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Gift
-            ON V3_Gift.collectedItemId = V3_CollectedItem.id
-            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
-            OR V3_Gift.lotId = V3_Lot.id
-        LEFT JOIN users as sellers
-            on sellers.user_id = V3_Gift.recipientId
         WHERE V3_Listing.id = '${listingId}'
-        Group by V3_CollectedItem.id;
+        Group by V3_Listing.id;
     `
     const req = { queryQueue: [query] }
     const res = {}
     let listing
     await executeQueries(req, res, (err) => {
         if (err) throw err
-        listing = req.results
+        listing = req.results[0]
     })
-    return listing[0]
+    const mostRecentTransfer = await findMostRecentTransfer([], listing)
+    return {
+        ...listing,
+        sellerId: mostRecentTransfer.ownerId,
+        sellerName: mostRecentTransfer.ownerName,
+        proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
+    }
 }
 
 const formatListingWithLot = (listing) => {
@@ -323,6 +361,7 @@ const createExternal = async (listing, watcherId) => {
                 id: lotInsertId,
                 lotEditId,
                 collectedItemId,
+                bulkSplitId: null,
                 index
             }
             formattedLotInsertsToInsert.push(formattedLotInsert)
@@ -334,6 +373,7 @@ const createExternal = async (listing, watcherId) => {
             const formattedLotInsert = {
                 id: lotInsertId,
                 lotEditId,
+                collectedItemId: null,
                 bulkSplitId,
                 index
             }
@@ -488,4 +528,10 @@ const createPrice = async ({ listingId, price }) => {
     return id
 }
 
-module.exports = { getWatching, createExternal, convertSaleItemsToListings, getListingById, createPrice }
+module.exports = { 
+    getWatching, 
+    createExternal, 
+    convertSaleItemsToListings, 
+    getById, 
+    createPrice 
+}
