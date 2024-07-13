@@ -239,16 +239,20 @@ const formatListing = (listing) => {
     return formattedListing
 }
 
-const convertLocalToUTC = (local) => {
-    const utcDate = new Date(local)
+const prepZuluForDB = (local) => {
     return`${
-        utcDate.getUTCFullYear()}-${
-        (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
-        utcDate.getUTCDate().toString().padStart(2, '0')}T${
-        utcDate.getUTCHours().toString().padStart(2, '0')}:${
-        utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
-        utcDate.getUTCSeconds().toString().padStart(2, '0')
-    }`
+        local.getUTCFullYear()}-${
+        (local.getUTCMonth() + 1).toString().padStart(2, '0')}-${
+        local.getUTCDate().toString().padStart(2, '0')}T${
+        local.getUTCHours().toString().padStart(2, '0')}:${
+        local.getUTCMinutes().toString().padStart(2, '0')}:${
+        local.getUTCSeconds().toString().padStart(2, '0')}.${
+        local.getMilliseconds().toString().padStart(3, '0')}`
+}
+const adjustISOHours = (stringDate, adjustment) => {
+    const oldDate = new Date(stringDate)
+    oldDate.setHours(oldDate.getHours() + adjustment)
+    return oldDate.toISOString()
 }
 
 const createExternal = async (listing, watcherId) => {
@@ -256,8 +260,11 @@ const createExternal = async (listing, watcherId) => {
     if ((listing.items.length + listing.bulkSplits.length) === 0) {
         throw new Error("No item(s) specified within listing.")
     }
-    const now = new Date()
+    const formattedImports = []
     // create collected items
+    const isLot = listing.items.length + listing.bulkSplits.length > 1
+    let importTime = adjustISOHours(listing.time, -1)
+    if (isLot) importTime = adjustISOHours(listing.time, -2)
     if (listing.items.length > 0) {
         const collectedItemsToInsert = []
         const appraisalsToInsert = []
@@ -270,21 +277,23 @@ const createExternal = async (listing, watcherId) => {
                 printingId: item.printing
             }
             const appraisalId = uuidV4()
+            // after listing created, user can create their own appraisal
             const formattedAppraisal = {
                 id: appraisalId,
                 collectedItemId,
                 conditionId: item.condition,
                 appraiserId: listing.sellerId,
-                time: listing.time
+                time: importTime
             }
             if (item.note) {
                 const itemNoteId = uuidV4()
+                // all notes are taken by the proxyCreator
                 const formattedCollectedItemNote = {
                     id: itemNoteId, 
                     collectedItemId, 
                     takerId: watcherId,
                     note: item.note,
-                    time: convertLocalToUTC(now)
+                    time: importTime
                 }
 
                 collectedItemNotesToInsert.push(formattedCollectedItemNote)
@@ -292,6 +301,16 @@ const createExternal = async (listing, watcherId) => {
             collectedItemsToInsert.push(formattedItem)
             appraisalsToInsert.push(formattedAppraisal)
             listing.items[idx] = { ...item, collectedItemId }
+            // create import for item
+            const importId = uuidV4();
+            const formattedImport = {
+                id: importId,
+                importerId: listing.sellerId,
+                collectedItemId,
+                bulkSplitId: null,
+                time: importTime
+            }
+            formattedImports.push(formattedImport)
         })
         queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
         queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
@@ -318,7 +337,7 @@ const createExternal = async (listing, watcherId) => {
                     bulkSplitId, 
                     takerId: watcherId,
                     note: listing.bulkSplits[i].note,
-                    time: convertLocalToUTC(now)
+                    time: importTime
                 }
                 bulkSplitNotesToInsert.push(formattedBulkSplitNote)
             }             
@@ -326,8 +345,18 @@ const createExternal = async (listing, watcherId) => {
             const bulkSplitLabels = await fetchOrCreateLabelIds(listing.bulkSplits[i])
             bulkSplitsToInsert.push(formattedBulkSplit)
             bulkSplitLabelsToInsert.push(...bulkSplitLabels)
+            // create import for split
+            const importId = uuidV4();
+            const formattedImport = {
+                id: importId,
+                importerId: listing.sellerId,
+                collectedItemId: null,
+                bulkSplitId,
+                time: importTime
+            }
+            formattedImports.push(formattedImport)
         }
-        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)  
+        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)
         if (bulkSplitLabelsToInsert.length > 0) {
             queryQueue.push(`${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`)  
         }
@@ -335,25 +364,24 @@ const createExternal = async (listing, watcherId) => {
             queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`)  
         }
     }
+    queryQueue.push(`${objectsToInsert(formattedImports, 'V3_Import')};`)
+
     let collectedItemId = undefined
     let bulkSplitId = undefined
     let lotId = undefined
-    // if lot
-    if ((listing.items.length + listing.bulkSplits.length) > 1) {
+    if (isLot) {
+        const lotEditTime = adjustISOHours(listing.time, -1)
         const formattedLotInsertsToInsert = []
-        // create V3_Lot
         lotId = uuidV4();
         const formattedLot = {
             id: lotId
         }
-        // create V3_LotEdit
         const lotEditId = uuidV4()
         const formattedLotEdit = {
             id: lotEditId,
             lotId,
-            time: listing.time
+            time: lotEditTime
         }
-        // create V3_LotInsert
         listing.items.forEach((item, index) => {
             const { collectedItemId } = item
             const lotInsertId = uuidV4()
@@ -387,18 +415,6 @@ const createExternal = async (listing, watcherId) => {
     } else if (listing.bulkSplits.length > 0) {
         bulkSplitId = listing.bulkSplits[0].bulkSplitId
     }
-
-    // create gift
-    const giftId = uuidV4();
-    const formattedGift = {
-        id: giftId,
-        recipientId: listing.sellerId,
-        collectedItemId,
-        bulkSplitId,
-        lotId,
-        time: listing.time
-    }
-    queryQueue.push(`${objectsToInsert([formattedGift], 'V3_Gift')};`)
     // create listing
     const listingId = uuidV4()
     const formattedListing = {
