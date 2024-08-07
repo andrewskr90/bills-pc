@@ -54,7 +54,6 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                     const { id: lotEditId } = sortedLotEdits[0]
                     const inserts = await LotInsert.selectByFilter({ lotEditId })
                     const { collectedItemId, bulkSplitId } = inserts[0]
-                    console.log(inserts[0])
                     subject = { collectedItemId, bulkSplitId, timeCutoff: subject.timeCutoff }
                 } else {
                     throw new Error('broken transaction chain')
