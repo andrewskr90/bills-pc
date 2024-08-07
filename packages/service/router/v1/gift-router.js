@@ -1,31 +1,33 @@
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { createLotEdit, patchLotEdit, selectLotEdits } = require('../../middleware/lot-edit-middleware')
+const { patchGift, selectGifts, deleteGiftById } = require('../../middleware/gift-middleware')
 
-const lotEditRouter = require('express').Router()
+const giftRouter = require('express').Router()
 
-lotEditRouter.post('/', 
-    verifyCookie,
-    decodeSessionToken,
-    createLotEdit,
-    (req, res, next) => {
-        res.status(201).json(req.results)
-})
-
-lotEditRouter.patch('/', 
+giftRouter.patch('/', 
     verifyCookie,
     decodeSessionToken,
     gymLeaderOnly,
-    patchLotEdit,
+    patchGift,
     (req, res, next) => {
         res.status(200).json(req.results)
 })
-lotEditRouter.get('/', 
+
+giftRouter.get('/', 
     verifyCookie,
     decodeSessionToken,
     gymLeaderOnly,
-    selectLotEdits,
+    selectGifts,
     (req, res) => {
         res.status(200).json(req.results)
 })
 
-module.exports = lotEditRouter
+giftRouter.delete('/:id', 
+    verifyCookie,
+    decodeSessionToken,
+    gymLeaderOnly,
+    deleteGiftById,
+    (req, res) => {
+        res.status(200).json(req.results)
+})
+
+module.exports = giftRouter

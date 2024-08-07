@@ -3,42 +3,127 @@ const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { objectsToInsert } = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
 const Transaction = require('./Transaction')
+const Gift = require('./Gift')
 const LotEdit = require('../models/LotEdit')
+const LotInsert = require('../models/LotInsert')
+const Import = require('../models/Import')
 
-const findMostRecentTransfer = async (transactions, listing) => {
-    // for each transaction
-    for (let i=transactions.length-1; i>-1; i--) {
-        const transaction = transactions[i]
-        if (transaction.ownerId || transaction.ownerProxyCreatorId) return transaction
-        // if lot removal
-        if (transaction.lotEditId) {
-            // TODO test complex transaction history (i.e. card that was added to then removed from lot)
-            const lotEditItems = await LotEdit.getById(transaction.lotEditId)
-            const lotTransactions = await Transaction.getByLotId(transaction.lotId)
-            for (let j=lotTransactions.length-1; j>-1; j--) {
-                const lotTransaction = lotTransactions[j]
-                if (lotTransaction.time < transaction.time) {
+const previousTransaction = async (subject) => {
 
+    const timeCutoff = subject.timeCutoff
+
+    if (subject.collectedItemId && subject.lotId) {
+        throw new Error('set up collectedItemId and lotId prev trans')
+    } else if (subject.bulkSplitId && subject.lotId) {
+        throw new Error('set up bulkSplitId and lotId prev trans')
+    } else if (subject.collectedItemId) {
+        const transactions = await Transaction.selectForCollectedItem(subject.collectedItemId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else if (subject.bulkSplitId) {
+        const transactions = await Transaction.selectForBulkSplit(subject.bulkSplitId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else if (subject.lotId) {
+        const transactions = await Transaction.selectForLot(subject.lotId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else {
+        throw new Error('sad path previousTransaction')
+    }
+}
+
+const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime) => {
+    let sellerId = undefined
+    let sellerName = undefined
+    let ownerProxyCreatorId = undefined
+    if (lotId) {
+        let subject = { lotId: lotId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                if (subject.lotId) {
+                    const lotEdits = await LotEdit.selectByFilter({ lotId: subject.lotId })
+                    const sortedLotEdits = lotEdits.sort((a, b) => {
+                        const aTime = new Date(a.time)
+                        const bTime = new Date(b.time)
+                        if (aTime < bTime) return -1
+                        if (aTime > bTime) return 1
+                        return 0
+                    })
+                    const { id: lotEditId } = sortedLotEdits[0]
+                    const inserts = await LotInsert.selectByFilter({ lotEditId })
+                    const { collectedItemId, bulkSplitId } = inserts[0]
+                    console.log(inserts[0])
+                    subject = { collectedItemId, bulkSplitId, timeCutoff: subject.timeCutoff }
+                } else {
+                    throw new Error('broken transaction chain')
                 }
+            }else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                const imp = await Import.getById(prev.importId)
+                sellerId = imp.importerId
+                sellerName = imp.importerName
+                ownerProxyCreatorId = imp.proxyCreatorId
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
+            }
+        }
+    } else if (collectedItemId) {
+        let subject = { collectedItemId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                throw new Error('broken transaction chain')
+            } else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                const imp = await Import.getById(prev.importId)
+                sellerId = imp.importerId
+                sellerName = imp.importerName
+                ownerProxyCreatorId = imp.proxyCreatorId
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
+            }
+        }
+    } else if (bulkSplitId) {
+        let subject = { bulkSplitId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                throw new Error('broken transaction chain')
+            } else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                throw new Error('set up lot import id')
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
             }
         }
     }
-    // transfer hasnt been found, find more transactions based on current state
-    if (listing.collectedItemId) {
-        const transactions = await Transaction.getByCollectedItemId(listing.collectedItemId)
-        return await findMostRecentTransfer(transactions, listing)
-        // find itemTransactions before date
-    } else if (listing.bulkSplitId) {
-        // find bulk split transactions before date
-        return false
-    } else if (listing.lotId) {
-        // find lot transactions
-        const transactions = await Transaction.getByLotId(listing.lotId)
-        return await findMostRecentTransfer(transactions, listing)
-    } else {
-        return false
-    }
-    // add transactions to stack, in order
+    return { sellerId, sellerName, ownerProxyCreatorId }
 }
 
 const getWatching = async (watcherId) => {
@@ -83,13 +168,16 @@ const getWatching = async (watcherId) => {
     const withAddedSellers = []
     for (let i=0; i<watchedListings.length; i++) {
         const listing = watchedListings[i]
-        const mostRecentTransfer = await findMostRecentTransfer([], listing)
-        withAddedSellers.push({
-            ...listing,
-            sellerId: mostRecentTransfer.ownerId,
-            sellerName: mostRecentTransfer.ownerName,
-            proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
-        })
+        const { lotId, collectedItemId, bulkSplitId } = listing
+        const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
+        withAddedSellers.push({ ...listing, sellerId, sellerName, ownerProxyCreatorId })
+        // const mostRecentTransfer = await findMostRecentTransfer([], { collectedItemId: listing.collectedItemId, bulkSplitId: listing.bulkSplitId, lotId: listing.lotId })
+        // withAddedSellers.push({
+        //     ...listing,
+        //     sellerId: mostRecentTransfer.ownerId,
+        //     sellerName: mostRecentTransfer.ownerName,
+        //     proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
+        // })
     }
     return withAddedSellers
 }
@@ -144,12 +232,13 @@ const getById = async (listingId) => {
         if (err) throw err
         listing = req.results[0]
     })
-    const mostRecentTransfer = await findMostRecentTransfer([], listing)
+    const { lotId, collectedItemId, bulkSplitId } = listing
+    const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
     return {
         ...listing,
-        sellerId: mostRecentTransfer.ownerId,
-        sellerName: mostRecentTransfer.ownerName,
-        proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
+        sellerId,
+        sellerName,
+        ownerProxyCreatorId
     }
 }
 
@@ -525,15 +614,15 @@ const convertSaleItemsToListings = async (listing) => {
     return listingId
 }
 
-const createPrice = async ({ listingId, price }) => {
+const createPrice = async ({ listingId, price, time }) => {
     const queryQueue = []
-    const now = new Date()
+    const priceTime = new Date(time)
     const id = uuidV4()
     const listingPriceToInsert = {
         id,
         listingId,
         price,
-        time: convertLocalToUTC(now)
+        time: prepZuluForDB(priceTime)
     }
     queryQueue.push(`${objectsToInsert([listingPriceToInsert], 'V3_ListingPrice')};`)
     const req = { queryQueue }
@@ -549,5 +638,6 @@ module.exports = {
     createExternal, 
     convertSaleItemsToListings, 
     getById, 
-    createPrice 
+    createPrice,
+    previousOwner
 }

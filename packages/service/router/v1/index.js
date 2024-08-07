@@ -27,6 +27,9 @@ const skuRouter = require('./sku-router')
 const tcgpMarketPriceRouter = require('./tcgp-market-price-router')
 const listingPriceRouter = require('./listing-price-router')
 const lotEditRouter = require('./lot-edit-router')
+const giftRouter = require('./gift-router')
+const importRouter = require('./import-router')
+const lotInsertRouter = require('./lot-insert-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -55,6 +58,9 @@ v1Router.use('/skus', skuRouter)
 v1Router.use('/tcgp-market-prices', tcgpMarketPriceRouter)
 v1Router.use('/listing-prices', listingPriceRouter)
 v1Router.use('/lot-edits', lotEditRouter)
+v1Router.use('/gifts', giftRouter)
+v1Router.use('/imports', importRouter)
+v1Router.use('/lot-inserts', lotInsertRouter)
 
 
 

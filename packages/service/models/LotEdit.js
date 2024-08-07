@@ -1,6 +1,6 @@
 const { v4: uuidV4 } = require('uuid')
 const { executeQueries } = require('../db')
-const { objectsToInsert } = require('../utils/queryFormatters')
+const { objectsToInsert, filterConcatinated } = require('../utils/queryFormatters')
 
 const getById = async (id) => {
     const indexWithBackticks = '`index`'
@@ -157,4 +157,32 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
     return lotEditId
 }
 
-module.exports= { getById, createForExternal }
+const selectByFilter = async (filter) => {
+    const query = `SELECT * FROM V3_LotEdit WHERE ${filterConcatinated(filter)}`
+    const req = { queryQueue: [query] }
+    const res = {}
+    let results
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        results = req.results
+    })
+    return results
+}
+
+const patchByFilter = async (filter, data) => {
+    const query = `
+        UPDATE V3_LotEdit 
+        SET ${filterConcatinated(data)}
+        WHERE ${filterConcatinated(filter)}
+    ;`
+    const req = { queryQueue: [query] }
+    const res = {}
+    let results
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        results = req.results
+    })
+    return results
+}
+
+module.exports= { getById, createForExternal, selectByFilter, patchByFilter }
