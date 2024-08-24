@@ -4,6 +4,7 @@ const SaleProduct = require('../models/SaleProduct')
 const SaleCard = require('../models/SaleCard')
 const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
+const Portfolio = require('../models/Portfolio')
 const { formatSaleFromPortfolioResult } = require('../utils/sale')
 
 const formatInventory = (inventory) => {
@@ -586,11 +587,19 @@ const combineSplitsWithSales = async (req, res, next) => {
 const getPortfolio = async (req, res, next) => {
     const userId = req.claims.user_id
     try {
-        req.saleCards = await SaleCard.select(userId)
-        req.saleProducts = await SaleProduct.select(userId)
-        req.saleBulkSplits = await SaleBulkSplit.select(userId)
-        req.sortingSplits = await SortingSplit.select(userId)
-        req.sortingGems = await SortingGem.select(userId)
+        const portfolio = await Portfolio.getByUserId(userId)
+
+        
+
+
+
+
+        console.log(portfolio)
+        // req.saleCards = await SaleCard.select(userId)
+        // req.saleProducts = await SaleProduct.select(userId)
+        // req.saleBulkSplits = await SaleBulkSplit.select(userId)
+        // req.sortingSplits = await SortingSplit.select(userId)
+        // req.sortingGems = await SortingGem.select(userId)
         next()
     } catch (err) {
         next(err)
