@@ -6,7 +6,6 @@ portfolioRouter.get('/',
     verifyCookie,
     decodeSessionToken,
     getPortfolio,
-    evaluatePortfolio,
     async (req, res, next) => {
         res.status(200).json(req.results)
 })

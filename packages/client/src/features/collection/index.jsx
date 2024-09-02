@@ -45,7 +45,7 @@ const Collection = (props) => {
             <Routes>
                 <Route 
                     path='/assets/*'
-                    element={<PortfolioAssets portfolio={portfolio} userClaims={userClaims} />}
+                    element={<PortfolioAssets portfolio={portfolio} />}
                 />
                 <Route 
                     path='/transactions/*'

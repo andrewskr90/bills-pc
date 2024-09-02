@@ -32,20 +32,41 @@ const SelectItems = (props) => {
     const navigate = useNavigate()
 
     const handleAddItem = (item, printing) => {
-        if (lotItemCounts[item.id]) {
-            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count +1, printing } })
-            else setLotItemCounts({ ...lotItemCounts, [item.id]: { ...item, count: 1, printing } })
-        }
-        else setLotItemCounts({ ...lotItemCounts, [item.id]: { ...item, count: 1, printing } })
+        setLotItemCounts({
+            ...lotItemCounts,
+            [item.id]: lotItemCounts[item.id] ? lotItemCounts[item.id].count ? {
+                ...lotItemCounts[item.id],
+                count: {
+                    ...lotItemCounts[item.id].count,
+                    [printing]: lotItemCounts[item.id].count[printing] ? lotItemCounts[item.id].count[printing] + 1 : 1
+                }
+            } : {
+                ...lotItemCounts[item.id],
+                count: { [printing]: 1 }
+            } : {
+                ...item,
+                count: { [printing]: 1 },
+                activePrinting: printing
+            }
+        })
     }
     const handleSubtractItem = (item, printing) => {
         if (lotItemCounts[item.id]) {
-            if (lotItemCounts[item.id].count) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], count: lotItemCounts[item.id].count - 1, printing } })
+            if (lotItemCounts[item.id].count) {
+                if (lotItemCounts[item.id].count[printing]) {
+                    setLotItemCounts({ 
+                        ...lotItemCounts, 
+                        [item.id]: { 
+                            ...lotItemCounts[item.id], 
+                            count: {
+                                ...lotItemCounts[item.id].count,
+                                [printing]: lotItemCounts[item.id].count[printing] - 1 
+                            }
+                        } 
+                    })
+                }
+            }
         } 
-    }
-
-    const handleChangePrinting = (item, printing) => {
-        if (lotItemCounts[item.id]) setLotItemCounts({ ...lotItemCounts, [item.id]: { ...lotItemCounts[item.id], printing }})
     }
 
     const submitSearch = (relayedSearch) => {
@@ -68,37 +89,70 @@ const SelectItems = (props) => {
     const convertToItemArray = () => {
         return Object.keys(lotItemCounts).reduce((prev, itemId) => {
             const cur = lotItemCounts[itemId]
-            if (cur.count === 0) return [...prev]
-            if (cur.count > 1) {
-                const items = []
-                for (let i=0; i<cur.count; i++) {
-                    items.push(cur)
-                }
-                return [...prev, ...items]
-            }
-            return [...prev, cur]
+            return [
+                ...prev,
+                ...cur.count ? Object.keys(cur.count).reduce((prev, printingId) => {
+                    if (cur.count[printingId]) {
+                        const items = []
+                        for (let i=0; i<cur.count[printingId]; i++) {
+                            items.push({ ...cur, printing: printingId })
+                        }
+                        return [...prev, ...items]
+                    } else {
+                        return [...prev]
+                    }
+                }, []) : []
+            ]
         }, [])
     }
 
-    const handleFindCount = (item_id) => {
-        return lotItemCounts[item_id] ? lotItemCounts[item_id].count : undefined
+    const handleFindCount = (item_id, selectedPrinting) => {
+        return lotItemCounts[item_id] 
+            ? lotItemCounts[item_id].count
+                ? lotItemCounts[item_id].count[selectedPrinting] 
+                    ? lotItemCounts[item_id].count[selectedPrinting] 
+                    : undefined 
+                : undefined
+            : undefined
     }
-    const handleFindPrinting = (item_id) => {
-        return lotItemCounts[item_id] ? lotItemCounts[item_id].printing : undefined
+
+    const handleChangePrinting = (item, printing) => {
+        setLotItemCounts({
+            ...lotItemCounts,
+            [item.id]: {
+                ...item,
+                ...lotItemCounts[item.id],
+                activePrinting: printing
+            }
+        })
     }
+   
     const countConfig = {
         handleAddItem,
         handleSubtractItem,
         handleChangePrinting,
         handleFindCount,
-        handleFindPrinting
     }
 
     return (<div className='selectItems page'>
         <Banner titleText={'Add Lot'} handleClickBackArrow={handleClickBackArrow} />
-        <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => lotItemCounts[itemId].count + prev, 0)}</p>
+        <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
+            if (lotItemCounts[itemId].count) {
+                return Object.keys(lotItemCounts[itemId].count).reduce((prev, printingId) => {
+                    return lotItemCounts[itemId].count[printingId] + prev
+                }, 0) + prev
+            }
+            return prev
+        }, 0)}</p>
         <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
-            return (lotItemCounts[itemId].marketValue[lotItemCounts[itemId].printing] * lotItemCounts[itemId].count) + prev
+            if (lotItemCounts[itemId]) {
+                if (lotItemCounts[itemId].count) {
+                    return Object.keys(lotItemCounts[itemId].count).reduce((prev, printingId) => {
+                        return (lotItemCounts[itemId].marketValue[printingId] * lotItemCounts[itemId].count[printingId]) + prev
+                    }, 0) + prev
+                }
+            }
+            return prev
             }, 0)}
         </p>
         <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>

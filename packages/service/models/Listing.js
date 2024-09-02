@@ -2,6 +2,128 @@ const { executeQueries } = require('../db/index')
 const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { objectsToInsert } = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
+const Transaction = require('./Transaction')
+const Gift = require('./Gift')
+const LotEdit = require('../models/LotEdit')
+const LotInsert = require('../models/LotInsert')
+const Import = require('../models/Import')
+
+const previousTransaction = async (subject) => {
+
+    const timeCutoff = subject.timeCutoff
+
+    if (subject.collectedItemId && subject.lotId) {
+        throw new Error('set up collectedItemId and lotId prev trans')
+    } else if (subject.bulkSplitId && subject.lotId) {
+        throw new Error('set up bulkSplitId and lotId prev trans')
+    } else if (subject.collectedItemId) {
+        const transactions = await Transaction.selectForCollectedItem(subject.collectedItemId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else if (subject.bulkSplitId) {
+        const transactions = await Transaction.selectForBulkSplit(subject.bulkSplitId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else if (subject.lotId) {
+        const transactions = await Transaction.selectForLot(subject.lotId, 1, timeCutoff)
+        if (transactions.length === 0) return undefined
+        return transactions[transactions.length-1]
+    } else {
+        throw new Error('sad path previousTransaction')
+    }
+}
+
+const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime) => {
+    let sellerId = undefined
+    let sellerName = undefined
+    let ownerProxyCreatorId = undefined
+    if (lotId) {
+        let subject = { lotId: lotId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                if (subject.lotId) {
+                    const lotEdits = await LotEdit.selectByFilter({ lotId: subject.lotId })
+                    const sortedLotEdits = lotEdits.sort((a, b) => {
+                        const aTime = new Date(a.time)
+                        const bTime = new Date(b.time)
+                        if (aTime < bTime) return -1
+                        if (aTime > bTime) return 1
+                        return 0
+                    })
+                    const { id: lotEditId } = sortedLotEdits[0]
+                    const inserts = await LotInsert.selectByFilter({ lotEditId })
+                    const { collectedItemId, bulkSplitId } = inserts[0]
+                    subject = { collectedItemId, bulkSplitId, timeCutoff: subject.timeCutoff }
+                } else {
+                    throw new Error('broken transaction chain')
+                }
+            }else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                const imp = await Import.getById(prev.importId)
+                sellerId = imp.importerId
+                sellerName = imp.importerName
+                ownerProxyCreatorId = imp.proxyCreatorId
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
+            }
+        }
+    } else if (collectedItemId) {
+        let subject = { collectedItemId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                throw new Error('broken transaction chain')
+            } else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                const imp = await Import.getById(prev.importId)
+                sellerId = imp.importerId
+                sellerName = imp.importerName
+                ownerProxyCreatorId = imp.proxyCreatorId
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
+            }
+        }
+    } else if (bulkSplitId) {
+        let subject = { bulkSplitId, timeCutoff: startTime.toISOString() }
+        while (!sellerId) {
+            const prev = await previousTransaction(subject)
+            if (!prev) {
+                throw new Error('broken transaction chain')
+            } else if (prev.giftId) {
+                const gift = await Gift.getById(prev.giftId)
+                sellerId = gift.recipientId
+                sellerName = gift.recipientName
+                ownerProxyCreatorId = gift.proxyCreatorId
+            } else if (prev.importId) {
+                throw new Error('set up lot import id')
+            } else if (prev.saleId) {
+                throw new Error('set up  lot sale id')
+            } else if (prev.lotEditId) {
+                subject = { ...subject, timeCutoff: prev.time.toISOString() }
+            } else {
+                throw new Error('prev transaction not accounted for.')
+            }
+        }
+    }
+    return { sellerId, sellerName, ownerProxyCreatorId }
+}
 
 const getWatching = async (watcherId) => {
     const timeWithBackticks = '`time`'
@@ -9,8 +131,6 @@ const getWatching = async (watcherId) => {
     const query = `
         SELECT 
             V3_Listing.id,
-            sellers.user_id as sellerId,
-            sellers.user_name as sellerName,
             watchers.user_id as watcherId,
             V3_CollectedItem.id as collectedItemId,
             V3_BulkSplit.id as bulkSplitId,
@@ -18,7 +138,6 @@ const getWatching = async (watcherId) => {
             V3_Listing.${timeWithBackticks} as listingTime,
             GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks} as listingDescription,
-            V3_Gift.id as giftId,
             V3_Watching.id as watchingId
         FROM V3_Listing
         LEFT JOIN V3_ListingPrice
@@ -31,12 +150,6 @@ const getWatching = async (watcherId) => {
             on Item.id = V3_CollectedItem.itemId
         LEFT JOIN V3_BulkSplit
             on V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Gift
-            ON V3_Gift.collectedItemId = V3_CollectedItem.id
-            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
-            OR V3_Gift.lotId = V3_Lot.id
-        LEFT JOIN users as sellers
-            on sellers.user_id = V3_Gift.recipientId
         LEFT JOIN V3_Watching
             on V3_Watching.listingId = V3_Listing.id
         LEFT JOIN users as watchers
@@ -51,18 +164,30 @@ const getWatching = async (watcherId) => {
         if (err) throw err
         watchedListings = req.results
     })
-    return watchedListings
+    const withAddedSellers = []
+    for (let i=0; i<watchedListings.length; i++) {
+        const listing = watchedListings[i]
+        const { lotId, collectedItemId, bulkSplitId } = listing
+        const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
+        withAddedSellers.push({ ...listing, sellerId, sellerName, ownerProxyCreatorId })
+        // const mostRecentTransfer = await findMostRecentTransfer([], { collectedItemId: listing.collectedItemId, bulkSplitId: listing.bulkSplitId, lotId: listing.lotId })
+        // withAddedSellers.push({
+        //     ...listing,
+        //     sellerId: mostRecentTransfer.ownerId,
+        //     sellerName: mostRecentTransfer.ownerName,
+        //     proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
+        // })
+    }
+    return withAddedSellers
 }
 
-const getListingById = async (listingId) => {
+
+const getById = async (listingId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
             V3_Listing.id,
-            sellers.user_id as sellerId,
-            sellers.user_name as sellerName,
-            sellers.proxyCreatorId,
             V3_CollectedItem.id as collectedItemId,
             V3_CollectedItem.printingId as printingId,
             V3_Appraisal.conditionId as conditionId,
@@ -96,23 +221,24 @@ const getListingById = async (listingId) => {
             on Item.setId = sets_v2.set_v2_id
         LEFT JOIN V3_BulkSplit
             ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Gift
-            ON V3_Gift.collectedItemId = V3_CollectedItem.id
-            OR V3_Gift.bulkSplitId = V3_BulkSplit.id
-            OR V3_Gift.lotId = V3_Lot.id
-        LEFT JOIN users as sellers
-            on sellers.user_id = V3_Gift.recipientId
         WHERE V3_Listing.id = '${listingId}'
-        Group by V3_CollectedItem.id;
+        Group by V3_Listing.id;
     `
     const req = { queryQueue: [query] }
     const res = {}
     let listing
     await executeQueries(req, res, (err) => {
         if (err) throw err
-        listing = req.results
+        listing = req.results[0]
     })
-    return listing[0]
+    const { lotId, collectedItemId, bulkSplitId } = listing
+    const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
+    return {
+        ...listing,
+        sellerId,
+        sellerName,
+        ownerProxyCreatorId
+    }
 }
 
 const formatListingWithLot = (listing) => {
@@ -201,16 +327,20 @@ const formatListing = (listing) => {
     return formattedListing
 }
 
-const convertLocalToUTC = (local) => {
-    const utcDate = new Date(local)
+const prepZuluForDB = (local) => {
     return`${
-        utcDate.getUTCFullYear()}-${
-        (utcDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${
-        utcDate.getUTCDate().toString().padStart(2, '0')}T${
-        utcDate.getUTCHours().toString().padStart(2, '0')}:${
-        utcDate.getUTCMinutes().toString().padStart(2, '0')}:${
-        utcDate.getUTCSeconds().toString().padStart(2, '0')
-    }`
+        local.getUTCFullYear()}-${
+        (local.getUTCMonth() + 1).toString().padStart(2, '0')}-${
+        local.getUTCDate().toString().padStart(2, '0')}T${
+        local.getUTCHours().toString().padStart(2, '0')}:${
+        local.getUTCMinutes().toString().padStart(2, '0')}:${
+        local.getUTCSeconds().toString().padStart(2, '0')}.${
+        local.getMilliseconds().toString().padStart(3, '0')}`
+}
+const adjustISOHours = (stringDate, adjustment) => {
+    const oldDate = new Date(stringDate)
+    oldDate.setHours(oldDate.getHours() + adjustment)
+    return oldDate.toISOString()
 }
 
 const createExternal = async (listing, watcherId) => {
@@ -218,8 +348,11 @@ const createExternal = async (listing, watcherId) => {
     if ((listing.items.length + listing.bulkSplits.length) === 0) {
         throw new Error("No item(s) specified within listing.")
     }
-    const now = new Date()
+    const formattedImports = []
     // create collected items
+    const isLot = listing.items.length + listing.bulkSplits.length > 1
+    let importTime = adjustISOHours(listing.time, -1)
+    if (isLot) importTime = adjustISOHours(listing.time, -2)
     if (listing.items.length > 0) {
         const collectedItemsToInsert = []
         const appraisalsToInsert = []
@@ -232,21 +365,23 @@ const createExternal = async (listing, watcherId) => {
                 printingId: item.printing
             }
             const appraisalId = uuidV4()
+            // after listing created, user can create their own appraisal
             const formattedAppraisal = {
                 id: appraisalId,
                 collectedItemId,
                 conditionId: item.condition,
                 appraiserId: listing.sellerId,
-                time: listing.time
+                time: importTime
             }
             if (item.note) {
                 const itemNoteId = uuidV4()
+                // all notes are taken by the proxyCreator
                 const formattedCollectedItemNote = {
                     id: itemNoteId, 
                     collectedItemId, 
                     takerId: watcherId,
                     note: item.note,
-                    time: convertLocalToUTC(now)
+                    time: importTime
                 }
 
                 collectedItemNotesToInsert.push(formattedCollectedItemNote)
@@ -254,6 +389,16 @@ const createExternal = async (listing, watcherId) => {
             collectedItemsToInsert.push(formattedItem)
             appraisalsToInsert.push(formattedAppraisal)
             listing.items[idx] = { ...item, collectedItemId }
+            // create import for item
+            const importId = uuidV4();
+            const formattedImport = {
+                id: importId,
+                importerId: listing.sellerId,
+                collectedItemId,
+                bulkSplitId: null,
+                time: importTime
+            }
+            formattedImports.push(formattedImport)
         })
         queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
         queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
@@ -280,7 +425,7 @@ const createExternal = async (listing, watcherId) => {
                     bulkSplitId, 
                     takerId: watcherId,
                     note: listing.bulkSplits[i].note,
-                    time: convertLocalToUTC(now)
+                    time: importTime
                 }
                 bulkSplitNotesToInsert.push(formattedBulkSplitNote)
             }             
@@ -288,8 +433,18 @@ const createExternal = async (listing, watcherId) => {
             const bulkSplitLabels = await fetchOrCreateLabelIds(listing.bulkSplits[i])
             bulkSplitsToInsert.push(formattedBulkSplit)
             bulkSplitLabelsToInsert.push(...bulkSplitLabels)
+            // create import for split
+            const importId = uuidV4();
+            const formattedImport = {
+                id: importId,
+                importerId: listing.sellerId,
+                collectedItemId: null,
+                bulkSplitId,
+                time: importTime
+            }
+            formattedImports.push(formattedImport)
         }
-        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)  
+        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)
         if (bulkSplitLabelsToInsert.length > 0) {
             queryQueue.push(`${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`)  
         }
@@ -297,25 +452,24 @@ const createExternal = async (listing, watcherId) => {
             queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`)  
         }
     }
+    queryQueue.push(`${objectsToInsert(formattedImports, 'V3_Import')};`)
+
     let collectedItemId = undefined
     let bulkSplitId = undefined
     let lotId = undefined
-    // if lot
-    if ((listing.items.length + listing.bulkSplits.length) > 1) {
+    if (isLot) {
+        const lotEditTime = adjustISOHours(listing.time, -1)
         const formattedLotInsertsToInsert = []
-        // create V3_Lot
         lotId = uuidV4();
         const formattedLot = {
             id: lotId
         }
-        // create V3_LotEdit
         const lotEditId = uuidV4()
         const formattedLotEdit = {
             id: lotEditId,
             lotId,
-            time: listing.time
+            time: lotEditTime
         }
-        // create V3_LotInsert
         listing.items.forEach((item, index) => {
             const { collectedItemId } = item
             const lotInsertId = uuidV4()
@@ -323,6 +477,7 @@ const createExternal = async (listing, watcherId) => {
                 id: lotInsertId,
                 lotEditId,
                 collectedItemId,
+                bulkSplitId: null,
                 index
             }
             formattedLotInsertsToInsert.push(formattedLotInsert)
@@ -334,6 +489,7 @@ const createExternal = async (listing, watcherId) => {
             const formattedLotInsert = {
                 id: lotInsertId,
                 lotEditId,
+                collectedItemId: null,
                 bulkSplitId,
                 index
             }
@@ -347,18 +503,6 @@ const createExternal = async (listing, watcherId) => {
     } else if (listing.bulkSplits.length > 0) {
         bulkSplitId = listing.bulkSplits[0].bulkSplitId
     }
-
-    // create gift
-    const giftId = uuidV4();
-    const formattedGift = {
-        id: giftId,
-        recipientId: listing.sellerId,
-        collectedItemId,
-        bulkSplitId,
-        lotId,
-        time: listing.time
-    }
-    queryQueue.push(`${objectsToInsert([formattedGift], 'V3_Gift')};`)
     // create listing
     const listingId = uuidV4()
     const formattedListing = {
@@ -469,15 +613,15 @@ const convertSaleItemsToListings = async (listing) => {
     return listingId
 }
 
-const createPrice = async ({ listingId, price }) => {
+const createPrice = async ({ listingId, price, time }) => {
     const queryQueue = []
-    const now = new Date()
+    const priceTime = new Date(time)
     const id = uuidV4()
     const listingPriceToInsert = {
         id,
         listingId,
         price,
-        time: convertLocalToUTC(now)
+        time: prepZuluForDB(priceTime)
     }
     queryQueue.push(`${objectsToInsert([listingPriceToInsert], 'V3_ListingPrice')};`)
     const req = { queryQueue }
@@ -488,4 +632,11 @@ const createPrice = async ({ listingId, price }) => {
     return id
 }
 
-module.exports = { getWatching, createExternal, convertSaleItemsToListings, getListingById, createPrice }
+module.exports = { 
+    getWatching, 
+    createExternal, 
+    convertSaleItemsToListings, 
+    getById, 
+    createPrice,
+    previousOwner
+}

@@ -54,17 +54,19 @@ const Listing = (props) => {
                                         if (a[sortKey] > b[sortKey]) return sortKey === 'marketPrice' ? -1 : 1
                                         return 0
                                     }).map(item => {
-                                    return <div style={{ marginBottom: '8px' }}>
-                                        <p>{item.name}</p>
-                                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                                            <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
-                                            <p>--</p>
-                                            <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printingId).printing_name}</p>
-                                            <p>--</p>
-                                            <p>{item.marketPrice}</p>
+                                        if (item.bulkSplitId) return <p>bulk split</p>
+                                        return <div style={{ marginBottom: '8px' }}>
+                                            <p>{item.name}</p>
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
+                                                <p>--</p>
+                                                <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printingId).printing_name}</p>
+                                                <p>--</p>
+                                                <p>{item.marketPrice}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                })}
+                                    })
+                                }
                             </div>
                         )}
                         {listing.collectedItem.id && (

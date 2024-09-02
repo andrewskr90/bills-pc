@@ -1,6 +1,6 @@
 const { v4: uuidV4 } = require('uuid')
 const { executeQueries } = require('../db')
-const { objectsToInsert } = require('../utils/queryFormatters')
+const { objectsToInsert, filterConcatinated } = require('../utils/queryFormatters')
 
 const getById = async (id) => {
     const indexWithBackticks = '`index`'
@@ -20,15 +20,16 @@ const getById = async (id) => {
             GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
             li.index as ${indexWithBackticks}
-        FROM V3_LotEdit le
-        LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
+        FROM V3_LotInsert li
+        LEFT JOIN V3_LotEdit le on le.id = li.lotEditId
         LEFT JOIN V3_CollectedItem c on c.id = li.collectedItemId
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        LEFT JOIN V3_BulkSplit bs on bs.id = li.bulkSplitId
         LEFT JOIN V3_Appraisal a
             on a.collectedItemId = c.id
         WHERE le.id = '${id}'
-        GROUP BY c.id
+        GROUP BY li.id
         UNION
         SELECT
             le.id as lotEditId,
@@ -45,13 +46,14 @@ const getById = async (id) => {
             null as appraisals,
             lr.bulkSplitId,
             null as ${indexWithBackticks}
-        FROM V3_LotEdit le
-        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id
+        FROM V3_LotRemoval lr 
+        LEFT JOIN V3_LotEdit le on le.id = lr.lotEditId
         LEFT JOIN V3_CollectedItem c on c.id = lr.collectedItemId
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
+        LEFT JOIN V3_BulkSplit bs on bs.id = lr.bulkSplitId
         WHERE le.id = '${id}'
-        GROUP BY c.id
+        GROUP BY lr.id
     `
     const queryQueue = [query]
     const req = { queryQueue }
@@ -155,4 +157,32 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
     return lotEditId
 }
 
-module.exports= { getById, createForExternal }
+const selectByFilter = async (filter) => {
+    const query = `SELECT * FROM V3_LotEdit WHERE ${filterConcatinated(filter)}`
+    const req = { queryQueue: [query] }
+    const res = {}
+    let results
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        results = req.results
+    })
+    return results
+}
+
+const patchByFilter = async (filter, data) => {
+    const query = `
+        UPDATE V3_LotEdit 
+        SET ${filterConcatinated(data)}
+        WHERE ${filterConcatinated(filter)}
+    ;`
+    const req = { queryQueue: [query] }
+    const res = {}
+    let results
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        results = req.results
+    })
+    return results
+}
+
+module.exports= { getById, createForExternal, selectByFilter, patchByFilter }

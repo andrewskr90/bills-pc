@@ -59,7 +59,7 @@ const Item = (props) => {
         {countConfig !== undefined && (
             <div className='count'>
                 <button onClick={() => countConfig.handleSubtractItem(item, selectedPrinting)}>-</button>
-                <div>{countConfig.handleFindCount(item.id) ? countConfig.handleFindCount(item.id) : ''}</div>
+                <div>{countConfig.handleFindCount(item.id, selectedPrinting) ? countConfig.handleFindCount(item.id, selectedPrinting) : ''}</div>
                 <button onClick={() => countConfig.handleAddItem(item, selectedPrinting)}>+</button>
             </div>
         )}

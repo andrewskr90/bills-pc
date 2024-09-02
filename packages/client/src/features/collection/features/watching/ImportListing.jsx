@@ -8,7 +8,6 @@ import editPNG from '../../assets/edit.png'
 import EditListingItem from './EditListingItem.jsx'
 import InputSelect from "../../../../components/input-select/index.jsx"
 import SelectItems from "../../../../components/select-items/index.jsx"
-import { convertLocalToUTC } from "../../../../utils/date/index.js"
 
 const ImportListing = (props) => {
     const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
@@ -46,7 +45,7 @@ const ImportListing = (props) => {
     const formatExternalListing = (listing) => {
         return {
             ...listing,
-            time: convertLocalToUTC(listing.time),
+            time: new Date(listing.time).toISOString(),
             items: listing.items.map(item => { 
                 const { id, printing, condition, note } = item
                 return {
@@ -62,7 +61,11 @@ const ImportListing = (props) => {
         try {
             
             await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
-            navigate('/gym-leader/collection/watching/import')
+                .then(res => {
+                    console.log(res)
+                    navigate('/gym-leader/collection/watching')
+                })
+                .catch(err => console.log(err))
         } catch (err) {
             console.log(err)
         }
