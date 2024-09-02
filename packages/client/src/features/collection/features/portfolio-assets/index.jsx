@@ -1,33 +1,34 @@
 import React from "react"
-import { Link, Route, Routes, useNavigate } from "react-router-dom"
+import { Link, Route, Routes } from "react-router-dom"
 import ItemContainer from "../../../../components/item-container/index.jsx"
-import BulkSplitInfo from "../../BulkSplitInfo.jsx"
-import BulkSplit from "../../BulkSplit.jsx"
+import CollectedItem from "../../../../components/collected-item/index.jsx"
+// import BulkSplitInfo from "../../BulkSplitInfo.jsx"
+// import BulkSplit from "../../BulkSplit.jsx"
 const PortfolioAssets = (props) => {
-    const { portfolio, userClaims } = props 
-    const navigate = useNavigate()
+    const { portfolio } = props 
+    // const navigate = useNavigate()
     
-    const selectBulkSplit = (splitId) => {
-        navigate(`bulk/${splitId}`)
-    }
-
+    // const selectBulkSplit = (splitId) => {
+    //     navigate(`bulk/${splitId}`)
+    // }
     return (<>
-        {portfolio.inventory.bulkSplits.length > 0
+        {portfolio.length
         ?   
             <Routes>
                 <Route 
                     path="/"
                     element={<ItemContainer>
-                        <h3>Bulk</h3>
+                        {/* <h3>Bulk</h3>
                         {portfolio.inventory.bulkSplits.map(split => {
                             return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
-                        })}
+                        })} */}
+                        {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={() => console.log(collectedItem)} />)}
                     </ItemContainer>}
                 />
-                <Route 
+                {/* <Route 
                     path={`/bulk/:bulkSplitId`}
                     element={<BulkSplitInfo portfolio={portfolio} userClaims={userClaims} />}
-                />
+                /> */}
             </Routes>
         :
             <div className='emptyCollection'>

@@ -206,4 +206,4 @@ const createListing = async (req, res, next) => {
     next()
 }
 
-module.exports = { getListings, createListing, getListingById }
+module.exports = { getListings, createListing, getListingById, tiePricesToItems }

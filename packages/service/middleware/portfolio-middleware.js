@@ -5,7 +5,7 @@ const SaleCard = require('../models/SaleCard')
 const SortingGem = require('../models/SortingGem')
 const SortingSplit = require('../models/SortingSplit')
 const Portfolio = require('../models/Portfolio')
-const { formatSaleFromPortfolioResult } = require('../utils/sale')
+const { tiePricesToItems } = require('../middleware/listing-middleware')
 
 const formatInventory = (inventory) => {
     const keys = Object.keys(inventory)
@@ -38,7 +38,7 @@ const formatInventory = (inventory) => {
 }
 
 const evaluatePortfolio = async (req, res, next) => {
-    const { saleCards, saleProducts, saleBulkSplits, sortingSplits, sortingGems } = req
+    const { portfolio } = req
     let balance = 0
     let revenue = 0
     let profit = 0
@@ -586,20 +586,25 @@ const combineSplitsWithSales = async (req, res, next) => {
 
 const getPortfolio = async (req, res, next) => {
     const userId = req.claims.user_id
+    const uniqueItemPrintingConditionInPortfolio = (portfolio) => {
+        return portfolio.filter(item => item.itemId).map(item => ({
+            itemId: item.itemId,
+            conditionId: item.appraisals[0][1],
+            printingId: item.printingId
+        }))
+    }
     try {
+        const today = new Date()
+        const yesterday = new Date(today)
+        yesterday.setDate(today.getDate()-1)
         const portfolio = await Portfolio.getByUserId(userId)
-
-        
-
-
-
-
-        console.log(portfolio)
-        // req.saleCards = await SaleCard.select(userId)
-        // req.saleProducts = await SaleProduct.select(userId)
-        // req.saleBulkSplits = await SaleBulkSplit.select(userId)
-        // req.sortingSplits = await SortingSplit.select(userId)
-        // req.sortingGems = await SortingGem.select(userId)
+        const portfolioItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
+            uniqueItemPrintingConditionInPortfolio(portfolio), 
+            yesterday, 
+            today
+        )
+        const portfolioItemsWithPrices = tiePricesToItems(portfolio, portfolioItemsPrices)
+        req.results = portfolioItemsWithPrices
         next()
     } catch (err) {
         next(err)
