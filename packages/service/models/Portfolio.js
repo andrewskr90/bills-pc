@@ -1,5 +1,5 @@
 const { executeQueries } = require("../db")
-const { parseThenFormatAppraisals } = require("../middleware/collected-item-middleware")
+const { parseThenFormatAppraisals, parseThenFormatLabels } = require("../middleware/collected-item-middleware")
 
 const timeWithBackticks = '`time`'
 
@@ -16,11 +16,7 @@ const getByUserId = async (userId) => {
             i.tcgpId,
             GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             null as bulkSplitId,
-            null as labelId,
-            null as rarityId,
-            null as typeId,
-            null as printingId,
-            null as setId
+            null as labels
         from V3_CollectedItem ci1
         LEFT JOIN Item i on i.id = ci1.itemId
         LEFT JOIN V3_Appraisal a on a.collectedItemId = ci1.id
@@ -124,7 +120,7 @@ const getByUserId = async (userId) => {
         )
         GROUP BY ci1.id
         UNION ALL -- below is a copy and pasted query from above, edited to work with bulk splits
-        select 
+        SELECT 
             null as collectedItemId,
             null as printingId,
             null as itemId,
@@ -132,15 +128,27 @@ const getByUserId = async (userId) => {
             null as tcgpId,
             null as appraisals,
             bs1.id as bulkSplitId,
-            la.id as labelId,
-            lc.rarityId,
-            lc.typeId,
-            lc.printingId,
-            lc.setId
-        from V3_BulkSplit bs1
-        LEFT JOIN V3_BulkSplitLabel bsl on bsl.bulkSplitId = bs1.id
-        LEFT JOIN V3_Label la on la.id = bsl.labelId
-        LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
+            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels
+        FROM V3_BulkSplit bs1
+        LEFT JOIN (
+            SELECT
+                bsl.id as bulkSplitLabelId,
+                bsl.bulkSplitId,
+                GROUP_CONCAT(
+                    '[', 
+                    IFNULL(la.id, 'NULL'), ',',
+                    IFNULL(lc.id, 'NULL'), ',',
+                    IFNULL(lc.rarityId, 'NULL'), ',',
+                    IFNULL(lc.typeId, 'NULL'), ',',
+                    IFNULL(lc.printingid, 'NULL'), ',',
+                    IFNULL(lc.setId, 'NULL'),
+                    ']' SEPARATOR ','
+                ) as labelComponents
+            FROM V3_BulkSplitLabel bsl
+            LEFT JOIN V3_Label la on la.id = bsl.labelId
+            LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
+            GROUP BY bsl.bulkSplitId
+        ) bsl on bsl.bulkSplitId = bs1.id
         WHERE bs1.id in (
             -- bought bulk split
             SELECT 
@@ -239,6 +247,7 @@ const getByUserId = async (userId) => {
                 ) -- TODO or not in a bulk sort that takes place afterward
             )
         )
+        GROUP BY bs1.id
         ;
     `
     const req = { queryQueue: [query] }
@@ -251,7 +260,8 @@ const getByUserId = async (userId) => {
         })
         return portfolio.map(portfolioItem => ({
             ...portfolioItem,
-            appraisals: portfolioItem.appraisals ? parseThenFormatAppraisals(portfolioItem.appraisals) : null
+            appraisals: portfolioItem.appraisals ? parseThenFormatAppraisals(portfolioItem.appraisals) : null,
+            labels: portfolioItem.labels ? parseThenFormatLabels(portfolioItem.labels) : null
         }))
     } catch (err) {
         throw err
