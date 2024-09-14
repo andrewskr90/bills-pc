@@ -38,7 +38,7 @@ const Collection = (props) => {
                 <Link to='update/purchase'><button>Update Collection</button></Link>
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'transactions', 'watching']} 
+                    categories={['assets', 'watching']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -47,7 +47,7 @@ const Collection = (props) => {
                     path='/assets/*'
                     element={<PortfolioAssets portfolio={portfolio} />}
                 />
-                <Route 
+                {/* <Route 
                     path='/transactions/*'
                     element={<Transactions
                         referenceData={referenceData}
@@ -55,7 +55,7 @@ const Collection = (props) => {
                         portfolio={portfolio}
                         userClaims={userClaims}
                      />}
-                />
+                /> */}
                 <Route 
                     path='/update/*'
                     element={<UpdatePortfolio
