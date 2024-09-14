@@ -112,7 +112,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = gift.recipientName
                 ownerProxyCreatorId = gift.proxyCreatorId
             } else if (prev.importId) {
-                throw new Error('set up lot import id')
+                const imp = await Import.getById(prev.importId)
+                sellerId = imp.importerId
+                sellerName = imp.importerName
+                ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
                 throw new Error('set up  lot sale id')
             } else if (prev.lotEditId) {
