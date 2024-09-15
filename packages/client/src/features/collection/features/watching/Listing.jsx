@@ -21,6 +21,15 @@ const Listing = (props) => {
         navigate('purchase')
     }
     const handleEditListing = () => navigate('edit')
+    const BulkSplitCard = ({ bulkSplit }) => {
+        const { id, count, estimate, labels } = bulkSplit
+        return <div>
+            <p>bulk split</p>
+            <p>id: {id}</p>
+            <p>count: {estimate ? '~' : ""}{count}</p>
+            <p>labels: {labels.length}</p>
+        </div>
+    }
 
     return (
         <Routes>
@@ -54,7 +63,7 @@ const Listing = (props) => {
                                         if (a[sortKey] > b[sortKey]) return sortKey === 'marketPrice' ? -1 : 1
                                         return 0
                                     }).map(item => {
-                                        if (item.bulkSplitId) return <p>bulk split</p>
+                                        if (item.bulkSplitId) return <BulkSplitCard bulkSplit={{ ...item, id: item.bulkSplitId}} />
                                         return <div style={{ marginBottom: '8px' }}>
                                             <p>{item.name}</p>
                                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
@@ -80,6 +89,9 @@ const Listing = (props) => {
                                     <p>{listing.collectedItem.marketPrice}</p>
                                 </div>
                             </div>
+                        )}
+                        {listing.bulkSplit.id && (
+                            <BulkSplitCard bulkSplit={listing.bulkSplit} />
                         )}
                     </div>
                 : <></>

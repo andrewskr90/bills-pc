@@ -72,7 +72,7 @@ const formatItems = (items) => {
         if (lotItem.itemId) {
             return formatItem(lotItem)
         } else if (lotItem.bulkSplitId) {
-            return { bulkSplitId: lotItem.bulkSplitId }
+            return lotItem
         }
     })
 }
@@ -179,17 +179,10 @@ const getListingById = async (req, res, next) => {
             }
         } else if (listing.bulkSplitId) {
             const formattedListing = formatListings([listing])[0]
-            console.log(formattedListing)
             const bulkSplit = await BulkSplit.getById(formattedListing.bulkSplit.id)
-            console.log(bulkSplit)
-            throw new Error()
-            const formattedBulkSplit = formatItem(bulkSplit)
             req.results = {
                 ...formattedListing,
-                bulkSplit: {
-                    ...formattedListing.bulkSplit,
-                    ...formattedBulkSplit,
-                }
+                bulkSplit
             }        
         }
     } catch (err) {

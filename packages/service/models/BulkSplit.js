@@ -43,7 +43,9 @@ const findByUserId = async (userId) => {
 const getById = async (id) => {
     const query = `
         SELECT 
-            bs1.id as bulkSplitId,
+            bs1.id,
+            bs1.count,
+            bs1.estimate,
             GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels
         FROM V3_BulkSplit bs1
         LEFT JOIN (
