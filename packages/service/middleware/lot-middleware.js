@@ -1,6 +1,6 @@
 const Transaction = require('../models/Transaction')
 const LotEdit = require('../models/LotEdit')
-const { parseThenFormatAppraisals } = require('./collected-item-middleware')
+const { parseThenFormatAppraisals, parseThenFormatLabels } = require('./collected-item-middleware')
 
 const buildLotFromId = async (lotId) => {
     let lotItems = []
@@ -12,13 +12,10 @@ const buildLotFromId = async (lotId) => {
         const lotInserts = lotEditItems
             .filter(i => i.lotInsertId)
             .map(i => { 
-                if (i.collectedItemId) {
-                    return {
-                        ...i, 
-                        appraisals: parseThenFormatAppraisals(i.appraisals)
-                    }
-                } else if (i.bulkSplitId) {
-                    return i
+                return {
+                    ...i, 
+                    appraisals: i.appraisals ? parseThenFormatAppraisals(i.appraisals) : null,
+                    labels: i.labels ? parseThenFormatLabels(i.labels) : null
                 }
             })
         const lotRemovals = lotEditItems.filter(i => i.lotRemovalId)

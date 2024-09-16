@@ -1,6 +1,7 @@
 const Listing = require('../models/Listing')
 const LotEdit = require('../models/LotEdit')
 const CollectedItem = require('../models/CollectedItem')
+const BulkSplit = require('../models/BulkSplit')
 const MarketPrice = require('../models/MarketPrice')
 const { buildLotFromId } = require('./lot-middleware')
 const { parseGroupConcat } = require('../utils')
@@ -39,7 +40,7 @@ const  formatListings = (listings) => {
             description,
             listingPrices: parseThenFormatListingPrices(listingPrices),
             collectedItem: { id: collectedItemId },
-            bulkSplitId: { id: bulkSplitId },
+            bulkSplit: { id: bulkSplitId },
             lot: { id: lotId },
         }
     }).sort((a, b) => {
@@ -71,7 +72,7 @@ const formatItems = (items) => {
         if (lotItem.itemId) {
             return formatItem(lotItem)
         } else if (lotItem.bulkSplitId) {
-            return { bulkSplitId: lotItem.bulkSplitId }
+            return lotItem
         }
     })
 }
@@ -177,7 +178,12 @@ const getListingById = async (req, res, next) => {
                 }
             }
         } else if (listing.bulkSplitId) {
-            // TODO
+            const formattedListing = formatListings([listing])[0]
+            const bulkSplit = await BulkSplit.getById(formattedListing.bulkSplit.id)
+            req.results = {
+                ...formattedListing,
+                bulkSplit
+            }        
         }
     } catch (err) {
         next(err)

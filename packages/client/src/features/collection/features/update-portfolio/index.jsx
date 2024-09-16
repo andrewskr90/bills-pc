@@ -8,7 +8,7 @@ import { buildPreviousRoute } from '../../../../utils/location'
 import ImportGift from '../../../import-gift/index.jsx'
 import SortBulkSplits from './features/sort-bulk-splits/index.jsx'
 
-const updatePortfolioCategories = ['import', 'purchase', 'sort', 'trade', 'sale', 'export']
+const updatePortfolioCategories = ['import', 'purchase']
 
 const UpdatePortfolio = (props) => {
     const { 
@@ -51,7 +51,7 @@ const UpdatePortfolio = (props) => {
                     setCreatedProxyUsers={setCreatedProxyUsers}
                 />}
             />
-            <Route 
+            {/* <Route 
                 path='/trade/*'
                 element={<>trade componet</>}
             />
@@ -63,7 +63,7 @@ const UpdatePortfolio = (props) => {
             <Route 
                 path='/export/*'
                 element={<>export component</>}
-            />
+            /> */}
         </Routes>
     </div>)
 }

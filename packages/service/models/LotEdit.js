@@ -19,6 +19,9 @@ const getById = async (id) => {
             c.printingId,
             GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
+            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels,
+            bs.count,
+            bs.estimate,
             li.index as ${indexWithBackticks}
         FROM V3_LotInsert li
         LEFT JOIN V3_LotEdit le on le.id = li.lotEditId
@@ -28,6 +31,25 @@ const getById = async (id) => {
         LEFT JOIN V3_BulkSplit bs on bs.id = li.bulkSplitId
         LEFT JOIN V3_Appraisal a
             on a.collectedItemId = c.id
+        LEFT JOIN (
+            SELECT
+                bsl.id as bulkSplitLabelId,
+                bsl.bulkSplitId,
+                GROUP_CONCAT(
+                    '[', 
+                    IFNULL(la.id, 'NULL'), ',',
+                    IFNULL(lc.id, 'NULL'), ',',
+                    IFNULL(lc.rarityId, 'NULL'), ',',
+                    IFNULL(lc.typeId, 'NULL'), ',',
+                    IFNULL(lc.printingid, 'NULL'), ',',
+                    IFNULL(lc.setId, 'NULL'),
+                    ']' SEPARATOR ','
+                ) as labelComponents
+            FROM V3_BulkSplitLabel bsl
+            LEFT JOIN V3_Label la on la.id = bsl.labelId
+            LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
+            GROUP BY bsl.bulkSplitId
+        ) bsl on bsl.bulkSplitId = bs.id
         WHERE le.id = '${id}'
         GROUP BY li.id
         UNION
@@ -45,6 +67,9 @@ const getById = async (id) => {
             c.printingId,
             null as appraisals,
             lr.bulkSplitId,
+            null as labels,
+            null as count,
+            null as estimate,
             null as ${indexWithBackticks}
         FROM V3_LotRemoval lr 
         LEFT JOIN V3_LotEdit le on le.id = lr.lotEditId

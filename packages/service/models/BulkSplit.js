@@ -1,4 +1,5 @@
 const { executeQueries } = require("../db")
+const { parseThenFormatLabels } = require("../middleware/collected-item-middleware")
 
 const findByUserId = async (userId) => {
     if (!userId) throw new Error(`Error: User ID required to find bulk splits collected by user.`)
@@ -39,4 +40,48 @@ const findByUserId = async (userId) => {
     return bulkSplits
 }
 
-module.exports = { findByUserId }
+const getById = async (id) => {
+    const query = `
+        SELECT 
+            bs1.id,
+            bs1.count,
+            bs1.estimate,
+            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels
+        FROM V3_BulkSplit bs1
+        LEFT JOIN (
+            SELECT
+                bsl.id as bulkSplitLabelId,
+                bsl.bulkSplitId,
+                GROUP_CONCAT(
+                    '[', 
+                    IFNULL(la.id, 'NULL'), ',',
+                    IFNULL(lc.id, 'NULL'), ',',
+                    IFNULL(lc.rarityId, 'NULL'), ',',
+                    IFNULL(lc.typeId, 'NULL'), ',',
+                    IFNULL(lc.printingid, 'NULL'), ',',
+                    IFNULL(lc.setId, 'NULL'),
+                    ']' SEPARATOR ','
+                ) as labelComponents
+            FROM V3_BulkSplitLabel bsl
+            LEFT JOIN V3_Label la on la.id = bsl.labelId
+            LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
+            GROUP BY bsl.bulkSplitId
+        ) bsl on bsl.bulkSplitId = bs1.id
+        WHERE bs1.id = '${id}'
+        GROUP BY bs1.id
+    `
+    const queryQueue = [query]
+    const req = { queryQueue }
+    const res = {}
+    let bulkSplitResults
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        bulkSplitResults = req.results[0]
+    })
+    return {
+        ...bulkSplitResults,
+        labels: bulkSplitResults.labels ? parseThenFormatLabels(bulkSplitResults.labels) : null
+    }
+}
+
+module.exports = { findByUserId, getById }
