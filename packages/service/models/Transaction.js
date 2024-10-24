@@ -12,9 +12,9 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
             null as giftId,
             le.time
         FROM V3_LotEdit le
-        WHERE le.lotId = '${lotId}'
-            ${timeCutoff ? `AND le.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE le.lotId = ?
+            ${timeCutoff ? `AND le.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             li.lotId as lotId,
@@ -27,9 +27,9 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
         FROM V3_Listing li
         WHERE li.deleted is null
             AND li.saleId is null
-            AND li.lotId = '${lotId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.lotId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             li.lotId as lotId,
@@ -41,9 +41,9 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
             li.deleted as time
         FROM V3_Listing li
         WHERE li.deleted is not null
-            AND li.lotId = '${lotId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.lotId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             li.lotId,
@@ -56,9 +56,9 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
         FROM V3_Sale s
         LEFT JOIN V3_Listing li
             ON li.saleId = s.id
-        WHERE li.lotId = '${lotId}'
-            ${timeCutoff ? `AND s.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE li.lotId = ?
+            ${timeCutoff ? `AND s.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             g.lotId,
@@ -69,11 +69,22 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
             g.id as giftId,
             g.time
         FROM V3_Gift g
-        WHERE g.lotId = '${lotId}'
-            ${timeCutoff ? `AND g.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE g.lotId = ?
+            ${timeCutoff ? `AND g.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
     ;`
-    const req = { queryQueue: [query] }
+    const req = { 
+        queryQueue: [{ 
+            query, 
+            variables: [
+                lotId, timeCutoff, limit, 
+                lotId, timeCutoff, limit, 
+                lotId, timeCutoff, limit, 
+                lotId, timeCutoff, limit, 
+                lotId, timeCutoff, limit
+            ] 
+        }] 
+    }
     const res = {}
     let transactions
     await executeQueries(req, res, (err) => {
@@ -101,10 +112,10 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
         LEFT JOIN V3_LotRemoval lr
             ON lr.lotEditId = le.id
         WHERE (
-            li.bulkSplitId = '${bulkSplitId}'
-            OR lr.bulkSplitId = '${bulkSplitId}'
-        ) ${timeCutoff ? `AND le.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            li.bulkSplitId = ?
+            OR lr.bulkSplitId = ?
+        ) ${timeCutoff ? `AND le.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -119,9 +130,9 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
         FROM V3_Listing li
         WHERE li.deleted is null
             AND li.saleId is null
-            AND li.bulkSplitId = '${bulkSplitId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.bulkSplitId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -135,9 +146,9 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
             li.deleted as time
         FROM V3_Listing li
         WHERE li.deleted is not null
-            AND li.bulkSplitId = '${bulkSplitId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.bulkSplitId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -152,9 +163,9 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
         FROM V3_Sale s
         LEFT JOIN V3_Listing li
             ON li.saleId = s.id
-        WHERE li.bulkSplitId = '${bulkSplitId}'
-            ${timeCutoff ? `AND s.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE li.bulkSplitId = ?
+            ${timeCutoff ? `AND s.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -167,9 +178,9 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
             null as importId,
             g.time
         FROM V3_Gift g
-        WHERE g.bulkSplitId = '${bulkSplitId}'
-            ${timeCutoff ? `AND g.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE g.bulkSplitId = ?
+            ${timeCutoff ? `AND g.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -182,11 +193,25 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
             i.id as importId,
             i.time
         FROM V3_Import i
-        WHERE i.bulkSplitId = '${bulkSplitId}'
-            ${timeCutoff ? `AND i.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE i.bulkSplitId = ?
+            ${timeCutoff ? `AND i.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
     ;`
-    const req = { queryQueue: [query] }
+    const req = { 
+        queryQueue: [
+            { 
+                query, 
+                variables: [
+                    bulkSplitId, bulkSplitId, timeCutoff, limit, 
+                    bulkSplitId, timeCutoff, limit, 
+                    bulkSplitId, timeCutoff, limit, 
+                    bulkSplitId, timeCutoff, limit, 
+                    bulkSplitId, timeCutoff, limit, 
+                    bulkSplitId, timeCutoff, limit 
+                ]
+            }
+        ] 
+    }
     const res = {}
     let transactions
     await executeQueries(req, res, (err) => {
@@ -214,10 +239,10 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
         LEFT JOIN V3_LotRemoval lr
             ON lr.lotEditId = le.id
         WHERE (
-            li.collectedItemId = '${collectedItemId}'
-            OR lr.collectedItemId = '${collectedItemId}'
-        ) ${timeCutoff ? `AND le.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            li.collectedItemId = ?
+            OR lr.collectedItemId = ?
+        ) ${timeCutoff ? `AND le.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -232,9 +257,9 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
         FROM V3_Listing li
         WHERE li.deleted is null
             AND li.saleId is null
-            AND li.collectedItemId = '${collectedItemId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.collectedItemId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -248,9 +273,9 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
             li.deleted as time
         FROM V3_Listing li
         WHERE li.deleted is not null
-            AND li.collectedItemId = '${collectedItemId}'
-            ${timeCutoff ? `AND li.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+            AND li.collectedItemId = ?
+            ${timeCutoff ? `AND li.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -265,9 +290,9 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
         FROM V3_Sale s
         LEFT JOIN V3_Listing li
             ON li.saleId = s.id
-        WHERE li.collectedItemId = '${collectedItemId}'
-            ${timeCutoff ? `AND s.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE li.collectedItemId = ?
+            ${timeCutoff ? `AND s.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -280,9 +305,9 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
             null as importId,
             g.time
         FROM V3_Gift g
-        WHERE g.collectedItemId = '${collectedItemId}'
-            ${timeCutoff ? `AND g.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE g.collectedItemId = ?
+            ${timeCutoff ? `AND g.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
         UNION
         (SELECT
             null as lotEditId,
@@ -295,11 +320,25 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
             i.id as importId,
             i.time
         FROM V3_Import i
-        WHERE i.collectedItemId = '${collectedItemId}'
-            ${timeCutoff ? `AND i.time < '${timeCutoff}'` : ''}
-        ${limit ? `LIMIT ${limit}` : ''})
+        WHERE i.collectedItemId = ?
+            ${timeCutoff ? `AND i.time < ?` : ''}
+        ${limit ? `LIMIT ?` : ''})
     ;`
-    const req = { queryQueue: [query] }
+    const req = { 
+        queryQueue: [
+            {
+                query,
+                variables: [
+                    collectedItemId, collectedItemId, timeCutoff, limit, 
+                    collectedItemId, timeCutoff, limit, 
+                    collectedItemId, timeCutoff, limit, 
+                    collectedItemId, timeCutoff, limit, 
+                    collectedItemId, timeCutoff, limit, 
+                    collectedItemId, timeCutoff, limit 
+                ]
+            }
+        ] 
+    }
     const res = {}
     let transactions
     await executeQueries(req, res, (err) => {
@@ -329,7 +368,7 @@ const getByLotId = async (lotId) => {
         RIGHT JOIN V3_LotEdit le on le.lotId = lo.id
         LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
         LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id
-        WHERE lo.id = '${lotId}'
+        WHERE lo.id = ?
         UNION
         SELECT 
             lo.id, 
@@ -344,7 +383,7 @@ const getByLotId = async (lotId) => {
         FROM V3_Lot lo
         RIGHT JOIN V3_Gift g on g.lotId = lo.id
         LEFT JOIN users u on u.user_id = g.recipientId
-        WHERE lo.id = '${lotId}'
+        WHERE lo.id = ?
         UNION
         SELECT 
             lo.id, 
@@ -360,7 +399,7 @@ const getByLotId = async (lotId) => {
         RIGHT JOIN V3_Listing l ON l.lotId = lo.id
         LEFT JOIN V3_Sale s on s.id = l.saleId
         LEFT JOIN users u on u.user_id = s.purchaserId
-        WHERE lo.id = '${lotId}'
+        WHERE lo.id = ?
         UNION
         SELECT 
             lo.id, 
@@ -376,9 +415,9 @@ const getByLotId = async (lotId) => {
         RIGHT JOIN V3_Listing l ON l.lotId = lo.id
         LEFT JOIN V3_Sale s on s.id = l.saleId
         LEFT JOIN users u on u.user_id = s.purchaserId
-        WHERE lo.id = '${lotId}' and s.id IS NOT NULL
+        WHERE lo.id = ? and s.id IS NOT NULL
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [lotId, lotId, lotId, lotId] }] }
     const res = {}
     let transactions
     await executeQueries(req, res, (err) => {
@@ -410,8 +449,8 @@ const getByCollectedItemId = async (collectedItemId) => {
         LEFT JOIN V3_LotInsert li on li.collectedItemId = ci.id
         LEFT JOIN V3_LotRemoval lr on lr.collectedItemid = ci.id
         LEFT JOIN V3_LotEdit le on le.id = li.lotEditId OR le.id = lr.lotEditId
-        WHERE li.collectedItemId = '${collectedItemId}'
-            OR lr.collectedItemId = '${collectedItemId}'
+        WHERE li.collectedItemId = ?
+            OR lr.collectedItemId = ?
         GROUP BY le.id
         UNION
         SELECT 
@@ -431,7 +470,7 @@ const getByCollectedItemId = async (collectedItemId) => {
         LEFT JOIN V3_Listing l on l.collectedItemId = ci.id
         LEFT JOIN V3_Sale s on s.id = l.saleid
         LEFT JOIN users u on u.user_id = s.purchaserId
-        WHERE l.collectedItemId = '${collectedItemId}'
+        WHERE l.collectedItemId = ?
             AND s.id IS NOT NULL
         UNION
         SELECT 
@@ -451,7 +490,7 @@ const getByCollectedItemId = async (collectedItemId) => {
         LEFT JOIN V3_Listing l on l.collectedItemId = ci.id
         LEFT JOIN V3_Sale s on s.id = l.saleid
         LEFT JOIN users u on u.user_id = s.purchaserId
-        WHERE l.collectedItemId = '${collectedItemId}'
+        WHERE l.collectedItemId = ?
         UNION
         SELECT 
             ci.id as collectedItemId, 
@@ -469,9 +508,22 @@ const getByCollectedItemId = async (collectedItemId) => {
         FROM V3_CollectedItem ci
         LEFT JOIN V3_Gift g on g.collectedItemId = ci.id
         LEFT JOIN users u on u.user_id = g.recipientId
-        WHERE ci.id = '${collectedItemId}'
+        WHERE ci.id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { 
+        queryQueue: [
+            { 
+                query, 
+                variables: [
+                    collectedItemId, 
+                    collectedItemId, 
+                    collectedItemId, 
+                    collectedItemId, 
+                    collectedItemId
+                ] 
+            }
+        ] 
+    }
     const res = {}
     let transactions
     await executeQueries(req, res, (err) => {

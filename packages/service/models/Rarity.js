@@ -2,8 +2,8 @@ const { executeQueries } = require("../db")
 const { v4: uuidV4 } = require('uuid')
 
 const find = async () => {
-    let query = `SELECT * FROM rarities`
-    const req = { queryQueue: [query] }
+    let query = `SELECT * FROM rarities;`
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let rarities
     await executeQueries(req, res, (err) => {
@@ -21,7 +21,7 @@ const create = async (rarity) => {
             return `'${rarity[key]}'`
         }).join(', ')});
     `   
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let addedRarity
 
@@ -48,7 +48,7 @@ const update = async (rarity, id) => {
         }).join(', ')}
         WHERE rarity_id = '${id}';
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
 
     await executeQueries(req, res, (err) => {
@@ -60,8 +60,8 @@ const update = async (rarity, id) => {
 }
 
 const destroy = async (id) => {
-    let query = `DELETE FROM rarities WHERE rarity_id = '${id}';`
-    const req = { queryQueue: [query] }
+    let query = `DELETE FROM rarities WHERE rarity_id = ?;`
+    const req = { queryQueue: [{ query, variables: [id] }] }
     const res = {}
 
     await executeQueries(req, res, (err) => {

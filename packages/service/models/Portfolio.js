@@ -29,7 +29,7 @@ const getByUserId = async (userId) => {
             right JOIN V3_Sale s1 on s1.id = l1.saleId
             WHERE s1.id is not null
             and ci2.id = ci1.id
-            and s1.purchaserId = '${userId}'
+            and s1.purchaserId = ?
             and (
                 ci2.id not in ( -- that is not sold afterward as a lone item
                     select 
@@ -158,7 +158,7 @@ const getByUserId = async (userId) => {
             right JOIN V3_Sale s1 on s1.id = l1.saleId
             WHERE s1.id is not null
             and bs2.id = bs1.id
-            and s1.purchaserId = '${userId}'
+            and s1.purchaserId = ?
             and (
                 bs2.id not in ( -- that is not sold afterward as a lone item
                     select 
@@ -250,7 +250,7 @@ const getByUserId = async (userId) => {
         GROUP BY bs1.id
         ;
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     try {
         let portfolio

@@ -50,7 +50,7 @@ const getById = async (id) => {
             LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
             GROUP BY bsl.bulkSplitId
         ) bsl on bsl.bulkSplitId = bs.id
-        WHERE le.id = '${id}'
+        WHERE le.id = ?
         GROUP BY li.id
         UNION
         SELECT
@@ -77,10 +77,10 @@ const getById = async (id) => {
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
         LEFT JOIN V3_BulkSplit bs on bs.id = lr.bulkSplitId
-        WHERE le.id = '${id}'
+        WHERE le.id = ?
         GROUP BY lr.id
     `
-    const queryQueue = [query]
+    const queryQueue = [{ query, variables: [id, id] }]
     const req = { queryQueue }
     const res = {}
     let lotEditResults
@@ -130,10 +130,10 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
             appraisalsToInsert.push(formattedAppraisal)
             lotInserts[idx] = { ...item, collectedItemId }
         })
-        queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
-        queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
+        queryQueue.push({ query: `${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`, variables: [] })        
         if (collectedItemNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`)
+            queryQueue.push({ query: `${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`, variables: [] })
         }
     }
     const lotEditId = uuidV4()
@@ -167,12 +167,12 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
         }
         formattedLotRemovals.push(formattedLotInsert)
     })
-    queryQueue.push(`${objectsToInsert([formattedLotEdit], 'V3_LotEdit')};`)
+    queryQueue.push({ query: `${objectsToInsert([formattedLotEdit], 'V3_LotEdit')};`, variables: [] })
     if (formattedLotInserts.length > 0) {
-        queryQueue.push(`${objectsToInsert(formattedLotInserts, 'V3_LotInsert')};`)  
+        queryQueue.push({ query: `${objectsToInsert(formattedLotInserts, 'V3_LotInsert')};`, variables: [] })  
     }
     if (formattedLotRemovals.length > 0) {
-        queryQueue.push(`${objectsToInsert(formattedLotRemovals, 'V3_LotRemoval')};`)  
+        queryQueue.push({ query: `${objectsToInsert(formattedLotRemovals, 'V3_LotRemoval')};`, variables: [] })  
     }
     const req = { queryQueue }
     const res = {}
@@ -184,7 +184,7 @@ const createForExternal = async (lotEdit, sellerId, watcherId) => {
 
 const selectByFilter = async (filter) => {
     const query = `SELECT * FROM V3_LotEdit WHERE ${filterConcatinated(filter)}`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let results
     await executeQueries(req, res, (err) => {
@@ -200,7 +200,7 @@ const patchByFilter = async (filter, data) => {
         SET ${filterConcatinated(data)}
         WHERE ${filterConcatinated(filter)}
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let results
     await executeQueries(req, res, (err) => {

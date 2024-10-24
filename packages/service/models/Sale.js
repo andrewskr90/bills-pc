@@ -22,10 +22,10 @@ const select = async (userId) => {
     let query = `
         SELECT * FROM sales
         WHERE 
-            sale_purchaser_id = '${userId}' OR
-            sale_seller_id = '${userId}'
+            sale_purchaser_id = ? OR
+            sale_seller_id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     let sales
     await executeQueries(req, res, (err) => {
@@ -57,7 +57,7 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
                 amount: parseFloat(listing.discounts[0].amount),
                 percentage: null
             })
-            queryQueue.push(QueryFormatters.objectsToInsert(listingDiscounts, 'V3_ListingDiscount'))
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(listingDiscounts, 'V3_ListingDiscount'), variables: [] })
         }
         if (listing.offers.length > 0) {
             if (!parseFloat(listing.offers[0].amount)) throw new Error("Offer amount is not a number.")
@@ -72,7 +72,7 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
                 makerId: purchaserId,
                 amount: parseFloat(listing.offers[0].amount)
             })
-            queryQueue.push(QueryFormatters.objectsToInsert(offers, 'V3_Offer'))
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(offers, 'V3_Offer'), variables: [] })
         }
         const { time } = sale
         let shipping = null
@@ -94,8 +94,8 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
             tax,
             time
         }
-        queryQueue.push(`${QueryFormatters.objectsToInsert([formattedSale], 'V3_Sale')};`)
-        queryQueue.push(`UPDATE V3_Listing SET saleId = '${formattedSale.id}' WHERE V3_Listing.id = '${listing.id}';`)
+        queryQueue.push({ query: `${QueryFormatters.objectsToInsert([formattedSale], 'V3_Sale')};`, variables: [] })
+        queryQueue.push({ query: `UPDATE V3_Listing SET saleId = ? WHERE V3_Listing.id = ?;`, variables: [formattedSale.id, listing.id] })
         if (sale.discounts.length > 0) {
             if (!parseFloat(sale.discounts[0].amount)) throw new Error("Sale discount is not a number.")
             if (parseFloat(sale.discounts[0].amount) <= 0) throw new Error("Sale discount must be greater than 0.")  
@@ -106,7 +106,7 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
                 amount: parseFloat(sale.discounts[0].amount),
                 percentage: null
             })
-            queryQueue.push(QueryFormatters.objectsToInsert(saleDiscounts, 'V3_SaleDiscount'))
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(saleDiscounts, 'V3_SaleDiscount'), variables: [] })
         }
         if (sale.notes.length > 0) {
             const saleNotes = []
@@ -117,7 +117,7 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
                 note: sale.notes[0].note,
                 time
             })
-            queryQueue.push(`${QueryFormatters.objectsToInsert(saleNotes, 'V3_SaleNote')};`)
+            queryQueue.push({ query: `${QueryFormatters.objectsToInsert(saleNotes, 'V3_SaleNote')};`, variables: [] })
         }
         const req = { queryQueue }
         const res = {}

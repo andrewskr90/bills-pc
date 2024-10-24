@@ -2,8 +2,8 @@ const { executeQueries } = require("../db")
 const { v4: uuidV4 } = require('uuid')
 
 const findProxyByCreatorId = async (userId) => {
-    let query = `SELECT * FROM users WHERE proxyCreatorId = '${userId}';`
-    const req = { queryQueue: [query] }
+    let query = `SELECT * FROM users WHERE proxyCreatorId = ?;`
+    const req = { queryQueue: [{ query, variables: [userId] }] }
     const res = {}
     let ProxyUsers
     await executeQueries(req, res, (err) => {
@@ -20,7 +20,7 @@ const createProxyUser = async (proxyUser) => {
             return `'${proxyUser[key]}'`
         }).join(', ')});
     `   
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let results
 

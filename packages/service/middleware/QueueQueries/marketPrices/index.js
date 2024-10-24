@@ -4,7 +4,7 @@ const { executeQueries } = require('../../../db/index')
 const insert = (req, res, next) => {
     const marketPrices = req.body
     const query = QueryFormatters.objectsToInsert(marketPrices, 'market_prices')
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
@@ -15,7 +15,7 @@ const selectByCardId = (req, res, next) => {
         query += ` LIMIT ${req.query.limit}`
     }
     query += ';'
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
@@ -26,11 +26,12 @@ const selectByProductId = (req, res, next) => {
         query += ` LIMIT ${req.query.limit}`
     }
     query += ';'
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
 const selectBySetId = (req, res, next) => {
+    const variables = []
     let query = `
     SELECT 
         GROUP_CONCAT('[',UNIX_TIMESTAMP(m.date), ',', m.price,']' ORDER BY m.date DESC) as prices,
@@ -58,11 +59,12 @@ const selectBySetId = (req, res, next) => {
         ON i.id = SKU.itemId
     LEFT JOIN sets_v2 as s
         ON  s.set_v2_id = i.setId
-    WHERE s.set_v2_id = '${req.params.set_v2_id}'
+    WHERE s.set_v2_id = ?
         AND (c.condition_id = '0655c457-ff60-11ee-b8b9-0efd996651a9' OR c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9')
     GROUP BY SKU.id
     ORDER BY i.name asc, p.printing_tcgp_printing_id, c.condition_tcgp_condition_id;`
-    req.queryQueue.push(query)
+    variables.push(req.params.set_v2_id)
+    req.queryQueue.push({ query, variables })
     next()
 }
 
@@ -76,7 +78,7 @@ const selectTopTenAverage = (req, res, next) => {
         ORDER BY latest_price DESC
         LIMIT 10) top_ten_cards) as top_ten_average_today
     FROM sets_v2;`
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 module.exports = {

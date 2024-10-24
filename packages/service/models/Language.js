@@ -2,7 +2,7 @@ const { executeQueries } = require("../db")
 
 const find = async () => {
     let query = `SELECT * FROM Language`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let languages
     await executeQueries(req, res, (err) => {

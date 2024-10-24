@@ -31,7 +31,7 @@ const selectByItemIdsBetweenDates = async (items, formerDate, latterDate) => {
         AND m.date >= '${stringifyDateYYYYMMDD(formerDate)}'
         AND m.date < '${stringifyDateYYYYMMDD(latterDate)}'
         ORDER BY itemId`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let marketPrices
     await executeQueries(req, res, (err) => {

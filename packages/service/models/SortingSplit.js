@@ -34,9 +34,9 @@ const select = async (userId) => {
         LEFT JOIN sets_v2 on set_v2_id = label_component_set_v2_id
         LEFT JOIN sorting_splits on sorting_split_bulk_split_id = bulk_split_id
         LEFT JOIN sortings on sorting_id = sorting_split_sorting_id
-        WHERE sorting_sorter_id = '${userId}'
+        WHERE sorting_sorter_id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId] }] }
     const res = {}
     try {
         let sortingSplits

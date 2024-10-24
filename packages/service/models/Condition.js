@@ -1,8 +1,8 @@
 const { executeQueries } = require("../db")
 
 const find = async () => {
-    let query = `SELECT * FROM conditions`
-    const req = { queryQueue: [query] }
+    let query = `SELECT * FROM conditions;`
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let conditions
     await executeQueries(req, res, (err) => {

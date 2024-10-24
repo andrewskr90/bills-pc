@@ -29,10 +29,10 @@ const select = async (userId) => {
         LEFT JOIN products on product_id = collected_product_product_id
         LEFT JOIN sets_v2 on set_v2_id = product_set_id
         LEFT JOIN sales on sale_id = sale_product_sale_id
-        WHERE sale_purchaser_id = '${userId}'
-            OR sale_seller_id = '${userId}'
+        WHERE sale_purchaser_id = ?
+            OR sale_seller_id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     try {
         let saleProducts

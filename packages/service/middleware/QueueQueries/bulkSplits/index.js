@@ -9,7 +9,7 @@ const insert = (req, res, next) => {
                 bulk_split_count,
                 bulk_split_estimate
             }], 'bulk_splits')
-            req.queryQueue.push(`${query};`)
+            req.queryQueue.push({ query: `${query};`, variables: [] })
             split.labels.forEach(label => {
                 const { 
                     bulk_split_label_assignment_id, 
@@ -21,7 +21,7 @@ const insert = (req, res, next) => {
                     bulk_split_label_assignment_bulk_split_id,
                     bulk_split_label_assignment_label_id
                 }], 'bulk_split_label_assignments')
-                req.queryQueue.push(`${query};`)
+                req.queryQueue.push({ query: `${query};`, variables: [] })
             })
         })
     })

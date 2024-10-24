@@ -3,7 +3,7 @@ const QueryFormatters = require('../../../utils/queryFormatters')
 const insert = (req, res, next) => {
     const products = req.products
     const query = QueryFormatters.objectsToInsert(products, 'products')
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
@@ -19,7 +19,7 @@ const select = (req, res, next) => {
     } else {
         query = 'SELECT * FROM products;'
     }
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
@@ -54,7 +54,7 @@ const selectWithValues = (req, res, next) => {
         }
     }
     query += ' GROUP BY product_id;'
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 
