@@ -15,13 +15,17 @@ const select = (req, res, next) => {
         let queryFilter = QueryFormatters.filterConcatinated(req.query.filter)
         query += ` WHERE ${queryFilter}`
     }
+    if (req.query.set_v2_id) {
+        query += ` WHERE set_v2_id = ?`
+        variables.push(req.query.set_v2_id)
+    }
     query += ` ORDER BY set_v2_release_date DESC, set_v2_name ASC`
     const pageInt = parseInt(req.query.page)
     if (pageInt && pageInt > 0) {
         variables.push((pageInt-1)*10)
         query += ` LIMIT ?,10;`
     } else {
-        query += ` LIMIT 1,10;`
+        query += ` LIMIT 0,10;`
     }
     req.queryQueue.push({ query, variables })
     next()

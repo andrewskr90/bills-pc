@@ -17,7 +17,7 @@ const Marketplace = (props) => {
     }
 
     const handleSelectSet = (setId) => {
-        navigate(setId)
+        navigate(`expansion/${setId}`)
     }
 
     return (<div className='marketplace'>
@@ -35,7 +35,7 @@ const Marketplace = (props) => {
                 />}
             />
             <Route 
-                path='/:setId/*' 
+                path='/expansion/:setId/*' 
                 element={<ExpansionItemsMarketplace 
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData}

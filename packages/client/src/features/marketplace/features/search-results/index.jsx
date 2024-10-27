@@ -42,7 +42,7 @@ const SearchResults = (props) => {
 
     const handleSelectItem = (item) => {
         const expansionId = item.set.id
-        navigate(`/market/${expansionId}/${item.id}`)
+        navigate(`/market/expansion/${expansionId}/item/${item.id}`)
     }
 
     return (<div className='searchResults'>
@@ -65,7 +65,7 @@ const SearchResults = (props) => {
             })}
         </ItemContainer>
         :
-        <></>
+        <>...loading</>
         }
     </div>)
 }

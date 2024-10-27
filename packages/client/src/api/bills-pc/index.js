@@ -28,11 +28,12 @@ const BillsPcService = {
             url: `/api/v1/sets`
         })
     },
-    getSetsV2(filter) {
+    getSetsV2(config) {
+        const { params } = config
         return axios({
             ...options,
             url: `/api/v1/sets-v2`,
-            params: filter
+            params
         })
     },
     getSetsBy(filter) {
@@ -155,16 +156,10 @@ const BillsPcService = {
             })
         }
     },
-    getMarketPricesByCardId(cardId) {
+    getMarketPricesByItemId(itemId) {
         return axios({
             ...options,
-            url: `/api/v1/market-prices/card-id/${cardId}`
-        })
-    },
-    getMarketPricesByProductId(productId) {
-        return axios({
-            ...options,
-            url: `/api/v1/market-prices/product-id/${productId}`
+            url: `/api/v1/market-prices/item-id/${itemId}`
         })
     },
     getProducts(filter) {

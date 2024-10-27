@@ -21,6 +21,17 @@ marketPricesRouter.post('/',
         res.status(201).json(results)
 })
 
+marketPricesRouter.get('/item-id/:item_id',
+    QueueQueries.init,
+    QueueQueries.marketPrices.selectByItemId,
+    executeQueries,
+    formatMarketPricesFromConcat,
+    formatItems,
+    (req, res, next) => {
+        res.status(200).json(req.results)
+    }
+)
+
 marketPricesRouter.get('/card-id/:card_id',
     QueueQueries.init,
     QueueQueries.marketPrices.selectByCardId,

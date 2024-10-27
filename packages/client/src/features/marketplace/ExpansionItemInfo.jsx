@@ -13,41 +13,19 @@ const ExpansionItemInfo = (props) => {
     const [loadImage, setLoadImage] = useState(true)
     const [selectedPrinting, setSelectedPrinting] = useState()
     const params = useParams()
-    const targetExpansionId = params['setId']
     const targetItemId = params['itemId']
-    
-    useEffect(() => {
-        if (referenceData.sets.filter(expansion => expansion.set_v2_id === targetExpansionId)[0].items.length > 0) {
-            const filteredTargetItem = referenceData.sets.filter(expansion => {
-                return expansion.set_v2_id === targetExpansionId
-            })[0].items.filter(item => {
-                if (item.id === targetItemId) return item
-            })
-            setTargetItem(applyMarketChanges(filteredTargetItem)[0])
-            setSelectedPrinting(filteredTargetItem[0].printings[0])
-        } else {
-            (async () => {
-                await BillsPcService.getMarketPrices({ set_v2_id: targetExpansionId})
-                    .then(res => {
-                        setReferenceData({
-                            ...referenceData,
-                            sets: referenceData.sets.map(expansion => {
-                                if (expansion.set_v2_id === targetExpansionId) {
-                                    return {
-                                        ...expansion,
-                                        items: res.data
-                                    }
-                                } else {
-                                    return expansion
-                                }
-                            })
-                        })
-                    })
-                    .catch(err => console.log(err))
-            })()
-        }
 
-    }, [referenceData])
+    useEffect(() => {
+        (async () => {
+            try {
+                const targetItemRes = await BillsPcService.getMarketPricesByItemId(targetItemId)
+                setTargetItem(applyMarketChanges(targetItemRes.data)[0])
+                setSelectedPrinting(targetItemRes.data[0].printings[0])
+            } catch (err) {
+                console.log(err)
+            }
+        })()
+    }, [])
 
     const handleAddToCollection = () => {
 
