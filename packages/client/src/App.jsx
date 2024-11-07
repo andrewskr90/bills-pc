@@ -80,10 +80,6 @@ const App = () => {
             await BillsPcService.authenticateSession()
                 .then(res => fetchedUserClaims = res.data)
                 .catch(err => console.log(err))
-            let fetchedExpansions
-            await BillsPcService.getSetsV2()
-                .then(res => fetchedExpansions = res.data)
-                .catch(err => console.log(err))
             let fetchedRarities
             await BillsPcService.getReferenceData()
                 .then(res => fetchedRarities = res.data.rarities)
@@ -91,12 +87,12 @@ const App = () => {
             const raritiesResponse = await BillsPcService.getRarities()
             const typesResponse = await BillsPcService.getTypes()
             const printingsResponse = await BillsPcService.getPrintings()
-            const expansionsResponse = await BillsPcService.getSetsV2()
+            const expansionsResponse = await BillsPcService.getSetsV2({ params: {} })
             const conditionsResponse = await BillsPcService.getConditions()
             setUserClaims(fetchedUserClaims)
             setReferenceData({
                 ...referenceData,
-                sets: formattedExpansions(fetchedExpansions),
+                sets: formattedExpansions(expansionsResponse.data),
                 rarities: fetchedRarities,
                 bulk: {
                     rarity: raritiesResponse.data,
@@ -107,7 +103,7 @@ const App = () => {
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),
-                    expansion: calcFilterMarketExpansionsConfig(fetchedExpansions)
+                    expansion: calcFilterMarketExpansionsConfig(expansionsResponse.data)
                 }
             })
             initialData = true
