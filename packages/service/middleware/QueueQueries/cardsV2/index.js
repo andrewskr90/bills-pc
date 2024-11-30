@@ -46,8 +46,9 @@ const selectWithValues = (req, res, next) => {
     LEFT JOIN sets_v2 as s
         ON  s.set_v2_id = c.card_v2_set_id`
     if (Object.keys(req.query).length > 0) {
-        if (req.query.searchValue) {
-            query += QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'c.card_v2_name')
+        if (req.query.searchvalue) {
+            query += 'WHERE'
+            query += QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'c.card_v2_name')
         }
     }
     query += ' GROUP BY card_v2_id;'

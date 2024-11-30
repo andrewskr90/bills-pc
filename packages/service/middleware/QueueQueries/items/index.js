@@ -18,7 +18,8 @@ const selectWithValues = (req, res, next) => {
         c.condition_name,
         p.printing_id,
         p.printing_name,
-        p.printing_tcgp_printing_id
+        p.printing_tcgp_printing_id,
+        count(*) OVER () as count
     FROM SKU
     LEFT JOIN MarketPrice as m
         ON m.skuId = SKU.id
@@ -31,9 +32,10 @@ const selectWithValues = (req, res, next) => {
     LEFT JOIN sets_v2 as s
         ON  s.set_v2_id = i.setId`
     if (Object.keys(req.query).length > 0) {
-        if (req.query.searchValue) {
-            const { whereAnd, searchVariables } = QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'i.name')
-            query += whereAnd
+        if (req.query.searchvalue) {
+            const { likeAnd, searchVariables } = QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'i.name')
+            query += 'WHERE'
+            query += likeAnd
             query += ` AND (c.condition_id = '0655c457-ff60-11ee-b8b9-0efd996651a9' OR c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9')`
             variables.push(...searchVariables)
         }

@@ -1,8 +1,7 @@
 const { executeQueries } = require('../../db')
 const { formatItems } = require('../../middleware')
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { createItems, getItems, patchItem } = require('../../middleware/item-middleware')
-const { formatMarketPricesFromConcat } = require('../../middleware/market-price-middleware')
+const { createItems, getItems, patchItem, getItemsByExpansionId } = require('../../middleware/item-middleware')
 const QueueQueries = require('../../middleware/QueueQueries')
 
 const itemRouter = require('express').Router()
@@ -17,18 +16,18 @@ itemRouter.post('/',
 })
 
 itemRouter.get('/', 
-    verifyCookie,
-    decodeSessionToken,
+    QueueQueries.init,
     getItems,
+    executeQueries,
+    formatItems,
     (req, res, next) => {
         res.status(200).json(req.results)
 })
 
-itemRouter.get('/values', 
+itemRouter.get('/expansion-id/:expansionId',
     QueueQueries.init,
-    QueueQueries.items.selectWithValues,
+    getItemsByExpansionId,
     executeQueries,
-    formatMarketPricesFromConcat,
     formatItems,
     (req, res, next) => {
         res.status(200).json(req.results)

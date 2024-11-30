@@ -49,8 +49,9 @@ const selectWithValues = (req, res, next) => {
     LEFT JOIN sets_v2 as s
         ON  s.set_v2_id = p.product_set_id`
     if (Object.keys(req.query).length > 0) {
-        if (req.query.searchValue) {
-            query += QueryFormatters.searchValueToWhereLike(req.query.searchValue, 'p.product_name')
+        if (req.query.searchvalue) {
+            query += 'WHERE'
+            query += QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'p.product_name')
         }
     }
     query += ' GROUP BY product_id;'

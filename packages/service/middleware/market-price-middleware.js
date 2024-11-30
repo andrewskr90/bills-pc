@@ -1,8 +1,10 @@
 const { parseGroupConcat } = require("../utils")
 
 const formatMarketPricesFromConcat = (req, res, next) => {
+    const itemPrintingLookup = {}
     const itemPriceLookup = {}
     const itemLookup = {}
+    req.printingsAlreadyFormatted = true
     const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
         const datesAndPrices = itemPrinting.prices ? parseGroupConcat(itemPrinting.prices) : []
         if (itemPriceLookup[itemPrinting.id]) {
@@ -15,6 +17,10 @@ const formatMarketPricesFromConcat = (req, res, next) => {
                 [itemPrinting.printing_id]: datesAndPrices
             }
         }
+        itemPrintingLookup[itemPrinting.id] = {
+            ...itemPrintingLookup[itemPrinting.id],
+            [itemPrinting.printing_id]: itemPrinting.printing_name
+        }
         if (itemLookup[itemPrinting.id]) return false
         itemLookup[itemPrinting.id] = 1
         return true
@@ -22,8 +28,12 @@ const formatMarketPricesFromConcat = (req, res, next) => {
         return {
                 ...item,
                 prices: itemPriceLookup[item.id],
-                printings: Object.keys(itemPriceLookup[item.id]),
-                sealed: item.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9'
+                printings: Object.keys(itemPrintingLookup[item.id]).map(printingId => ({
+                    id: printingId,
+                    name: itemPrintingLookup[item.id][printingId]
+                })),
+                sealed: item.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9',
+
             }
     })
     req.results = formattedMarketPricesFromConcat

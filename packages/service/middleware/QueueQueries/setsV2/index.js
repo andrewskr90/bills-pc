@@ -8,24 +8,47 @@ const insert = (req, res, next) => {
 }
 
 const select = (req, res, next) => {
-    let query = `SELECT * FROM sets_v2`
-    const variables = []
-    // if query params exist, add it to query
-    if (req.query.filter) {
-        let queryFilter = QueryFormatters.filterConcatinated(req.query.filter)
-        query += ` WHERE ${queryFilter}`
-    }
+    const whereVariables = {}
     if (req.query.set_v2_id) {
-        query += ` WHERE set_v2_id = ?`
-        variables.push(req.query.set_v2_id)
+        whereVariables['set_v2_id'] = req.query.set_v2_id
     }
-    query += ` ORDER BY set_v2_release_date DESC, set_v2_name ASC`
+    if (req.query.set_v2_tcgplayer_set_id) {
+        whereVariables['set_v2_tcgplayer_set_id'] = req.query.set_v2_tcgplayer_set_id
+    }
+    const direction = req.query.direction ? req.query.direction.toLowerCase() : undefined 
+    const attribute = req.query.attribute ? req.query.attribute.toLowerCase() : undefined
+    let orderBy = ``
+    if (attribute && attribute.toLowerCase() === 'name') {
+        orderBy = ' ORDER BY set_v2_name'
+        if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
+        else orderBy += ' ASC'
+    } else {
+        orderBy =  ' ORDER BY set_v2_release_date'
+        if (direction && direction.toLowerCase() === 'asc') orderBy += ' ASC'
+        else orderBy += ' DESC'
+        orderBy += ', set_v2_name ASC'
+    }
+    let query = `
+        SELECT
+            set_v2_id,
+            set_v2_name,
+            set_v2_series, 
+            set_v2_tcgplayer_set_id, 
+            set_v2_ptcgio_id, 
+            set_v2_release_date,
+            count(*) OVER () as count
+        FROM sets_v2 
+        ${Object.keys(whereVariables).length > 0 ? 
+        `WHERE ${QueryFormatters.filterConcatinated(whereVariables)} ` : ''}
+    `
+    const variables = []
+    query += orderBy
     const pageInt = parseInt(req.query.page)
     if (pageInt && pageInt > 0) {
-        variables.push((pageInt-1)*10)
-        query += ` LIMIT ?,10;`
+        variables.push((pageInt-1)*20)
+        query += ` LIMIT ?,20;`
     } else {
-        query += ` LIMIT 0,10;`
+        query += ` LIMIT 0,20;`
     }
     req.queryQueue.push({ query, variables })
     next()
