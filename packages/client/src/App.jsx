@@ -92,28 +92,21 @@ const App = () => {
             setUserClaims(fetchedUserClaims)
             setReferenceData({
                 ...referenceData,
-                sets: formattedExpansions(expansionsResponse.data),
+                sets: formattedExpansions(expansionsResponse.data.expansions),
                 rarities: fetchedRarities,
                 bulk: {
                     rarity: raritiesResponse.data,
                     type: typesResponse.data,
                     printing: printingsResponse.data,
-                    set: expansionsResponse.data,
+                    set: expansionsResponse.data.expansions,
                     condition: conditionsResponse.data
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),
-                    expansion: calcFilterMarketExpansionsConfig(expansionsResponse.data)
+                    expansion: calcFilterMarketExpansionsConfig(expansionsResponse.data.expansions)
                 }
             })
             initialData = true
-            // await BillsPcService.getMarketPrices({ topTenAverage: true })
-            //     .then(res => {
-            //         setTopTenLoaded(res.data)
-            //     })
-            //     .catch(err => {
-            //         console.log(err)
-            //     })
         })()
         if (location.pathname === '/') {
             navigate('market')
