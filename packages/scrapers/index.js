@@ -3,14 +3,14 @@ import {
     getSetsBillsPc,
     postSetsBillsPc,
     postItemsBillsPc,
-    getItemsBillsPc,
     getLanguagesBillsPc,
     getPrintingsBillsPc,
     getConditionsBillsPc,
     getSkusBillsPc,
     postSkusBillsPc,
     postPricesBillsPc,
-    patchItemByFilterBillsPc
+    patchItemByFilterBillsPc,
+    getAllItemsInExpansionBillsPc
 } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
 import dotenv from 'dotenv'
@@ -87,7 +87,7 @@ const catalogueSync = async () => {
                 } else {
                     bpc_curExpansion = bpcExpansionsByGroupId[0]
                 }
-                const bpc_curExpansionItems = await getItemsBillsPc({ setId: bpc_curExpansion.set_v2_id }, cookies)
+                const bpc_curExpansionItems = await getAllItemsInExpansionBillsPc(bpc_curExpansion.set_v2_id, cookies)
                 const bpc_curSetItemLookup = {
                     items: {},
                     skus: {}

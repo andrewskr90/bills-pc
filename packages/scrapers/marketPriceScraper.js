@@ -364,96 +364,101 @@ const processNewItemsThenMarketPerPage = async (referenceLib, gatherPageMarketPr
 
 const marketScraper = async () => {
     const cookies = await loginBillsPc()
-    const setsToSearch = await getSetsBillsPc(cookies)
 
-    for (let i=0; i< setsToSearch.length; i++) {
-        console.log(`------------------------Scraping Market Prices: ${setsToSearch[i].set_v2_name}------------------------`)
-        //  get set cards and products from bills_pc
-        let currentSetCards
-        let currentSetProducts
-        try {
-            currentSetCards = await getCardsBillsPc({ card_v2_set_id: setsToSearch[i].set_v2_id }, cookies)
-            currentSetProducts = await getProductsBillsPc({ product_set_id: setsToSearch[i].set_v2_id }, cookies)
-        } catch (err) {
-            throw new Error(err)
-        }
-        //  check if current set has been scraped already today
-        if (currentSetCards.length > 0) {
-            const firstCardId = currentSetCards[0].card_v2_id
-            const parameters = { limit: 1 }
-            let cardMarketPrice
+    let moreSets = true
+    let page = 1
+    while (moreSets) {
+        const setsToSearch = await getSetsBillsPc(cookies, { page })
+        for (let i=0; i< setsToSearch.length; i++) {
+            console.log(`------------------------Scraping Market Prices: ${setsToSearch[i].set_v2_name}------------------------`)
+            //  get set cards and products from bills_pc
+            let currentSetCards
+            let currentSetProducts
             try {
-                cardMarketPrice = await getMarketPricesByCardIdBillsPc(cookies, firstCardId, parameters)
+                currentSetCards = await getCardsBillsPc({ card_v2_set_id: setsToSearch[i].set_v2_id }, cookies)
+                currentSetProducts = await getProductsBillsPc({ product_set_id: setsToSearch[i].set_v2_id }, cookies)
             } catch (err) {
                 throw new Error(err)
             }
-            if (cardMarketPrice.length > 0) {
-                const mostRecentPriceDate = cardMarketPrice[0].created_date.split('T')[0]
-                const todaysDate = new Date()
-                todaysDate.setHours(0,0,0,0)
+            //  check if current set has been scraped already today
+            if (currentSetCards.length > 0) {
+                const firstCardId = currentSetCards[0].card_v2_id
+                const parameters = { limit: 1 }
+                let cardMarketPrice
+                try {
+                    cardMarketPrice = await getMarketPricesByCardIdBillsPc(cookies, firstCardId, parameters)
+                } catch (err) {
+                    throw new Error(err)
+                }
+                if (cardMarketPrice.length > 0) {
+                    const mostRecentPriceDate = cardMarketPrice[0].created_date.split('T')[0]
+                    const todaysDate = new Date()
+                    todaysDate.setHours(0,0,0,0)
 
-                // check if most recent date matches todays date
-                if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
-                    console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
-                    continue
+                    // check if most recent date matches todays date
+                    if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
+                        console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
+                        continue
+                    }
+                }
+            //  just in case current set only has sealed product i.e. World Championship Decks
+            } else if (currentSetProducts.length > 0) {
+                const firstProductId = currentSetProducts[0].product_id
+                const parameters = { limit: 1 }
+                let productMarketPrice
+                try {
+                    productMarketPrice = await getMarketPricesByProductIdBillsPc(cookies, firstProductId, parameters)
+                } catch (err) {
+                    throw new Error(err)
+                }
+                if (productMarketPrice.length > 0) {
+                    const mostRecentPriceDate = productMarketPrice[0].created_date.split('T')[0]
+                    const todaysDate = new Date()
+                    todaysDate.setHours(0,0,0,0)
+                    //  check if most recent date matches todays date
+                    if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
+                        console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
+                        continue
+                    }
                 }
             }
-        //  just in case current set only has sealed product i.e. World Championship Decks
-        } else if (currentSetProducts.length > 0) {
-            const firstProductId = currentSetProducts[0].product_id
-            const parameters = { limit: 1 }
-            let productMarketPrice
+            //  building currentSet Cards and Products from addItemsFromTcgPlayer
+            const currentSetCardsLib = {}
+            const currentSetProductsLib = {}
+
+            //  flag cards as visited
+            currentSetCards.forEach(card => {
+                const cardTcgId = card.card_v2_tcgplayer_product_id
+                currentSetCardsLib[cardTcgId] = 1
+            })
+            //  flag products as visited
+            currentSetProducts.forEach(product => {
+                const productTcgId = product.product_tcgplayer_product_id
+                currentSetProductsLib[productTcgId] = 1
+            })
+            let referenceLib = {}
+            referenceLib.set_ = setsToSearch[i]
+            referenceLib.currentSetCards = currentSetCards
+            referenceLib.currentSetProducts = currentSetProducts
+            referenceLib.marketPricesToAdd = []
+            referenceLib.visitedItems = {}
+            //  referenceLib variables needed for addItemsFromTcgPlayer
+            referenceLib.currentSetCardsLib = currentSetCardsLib
+            referenceLib.currentSetProductsLib = currentSetProductsLib
+            referenceLib.cardsToAdd = []
+            referenceLib.productsToAdd = []
+            referenceLib.cookies = cookies
             try {
-                productMarketPrice = await getMarketPricesByProductIdBillsPc(cookies, firstProductId, parameters)
+                referenceLib = await processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gatherPageNewItems)
+                const marketPricesToAdd = referenceLib.marketPricesToAdd
+                if (marketPricesToAdd.length > 0) {
+                    await addMarketPricesBillsPc(marketPricesToAdd, cookies, setsToSearch[i])
+                }
             } catch (err) {
                 throw new Error(err)
             }
-            if (productMarketPrice.length > 0) {
-                const mostRecentPriceDate = productMarketPrice[0].created_date.split('T')[0]
-                const todaysDate = new Date()
-                todaysDate.setHours(0,0,0,0)
-                //  check if most recent date matches todays date
-                if (mostRecentPriceDate === todaysDate.toISOString().split('T')[0]) {
-                    console.log(`---------${setsToSearch[i].set_v2_name} has already been scraped today---------`)
-                    continue
-                }
-            }
         }
-        //  building currentSet Cards and Products from addItemsFromTcgPlayer
-        const currentSetCardsLib = {}
-        const currentSetProductsLib = {}
-
-        //  flag cards as visited
-        currentSetCards.forEach(card => {
-            const cardTcgId = card.card_v2_tcgplayer_product_id
-            currentSetCardsLib[cardTcgId] = 1
-        })
-        //  flag products as visited
-        currentSetProducts.forEach(product => {
-            const productTcgId = product.product_tcgplayer_product_id
-            currentSetProductsLib[productTcgId] = 1
-        })
-        let referenceLib = {}
-        referenceLib.set_ = setsToSearch[i]
-        referenceLib.currentSetCards = currentSetCards
-        referenceLib.currentSetProducts = currentSetProducts
-        referenceLib.marketPricesToAdd = []
-        referenceLib.visitedItems = {}
-        //  referenceLib variables needed for addItemsFromTcgPlayer
-        referenceLib.currentSetCardsLib = currentSetCardsLib
-        referenceLib.currentSetProductsLib = currentSetProductsLib
-        referenceLib.cardsToAdd = []
-        referenceLib.productsToAdd = []
-        referenceLib.cookies = cookies
-        try {
-            referenceLib = await processNewItemsThenMarketPerPage(referenceLib, gatherPageMarketPrices, gatherPageNewItems)
-            const marketPricesToAdd = referenceLib.marketPricesToAdd
-            if (marketPricesToAdd.length > 0) {
-                await addMarketPricesBillsPc(marketPricesToAdd, cookies, setsToSearch[i])
-            }
-        } catch (err) {
-            throw new Error(err)
-        }
+        if (setsToSearch.length === 0) moreSets = false
     }
 }
 
