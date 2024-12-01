@@ -107,7 +107,7 @@ for (let i=0; i<portfolio.sales.length; i++) {
             await convertSaleItemToListing(cookies, listing)
         }
     }
-    // WHAT ABOUT FREE CARDS INCLUDED WITH PURCHASE AT GAMESTOP?????
+    // TODO WHAT ABOUT FREE CARDS INCLUDED WITH PURCHASE AT GAMESTOP?????
     // if (sale.saleCards.length === 1) console.log(sale)
 }
 

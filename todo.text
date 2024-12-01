@@ -1,0 +1,75 @@
+refactor EditListingItem to work with update created listing item
+revisit import csv file
+investigate connection pools, should I be releasing them?
+update external listing, sellers appraisal AND buyers appraisal
+toggle between different appraisals for a listing as the buyer (seller appraiser, or one of buyers inferred appraisals)
+refactor gifts as imports to new Import table
+update how offers are saved into database (accepted offers held in listing instead of offer now)
+updating TCGplayer inventory needs to be streamlined, possibly with csv's
+convert lot with id 96000f7b-3ac2-4076-a7cb-f5f37a0875cd to have imports
+items are grouped into two parts when ordering by marketprice
+unavailable market prices on listing items that include items that sell seldomly (1st edition)
+
+add market prices to inturum assets. filter and pagination as well
+add purchage price to assets
+
+-- collection --
+view items in collection
+view items based off filter
+view transactions
+view total value
+    market value for items in collection required
+
+bare minimum
+view all items currently owned
+grade item / lot
+sell item / lot
+add to lot
+remove from lot
+see transactions and sub-transactions below
+
+
+-- Transactions --
+    purchase
+        item
+        bulksplit
+        lot
+    sell
+        item
+        bulksplit
+        lot
+    trade
+        item => item || bulksplit || lot
+        bulksplit => item || bulksplit || lot
+        lot => item || bulksplit || lot
+
+-- Sub Transactions -- // all the verbs for items in collections
+    rip
+        item => item(s)
+    sort
+        bulksplit => bulksplit(s) || item(s)
+    grade
+        item => item
+    insert into lot
+        item => lot
+    remove from lot
+        lot => item(s) && lot || item(s)
+
+** Technical notes **
+-- Transactions --
+    view / filter all transactions
+    view / filter items obtained in transactions
+    paginated response shows items currently in collection
+        sale, trade, rip, in or out of lot, sorted from bulk, bulk split
+    statistics on entire collection 
+
+mvp:
+import listing
+    card, product, and (lot) or bulk
+purchase listing
+import gift
+    card, product, and (lot) or bulk
+auth
+    register with validation
+    forgot password
+    
