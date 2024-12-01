@@ -36,6 +36,21 @@ export default {
             throw new Error(err)
         }
     },
+    async categories(apiToken, offset) {
+        try {
+            const categoriesRes = await axios({
+                ...tcgpapiConfig,
+                url: `/catalog/categories`,
+                params: { offset },
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }
+            })
+            return categoriesRes.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
     async groups(apiToken, offset) {
         try {
             const groupsRes = await axios({
