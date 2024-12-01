@@ -9,8 +9,9 @@ import Banner from '../../layouts/banner/index.jsx'
 import Toolbar from '../../layouts/toolbar/index.jsx'
 import { filterMarketItems } from '../../utils/filter'
 import { generateMarketItemSortCB } from '../../utils/sort'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
+import PageSelection from '../page-selection/index.jsx'
 
 const SelectItem = (props) => {
     const { 
@@ -25,13 +26,19 @@ const SelectItem = (props) => {
     const sortKey = 'itemSort'
     const filterKey = 'market'
     const navigate = useNavigate()
+    const [count, setCount] = useState()
+    const [isGrid, setIsGrid] = useState(false)
+    const location = useLocation()
 
     const submitSearch = (value) => {
         setLoading(true)
-        searchForItems(value)
+        const params = buildParams(location)
+        params.includePrintings = true
+        searchForItems(value, params)
             .then(res => {
                 setEmptyMessage('No results found.')
-                setSearchedItems(res.data)
+                setSearchedItems(res.data.items)
+                setCount(res.data.count)
                 setLoading(false)
             })
             .catch(err => {
@@ -54,12 +61,21 @@ const SelectItem = (props) => {
                 referenceData={referenceData} 
                 setReferenceData={setReferenceData}
                 sortKey={sortKey}
+                defaultSortDirection={'asc'}
             />
+            <PageSelection location={location} count={count} />
             <ItemContainer emptyMessage={emptyMessage} loading={loading}>
                 {applyMarketChanges(
                     filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
-                    return <Item key={item.id} item={item} referenceData={referenceData} handleSelectItem={handleSelectItem}/>
+                    return <Item 
+                        key={item.id} 
+                        item={item} 
+                        referenceData={referenceData} 
+                        handleSelectItem={handleSelectItem} 
+                        isGrid={isGrid} 
+                    />
                 })}
+                <PageSelection location={location} count={count} />
             </ItemContainer>
         </div>
     </div>)

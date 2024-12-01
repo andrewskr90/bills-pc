@@ -35,7 +35,7 @@ const Collection = (props) => {
                 <Link to='support-us'>Support Us</Link>
             </Header>
             <>
-                <Link to='update/purchase'><button>Update Collection</button></Link>
+                {/* <Link to='update/purchase'><button>Update Collection</button></Link> */}
                 <CategorySelector
                     basePage="collection"
                     categories={['assets', 'watching']} 
@@ -56,7 +56,7 @@ const Collection = (props) => {
                         userClaims={userClaims}
                      />}
                 /> */}
-                <Route 
+                {/* <Route 
                     path='/update/*'
                     element={<UpdatePortfolio
                         portfolio={portfolio}
@@ -65,7 +65,7 @@ const Collection = (props) => {
                         createdProxyUsers={createdProxyUsers}
                         setCreatedProxyUsers={setCreatedProxyUsers}
                      />}
-                />
+                /> */}
                 <Route 
                     path='/watching/*'
                     element={

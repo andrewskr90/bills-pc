@@ -5,38 +5,41 @@ import './assets/previousRoutes.css'
 import BillsPcService from '../../api/bills-pc'
 
 const PreviousRoutes = (props) => {
-    const { location, referenceData } = props
+    const { location } = props
     const [prevRoutes, setPrevRoutes] = useState([])
     const navigate = useNavigate()
 
-    const formatPrevMarketRoutes = async (prevRoutes) => {
+    const formatPrevMarketRoutes = async (parsedPath) => {
         let dynamicPath = ''
-        const filteredRoutes = prevRoutes.filter((route, idx) => idx < prevRoutes.length-1) // remove current route
         const routes = []
-        for (let i=0; i<filteredRoutes.length; i++) {
-            if (filteredRoutes[i].toLowerCase() === 'market') {
-                dynamicPath += `/${filteredRoutes[i].toLowerCase()}`
+        for (let i=0; i<parsedPath.length; i++) {
+            let cur = parsedPath[i]
+            if (cur.toLowerCase() === 'market') {
+                dynamicPath += `/${cur.toLowerCase()}`
                 routes.push({
-                    [filteredRoutes[i].toLowerCase()]: {
+                    [cur.toLowerCase()]: {
                         formatted: 'Market',
                         path: dynamicPath
                     }
                 })
-            } else if (filteredRoutes[i].toLowerCase() === 'expansion') {
-                dynamicPath += `/${filteredRoutes[i].toLowerCase()}`
-                i++
-                let expansions
-                await BillsPcService.getSetsV2({ params: { set_v2_id: filteredRoutes[i] } })
-                    .then(res => expansions = res.data)
-                    .catch(err => console.log(err))
-                if (expansions.length > 0) {
-                    dynamicPath += `/${filteredRoutes[i]}`
-                    routes.push({
-                        [filteredRoutes[i]]: {
-                            formatted: expansions[0].set_v2_name,
-                            path: dynamicPath
-                        }
-                    })
+            } else if (cur.toLowerCase() === 'expansion') {
+                if (parsedPath.length > 3) {
+                    dynamicPath += `/${cur.toLowerCase()}`
+                    i++
+                    cur = parsedPath[i]
+                    let expansions
+                    await BillsPcService.getSetsV2({ params: { set_v2_id: cur } })
+                        .then(res => expansions = res.data.expansions)
+                        .catch(err => console.log(err))
+                    if (expansions.length > 0) {
+                        dynamicPath += `/${cur}`
+                        routes.push({
+                            [cur]: {
+                                formatted: expansions[0].set_v2_name,
+                                path: dynamicPath
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -55,7 +58,7 @@ const PreviousRoutes = (props) => {
             const routesToSet = await generatePrevRoutes()
             setPrevRoutes(routesToSet)
         })()
-    }, [])
+    }, [location])
     return (<div className='previousRoutes'>
         {prevRoutes.length > 0 ? <>
             {prevRoutes.map((route, idx) => {

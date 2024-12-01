@@ -3,20 +3,20 @@ import './assets/search.css'
 
 const Search = (props) => {
     const { submitSearch } = props
-    const [searchValue, setSearchValue] = useState('')
+    const [value, setValue] = useState('')
 
     const handleValueChange = (e) => {
-        setSearchValue(e.target.value)
+        setValue(e.target.value)
     }
 
     const handleSubmitSearch = (e) => {
         e.preventDefault()
-        submitSearch(searchValue)
+        submitSearch(value)
     }
     
     return (<div className='search'>
         <form onSubmit={handleSubmitSearch}>
-            <input className='field' value={searchValue} onChange={handleValueChange}/>
+            <input className='field' value={value} onChange={handleValueChange}/>
             <button className='submit'>Search</button>
         </form>
     </div>)

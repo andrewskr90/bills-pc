@@ -190,22 +190,12 @@ const ImportListing = (props) => {
                             </div>)
                         })}
                         <div style={{ display: 'flex' }}>
-                            <button onClick={() => navigate('add-item')}>Add Item</button>
                             <button onClick={() => navigate('add-bulk')}>Add Bulk</button>
                             <button onClick={() => navigate('add-lot')}>Add Lot</button>
                         </div>
                         <button onClick={handleCreateExternalListing}>Create Listing</button>
                     </div>
                 }
-            />
-            <Route 
-                path='/add-item'
-                element={<SelectItem
-                    referenceData={referenceData}
-                    setReferenceData={setReferenceData}
-                    handleSelectItem={handleSelectItem}
-                    initialEmptyMessage={initialEmptyMessage}
-                />}
             />
             <Route 
                 path='/add-bulk'
@@ -216,7 +206,7 @@ const ImportListing = (props) => {
                 />}
             />
             <Route 
-                path='/add-lot'
+                path='/add-lot/*'
                 element={<SelectItems
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}

@@ -8,10 +8,9 @@ const ExpansionItemsMarketplace = (props) => {
     const {
         referenceData,
         setReferenceData,
-        selectedSetIdProp
     } = props
     const location = useLocation()
-    const selectedSetId = useParams()['setId'] || selectedSetIdProp
+    const selectedSetId = useParams()['setId']
     const navigate = useNavigate()
 
     const handleSelectItem = (item) => {

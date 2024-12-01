@@ -14,13 +14,13 @@ const ExpansionItemInfo = (props) => {
     const [selectedPrinting, setSelectedPrinting] = useState()
     const params = useParams()
     const targetItemId = params['itemId']
-
     useEffect(() => {
         (async () => {
             try {
-                const targetItemRes = await BillsPcService.getMarketPricesByItemId(targetItemId)
-                setTargetItem(applyMarketChanges(targetItemRes.data)[0])
-                setSelectedPrinting(targetItemRes.data[0].printings[0])
+                const params = { includeprintings: true }
+                const targetItemRes = await BillsPcService.getMarketPricesByItemId(targetItemId, params)
+                setTargetItem(applyMarketChanges(targetItemRes.data.items)[0])
+                setSelectedPrinting(targetItemRes.data.items[0].printings[0].id)
             } catch (err) {
                 console.log(err)
             }
@@ -71,7 +71,7 @@ const ExpansionItemInfo = (props) => {
                 </div>
             </div>
             <select value={selectedPrinting} onChange={(e) => setSelectedPrinting(e.target.value)}>
-                {targetItem.printings.map(printing => <option value={printing}>{referenceData.bulk.printing.find(p => p.printing_id === printing).printing_name}</option>)}
+                {targetItem.printings.map(printing => <option value={printing.id}>{printing.name}</option>)}
             </select>
             <div className='purchaseSection'>
                 <p>Support Bill's PC!</p>

@@ -1,10 +1,18 @@
 import React from 'react'
 import './assets/sort.css'
+import { buildParams, buildParamString } from '../../utils/location'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Sort = (props) => {
-    const { referenceData, setReferenceData, sortKey } = props
+    const { referenceData, setReferenceData, sortKey, defaultSortDirection, defaultAttribute } = props
+    const location = useLocation()
+    const navigate = useNavigate()
+
+    const params = buildParams(location)
 
     const handleChangeValue = (e) => {
+        params.attribute = e.target.value
+        navigate(location.pathname + buildParamString(params))
         setReferenceData({
             ...referenceData,
             [sortKey]: {
@@ -17,31 +25,24 @@ const Sort = (props) => {
 
     const toggleDirection = (e) => {
         if (e.currentTarget.value === 'asc') {
-            setReferenceData({
-                ...referenceData,
-                [sortKey]: {
-                    ...referenceData[sortKey],
-                    direction: 'desc'
-                }
-            })
+            params.direction = 'desc'
         } else {
-            setReferenceData({
-                ...referenceData,
-                [sortKey]: {
-                    ...referenceData[sortKey],
-                    direction: 'asc'
-                }
-            })
+            params.direction = 'asc'
         }
+        navigate(location.pathname + buildParamString(params))
     }
 
+    const directionValue = params.direction ? params.direction.toLowerCase() : defaultSortDirection
+    const attributeValue = params.attribute ? params.attribute.toLowerCase() : defaultAttribute
     return (<div className='sort'>
-        <button className='direction' value={referenceData[sortKey].direction} onClick={toggleDirection}>
-            {referenceData[sortKey].direction === 'asc' ? <i className='upArrow' /> : <i className= 'downArrow' />}
+        <button className='direction' value={directionValue} onClick={toggleDirection}>
+            {directionValue === 'asc'
+                ? <i className='downArrow' /> 
+                : <i className= 'upArrow' />}
         </button>
         <select className='value' onChange={handleChangeValue}>
             {Object.keys(referenceData[sortKey].values).map(value => {
-                if (referenceData[sortKey].value === value) return <option value={value} selected>{referenceData[sortKey].values[value].formatted}</option>
+                if (attributeValue === value.toLowerCase()) return <option value={value} selected>{referenceData[sortKey].values[value].formatted}</option>
                 return <option value={value}>{referenceData[sortKey].values[value].formatted}</option>
             })}
         </select>

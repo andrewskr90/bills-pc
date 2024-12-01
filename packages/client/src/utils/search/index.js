@@ -7,13 +7,15 @@ export const conditionSearchString = (value) => {
     return escapeApostrophes(value)
 }
 
-export const searchForItems = async (searchValue) => {
-    let marketSearchResults = []
-    const conditionedValue = conditionSearchString(searchValue)
-    if (conditionedValue !== '') {
-        marketSearchResults = await BillsPcService.getItemsWithValues({ searchValue: conditionedValue })
+export const searchForItems = async (unconditionedSearchValue, params) => {
+    let marketSearchResults = { items: [] }
+    params.searchvalue = conditionSearchString(unconditionedSearchValue)
+    if (params.searchvalue) {
+        marketSearchResults = await BillsPcService.getItems({ params })
                 .then(res => res.data)
                 .catch(err => console.log(err))
     }
-    return { data: marketSearchResults }
+    return { 
+        data: marketSearchResults
+    }
 }
