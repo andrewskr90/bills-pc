@@ -4,7 +4,7 @@ const { parseThenFormatAppraisals, parseThenFormatLabels } = require("../middlew
 const timeWithBackticks = '`time`'
 
 
-const getByUserId = async (userId) => {
+const getItemsByUserId = async (userId, reqQuery) => {
     if (!userId) throw new Error(`Error: User Id required to query for `)
 
     let query = `
@@ -15,8 +15,7 @@ const getByUserId = async (userId) => {
             i.name,
             i.tcgpId,
             GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
-            null as bulkSplitId,
-            null as labels
+            count(*) OVER () as count
         from V3_CollectedItem ci1
         LEFT JOIN Item i on i.id = ci1.itemId
         LEFT JOIN V3_Appraisal a on a.collectedItemId = ci1.id
@@ -75,7 +74,7 @@ const getByUserId = async (userId) => {
             right join V3_Sale s1 on s1.id = l1.saleId
             where s1.id is not null
             and ci2.id = ci1.id
-            and ci2.id not in ( -- which was not removed
+            and ci2.id not in ( -- which was not removed from lot before lot was purchased
                 select 
                     lr1.collectedItemId id 
                 from V3_LotEdit le2
@@ -116,19 +115,63 @@ const getByUserId = async (userId) => {
                         and le2.${timeWithBackticks} < s2.${timeWithBackticks}
                     )
                 )
-            )
+            ) -- TODO items that were pulled from bulk as bulk gem
         )
-        GROUP BY ci1.id
-        UNION ALL -- below is a copy and pasted query from above, edited to work with bulk splits
+    `
+
+    const direction = reqQuery.direction ? reqQuery.direction.toLowerCase() : undefined 
+    // const attribute = reqQuery.attribute ? reqQuery.attribute.toLowerCase() : undefined
+    let orderBy = ``
+    // if (attribute && attribute.toLowerCase() === 'expansionname') {
+    //     orderBy = ' ORDER BY set_v2_name'
+    //     if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
+    //     else orderBy += ' ASC'
+    // } else {
+        orderBy =  ' ORDER BY name'
+        if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
+        else orderBy += ' ASC'
+        // orderBy += ', set_v2_name ASC'
+    // }
+    let groupBy = ' GROUP BY ci1.id'
+
+    query += groupBy
+    query += orderBy
+
+
+    const variables = []
+    variables.push(userId)
+    const pageInt = parseInt(reqQuery.page)
+    if (pageInt && pageInt > 0) {
+        variables.push((pageInt-1)*20)
+        query += ` LIMIT ?,20;`
+    } else {
+        query += ` LIMIT 0,20;`
+    }
+    const req = { queryQueue: [{ query, variables }] }
+    const res = {}
+    try {
+        let portfolio
+        await executeQueries(req, res, (err) => {
+            if (err) throw new Error(err)
+            portfolio = req.results
+        })
+        return portfolio.map(portfolioItem => ({
+            ...portfolioItem,
+            appraisals: portfolioItem.appraisals ? parseThenFormatAppraisals(portfolioItem.appraisals) : null,
+        }))
+    } catch (err) {
+        throw err
+    }
+}
+
+const getBulkSplitsByUserId = async (userId) => {
+    if (!userId) throw new Error(`Error: User Id required to query for `)
+
+    let query = `
         SELECT 
-            null as collectedItemId,
-            null as printingId,
-            null as itemId,
-            null as name,
-            null as tcgpId,
-            null as appraisals,
             bs1.id as bulkSplitId,
-            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels
+            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels,
+            count(*) OVER () as count
         FROM V3_BulkSplit bs1
         LEFT JOIN (
             SELECT
@@ -250,22 +293,21 @@ const getByUserId = async (userId) => {
         GROUP BY bs1.id
         ;
     `
-    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
+    const req = { queryQueue: [{ query, variables: [userId] }] }
     const res = {}
     try {
-        let portfolio
+        let portfolioBulkSplits
         await executeQueries(req, res, (err) => {
             if (err) throw new Error(err)
-            portfolio = req.results
+            portfolioBulkSplits = req.results
         })
-        return portfolio.map(portfolioItem => ({
-            ...portfolioItem,
-            appraisals: portfolioItem.appraisals ? parseThenFormatAppraisals(portfolioItem.appraisals) : null,
-            labels: portfolioItem.labels ? parseThenFormatLabels(portfolioItem.labels) : null
+        return portfolioBulkSplits.map(bulkSplit => ({
+            ...bulkSplit,
+            labels: bulkSplit.labels ? parseThenFormatLabels(bulkSplit.labels) : null
         }))
     } catch (err) {
         throw err
     }
 }
 
-module.exports = { getByUserId }
+module.exports = { getItemsByUserId, getBulkSplitsByUserId }

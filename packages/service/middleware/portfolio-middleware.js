@@ -584,7 +584,7 @@ const combineSplitsWithSales = async (req, res, next) => {
     next()
 }
 
-const getPortfolio = async (req, res, next) => {
+const getPortfolioItems = async (req, res, next) => {
     const userId = req.claims.user_id
     const uniqueItemPrintingConditionInPortfolio = (portfolio) => {
         return portfolio.filter(item => item.itemId).map(item => ({
@@ -597,18 +597,32 @@ const getPortfolio = async (req, res, next) => {
         const today = new Date()
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
-        const portfolio = await Portfolio.getByUserId(userId)
+        const portfolio = await Portfolio.getItemsByUserId(userId, req.query)
         const portfolioItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
             uniqueItemPrintingConditionInPortfolio(portfolio), 
             yesterday, 
             today
         )
         const portfolioItemsWithPrices = tiePricesToItems(portfolio, portfolioItemsPrices)
-        req.results = portfolioItemsWithPrices
+
+        let count = 0
+        let countedCollectedItems = false
+        req.results = {}
+        req.results.items = portfolioItemsWithPrices.map(item => {
+            if (!countedCollectedItems) {
+                if (item.count !== null) {
+                    count += parseInt(item.count)
+                    countedCollectedItems = true
+                }
+            }
+            delete item.count
+            return item
+        })
+        req.results.count = count
         next()
     } catch (err) {
         next(err)
     }
 }
 
-module.exports = { evaluatePortfolio, combineSplitsWithSales, getPortfolio }
+module.exports = { evaluatePortfolio, combineSplitsWithSales, getPortfolioItems }
