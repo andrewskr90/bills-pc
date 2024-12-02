@@ -16,19 +16,9 @@ const AddItemSearch = (props) => {
     const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const [loading, setLoading] = useState(false)
     const [count, setCount] = useState()
-    const navigate = useNavigate()
 
     const sortKey = 'itemSort'
     const filterKey = 'market'
-
-    const submitSearch = (value) => {
-        if (value !== params.searchvalue) {
-            setLoading(true)
-            if (value) params.searchvalue = value
-            const builtParamString = buildParamString(params)
-            navigate(builtParamString)
-        }
-    }
 
     useEffect(() => {
         (async () => {
@@ -52,7 +42,7 @@ const AddItemSearch = (props) => {
 
     return (
         <>
-            <Search submitSearch={submitSearch} />
+            <Search setLoading={setLoading} />
             <Toolbar
                 viewRangeSelector={true} 
                 filterKey={filterKey}

@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
 import './assets/search.css'
+import { buildParams, buildParamString } from '../../utils/location'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Search = (props) => {
-    const { submitSearch } = props
+    const { setLoading, marketSearch } = props
     const [value, setValue] = useState('')
+    const location = useLocation()
+    const params = buildParams(location)
+    const navigate = useNavigate()
 
     const handleValueChange = (e) => {
         setValue(e.target.value)
@@ -11,7 +16,16 @@ const Search = (props) => {
 
     const handleSubmitSearch = (e) => {
         e.preventDefault()
-        submitSearch(value)
+        if (value !== params.searchvalue) {
+            setLoading(true)
+            if (value) {
+                params.searchvalue = value
+            } else {
+                delete params.searchvalue
+            }
+            const builtParamString = buildParamString(params)
+            navigate((marketSearch ? '/market/search' : '') + builtParamString)
+        }
     }
     
     return (<div className='search'>

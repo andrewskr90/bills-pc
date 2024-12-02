@@ -11,7 +11,7 @@ import { buildParams } from '../../../../utils/location/index.js'
 import BillsPcService from '../../../../api/bills-pc/index.js'
 
 const SearchResults = (props) => {
-    const { referenceData, setReferenceData, includePrintings } = props
+    const { referenceData, setReferenceData, includePrintings, loading, setLoading } = props
     const [value, setValue] = useState('')
     const [count, setCount] = useState()
     const location = useLocation()
@@ -31,6 +31,7 @@ const SearchResults = (props) => {
                         .then(res => {
                             setMarketSearchResults(res.data.items)
                             setCount(res.data.count)
+                            setLoading(false)
                         })
                         .catch(err => console.log(err))
             }
@@ -60,7 +61,7 @@ const SearchResults = (props) => {
         ?
         <>
             <PageSelection location={location} count={count} />
-            <ItemContainer>
+            <ItemContainer loading={loading} >
                 {marketSearchResults.map(result => {
                     return <Item 
                         key={result.id} 

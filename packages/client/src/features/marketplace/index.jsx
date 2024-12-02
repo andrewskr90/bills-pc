@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import ExpansionsMarketplace from './ExpansionsMarketplace.jsx'
 import ExpansionItemsMarketplace from './ExpansionItemsMarketplace.jsx'
@@ -7,21 +7,11 @@ import SearchResults from './features/search-results/index.jsx'
 import Header from '../../layouts/header/index.jsx'
 import { Link } from 'react-router-dom'
 import './assets/marketplace.css'
-import { buildParams, buildParamString } from '../../utils/location/index.js'
 
 const Marketplace = (props) => {
     const { referenceData, setReferenceData } = props
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
-    const location = useLocation()
-
-    const submitSearch = async (value) => {
-        if (value !== params.searchvalue) {
-            const params = buildParams(location)
-            if (value) params.searchvalue = value
-            const builtParamString = buildParamString(params)
-            navigate('search' + builtParamString)
-        }
-    }
 
     const handleSelectSet = (setId) => {
         navigate(`expansion/${setId}`)
@@ -31,7 +21,7 @@ const Marketplace = (props) => {
         <Header main title={'Marketplace'}>
             <Link to='/support-us'>Support Us</Link>
         </Header>
-        <Search submitSearch={submitSearch}/>
+        <Search marketSearch={true} setLoading={setLoading} />
         <Routes>
             <Route 
                 path='/'
@@ -50,9 +40,11 @@ const Marketplace = (props) => {
             />
             <Route 
                 path='/search/*'
-                element={<SearchResults 
+                element={<SearchResults
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}
+                    loading={loading}
+                    setLoading={setLoading}
                 />}
             />
         </Routes>

@@ -20,22 +20,11 @@ const PortfolioAssets = (props) => {
     } = props 
     // const navigate = useNavigate()
     const location = useLocation()
-    const navigate = useNavigate()
-    const params = buildParams(location)
     const [loading, setLoading] = useState(false)
     
     // const selectBulkSplit = (splitId) => {
     //     navigate(`bulk/${splitId}`)
     // }
-
-    const submitSearch = (value) => {
-        if (value !== params.searchvalue) {
-            setLoading(true)
-            if (value) params.searchvalue = value
-            const builtParamString = buildParamString(params)
-            navigate(builtParamString)
-        }
-    }
 
     useEffect(() => {
         (async () => {
@@ -58,7 +47,7 @@ const PortfolioAssets = (props) => {
                 <Route 
                     path="/"
                     element={<>
-                        <Search submitSearch={submitSearch} />
+                        <Search setLoading={setLoading} />
                         <Toolbar
                             sortKey={sortKey}
                             referenceData={referenceData}
