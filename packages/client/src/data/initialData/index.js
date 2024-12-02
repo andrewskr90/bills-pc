@@ -38,6 +38,16 @@ export const initialReferenceDataValues = {
             },
         }
     },
+    portfolioItemSort: {
+        value: 'name',
+        direction: 'asc',
+        values: {
+            name: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
+            },
+        }
+    },
     filter: {
         market: null
     }
