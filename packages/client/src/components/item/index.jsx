@@ -3,7 +3,6 @@ import './assets/item.css'
 
 const Item = (props) => {
     const { item, referenceData, handleSelectItem, countConfig, isGrid, allowSelectPrinting } = props
-    console.log(item)
     const [loadImage, setLoadImage] = useState(true)
     const [selectedPrinting, setSelectedPrinting] = useState(allowSelectPrinting ? item.printings[0].id : undefined)
     const handleImageError = () => {

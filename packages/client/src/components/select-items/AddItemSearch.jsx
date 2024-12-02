@@ -21,29 +21,32 @@ const AddItemSearch = (props) => {
     const sortKey = 'itemSort'
     const filterKey = 'market'
 
-    const submitSearch = (relayedSearch) => {
-        setLoading(true)
-        params.searchvalue = relayedSearch
-        const builtParamString = buildParamString(params)
-        navigate(builtParamString)
+    const submitSearch = (value) => {
+        if (value !== params.searchvalue) {
+            setLoading(true)
+            if (value) params.searchvalue = value
+            const builtParamString = buildParamString(params)
+            navigate(builtParamString)
+        }
     }
 
     useEffect(() => {
         (async () => {
             const relayedSearch = params.searchvalue
             params.includeprintings = true
-            await searchForItems(relayedSearch, params)
-                .then(res => {
-                    console.log(res)
-                    setEmptyMessage('No results found.')
-                    setSearchedItems(res.data.items)
-                    setCount(res.data.count)
-                    setLoading(false)
-                })
-                .catch(err => {
-                    console.log(err)
-                    setLoading(false)
-                })   
+            if (relayedSearch) {
+                await searchForItems(relayedSearch, params)
+                    .then(res => {
+                        setEmptyMessage('No results found.')
+                        setSearchedItems(res.data.items)
+                        setCount(res.data.count)
+                        setLoading(false)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        setLoading(false)
+                    })
+            }
         })()
     }, [location.search])
 

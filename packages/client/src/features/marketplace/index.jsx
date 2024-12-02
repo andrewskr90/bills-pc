@@ -15,10 +15,12 @@ const Marketplace = (props) => {
     const location = useLocation()
 
     const submitSearch = async (value) => {
-        const params = buildParams(location)
-        if (value) params.searchvalue = value
-        const builtParamString = buildParamString(params)
-        navigate('search' + builtParamString)
+        if (value !== params.searchvalue) {
+            const params = buildParams(location)
+            if (value) params.searchvalue = value
+            const builtParamString = buildParamString(params)
+            navigate('search' + builtParamString)
+        }
     }
 
     const handleSelectSet = (setId) => {

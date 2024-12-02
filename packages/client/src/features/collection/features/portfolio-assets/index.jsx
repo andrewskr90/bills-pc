@@ -1,11 +1,12 @@
-import React, { useEffect } from "react"
-import { Link, Route, Routes, useLocation } from "react-router-dom"
+import React, { useEffect, useState } from "react"
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import ItemContainer from "../../../../components/item-container/index.jsx"
 import CollectedItem from "../../../../components/collected-item/index.jsx"
 import BillsPcService from "../../../../api/bills-pc/index.js"
 import PageSelection from "../../../../components/page-selection/index.jsx"
-import { buildParams } from "../../../../utils/location/index.js"
+import { buildParams, buildParamString } from "../../../../utils/location/index.js"
 import Toolbar from "../../../../layouts/toolbar/index.jsx"
+import Search from "../../../search/index.jsx"
 // import BulkSplitInfo from "../../BulkSplitInfo.jsx"
 // import BulkSplit from "../../BulkSplit.jsx"
 const PortfolioAssets = (props) => {
@@ -19,10 +20,23 @@ const PortfolioAssets = (props) => {
     } = props 
     // const navigate = useNavigate()
     const location = useLocation()
+    const navigate = useNavigate()
+    const params = buildParams(location)
+    const [loading, setLoading] = useState(false)
     
     // const selectBulkSplit = (splitId) => {
     //     navigate(`bulk/${splitId}`)
     // }
+
+    const submitSearch = (value) => {
+        if (value !== params.searchvalue) {
+            setLoading(true)
+            if (value) params.searchvalue = value
+            const builtParamString = buildParamString(params)
+            navigate(builtParamString)
+        }
+    }
+
     useEffect(() => {
         (async () => {
             const params = buildParams(location)
@@ -31,6 +45,7 @@ const PortfolioAssets = (props) => {
             .then(res => {
                 setCount(res.data.count)
                 setPortfolio(res.data.items)
+                setLoading(false)
             })
             .catch(err => console.log(err))
         })()
@@ -43,6 +58,7 @@ const PortfolioAssets = (props) => {
                 <Route 
                     path="/"
                     element={<>
+                        <Search submitSearch={submitSearch} />
                         <Toolbar
                             sortKey={sortKey}
                             referenceData={referenceData}
@@ -51,7 +67,7 @@ const PortfolioAssets = (props) => {
                             defaultAttribute='name'
                         />
                         <PageSelection location={location} count={count} />
-                        <ItemContainer>
+                        <ItemContainer loading={loading} >
                             {/* <h3>Bulk</h3>
                             {portfolio.inventory.bulkSplits.map(split => {
                                 return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>

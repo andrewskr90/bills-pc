@@ -31,20 +31,23 @@ const SelectItem = (props) => {
     const location = useLocation()
 
     const submitSearch = (value) => {
-        setLoading(true)
-        const params = buildParams(location)
-        params.includePrintings = true
-        searchForItems(value, params)
-            .then(res => {
-                setEmptyMessage('No results found.')
-                setSearchedItems(res.data.items)
-                setCount(res.data.count)
-                setLoading(false)
-            })
-            .catch(err => {
-                console.log(err)
-                setLoading(false)
-            })
+        if (value !== params.searchvalue) {
+            setLoading(true)
+            const params = buildParams(location)
+            params.includePrintings = true
+            // TODO match this function to other `submitSearch` implimentations
+            // searchForItems(value, params)
+            //     .then(res => {
+            //         setEmptyMessage('No results found.')
+            //         setSearchedItems(res.data.items)
+            //         setCount(res.data.count)
+            //         setLoading(false)
+            //     })
+            //     .catch(err => {
+            //         console.log(err)
+            //         setLoading(false)
+            //     })
+        }
     }
 
     const handleClickBackArrow = () => {
