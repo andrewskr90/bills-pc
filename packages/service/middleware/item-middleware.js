@@ -13,8 +13,8 @@ const createItems = async (req, res, next) => {
 const getItems = async (req, res, next) => {
     const whereVariables = {}
     const variables = []
-    if (req.query.expansionId) {
-        whereVariables['set_v2_id'] = req.query.expansionId
+    if (req.query.expansionid) {
+        whereVariables['set_v2_id'] = req.query.expansionid
     }
     // if (req.query.set_v2_tcgplayer_set_id) {
     //     whereVariables['set_v2_tcgplayer_set_id'] = req.query.set_v2_tcgplayer_set_id
@@ -95,33 +95,6 @@ const getItems = async (req, res, next) => {
     next()
 }
 
-const getItemsByExpansionId = async (req, res, next) => {
-    const variables = []
-    let query = `
-    SELECT 
-        i.id,
-        i.name,
-        i.tcgpId,
-        s.set_v2_id,
-        s.set_v2_name,
-        s.set_v2_ptcgio_id,
-        s.set_v2_release_date,
-        s.set_v2_series,
-        count(*) OVER () as count
-    FROM Item as i
-    LEFT JOIN sets_v2 as s
-        ON  s.set_v2_id = i.setId
-    WHERE s.set_v2_id = ?
-    ORDER BY 
-        i.name 
-        asc
-    LIMIT ${req.query.page ? (parseInt(req.query.page)-1)*20 : '0'},20 -- logic in ExpansionItems.jsx is dependent on the LIMIT
-    ;`
-    variables.push(req.params.expansionId)
-    req.queryQueue.push({ query, variables })
-    next()
-}
-
 const patchItem = async (req, res, next) => {
     if (req.query.tcgpId) {
         req.results = await Item.patchByTcgpId(req.query.tcgpId, req.body)
@@ -130,4 +103,4 @@ const patchItem = async (req, res, next) => {
     }
 }
 
-module.exports = { createItems, getItems, patchItem, getItemsByExpansionId }
+module.exports = { createItems, getItems, patchItem }

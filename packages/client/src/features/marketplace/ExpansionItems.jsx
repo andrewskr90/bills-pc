@@ -21,17 +21,17 @@ const ExpansionItems = (props) => {
     
     useEffect(() => {
         (async () => {
-            let expansionId
+            let expansionid
             await BillsPcService.getSetsV2({ params: { set_v2_id: selectedSetId } })
                 .then(res => {
-                    expansionId = res.data.expansions[0].set_v2_id
+                    expansionid = res.data.expansions[0].set_v2_id
                     setExpansion(res.data.expansions[0])
                 })
                 .catch(err => console.log(err))
             const params = buildParams(location)
             const includeprintings = true
             const direction = params.direction ? params.direction : undefined
-            await BillsPcService.getItems({ params: { ...params, expansionId, includeprintings, direction } })
+            await BillsPcService.getItems({ params: { ...params, expansionid, includeprintings, direction } })
                 .then(res => {
                     setCount(res.data.count)
                     setItems(res.data.items)

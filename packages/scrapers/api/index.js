@@ -199,13 +199,13 @@ export const postItemsBillsPc = async (data, cookies) => {
     }
 }
 
-export const getAllItemsInExpansionBillsPc = async (expansionId, cookies) => {
+export const getAllItemsInExpansionBillsPc = async (expansionid, cookies) => {
     const items = []
     let moreItems = true
     let page = 1
     while (moreItems) {
         try {
-            const currentPageItems = await getItemsByExpansionIdBillsPc(expansionId, cookies, { page })
+            const currentPageItems = await getItemsBillsPc(cookies, { page, expansionid })
             items.push(...currentPageItems.items)
             if (currentPageItems.items.length > 0) {
                 page += 1
@@ -219,11 +219,11 @@ export const getAllItemsInExpansionBillsPc = async (expansionId, cookies) => {
     return items
 }
 
-export const getItemsByExpansionIdBillsPc = async (expansionId, cookies, params) => {
+export const getItemsBillsPc = async (cookies, params) => {
     try {
         const billsPcItems = await axios({
             baseURL: baseurl,
-            url: `/api/v1/items/expansion-id/${expansionId}`,
+            url: `/api/v1/items`,
             headers: { Cookie: cookies },
             params
         })        
