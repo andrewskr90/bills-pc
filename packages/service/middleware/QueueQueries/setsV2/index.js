@@ -8,7 +8,6 @@ const insert = (req, res, next) => {
 }
 
 const select = (req, res, next) => {
-    console.log(req.query)
     const whereVariables = {}
     let expansionSeriesWhereWithOr = ''
     if (req.query.set_v2_id) {

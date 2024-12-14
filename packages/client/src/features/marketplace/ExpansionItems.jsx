@@ -13,9 +13,9 @@ const ExpansionItems = (props) => {
     const [expansion, setExpansion] = useState()
     const [isGrid, setIsGrid] = useState(false)
     const [count, setCount] = useState()
+    const filterConfig = { itemType: ['card', 'product'] }
 
     const sortKey = 'itemSort'
-    const filterKey = 'market'
     const location = useLocation()
     const navigate = useNavigate()
     
@@ -48,7 +48,6 @@ const ExpansionItems = (props) => {
                 <p>Market Values</p>
             </div>
             <Toolbar
-                filterKey={filterKey} 
                 sortKey={sortKey}
                 viewToggleRowGrid={true}
                 referenceData={referenceData}
@@ -56,6 +55,7 @@ const ExpansionItems = (props) => {
                 isGrid={isGrid}
                 setIsGrid={setIsGrid}
                 defaultSortDirection='asc'
+                filterConfig={filterConfig}
             />
             {items.length > 0
             ?

@@ -13,27 +13,32 @@ const createItems = async (req, res, next) => {
 const getItems = async (req, res, next) => {
     const whereVariables = {}
     const variables = []
+    let itemTypeWhereWithOr = ''
     if (req.query.expansionid) {
         whereVariables['set_v2_id'] = req.query.expansionid
     }
-    // if (req.query.set_v2_tcgplayer_set_id) {
-    //     whereVariables['set_v2_tcgplayer_set_id'] = req.query.set_v2_tcgplayer_set_id
-    // }
+    if (req.query['filter-itemtype']) {
+        itemTypeWhereWithOr = '(' + req.query['filter-itemtype'].split(',')
+            .map((singularType, idx) => {
+                if (singularType === 'card') return `c.condition_id != '7e464ec6-0b23-11ef-b8b9-0efd996651a9'`
+                else if (singularType === 'product') return `c.condition_id = '7e464ec6-0b23-11ef-b8b9-0efd996651a9'`
+            }).join(' OR ') + ') '
+    }
     let whereStatement = ''
-    if (Object.keys(whereVariables).length > 0) {
+    const whereVarsPresent = Object.keys(whereVariables).length > 0
+    if (whereVarsPresent) {
         whereStatement += `WHERE ${QueryFormatters.filterConcatinated(whereVariables)} `
-        if (req.query.searchvalue) {
-            const { likeAnd, searchVariables } = QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'i.name')
-            whereStatement += likeAnd
-            variables.push(...searchVariables)
-        }
-    } else {
-        if (req.query.searchvalue) {
-            const { likeAnd, searchVariables } = QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'i.name')
-            whereStatement += 'WHERE '
-            whereStatement += likeAnd
-            variables.push(...searchVariables)
-        }
+    }
+    if (req.query.searchvalue) {
+        const { likeAnd, searchVariables } = QueryFormatters.searchValueToLikeAnd(req.query.searchvalue, 'i.name')
+        whereStatement += whereVarsPresent ? 'AND ' : 'WHERE '
+        whereStatement += likeAnd
+        variables.push(...searchVariables)
+    }
+    if (itemTypeWhereWithOr) {
+        if (whereVarsPresent || req.query.searchvalue) {
+            whereStatement += `AND ${itemTypeWhereWithOr} `
+        } else whereStatement += `WHERE ${itemTypeWhereWithOr} `
     }
     const direction = req.query.direction ? req.query.direction.toLowerCase() : undefined 
     const attribute = req.query.attribute ? req.query.attribute.toLowerCase() : undefined

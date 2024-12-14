@@ -2,7 +2,9 @@ export const checkIfFilterIsActive = (filterType, filter, params) => {
     const conditionedFilterType = filterType.toLowerCase()
     const conditionedFilter = filter.toLowerCase()
     if (params[`filter-${conditionedFilterType}`]) {
-        return params[`filter-${conditionedFilterType}`].includes(conditionedFilter)
+        return params[`filter-${conditionedFilterType}`]
+            .split(',')
+            .includes(conditionedFilter)
     }
     return false
 }
