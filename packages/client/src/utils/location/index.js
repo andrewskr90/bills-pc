@@ -35,13 +35,13 @@ export const buildPreviousRoute = (location, optionalNumber) => {
 
 export const buildParams = (location) => {
     const builtParams = {}
-    const splitSearch = decodeURI(location.search).split('?')
+    const splitSearch = location.search.split('?')
     if (splitSearch.length > 1) {
         const splitParams = splitSearch[1].split('&')
         splitParams.forEach(param => {
             const splitParam = param.split('=')
             if (splitParam.length > 1) {
-                builtParams[splitParam[0].toLowerCase()] = splitParam[1].toLowerCase()
+                builtParams[splitParam[0].toLowerCase()] = decodeURIComponent(splitParam[1])
             }
         })
     }
@@ -49,8 +49,9 @@ export const buildParams = (location) => {
 }
 
 export const buildParamString = (params) => {
-    return '?' + Object.keys(params).map((key, idx) => {
-        if (idx !== 0) return `&${key}=${params[key]}`
-        return `${key}=${params[key]}`
-    }).join('')
+    return '?' + Object.keys(params).map((key) => {
+        const encodedKey = encodeURIComponent(key)
+        const encodedValue = encodeURIComponent(params[key])
+        return `${encodedKey}=${encodedValue}`
+    }).join('&')
 }

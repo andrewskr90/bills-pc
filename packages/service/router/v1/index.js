@@ -30,6 +30,7 @@ const lotEditRouter = require('./lot-edit-router')
 const giftRouter = require('./gift-router')
 const importRouter = require('./import-router')
 const lotInsertRouter = require('./lot-insert-router')
+const expansionSeriesRouter = require('./expansion-series-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets', setRouter)
@@ -61,6 +62,7 @@ v1Router.use('/lot-edits', lotEditRouter)
 v1Router.use('/gifts', giftRouter)
 v1Router.use('/imports', importRouter)
 v1Router.use('/lot-inserts', lotInsertRouter)
+v1Router.use('/expansion-series', expansionSeriesRouter)
 
 
 

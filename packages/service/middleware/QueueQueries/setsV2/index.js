@@ -8,12 +8,21 @@ const insert = (req, res, next) => {
 }
 
 const select = (req, res, next) => {
+    console.log(req.query)
     const whereVariables = {}
+    let expansionSeriesWhereWithOr = ''
     if (req.query.set_v2_id) {
         whereVariables['set_v2_id'] = req.query.set_v2_id
     }
     if (req.query.set_v2_tcgplayer_set_id) {
         whereVariables['set_v2_tcgplayer_set_id'] = req.query.set_v2_tcgplayer_set_id
+    }
+    if (req.query['filter-expansionseries']) {
+        req.query['filter-expansionseries'].split(',')
+            .forEach((singularSeries, idx) => {
+                if (idx === 0) expansionSeriesWhereWithOr += `set_v2_series = '${singularSeries}'`
+                else  expansionSeriesWhereWithOr += ` OR set_v2_series = '${singularSeries}'`
+            })
     }
     const direction = req.query.direction ? req.query.direction.toLowerCase() : undefined 
     const attribute = req.query.attribute ? req.query.attribute.toLowerCase() : undefined
@@ -40,6 +49,11 @@ const select = (req, res, next) => {
         FROM sets_v2 
         ${Object.keys(whereVariables).length > 0 ? 
         `WHERE ${QueryFormatters.filterConcatinated(whereVariables)} ` : ''}
+        ${expansionSeriesWhereWithOr
+            ? Object.keys(whereVariables).length > 0
+                ? `AND (${expansionSeriesWhereWithOr})`
+                : `WHERE (${expansionSeriesWhereWithOr})`
+            : ''}
     `
     const variables = []
     query += orderBy

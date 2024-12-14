@@ -60,20 +60,6 @@ const App = () => {
         return filterMarketItemsConfig
     }
 
-    const calcFilterMarketExpansionsConfig = (expansions) => {
-        const expansionSeries = {}
-        expansions.forEach(expansion => {
-            if (expansion.set_v2_series) {
-                if (!expansionSeries[expansion.set_v2_series]) {
-                    expansionSeries[expansion.set_v2_series] = false
-                }
-            }
-        })
-        return {
-            expansionSeries: expansionSeries
-        }
-    }
-
     useEffect(() => {
         (async () => {
             let fetchedUserClaims
@@ -103,7 +89,6 @@ const App = () => {
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),
-                    expansion: calcFilterMarketExpansionsConfig(expansionsResponse.data.expansions)
                 }
             })
             initialData = true

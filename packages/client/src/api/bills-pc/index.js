@@ -43,6 +43,14 @@ const BillsPcService = {
             params: filter
         })
     },
+    getExpansionSeries(config) {
+        const { params } = config
+        return axios({
+            ...options,
+            url: `/api/v1/expansion-series`,
+            params
+        })
+    },
     postSetsToSets(setsArray) {
         return axios({
             ...options,

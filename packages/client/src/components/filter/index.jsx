@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import FilterModal from './FilterModal.jsx'
-import { countFilters } from '../../utils/filter'
 import './assets/filter.css'
+import { useLocation } from 'react-router-dom'
+import { buildParams } from '../../utils/location/index.js'
+import { countFilters } from './utils/index.js'
 
 const Filter = (props) => {
-    const { 
-        referenceData,
-        setReferenceData,
-        filterKey
-    } = props
+    const { filterConfig } = props
     const [showFilterModal, setShowFilterModal] = useState(false)
-    const filterCount = countFilters(referenceData.filter[filterKey])
+    const location = useLocation()
+    const params = buildParams(location)
+    const filterCount = countFilters(filterConfig, params)
 
     const openFilterModal = () => {
         setShowFilterModal(true)
@@ -26,11 +26,9 @@ const Filter = (props) => {
             <></>}
         </button>
         <FilterModal 
-            referenceData={referenceData} 
-            setReferenceData={setReferenceData}
             showFilterModal={showFilterModal} 
             setShowFilterModal={setShowFilterModal}
-            filterKey={filterKey}
+            filterConfig={filterConfig}
         />
     </div>)
 }

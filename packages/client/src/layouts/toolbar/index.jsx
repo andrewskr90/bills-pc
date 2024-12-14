@@ -9,18 +9,18 @@ const Toolbar = (props) => {
     const { 
         viewRangeSelector, 
         viewToggleRowGrid,
-        filterKey,
         referenceData, 
         setReferenceData,
         sortKey,
         isGrid,
         setIsGrid,
         defaultSortDirection,
-        defaultAttribute
+        defaultAttribute,
+        filterConfig
     } = props
 
     return (<div className='toolbar'>
-        {filterKey ? <Filter filterKey={filterKey} referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
+        {filterConfig ? <Filter filterConfig={filterConfig} /> : <></>}
         {sortKey ? (
             <Sort 
                 sortKey={sortKey} 
