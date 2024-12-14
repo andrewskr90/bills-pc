@@ -15,27 +15,11 @@ const ExpansionsMarketplace = (props) => {
     const [filterConfig, setFilterConfig] = useState()
     const navigate = useNavigate()
 
-    const calcFilterMarketExpansionsConfig = (expansions) => {
-        const visitedSeries = {}
-        const expansionSeries = []
-        expansions.forEach(expansion => {
-            if (expansion.set_v2_series) {
-                if (!visitedSeries[expansion.set_v2_series]) {
-                    visitedSeries[expansion.set_v2_series] = 1
-                    expansionSeries.push(expansion.set_v2_series)
-                }
-            }
-        })
-        return {
-            expansionSeries
-        }
-    }
-
     const params = buildParams(location)
     useEffect(() => {
         (async () => {
             await BillsPcService.getExpansionSeries({})
-                .then(res => setFilterConfig(calcFilterMarketExpansionsConfig(res.data)))
+                .then(res => setFilterConfig({ expansionSeries: res.data }))
             await BillsPcService.getSetsV2({ params })
                 .then(res => {
                     if (parseInt(params.page) && ((parseInt(params.page)*20) - 20) > res.data.count) {

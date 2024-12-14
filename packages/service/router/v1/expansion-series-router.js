@@ -9,7 +9,7 @@ expansionSeriesRouter.get('/',
     getExpansionSeries,
     executeQueries,
     (req, res, next) => {
-        const results = req.results
+        const results = req.results.map(result => result.set_v2_series)
         res.status(200).json(results)
 })
 
