@@ -18,7 +18,8 @@ dotenv.config()
 
 const pokemonCategoryIds = [
     3, // english
-    85, // japanese
+    50, // storage albums
+    85 // japanese
 ]
 
 const catalogueSync = async () => {
@@ -74,9 +75,13 @@ const catalogueSync = async () => {
         let expOffset = 0
         while (moreGroups) {
             try {
-                const currentPageGroups = await TCGPAPI.groups(apiToken, expOffset, curCategoryid)
-                if (currentPageGroups.length === 0) {
+                const fetchedPageGroups = await TCGPAPI.groups(apiToken, expOffset, curCategoryid)
+                if (fetchedPageGroups.length === 0) {
                     moreGroups = false
+                }
+                let currentPageGroups = fetchedPageGroups
+                if (curCategoryid === 50) {
+                    currentPageGroups = currentPageGroups.filter(group => group.name === 'Pokemon International Storage Albums')
                 }
                 for (let i=0; i<currentPageGroups.length; i++) {
                     const tcgp_curGroup = currentPageGroups[i]
