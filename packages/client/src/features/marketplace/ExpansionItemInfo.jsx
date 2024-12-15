@@ -17,8 +17,7 @@ const ExpansionItemInfo = (props) => {
     useEffect(() => {
         (async () => {
             try {
-                const params = { includeprintings: true }
-                const targetItemRes = await BillsPcService.getMarketPricesByItemId(targetItemId, params)
+                const targetItemRes = await BillsPcService.getMarketPricesByItemId(targetItemId)
                 setTargetItem(applyMarketChanges(targetItemRes.data.items)[0])
                 setSelectedPrinting(targetItemRes.data.items[0].printings[0].id)
             } catch (err) {

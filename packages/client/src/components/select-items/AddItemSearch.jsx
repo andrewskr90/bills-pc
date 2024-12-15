@@ -18,12 +18,10 @@ const AddItemSearch = (props) => {
     const [count, setCount] = useState()
 
     const sortKey = 'itemSort'
-    const filterKey = 'market'
 
     useEffect(() => {
         (async () => {
             const relayedSearch = params.searchvalue
-            params.includeprintings = true
             if (relayedSearch) {
                 await searchForItems(relayedSearch, params)
                     .then(res => {
@@ -45,7 +43,6 @@ const AddItemSearch = (props) => {
             <Search setLoading={setLoading} />
             <Toolbar
                 viewRangeSelector={true} 
-                filterKey={filterKey}
                 referenceData={referenceData} 
                 setReferenceData={setReferenceData}
                 sortKey={sortKey}

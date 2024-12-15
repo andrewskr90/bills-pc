@@ -24,7 +24,6 @@ const SelectItem = (props) => {
     const [searchedItems, setSearchedItems] = useState([])
     const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const sortKey = 'itemSort'
-    const filterKey = 'market'
     const navigate = useNavigate()
     const [count, setCount] = useState()
     const [isGrid, setIsGrid] = useState(false)
@@ -34,7 +33,6 @@ const SelectItem = (props) => {
         if (value !== params.searchvalue) {
             setLoading(true)
             const params = buildParams(location)
-            params.includePrintings = true
             // TODO match this function to other `submitSearch` implimentations
             // searchForItems(value, params)
             //     .then(res => {
@@ -60,7 +58,6 @@ const SelectItem = (props) => {
             <Search submitSearch={submitSearch} />
             <Toolbar 
                 viewRangeSelector={true} 
-                filterKey={filterKey}
                 referenceData={referenceData} 
                 setReferenceData={setReferenceData}
                 sortKey={sortKey}
@@ -68,6 +65,7 @@ const SelectItem = (props) => {
             />
             <PageSelection location={location} count={count} />
             <ItemContainer emptyMessage={emptyMessage} loading={loading}>
+                {/* TODO either update SelectItem or refactor other components to use SelectItems instead of this component */}
                 {applyMarketChanges(
                     filterMarketItems(searchedItems, referenceData.filter[filterKey])).sort(generateMarketItemSortCB(referenceData, sortKey)).map((item) => {
                     return <Item 

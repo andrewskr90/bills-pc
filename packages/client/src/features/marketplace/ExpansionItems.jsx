@@ -29,9 +29,8 @@ const ExpansionItems = (props) => {
                 })
                 .catch(err => console.log(err))
             const params = buildParams(location)
-            const includeprintings = true
             const direction = params.direction ? params.direction : undefined
-            await BillsPcService.getItems({ params: { ...params, expansionid, includeprintings, direction } })
+            await BillsPcService.getItems({ params: { ...params, expansionid, direction } })
                 .then(res => {
                     setCount(res.data.count)
                     setItems(res.data.items)

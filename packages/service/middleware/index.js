@@ -56,11 +56,9 @@ const formatItems = (req, res, next) => {
                 // description: item.product_description,
                 prices: item.prices,
                 tcgpId: item.tcgpId,
-                printings: req.query.includeprintings && req.query.includeprintings.toLowerCase() === 'true' 
-                    ? req.printingsAlreadyFormatted 
-                        ? item.printings 
-                        : formatPrintingsFromSkus(parseGroupConcat(item.printings)) 
-                    : undefined,
+                printings: req.printingsAlreadyFormatted 
+                    ? item.printings 
+                    : formatPrintingsFromSkus(parseGroupConcat(item.printings)),
                 sealed: item.sealed,
                 set: {
                     id: item.set_v2_id,

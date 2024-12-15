@@ -53,10 +53,7 @@ const getItems = async (req, res, next) => {
         else orderBy += ' ASC'
         orderBy += ', set_v2_name ASC'
     }
-    let groupBy = ``
-    if (req.query.includeprintings && req.query.includeprintings.toLowerCase() === 'true') {
-        groupBy += ' GROUP BY i.name, i.id'
-    }
+    const groupBy = ' GROUP BY i.name, i.id'
     let query = `
         SELECT 
             i.id,
@@ -67,24 +64,20 @@ const getItems = async (req, res, next) => {
             s.set_v2_ptcgio_id,
             s.set_v2_release_date,
             s.set_v2_series,
-            count(*) OVER () as count
-            ${req.query.includeprintings && req.query.includeprintings.toLowerCase() === 'true'
-                ? `, GROUP_CONCAT(
+            count(*) OVER () as count, 
+            GROUP_CONCAT(
                     '[', p.printing_id, ',', p.printing_name, ',', c.condition_id, ',', c.condition_name, ']' 
                     ORDER BY p.printing_tcgp_printing_id, c.condition_tcgp_condition_id SEPARATOR ','
-                ) as printings`
-                : ``}
+                ) as printings
         FROM Item as i
         LEFT JOIN sets_v2 as s
             ON  s.set_v2_id = i.setId
-        ${req.query.includeprintings && req.query.includeprintings.toLowerCase() === 'true' ? `
-            LEFT JOIN SKU
-                ON SKU.itemId = i.id
-            LEFT JOIN conditions c
-                ON c.condition_id = SKU.conditionId
-            LEFT JOIN printings p
-                ON p.printing_id = SKU.printingId
-        ` : ``}
+        LEFT JOIN SKU
+            ON SKU.itemId = i.id
+        LEFT JOIN conditions c
+            ON c.condition_id = SKU.conditionId
+        LEFT JOIN printings p
+            ON p.printing_id = SKU.printingId
     `
     query += whereStatement
     query += groupBy
