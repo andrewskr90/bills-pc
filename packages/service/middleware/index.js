@@ -23,6 +23,7 @@ const checkReqBody = (req, res, next) => {
 }
 
 const formatPrintingsFromSkus = (skus) => {
+    if (!skus) return []
     const visitedPrintings = {}
     return skus.filter(sku => {
         if (!visitedPrintings[sku[0]]) {
