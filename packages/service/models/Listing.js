@@ -157,10 +157,10 @@ const getWatching = async (watcherId) => {
             on V3_Watching.listingId = V3_Listing.id
         LEFT JOIN users as watchers
             on watchers.user_id = V3_Watching.watcherId
-        WHERE V3_Watching.watcherId = '${watcherId}' AND V3_Listing.saleId IS NULL
+        WHERE V3_Watching.watcherId = ? AND V3_Listing.saleId IS NULL
         Group by V3_Listing.id;
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [watcherId] }] }
     const res = {}
     let watchedListings
     await executeQueries(req, res, (err) => {
@@ -224,10 +224,10 @@ const getById = async (listingId) => {
             on Item.setId = sets_v2.set_v2_id
         LEFT JOIN V3_BulkSplit
             ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-        WHERE V3_Listing.id = '${listingId}'
+        WHERE V3_Listing.id = ?
         Group by V3_Listing.id;
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [listingId] }] }
     const res = {}
     let listing
     await executeQueries(req, res, (err) => {
@@ -403,10 +403,10 @@ const createExternal = async (listing, watcherId) => {
             }
             formattedImports.push(formattedImport)
         })
-        queryQueue.push(`${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`)
-        queryQueue.push(`${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`)        
+        queryQueue.push({ query: `${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`, variables: [] })
         if (collectedItemNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`)
+            queryQueue.push({ query: `${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`, variables: [] })
         }
     }
     if (listing.bulkSplits.length > 0) {
@@ -447,15 +447,15 @@ const createExternal = async (listing, watcherId) => {
             }
             formattedImports.push(formattedImport)
         }
-        queryQueue.push(`${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`)
+        queryQueue.push({ query: `${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`, variables: [] })
         if (bulkSplitLabelsToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`)  
+            queryQueue.push({ query: `${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`, variables: [] })  
         }
         if (bulkSplitNotesToInsert.length > 0) {
-            queryQueue.push(`${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`)  
+            queryQueue.push({ query: `${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`, variables: [] })  
         }
     }
-    queryQueue.push(`${objectsToInsert(formattedImports, 'V3_Import')};`)
+    queryQueue.push({ query: `${objectsToInsert(formattedImports, 'V3_Import')};`, variables: [] })
 
     let collectedItemId = undefined
     let bulkSplitId = undefined
@@ -498,9 +498,9 @@ const createExternal = async (listing, watcherId) => {
             }
             formattedLotInsertsToInsert.push(formattedLotInsert)
         })
-        queryQueue.push(`${objectsToInsert([formattedLot], 'V3_Lot')};`)  
-        queryQueue.push(`${objectsToInsert([formattedLotEdit], 'V3_LotEdit')};`)  
-        queryQueue.push(`${objectsToInsert(formattedLotInsertsToInsert, 'V3_LotInsert')};`)  
+        queryQueue.push({ query: `${objectsToInsert([formattedLot], 'V3_Lot')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert([formattedLotEdit], 'V3_LotEdit')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert(formattedLotInsertsToInsert, 'V3_LotInsert')};`, variables: [] })
     } else if (listing.items.length > 0) {
         collectedItemId = listing.items[0].collectedItemId
     } else if (listing.bulkSplits.length > 0) {
@@ -517,7 +517,7 @@ const createExternal = async (listing, watcherId) => {
         saleId: undefined,
         time: listing.time
     }
-    queryQueue.push(`${objectsToInsert([formattedListing], 'V3_Listing')};`)
+    queryQueue.push({ query: `${objectsToInsert([formattedListing], 'V3_Listing')};`, variables: [] })
     // create ListingPrice
     const listingPriceId = uuidV4()
     const formattedListingPrice = {
@@ -526,7 +526,7 @@ const createExternal = async (listing, watcherId) => {
         price: listing.price,
         time: listing.time
     }
-    queryQueue.push(`${objectsToInsert([formattedListingPrice], 'V3_ListingPrice')};`)
+    queryQueue.push({ query: `${objectsToInsert([formattedListingPrice], 'V3_ListingPrice')};`, variables: [] })
     // create Watching
     const watchingId = uuidV4()
     const formattedWatching = { 
@@ -534,7 +534,7 @@ const createExternal = async (listing, watcherId) => {
         listingId, 
         watcherId
     }
-    queryQueue.push(`${objectsToInsert([formattedWatching], 'V3_Watching')};`)
+    queryQueue.push({ query: `${objectsToInsert([formattedWatching], 'V3_Watching')};`, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {
@@ -552,7 +552,7 @@ const convertSaleItemsToListings = async (listing) => {
         gift_id,
         gift_receiver_id: listing.sellerId
     }
-    queryQueue.push(`${objectsToInsert([formattedGift], 'gifts')};`)
+    queryQueue.push({ query: `${objectsToInsert([formattedGift], 'gifts')};`, variables: [] })
     // create gift cards
     const giftCardsToInsert = []
     listing.cards.forEach(card => {
@@ -587,25 +587,25 @@ const convertSaleItemsToListings = async (listing) => {
         giftSplitsToInsert.push(formattedGiftBulkSplit)
     })
     if (giftCardsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftCardsToInsert, 'gift_cards')};`)
+        queryQueue.push({ query: `${objectsToInsert(giftCardsToInsert, 'gift_cards')};`, variables: [] })
     }
     if (giftProductsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftProductsToInsert, 'gift_products')};`)
+        queryQueue.push({ query: `${objectsToInsert(giftProductsToInsert, 'gift_products')};`, variables: [] })
     }
     if (giftSplitsToInsert.length > 0) {
-        queryQueue.push(`${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`)
+        queryQueue.push({ query: `${objectsToInsert(giftSplitsToInsert, 'gift_bulk_splits')};`, variables: [] })
     }
     if ((listing.cards.length + listing.products.length + listing.bulkSplits.length) > 1) {
         const { formattedLot, lotItemsToInsert, formattedListing } = formatListingWithLot(listing)
         formattedListing.saleId = listing.saleId
-        queryQueue.push(`${objectsToInsert([formattedLot], 'Lot')};`)
-        queryQueue.push(`${objectsToInsert(lotItemsToInsert, 'LotItem')};`)
-        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
+        queryQueue.push({ query: `${objectsToInsert([formattedLot], 'Lot')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert(lotItemsToInsert, 'LotItem')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert([formattedListing], 'Listing')};`, variables: [] })
         listingId = formattedListing.id
     } else {
         const formattedListing = formatListing(listing)
         formattedListing.saleId = listing.saleId
-        queryQueue.push(`${objectsToInsert([formattedListing], 'Listing')};`)
+        queryQueue.push({ query: `${objectsToInsert([formattedListing], 'Listing')};`, variables: [] })
         listingId = formattedListing.id
     }
     const req = { queryQueue }
@@ -626,7 +626,7 @@ const createPrice = async ({ listingId, price, time }) => {
         price,
         time: prepZuluForDB(priceTime)
     }
-    queryQueue.push(`${objectsToInsert([listingPriceToInsert], 'V3_ListingPrice')};`)
+    queryQueue.push({ query: `${objectsToInsert([listingPriceToInsert], 'V3_ListingPrice')};`, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {

@@ -13,7 +13,8 @@ const executeQueries = async (req, res, next) => {
         const connection = await pool.getConnection()
         try {
             // mysql2/promise queries return an array: [rows, fields]
-            const [rows, fields] = await connection.query(req.queryQueue[0])
+            const { query, variables } = req.queryQueue[0]
+            const [rows, fields] = await connection.query(query, variables)
             req.results = rows
             await connection.release()
             next()
@@ -27,7 +28,8 @@ const executeQueries = async (req, res, next) => {
         try {
             await connection.query('START TRANSACTION')
             for (let i=0; i<req.queryQueue.length; i++) {
-                const [rows, fields] = await connection.query(req.queryQueue[i])
+                const { query, variables } = req.queryQueue[i]
+                const [rows, fields] = await connection.query(query, variables)
             }
             await connection.commit()
             await connection.release()

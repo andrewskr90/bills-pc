@@ -10,7 +10,7 @@ const create = async (itemArray) => {
         return item
     })
     const query = QueryFormatters.objectsToInsert(formattedItemArray, 'Item')
-    queryQueue.push(query)
+    queryQueue.push({ query, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {        
@@ -33,7 +33,7 @@ const selectBy = async (filter) => {
         SELECT * FROM Item
         WHERE ${QueryFormatters.filterConcatinated(filter)}
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let items
     await executeQueries(req, res, (err) => {
@@ -48,7 +48,7 @@ const select = async () => {
         SELECT * FROM Items
         Limit 10
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let items
     await executeQueries(req, res, (err) => {
@@ -60,9 +60,9 @@ const select = async () => {
 
 const patchByTcgpId = async (tcgpId, values) => {
     const query = `UPDATE Item SET ${Object.keys(values).map((value, idx) => {
-        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''} WHERE tcgpId = '${tcgpId}'`
+        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''} WHERE tcgpId = ?`
     })}`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [tcgpId] }] }
     const res = {}
     await executeQueries(req, res, (err) => {
         if (err) throw err

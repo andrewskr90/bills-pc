@@ -129,7 +129,7 @@ const EditWatchedListing = (props) => {
                 </>
             } />
                 <Route 
-                path='/add-lot'
+                path='/add-lot/*'
                 element={<SelectItems
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}

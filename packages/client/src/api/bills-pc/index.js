@@ -28,11 +28,12 @@ const BillsPcService = {
             url: `/api/v1/sets`
         })
     },
-    getSetsV2(filter) {
+    getSetsV2(config) {
+        const { params } = config
         return axios({
             ...options,
             url: `/api/v1/sets-v2`,
-            params: filter
+            params
         })
     },
     getSetsBy(filter) {
@@ -40,6 +41,14 @@ const BillsPcService = {
             ...options,
             url: `/api/v1/sets`,
             params: filter
+        })
+    },
+    getExpansionSeries(config) {
+        const { params } = config
+        return axios({
+            ...options,
+            url: `/api/v1/expansion-series`,
+            params
         })
     },
     postSetsToSets(setsArray) {
@@ -135,36 +144,11 @@ const BillsPcService = {
             params: filter
         })
     },
-    getMarketPrices(filter) {
-        if (Object.keys(filter)[0] === 'set_v2_id') {
-            return axios({
-                ...options,
-                url: `/api/v1/market-prices/set-id/${filter['set_v2_id']}`,
-                params: filter
-            })
-        } else if (filter[Object.keys(filter)[0]] === true) {
-            return axios({
-                ...options,
-                url: '/api/v1/market-prices/top-ten-average'
-            })
-        } else {
-            return axios({
-                ...options,
-                url: '/api/v1/market-prices',
-                params: filter
-            })
-        }
-    },
-    getMarketPricesByCardId(cardId) {
+    getMarketPricesByItemId(itemId, params) {
         return axios({
             ...options,
-            url: `/api/v1/market-prices/card-id/${cardId}`
-        })
-    },
-    getMarketPricesByProductId(productId) {
-        return axios({
-            ...options,
-            url: `/api/v1/market-prices/product-id/${productId}`
+            url: `/api/v1/market-prices/item-id/${itemId}`,
+            params
         })
     },
     getProducts(filter) {
@@ -362,11 +346,12 @@ const BillsPcService = {
             url: '/api/v1/conditions'
         })
     },
-    getItemsWithValues(filter) {
+    getItems(config) {
+        const { params } = config
         return axios({
             ...options,
-            url:'/api/v1/items/values',
-            params: filter
+            url: '/api/v1/items',
+            params
         })
     },
     createListingPrice({ data }) {

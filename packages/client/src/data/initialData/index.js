@@ -22,10 +22,6 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'asc',
                 formatted: 'Name'
             },
-            // topTenAverageToday: {
-            //     defaultDirection: 'desc',
-            //     formatted: 'Top 10 Average'
-            // },
             release_date: {
                 defaultDirection: 'desc',
                 formatted: 'Release Date'
@@ -40,13 +36,16 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'asc',
                 formatted: 'Name'
             },
-            marketValue: {
-                defaultDirection: 'desc',
-                formatted: 'Market Value'
+        }
+    },
+    portfolioItemSort: {
+        value: 'name',
+        direction: 'asc',
+        values: {
+            name: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
             },
-            percentChange: {
-                defaultDirection: 'desc',
-                formatted: 'Percent Change'}
         }
     },
     filter: {

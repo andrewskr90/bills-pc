@@ -17,10 +17,10 @@ const getById = async (id) => {
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId
         LEFT JOIN V3_Appraisal a
             on a.collectedItemId = c.id
-        WHERE c.id = '${id}'
+        WHERE c.id = ?
         GROUP BY c.id
     `
-    const queryQueue = [query]
+    const queryQueue = [{ query, variables: [id] }]
     const req = { queryQueue }
     const res = {}
     let collectedItemResults

@@ -3,7 +3,7 @@ const QueryFormatters = require('../../../utils/queryFormatters')
 const insert = (req, res, next) => {
     const sets= req.body.sets
     const { columns, values } = QueryFormatters.seperateColumnsValues(sets)
-    req.queryQueue.push(`INSERT INTO sets (${columns}) VALUES (${values});`)
+    req.queryQueue.push({ query: `INSERT INTO sets (${columns}) VALUES (${values});`, variables: [] })
     next()
 }
 
@@ -14,7 +14,7 @@ const select = (req, res, next) => {
         let queryFilter = QueryFormatters.filterConcatinated(req.query)
         query += ` WHERE ${queryFilter}`
     }
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 

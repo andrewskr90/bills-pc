@@ -14,15 +14,13 @@ import Watching from './features/watching/index.jsx'
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [portfolio, setPortfolio] = useState(initialPortfolioValues)
+    const [count, setCount] = useState()
     const [createdProxyUsers, setCreatedProxyUsers] = useState([])
 
     const navigate = useNavigate()
 
     useEffect(() => {
         (async () => { 
-            await BillsPcService.getPortfolio({ timeFrame: '2w' })
-                .then(res => setPortfolio(res.data))
-                .catch(err => console.log(err))
             await BillsPcService.getUsers({ params: { proxy: true } })
                 .then(res => setCreatedProxyUsers(res.data))
                 .catch(err => console.log(err))
@@ -35,7 +33,7 @@ const Collection = (props) => {
                 <Link to='support-us'>Support Us</Link>
             </Header>
             <>
-                <Link to='update/purchase'><button>Update Collection</button></Link>
+                {/* <Link to='update/purchase'><button>Update Collection</button></Link> */}
                 <CategorySelector
                     basePage="collection"
                     categories={['assets', 'watching']} 
@@ -45,7 +43,14 @@ const Collection = (props) => {
             <Routes>
                 <Route 
                     path='/assets/*'
-                    element={<PortfolioAssets portfolio={portfolio} />}
+                    element={<PortfolioAssets 
+                        portfolio={portfolio} 
+                        setPortfolio={setPortfolio} 
+                        count={count} 
+                        setCount={setCount} 
+                        referenceData={referenceData}
+                        setReferenceData={setReferenceData}
+                    />}
                 />
                 {/* <Route 
                     path='/transactions/*'
@@ -56,7 +61,7 @@ const Collection = (props) => {
                         userClaims={userClaims}
                      />}
                 /> */}
-                <Route 
+                {/* <Route 
                     path='/update/*'
                     element={<UpdatePortfolio
                         portfolio={portfolio}
@@ -65,7 +70,7 @@ const Collection = (props) => {
                         createdProxyUsers={createdProxyUsers}
                         setCreatedProxyUsers={setCreatedProxyUsers}
                      />}
-                />
+                /> */}
                 <Route 
                     path='/watching/*'
                     element={

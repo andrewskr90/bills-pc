@@ -114,7 +114,7 @@ export const getSetsBillsPc = async (cookies, params) => {
             params,
             headers: { Cookie: cookies }
         })
-        const expansions = expansionsRes.data
+        const expansions = expansionsRes.data.expansions
         expansions.sort((a, b) => {
             if (a.set_v2_name < b.set_v2_name) return 1
             else if (a.set_v2_name > b.set_v2_name) return -1
@@ -199,11 +199,31 @@ export const postItemsBillsPc = async (data, cookies) => {
     }
 }
 
-export const getItemsBillsPc = async (params, cookies) => {
+export const getAllItemsInExpansionBillsPc = async (expansionid, cookies) => {
+    const items = []
+    let moreItems = true
+    let page = 1
+    while (moreItems) {
+        try {
+            const currentPageItems = await getItemsBillsPc(cookies, { page, expansionid })
+            items.push(...currentPageItems.items)
+            if (currentPageItems.items.length > 0) {
+                page += 1
+            } else {
+                moreItems = false
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    return items
+}
+
+export const getItemsBillsPc = async (cookies, params) => {
     try {
         const billsPcItems = await axios({
             baseURL: baseurl,
-            url: '/api/v1/items',
+            url: `/api/v1/items`,
             headers: { Cookie: cookies },
             params
         })        

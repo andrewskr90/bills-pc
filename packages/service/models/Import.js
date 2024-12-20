@@ -4,7 +4,7 @@ const QueryFormatters = require("../utils/queryFormatters")
 const create = async (imports) => {
     const queryQueue = []
     const query = QueryFormatters.objectsToInsert(imports, 'V3_Import')
-    queryQueue.push(query)
+    queryQueue.push({ query, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {
@@ -13,7 +13,7 @@ const create = async (imports) => {
     return imports.map(sku => sku.id)
 }
 
-const getById = async (id, userId) => {
+const getById = async (id) => {
     const query = `
         SELECT
             id,
@@ -26,9 +26,9 @@ const getById = async (id, userId) => {
         FROM V3_Import i
         LEFT JOIN users u
             ON u.user_id = i.importerId OR u.proxyCreatorId = i.importerId
-        WHERE id = '${id}'
+        WHERE id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [id] }] }
     const res = {}
     let imp
     await executeQueries(req, res, (err) => {

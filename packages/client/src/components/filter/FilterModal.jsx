@@ -1,54 +1,52 @@
 import React from 'react'
-import { clearFilters } from '../../utils/filter'
 import { camelCaseToCapitalized } from '../../utils/string'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { buildParams, buildParamString } from '../../utils/location'
+import { checkIfFilterIsActive } from './utils'
 
 const FilterModal = (props) => {
-    const { referenceData, setReferenceData, showFilterModal, setShowFilterModal, filterKey } = props
+    const { showFilterModal, setShowFilterModal, filterConfig } = props
+    const location = useLocation()
+    const params = buildParams(location)
+    const navigate = useNavigate()
 
     const toggleFilter = (filterType, filter) => {
-        setReferenceData({
-            ...referenceData,
-            filter: {
-                ...referenceData.filter,
-                [filterKey]: {
-                    ...referenceData.filter[filterKey],
-                    [filterType]: {
-                        ...referenceData.filter[filterKey][filterType],
-                        [filter]: !referenceData.filter[filterKey][filterType][filter]
-                    }
-                }
+        const conditionedFilterType = filterType.toLowerCase()
+        const conditionedFilter = filter.toLowerCase()
+        if (params[`filter-${conditionedFilterType}`]) {
+            if (params[`filter-${conditionedFilterType}`].includes(conditionedFilter)) {
+                params[`filter-${conditionedFilterType}`] = 
+                    params[`filter-${conditionedFilterType}`]
+                        .split(',')
+                        .filter(existingFilter => existingFilter !== conditionedFilter)
+                        .join(',')
+            } else {
+                params[`filter-${conditionedFilterType}`] += `,${conditionedFilter.toLowerCase()}`
             }
-        })
-    }
-
-    const handleClearFilters = () => {
-        setReferenceData({
-            ...referenceData,
-            filter: {
-                ...referenceData.filter,
-                [referenceData.filter[filterKey]]: clearFilters(referenceData.filter[filterKey])
-            }
-        })
+        } else {
+            params[`filter-${conditionedFilterType}`] = conditionedFilter.toLowerCase()
+        }
+        navigate(location.pathname + buildParamString(params))
     }
 
     return (<div className={showFilterModal ? 'modalBackground' : 'hidden'}>
         <div className='modalContent filterModal'>
             <h2>Filters</h2>
-            {Object.keys(referenceData.filter[filterKey]).map(filterType => {
+            {(Object.keys(filterConfig).map(filterType => {
                 return <div className='filterSection'>
                     <p>{camelCaseToCapitalized(filterType)}</p>
                     <div className='filterBubbles'>
-                        {Object.keys(referenceData.filter[filterKey][filterType]).map(filter => {
-                            return <div className={`filterBubble ${referenceData.filter[filterKey][filterType][filter] ? 'active' : ''}`} onClick={() => toggleFilter(filterType, filter)}>
+                        {filterConfig[filterType].map(filter => {
+                            return <div className={`filterBubble ${checkIfFilterIsActive(filterType, filter, params) ? 'active' : ''}`} onClick={() => toggleFilter(filterType, filter)}>
                                 {/* filter keys are already formatted */}
                                 <p>{filter}</p>
                             </div>
                         })}
                     </div>
                 </div>
-            })}
+            }))}
             <div className='clearAndClose'>
-                <button onClick={handleClearFilters}>Clear All</button>
+                <button onClick={() => navigate(location.pathname)}>Clear All</button>
                 <button onClick={() => setShowFilterModal(false)}>Close</button>
             </div>
         </div>

@@ -6,8 +6,6 @@ dotenv.config()
 // --data-binary "grant_type=client_credentials&client_id=PUBLIC_KEY&client_secret=PRIVATE_KEY" \
 // "https://api.tcgplayer.com/token"
 
-const categoryId = 3 // pokemon
-
 const tcgpapiConfig = {
     baseURL: 'https://api.tcgplayer.com',
     headers: {
@@ -36,7 +34,22 @@ export default {
             throw new Error(err)
         }
     },
-    async groups(apiToken, offset) {
+    async categories(apiToken, offset) {
+        try {
+            const categoriesRes = await axios({
+                ...tcgpapiConfig,
+                url: `/catalog/categories`,
+                params: { offset },
+                headers: {
+                    Authorization: `bearer ${apiToken}`
+                }
+            })
+            return categoriesRes.data.results
+        } catch (err) {
+            throw new Error(err)
+        }
+    },
+    async groups(apiToken, offset, categoryId) {
         try {
             const groupsRes = await axios({
                 ...tcgpapiConfig,
@@ -95,7 +108,7 @@ export default {
             throw new Error(err)
         }
     },
-    async languages(apiToken) {
+    async languages(apiToken, categoryId) {
         try {
             const languages = await axios({
                 ...tcgpapiConfig,
@@ -109,7 +122,7 @@ export default {
             throw new Error(err)
         }
     },
-    async printings(apiToken) {
+    async printings(apiToken, categoryId) {
         try {
             const printings = await axios({
                 ...tcgpapiConfig,
@@ -123,7 +136,7 @@ export default {
             throw new Error(err)
         }
     },
-    async conditions(apiToken) {
+    async conditions(apiToken, categoryId) {
         try {
             const conditions = await axios({
                 ...tcgpapiConfig,

@@ -4,7 +4,7 @@ const insert = (req, res, next) => {
     const sales = req.sales
     if (sales.length > 0) {
         const query = QueryFormatters.objectsToInsert(sales, 'sales')
-        req.queryQueue.push(`${query};`)
+        req.queryQueue.push({ query: `${query};`, variables: [] })
     }
     next()
 }
@@ -28,7 +28,7 @@ const select = (req, res, next) => {
             LEFT JOIN cards_v2 ON cards_v2.card_v2_id = collected_cards.collected_card_card_id
             LEFT JOIN sale_notes ON sale_note_sale_id = sale_id`
     }
-    req.queryQueue.push(query)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 

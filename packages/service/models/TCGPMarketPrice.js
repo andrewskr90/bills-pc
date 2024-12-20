@@ -4,7 +4,7 @@ const QueryFormatters = require("../utils/queryFormatters")
 const create = async (prices) => {
     const queryQueue = []
     const query = QueryFormatters.objectsToInsert(prices, 'MarketPrice')
-    queryQueue.push(query)
+    queryQueue.push({ query, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {

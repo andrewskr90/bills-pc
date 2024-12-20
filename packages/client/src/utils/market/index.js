@@ -95,11 +95,11 @@ export const applyMarketChanges = (itemsArray) => {
         const formattedPrices = {}
         const marketValue = {}
         item.printings.forEach(printing => {
-            const itemMarketData = calcItemMarketData(item.prices[printing])
+            const itemMarketData = calcItemMarketData(item.prices[printing.id])
             if (itemMarketData) {
-                formattedPrices[printing] = itemMarketData
+                formattedPrices[printing.id] = itemMarketData
                 if (itemMarketData.prices.latest) {
-                    marketValue[printing] = itemMarketData.prices.latest[0]
+                    marketValue[printing.id] = itemMarketData.prices.latest[0]
                 }
             }
         })

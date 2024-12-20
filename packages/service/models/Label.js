@@ -29,7 +29,7 @@ const getLabelByExactComponents = async (label) => {
         GROUP BY labelId
         ${buildHaving()}
     ;`   
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let labels
     await executeQueries(req, res, (err) => {
@@ -42,12 +42,13 @@ const getLabelByExactComponents = async (label) => {
 
 const createLabel = async (labelId, label) => {
     const queryQueue = []
-    queryQueue.push(`INSERT INTO V3_Label (id) VALUES ('${labelId}');`)
+    queryQueue.push({ query: `INSERT INTO V3_Label (id) VALUES (?);`, variables: [labelId] })
     Object.keys(label).filter(component => label[component].length !== 0).forEach(component => {
-        label[component].forEach(componentId => queryQueue.push(`
-            INSERT INTO V3_LabelComponent (id, labelId, ${formatSingularComponent(component)}Id) 
-                VALUES ('${uuidV4()}', '${labelId}', '${componentId}');
-        `))
+        label[component].forEach(componentId => queryQueue.push({
+            query: `INSERT INTO V3_LabelComponent (id, labelId, ${formatSingularComponent(component)}Id) 
+                VALUES ('${uuidV4()}', ?, ?);`,
+            variables: [labelId, componentId]
+        }))
     })
     const req = { queryQueue }
     const res = {}

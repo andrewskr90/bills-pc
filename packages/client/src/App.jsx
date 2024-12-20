@@ -60,29 +60,11 @@ const App = () => {
         return filterMarketItemsConfig
     }
 
-    const calcFilterMarketExpansionsConfig = (expansions) => {
-        const expansionSeries = {}
-        expansions.forEach(expansion => {
-            if (expansion.set_v2_series) {
-                if (!expansionSeries[expansion.set_v2_series]) {
-                    expansionSeries[expansion.set_v2_series] = false
-                }
-            }
-        })
-        return {
-            expansionSeries: expansionSeries
-        }
-    }
-
     useEffect(() => {
         (async () => {
             let fetchedUserClaims
             await BillsPcService.authenticateSession()
                 .then(res => fetchedUserClaims = res.data)
-                .catch(err => console.log(err))
-            let fetchedExpansions
-            await BillsPcService.getSetsV2()
-                .then(res => fetchedExpansions = res.data)
                 .catch(err => console.log(err))
             let fetchedRarities
             await BillsPcService.getReferenceData()
@@ -91,33 +73,25 @@ const App = () => {
             const raritiesResponse = await BillsPcService.getRarities()
             const typesResponse = await BillsPcService.getTypes()
             const printingsResponse = await BillsPcService.getPrintings()
-            const expansionsResponse = await BillsPcService.getSetsV2()
+            const expansionsResponse = await BillsPcService.getSetsV2({ params: {} })
             const conditionsResponse = await BillsPcService.getConditions()
             setUserClaims(fetchedUserClaims)
             setReferenceData({
                 ...referenceData,
-                sets: formattedExpansions(fetchedExpansions),
+                sets: formattedExpansions(expansionsResponse.data.expansions),
                 rarities: fetchedRarities,
                 bulk: {
                     rarity: raritiesResponse.data,
                     type: typesResponse.data,
                     printing: printingsResponse.data,
-                    set: expansionsResponse.data,
+                    set: expansionsResponse.data.expansions,
                     condition: conditionsResponse.data
                 },
                 filter: {
                     market: calcFilterMarketItemsConfig(fetchedRarities),
-                    expansion: calcFilterMarketExpansionsConfig(fetchedExpansions)
                 }
             })
             initialData = true
-            // await BillsPcService.getMarketPrices({ topTenAverage: true })
-            //     .then(res => {
-            //         setTopTenLoaded(res.data)
-            //     })
-            //     .catch(err => {
-            //         console.log(err)
-            //     })
         })()
         if (location.pathname === '/') {
             navigate('market')

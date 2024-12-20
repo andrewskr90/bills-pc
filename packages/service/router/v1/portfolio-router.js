@@ -1,11 +1,11 @@
 const portfolioRouter = require('express').Router()
 const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-middleware')
-const { getPortfolio, evaluatePortfolio } = require('../../middleware/portfolio-middleware')
+const { getPortfolioItems } = require('../../middleware/portfolio-middleware')
 
 portfolioRouter.get('/', 
     verifyCookie,
     decodeSessionToken,
-    getPortfolio,
+    getPortfolioItems,
     async (req, res, next) => {
         res.status(200).json(req.results)
 })

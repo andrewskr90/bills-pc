@@ -28,9 +28,9 @@ const findByUserId = async (userId) => {
         LEFT JOIN types on type_id = label_component_type_id
         LEFT JOIN printings on printing_id = label_component_printing_id
         LEFT JOIN sets_v2 on set_v2_id = label_component_set_v2_id
-        WHERE bulk_split_user_id = '${userId}'
+        WHERE bulk_split_user_id = ?
     ;`   
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId] }] }
     const res = {}
     let bulkSplits
     await executeQueries(req, res, (err) => {
@@ -67,10 +67,10 @@ const getById = async (id) => {
             LEFT JOIN V3_LabelComponent lc on lc.labelId = la.id
             GROUP BY bsl.bulkSplitId
         ) bsl on bsl.bulkSplitId = bs1.id
-        WHERE bs1.id = '${id}'
+        WHERE bs1.id = ?
         GROUP BY bs1.id
     `
-    const queryQueue = [query]
+    const queryQueue = [{ query, variables: [id] }]
     const req = { queryQueue }
     const res = {}
     let bulkSplitResults

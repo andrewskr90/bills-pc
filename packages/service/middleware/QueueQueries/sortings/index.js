@@ -6,7 +6,7 @@ const insert = (req, res, next) => {
         const query = QueryFormatters.objectsToInsert([
             { sorting_id, sorting_date, sorting_bulk_split_id, sorting_sorter_id: req.claims.user_id }
         ], 'sortings')
-        req.queryQueue.push(`${query};`)
+        req.queryQueue.push({ query: `${query};`, variables: [] })
     })
     next()
 }

@@ -1,18 +1,10 @@
 import React, { useState } from 'react'
-import Item from '../item/index.jsx'
-import Search from '../../features/search/index.jsx'
-import { searchForItems } from '../../utils/search'
 import './assets/selectItem.css'
-import { applyMarketChanges } from '../../utils/market'
-import ItemContainer from '../item-container/index.jsx'
 import Banner from '../../layouts/banner/index.jsx'
-import Toolbar from '../../layouts/toolbar/index.jsx'
-import { filterMarketItems } from '../../utils/filter'
-import { generateMarketItemSortCB } from '../../utils/sort'
-import { useNavigate } from 'react-router-dom'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { buildPreviousRoute } from '../../utils/location'
-import ExpansionsMarketplace from '../../features/marketplace/ExpansionsMarketplace.jsx'
-import ExpansionItems from '../../features/marketplace/ExpansionItems.jsx'
+import AddItemSearch from './AddItemSearch.jsx'
+import AddItemExpansion from './AddItemExpansion.jsx'
 
 const SelectItems = (props) => {
     const { 
@@ -21,66 +13,46 @@ const SelectItems = (props) => {
         handleSelectItems,
         initialEmptyMessage,
     } = props
-    const [loading, setLoading] = useState(false)
-    const [searchedItems, setSearchedItems] = useState([])
-    const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const [lotItemCounts, setLotItemCounts] = useState({})
-    const [expansionOrSearch, setExpansionOrSearch] = useState('search')
-    const [selectedExpansion, setSelectedExpansion] = useState(undefined)
-    const sortKey = 'itemSort'
-    const filterKey = 'market'
     const navigate = useNavigate()
+    const location = useLocation()
 
-    const handleAddItem = (item, printing) => {
+    const handleAddItem = (item, printingId) => {
         setLotItemCounts({
             ...lotItemCounts,
             [item.id]: lotItemCounts[item.id] ? lotItemCounts[item.id].count ? {
                 ...lotItemCounts[item.id],
                 count: {
                     ...lotItemCounts[item.id].count,
-                    [printing]: lotItemCounts[item.id].count[printing] ? lotItemCounts[item.id].count[printing] + 1 : 1
+                    [printingId]: lotItemCounts[item.id].count[printingId] ? lotItemCounts[item.id].count[printingId] + 1 : 1
                 }
             } : {
                 ...lotItemCounts[item.id],
-                count: { [printing]: 1 }
+                count: { [printingId]: 1 }
             } : {
                 ...item,
-                count: { [printing]: 1 },
-                activePrinting: printing
+                count: { [printingId]: 1 },
+                activePrinting: printingId
             }
         })
     }
-    const handleSubtractItem = (item, printing) => {
+    const handleSubtractItem = (item, printingId) => {
         if (lotItemCounts[item.id]) {
             if (lotItemCounts[item.id].count) {
-                if (lotItemCounts[item.id].count[printing]) {
+                if (lotItemCounts[item.id].count[printingId]) {
                     setLotItemCounts({ 
                         ...lotItemCounts, 
                         [item.id]: { 
                             ...lotItemCounts[item.id], 
                             count: {
                                 ...lotItemCounts[item.id].count,
-                                [printing]: lotItemCounts[item.id].count[printing] - 1 
+                                [printingId]: lotItemCounts[item.id].count[printingId] - 1 
                             }
                         } 
                     })
                 }
             }
         } 
-    }
-
-    const submitSearch = (relayedSearch) => {
-        setLoading(true)
-        searchForItems(relayedSearch)
-            .then(res => {
-                setEmptyMessage('No results found.')
-                setSearchedItems(res.data)
-                setLoading(false)
-            })
-            .catch(err => {
-                console.log(err)
-                setLoading(false)
-            })
     }
 
     const handleClickBackArrow = () => {
@@ -106,23 +78,23 @@ const SelectItems = (props) => {
         }, [])
     }
 
-    const handleFindCount = (item_id, selectedPrinting) => {
+    const handleFindCount = (item_id, selectedPrintingId) => {
         return lotItemCounts[item_id] 
             ? lotItemCounts[item_id].count
-                ? lotItemCounts[item_id].count[selectedPrinting] 
-                    ? lotItemCounts[item_id].count[selectedPrinting] 
+                ? lotItemCounts[item_id].count[selectedPrintingId] 
+                    ? lotItemCounts[item_id].count[selectedPrintingId] 
                     : undefined 
                 : undefined
             : undefined
     }
 
-    const handleChangePrinting = (item, printing) => {
+    const handleChangePrinting = (item, printingId) => {
         setLotItemCounts({
             ...lotItemCounts,
             [item.id]: {
                 ...item,
                 ...lotItemCounts[item.id],
-                activePrinting: printing
+                activePrinting: printingId
             }
         })
     }
@@ -144,69 +116,25 @@ const SelectItems = (props) => {
             }
             return prev
         }, 0)}</p>
-        <p>NM value: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
-            if (lotItemCounts[itemId]) {
-                if (lotItemCounts[itemId].count) {
-                    return Object.keys(lotItemCounts[itemId].count).reduce((prev, printingId) => {
-                        return (lotItemCounts[itemId].marketValue[printingId] * lotItemCounts[itemId].count[printingId]) + prev
-                    }, 0) + prev
-                }
-            }
-            return prev
-            }, 0)}
-        </p>
         <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>
         <div className='itemFinder'>
             <div style={{ display: 'flex' }}>
-                <button onClick={() => setExpansionOrSearch('search')}>Search</button>
-                <button onClick={() => setExpansionOrSearch('expansion')}>Expansion</button>
+                <button onClick={() => navigate('search')}>Search</button>
+                <button onClick={() => navigate('expansion')}>Expansion</button>
             </div>
-            {expansionOrSearch === 'search' ? (
-                <>
-                    <Search submitSearch={submitSearch} />
-                    <Toolbar 
-                        viewRangeSelector={true} 
-                        filterKey={filterKey}
-                        referenceData={referenceData} 
-                        setReferenceData={setReferenceData}
-                        sortKey={sortKey}
-                    />
-                    <ItemContainer emptyMessage={emptyMessage} loading={loading}>
-                        {applyMarketChanges(
-                            filterMarketItems(searchedItems, referenceData.filter[filterKey]))
-                                .sort(generateMarketItemSortCB(referenceData, sortKey))
-                                .map(item => {
-                                    return <Item 
-                                        key={item.id} 
-                                        item={item} 
-                                        referenceData={referenceData} 
-                                        countConfig={countConfig} 
-                                    />
-                        })}
-                    </ItemContainer>
-                </>
-            ) : (
-                <>
-                    {!selectedExpansion ? (
-                        <ExpansionsMarketplace 
-                            handleSelectSet={(id) => setSelectedExpansion(id)}
-                            referenceData={referenceData}
-                            setReferenceData={setReferenceData}
-                        />
-                    ) : (
-                        <>
-                            <button onClick={() => setSelectedExpansion(undefined)}>clear set</button>
-                            <ExpansionItems 
-                                selectedSetId={selectedExpansion}
-                                referenceData={referenceData} 
-                                setReferenceData={setReferenceData}
-                                countConfig={countConfig} 
-
-                            />
-                        </>
-                    )}
-                </>
-            )}
+            <Routes>
+                <Route path='/search' element={<AddItemSearch 
+                    initialEmptyMessage={initialEmptyMessage} 
+                    referenceData={referenceData}
+                    setReferenceData={setReferenceData}
+                    countConfig={countConfig}
+                />} />
+                <Route path='/expansion' element={<AddItemExpansion 
+                    referenceData={referenceData}
+                    setReferenceData={setReferenceData}
+                    countConfig={countConfig}
+                />} />
+            </Routes>
         </div>
     </div>)
 }

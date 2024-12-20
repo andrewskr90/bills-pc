@@ -32,3 +32,26 @@ export const buildPreviousRoute = (location, optionalNumber) => {
     })
     return previousRoute
 }
+
+export const buildParams = (location) => {
+    const builtParams = {}
+    const splitSearch = location.search.split('?')
+    if (splitSearch.length > 1) {
+        const splitParams = splitSearch[1].split('&')
+        splitParams.forEach(param => {
+            const splitParam = param.split('=')
+            if (splitParam.length > 1) {
+                builtParams[splitParam[0].toLowerCase()] = decodeURIComponent(splitParam[1])
+            }
+        })
+    }
+    return builtParams
+}
+
+export const buildParamString = (params) => {
+    return '?' + Object.keys(params).map((key) => {
+        const encodedKey = encodeURIComponent(key)
+        const encodedValue = encodeURIComponent(params[key])
+        return `${encodedKey}=${encodedValue}`
+    }).join('&')
+}
