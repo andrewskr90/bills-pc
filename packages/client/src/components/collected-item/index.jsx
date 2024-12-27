@@ -22,7 +22,7 @@ const CollectedItem = (props) => {
                 }
             </div>
             <div className='text-blue mt-1 w-2/5 h-[90%] flex flex-col justify-center items-center'>
-                <p>${collectedItem.marketPrice}</p>
+                <p>x {collectedItem.quantity}</p>
                 <button className='rounded-full border-blue bb-white border-2 w-1/2' style={{ borderRadius: '50%', backgroundColor: 'white', color: '#6065cb', borderColor: '#6065cb' }} onClick={() => handleSelectItem(collectedItem)}>i</button>
             </div>
         </div>

@@ -19,7 +19,7 @@ const ExpansionItemsMarketplace = (props) => {
     }
 
     return (<div className='expansionItemsMarketplace'>
-        <PreviousRoutes location={location} referenceData={referenceData} />
+        <PreviousRoutes location={location} />
         <Routes>
             <Route 
                 path='/'

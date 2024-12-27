@@ -50,6 +50,13 @@ const PreviousRoutes = (props) => {
         const parsedPath = parseLocationPathname(location)
         if (parsedPath[0].toLowerCase() === 'market'){
             return await formatPrevMarketRoutes(parsedPath)
+        } else if (location.pathname.includes('/gym-leader/collection/assets')) {
+            return [{
+                ['gym-leader']: {
+                    formatted: 'Assets',
+                    path: '/gym-leader/collection/assets'
+                }
+            }]
         }
     }
 
