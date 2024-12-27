@@ -598,17 +598,11 @@ const getPortfolioItems = async (req, res, next) => {
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
         const portfolio = await Portfolio.getItemsByUserId(userId, req.query)
-        const portfolioItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
-            uniqueItemPrintingConditionInPortfolio(portfolio), 
-            yesterday, 
-            today
-        )
-        const portfolioItemsWithPrices = tiePricesToItems(portfolio, portfolioItemsPrices)
-
+        
         let count = 0
         let countedCollectedItems = false
         req.results = {}
-        req.results.items = portfolioItemsWithPrices.map(item => {
+        req.results.items = portfolio.map(item => {
             if (!countedCollectedItems) {
                 if (item.count !== null) {
                     count += parseInt(item.count)
