@@ -38,13 +38,6 @@ const BillsPcService = {
             params
         })
     },
-    getCardsV2(filter) {
-        return axios({
-            ...options,
-            url:`/api/v1/cards-v2`,
-            params: filter
-        })
-    },
     authenticateSession() {
         return axios({
             ...options,

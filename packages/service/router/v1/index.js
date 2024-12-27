@@ -1,7 +1,6 @@
 const v1Router = require('express').Router()
 
 const authRouter = require('./auth-router')
-const cardV2Router = require('./card-v2-router')
 const setV2Router = require('./set-v2-router')
 const transactionRouter = require('./transaction-router')
 const marketPricesRouter = require('./market-prices-router')
@@ -29,7 +28,6 @@ const expansionSeriesRouter = require('./expansion-series-router')
 
 v1Router.use('/auth', authRouter)
 v1Router.use('/sets-v2', setV2Router)
-v1Router.use('/cards-v2', cardV2Router)
 v1Router.use('/transactions', transactionRouter)
 v1Router.use('/market-prices', marketPricesRouter)
 v1Router.use('/reference-data', referenceDataRouter)
