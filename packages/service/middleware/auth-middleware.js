@@ -161,12 +161,6 @@ const authenticateUser = (req, res, next) => {
     })
 }
 
-const prepUserFilter = (req, res, next) => {
-    const preppedFilter = { user_name: req.body.user_name}
-    req.preppedFilter = preppedFilter
-    next()
-}
-
 module.exports = {
     formatUser,
     createSession,
@@ -175,7 +169,6 @@ module.exports = {
     decodeSessionToken, 
     encryptPassword, 
     authenticateUser,
-    prepUserFilter,
     checkRegisterValues,
     gymLeaderOnly
 }

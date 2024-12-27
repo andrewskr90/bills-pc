@@ -1,5 +1,4 @@
 const authRouter = require('express').Router()
-const { addUserMySQL, findUsersByFilterMySQL } = require('../../db/queries/userQueries')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
 
@@ -11,7 +10,6 @@ const {
     decodeSessionToken,
     encryptPassword,
     authenticateUser,
-    prepUserFilter,
     checkRegisterValues
 } = require('../../middleware/auth-middleware')
 
