@@ -79,13 +79,6 @@ const BillsPcService = {
             url: `api/v1/cards-v2/set-id/${setId}`
         })
     },
-    getCardsV2WithValues(filter) {
-        return axios({
-            ...options,
-            url:'/api/v1/cards-v2/values',
-            params: filter
-        })
-    },
     getCardsBySetId(setId) {
         return axios({
             ...options,
@@ -155,13 +148,6 @@ const BillsPcService = {
         return axios({
             ...options,
             url: '/api/v1/products',
-            params: filter
-        })
-    },
-    getProductsWithValues(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/products/values',
             params: filter
         })
     },

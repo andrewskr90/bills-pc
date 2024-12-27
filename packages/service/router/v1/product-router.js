@@ -17,16 +17,6 @@ productRouter.get('/',
         res.status(200).json(results)
 })
 
-productRouter.get('/values', 
-    QueueQueries.init,
-    QueueQueries.products.selectWithValues,
-    executeQueries,
-    formatMarketPricesFromConcat,
-    formatItems,
-    (req, res, next) => {
-        res.status(200).json(req.results)
-})
-
 productRouter.post('/',
     verifyCookie, 
     decodeSessionToken,

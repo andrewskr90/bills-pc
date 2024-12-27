@@ -17,16 +17,6 @@ cardV2Router.get('/',
         res.status(200).json(results)
 })
 
-cardV2Router.get('/values', 
-    QueueQueries.init,
-    QueueQueries.cardsV2.selectWithValues,
-    executeQueries,
-    formatMarketPricesFromConcat,
-    formatItems,
-    (req, res, next) => {
-        res.status(200).json(req.results)
-})
-
 cardV2Router.get('/set-id/:setId', 
     verifyCookie,
     decodeSessionToken,
