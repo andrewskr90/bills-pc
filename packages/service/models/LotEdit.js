@@ -17,9 +17,9 @@ const getById = async (id) => {
             s.set_v2_id as setId,
             s.set_v2_name as setName,
             c.printingId,
-            GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
+            GROUP_CONCAT('[', '"', UNIX_TIMESTAMP(a.time), '"', ',', '"', a.conditionId, '"', ',', '"', a.appraiserId, '"', ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
-            GROUP_CONCAT(bsl.labelComponents SEPARATOR ',') as labels,
+            GROUP_CONCAT('[', bsl.labelComponents, ']', SEPARATOR ',') as labels,
             bs.count,
             bs.estimate,
             li.index as ${indexWithBackticks}

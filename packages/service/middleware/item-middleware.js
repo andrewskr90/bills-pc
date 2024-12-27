@@ -66,8 +66,8 @@ const getItems = async (req, res, next) => {
             s.set_v2_series,
             count(*) OVER () as count, 
             GROUP_CONCAT(
-                    '[', p.printing_id, ',', p.printing_name, ',', c.condition_id, ',', c.condition_name, ']' 
-                    ORDER BY p.printing_tcgp_printing_id, c.condition_tcgp_condition_id SEPARATOR ','
+                    '[', '"', p.printing_id, '"', ',', '"', p.printing_name, '"', ']' 
+                    ORDER BY p.printing_tcgp_printing_id SEPARATOR ','
                 ) as printings
         FROM Item as i
         LEFT JOIN sets_v2 as s

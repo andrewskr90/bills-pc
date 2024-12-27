@@ -197,7 +197,7 @@ const getById = async (listingId) => {
             SKU.id as skuId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,
-            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
+            GROUP_CONCAT('[', '"', UNIX_TIMESTAMP(V3_ListingPrice.time), '"', ',', '"', V3_ListingPrice.price, '"', ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
             V3_Listing.${descriptionWithBackticks},
             Item.id as itemId,
             Item.name as name,

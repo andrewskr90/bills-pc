@@ -1,5 +1,5 @@
 const { executeQueries } = require("../db")
-const { parseThenFormatAppraisals, parseThenFormatLabels } = require("../middleware/collected-item-middleware")
+const { parseThenFormatLabels } = require("../middleware/collected-item-middleware")
 
 const timeWithBackticks = '`time`'
 
@@ -13,12 +13,9 @@ const getItemsByUserId = async (userId, reqQuery) => {
             ci1.printingId,
             i.id as itemId,
             i.name,
-            i.tcgpId,
-            GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
-            count(*) OVER () as count
+            i.tcgpId
         from V3_CollectedItem ci1
         LEFT JOIN Item i on i.id = ci1.itemId
-        LEFT JOIN V3_Appraisal a on a.collectedItemId = ci1.id
         WHERE (
             ci1.id in (
                 -- bought item
@@ -149,14 +146,27 @@ const getItemsByUserId = async (userId, reqQuery) => {
 
     const variables = []
     variables.push(userId)
+
+    const finalQuery = `
+        select
+            itemId,
+            name,
+            tcgpId,
+            COUNT(collectedItemId) as quantity,
+            count(*) OVER () as count
+        from (
+            ${query}
+        ) as collectedItems
+        group by itemId
+    `
     const pageInt = parseInt(reqQuery.page)
     if (pageInt && pageInt > 0) {
         variables.push((pageInt-1)*20)
-        query += ` LIMIT ?,20;`
+        query += ` LIMIT ?,20`
     } else {
         query += ` LIMIT 0,20;`
     }
-    const req = { queryQueue: [{ query, variables }] }
+    const req = { queryQueue: [{ query: finalQuery, variables }] }
     const res = {}
     try {
         let portfolio
@@ -164,10 +174,7 @@ const getItemsByUserId = async (userId, reqQuery) => {
             if (err) throw new Error(err)
             portfolio = req.results
         })
-        return portfolio.map(portfolioItem => ({
-            ...portfolioItem,
-            appraisals: portfolioItem.appraisals ? parseThenFormatAppraisals(portfolioItem.appraisals) : null,
-        }))
+        return portfolio
     } catch (err) {
         throw err
     }
