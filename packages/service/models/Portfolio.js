@@ -147,7 +147,7 @@ const getItemsByUserId = async (userId, reqQuery) => {
     const variables = []
     variables.push(userId)
 
-    const finalQuery = `
+    let finalQuery = `
         select
             itemId,
             name,
@@ -162,9 +162,9 @@ const getItemsByUserId = async (userId, reqQuery) => {
     const pageInt = parseInt(reqQuery.page)
     if (pageInt && pageInt > 0) {
         variables.push((pageInt-1)*20)
-        query += ` LIMIT ?,20`
+        finalQuery += ` LIMIT ?,20`
     } else {
-        query += ` LIMIT 0,20;`
+        finalQuery += ` LIMIT 0,20;`
     }
     const req = { queryQueue: [{ query: finalQuery, variables }] }
     const res = {}
