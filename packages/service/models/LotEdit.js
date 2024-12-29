@@ -19,7 +19,7 @@ const getById = async (id) => {
             c.printingId,
             GROUP_CONCAT('[', '"', UNIX_TIMESTAMP(a.time), '"', ',', '"', a.conditionId, '"', ',', '"', a.appraiserId, '"', ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals,
             li.bulkSplitId,
-            GROUP_CONCAT('[', bsl.labelComponents, ']', SEPARATOR ',') as labels,
+            GROUP_CONCAT('[', bsl.labelComponents, ']' SEPARATOR ',') as labels,
             bs.count,
             bs.estimate,
             li.index as ${indexWithBackticks}
@@ -36,14 +36,16 @@ const getById = async (id) => {
                 bsl.id as bulkSplitLabelId,
                 bsl.bulkSplitId,
                 GROUP_CONCAT(
-                    '[', 
-                    IFNULL(la.id, 'NULL'), ',',
-                    IFNULL(lc.id, 'NULL'), ',',
-                    IFNULL(lc.rarityId, 'NULL'), ',',
-                    IFNULL(lc.typeId, 'NULL'), ',',
-                    IFNULL(lc.printingid, 'NULL'), ',',
-                    IFNULL(lc.setId, 'NULL'),
-                    ']' SEPARATOR ','
+                    JSON_ARRAY(
+                        '[', 
+                        IFNULL(la.id, 'NULL'), ',',
+                        IFNULL(lc.id, 'NULL'), ',',
+                        IFNULL(lc.rarityId, 'NULL'), ',',
+                        IFNULL(lc.typeId, 'NULL'), ',',
+                        IFNULL(lc.printingid, 'NULL'), ',',
+                        IFNULL(lc.setId, 'NULL'),
+                        ']'
+                    ) SEPARATOR ','
                 ) as labelComponents
             FROM V3_BulkSplitLabel bsl
             LEFT JOIN V3_Label la on la.id = bsl.labelId

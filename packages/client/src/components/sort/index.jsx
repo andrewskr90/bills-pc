@@ -13,14 +13,6 @@ const Sort = (props) => {
     const handleChangeValue = (e) => {
         params.attribute = e.target.value
         navigate(location.pathname + buildParamString(params))
-        setReferenceData({
-            ...referenceData,
-            [sortKey]: {
-                ...referenceData[sortKey],
-                value: e.target.value,
-                direction: referenceData[sortKey].values[e.target.value].defaultDirection
-            }
-        })
     }
 
     const toggleDirection = (e) => {
