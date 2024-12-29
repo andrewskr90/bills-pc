@@ -41,6 +41,10 @@ const PortfolioAssets = (props) => {
         })()
     }, [location.search])
     const sortKey = 'portfolioItemSort'
+
+    const handleSelectAsset = (slug) => {
+        navigate(slug)
+    }
     return (<>
         {portfolio.length
         ?   
@@ -62,7 +66,7 @@ const PortfolioAssets = (props) => {
                             {portfolio.inventory.bulkSplits.map(split => {
                                 return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
                             })} */}
-                            {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={() => navigate(collectedItem.itemId)} />)}
+                            {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`item/${id}`)} />)}
                             <PageSelection location={location} count={count} />
                         </ItemContainer>
                     </>}
@@ -72,7 +76,7 @@ const PortfolioAssets = (props) => {
                     element={<BulkSplitInfo portfolio={portfolio} userClaims={userClaims} />}
                 /> */}
                 <Route 
-                    path="/:itemId"
+                    path="/item/:itemId"
                     element={<AssetItemInfo />}
                 />
             </Routes>
