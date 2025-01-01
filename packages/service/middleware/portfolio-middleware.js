@@ -3,9 +3,6 @@ const Portfolio = require('../models/Portfolio')
 const getPortfolioItems = async (req, res, next) => {
     const userId = req.claims.user_id
     try {
-        const today = new Date()
-        const yesterday = new Date(today)
-        yesterday.setDate(today.getDate()-1)
         const portfolio = await Portfolio.getItemsByUserId(userId, req.query)
         
         let count = 0
@@ -28,4 +25,73 @@ const getPortfolioItems = async (req, res, next) => {
     }
 }
 
-module.exports = { getPortfolioItems }
+
+const formatPortfolioItems = (req, res, next) => {
+    req.results.items = req.results.items.reduce((acc, cur) => {
+        const {
+            collectedItemId,
+            bulkSplitId,
+            itemId,
+            setName,
+            name,
+            tcgpId,
+            lotId,
+            purchaseId,
+            purchaseTime,
+            purchasePrice,
+            acceptedOfferPrice,
+            quantity
+        } = cur
+        const foundItem = acc.find(item => {
+            if (cur.itemId) {
+                return item.itemId === cur.itemId
+            } else if (cur.bulkSplitId) {
+                return item.bulkSplitId === cur.bulkSplitId
+            }
+        })
+        if (foundItem) {
+            return acc.map(item => {
+                if (item.itemId === foundItem.itemId) {
+                    return {
+                        ...item,
+                        collectedItems: [
+                            ...item.collectedItems,
+                            {
+                                collectedItemId,
+                                lotId,
+                                purchaseId,
+                                purchaseTime,
+                                purchasePrice,
+                                acceptedOfferPrice,
+                            }
+                        ]
+                    }
+                }
+                return item
+            })
+        }
+        const newItem = {
+            itemId,
+            bulkSplitId,
+            name,
+            setName,
+            setName,
+            tcgpId
+        }
+        if (req.query.itemId) {
+            newItem.collectedItems = [{
+                collectedItemId,
+                lotId,
+                purchaseId,
+                purchaseTime,
+                purchasePrice,
+                acceptedOfferPrice
+            }]
+        }
+        else newItem.quantity = quantity
+        return [...acc, newItem]
+    },[])
+    next()
+}
+
+module.exports = { getPortfolioItems, formatPortfolioItems }
