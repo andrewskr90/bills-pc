@@ -533,10 +533,140 @@ const getByCollectedItemId = async (collectedItemId) => {
     return sortLotTransactions(transactions)
 }
 
+const getByCollectedCardIdNew = async (collectedItemId, userId) => {
+    if (!userId) throw new Error(`Error: User Id required to query for collected item history`)
+    if (!collectedItemId) throw new Error(`Error: collectedItemId required to query for collected item history`)
+
+    const timeWithBackticks = `time`
+
+    let query = `
+        select
+            le.id as lotEditId,
+            li.id as lotInsertId,
+            lr.id as lotRemovalId,
+            null as importId,
+            null as listingId,
+            null as listingPriceId,
+            null as price,
+            null as listingRemovalId,
+            null as saleId,
+            le.time
+        from V3_LotEdit le
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.lotEditId = le.id
+        left join V3_CollectedItem ci on ci.id = li.collectedItemId or ci.id = lr.collectedItemId
+        where ci.id = '${collectedItemId}'
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            i.id as importId,
+            null as listingId,
+            null as listingPriceId,
+            null as price,
+            null as listingRemovalId,
+            null as saleId,
+            i.time
+        from V3_Import i
+        where i.collectedItemId = '${collectedItemId}'
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            null as importId,
+            lp.listingId as listingId,
+            lp.id as listingPriceId,
+            lp.price,
+            null as listingRemovalId,
+            null as saleId,
+            lp.time
+        from V3_ListingPrice lp
+        left join V3_Listing l on l.id = lp.listingId
+        left join V3_Lot lo on lo.id = l.lotId
+        left join V3_LotEdit le on le.lotId = lo.id
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
+        left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
+        left join V3_CollectedItem ci on ci.id = l.collectedItemId or ci.id = li.collectedItemId
+        where ci.id = '${collectedItemId}'
+            and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+            and (removalEdit.${timeWithBackticks} > lp.${timeWithBackticks} or removalEdit.id is null)
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            null as importId,
+            listR.listingId as listingId,
+            null as listingPriceId,
+            null as price,
+            listR.id as listingRemovalId,
+            null as saleId,
+            listR.time
+        from V3_ListingRemoval listR
+        left join V3_Listing l on l.id = listR.listingId
+        left join V3_Lot lo on lo.id = l.lotId
+        left join V3_LotEdit le on le.lotId = lo.id
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
+        left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
+        left join V3_CollectedItem ci on ci.id = l.collectedItemId or ci.id = li.collectedItemId
+        where ci.id = '${collectedItemId}'
+            and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+            and (removalEdit.${timeWithBackticks} > listR.${timeWithBackticks} or removalEdit.id is null)
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            null as importId,
+            l.id as listingId,
+            lp.id as listingPriceId,
+            lp.price as price,
+            null as listingRemovalId,
+            s.id as saleId,
+            s.time
+        from V3_Sale s
+        left join V3_Listing l on l.saleId = s.id
+        left join V3_ListingPrice lp on lp.listingId = l.id and lp.${timeWithBackticks} < s.${timeWithBackticks}
+        left join V3_ListingPrice laterPrices on laterPrices.listingId = l.id and laterPrices.${timeWithBackticks} > lp.${timeWithBackticks} and lp.${timeWithBackticks} < s.${timeWithBackticks}
+        left join V3_Lot lo on lo.id = l.lotId
+        left join V3_LotEdit le on le.lotId = lo.id
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
+        left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
+        left join V3_CollectedItem ci on ci.id = l.collectedItemId or ci.id = li.collectedItemId
+        where ci.id = '${collectedItemId}'
+            and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+            and (removalEdit.${timeWithBackticks} > s.${timeWithBackticks} or removalEdit.id is null)
+            and laterPrices.id is null
+        order by time desc;
+    `    
+    const variables = []
+    const req = { queryQueue: [{ query: query, variables }] }
+    const res = {}
+    try {
+        let portfolio
+        await executeQueries(req, res, (err) => {
+            if (err) throw new Error(err)
+            portfolio = req.results
+        })
+        return portfolio
+    } catch (err) {
+        throw err
+    }
+
+    
+    next()
+}
+
 module.exports = {
      selectForLot, 
      selectForBulkSplit, 
      selectForCollectedItem, 
      getByLotId, 
-     getByCollectedItemId 
+     getByCollectedItemId,
+     getByCollectedCardIdNew
 }

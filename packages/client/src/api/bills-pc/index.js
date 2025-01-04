@@ -267,6 +267,14 @@ const BillsPcService = {
             params,
             url: `/api/v1/lot-edits`
         })
+    },
+    getCollectedItem(config) {
+        const { id, params } = config
+        return axios({
+            ...options,
+            url: `/api/v1/transactions/collected-item/${id}`,
+            params: params
+        })
     }
 }
 

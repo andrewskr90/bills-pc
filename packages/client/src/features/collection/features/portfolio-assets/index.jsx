@@ -4,10 +4,11 @@ import ItemContainer from "../../../../components/item-container/index.jsx"
 import CollectedItem from "../../../../components/collected-item/index.jsx"
 import BillsPcService from "../../../../api/bills-pc/index.js"
 import PageSelection from "../../../../components/page-selection/index.jsx"
-import { buildParams, buildParamString } from "../../../../utils/location/index.js"
+import { buildParams } from "../../../../utils/location/index.js"
 import Toolbar from "../../../../layouts/toolbar/index.jsx"
 import Search from "../../../search/index.jsx"
 import AssetItemInfo from "./AssetItemInfo.jsx"
+import CollectedItemInfo from "./CollectedItemInfo.jsx"
 // import BulkSplitInfo from "../../BulkSplitInfo.jsx"
 // import BulkSplit from "../../BulkSplit.jsx"
 const PortfolioAssets = (props) => {
@@ -78,6 +79,10 @@ const PortfolioAssets = (props) => {
                 <Route 
                     path="/item/:itemId"
                     element={<AssetItemInfo />}
+                />
+                <Route 
+                    path="/collected-item/:id"
+                    element={<CollectedItemInfo />}
                 />
             </Routes>
         :
