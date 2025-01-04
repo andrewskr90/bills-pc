@@ -25,7 +25,9 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
             null as giftId,
             li.time
         FROM V3_Listing li
-        WHERE li.deleted is null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is null
             AND li.saleId is null
             AND li.lotId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
@@ -38,9 +40,11 @@ const selectForLot = async (lotId, limit, timeCutoff) => {
             li.id as deletedListingId,
             null as saleId,
             null as giftId,
-            li.deleted as time
+            listR.time as time
         FROM V3_Listing li
-        WHERE li.deleted is not null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is not null
             AND li.lotId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
         ${limit ? `LIMIT ?` : ''})
@@ -128,7 +132,9 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
             null as importId,
             li.time
         FROM V3_Listing li
-        WHERE li.deleted is null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is null
             AND li.saleId is null
             AND li.bulkSplitId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
@@ -143,9 +149,11 @@ const selectForBulkSplit = async (bulkSplitId, limit, timeCutoff) => {
             null as saleId,
             null as giftId,
             null as importId,
-            li.deleted as time
+            listR.time as time
         FROM V3_Listing li
-        WHERE li.deleted is not null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is not null
             AND li.bulkSplitId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
         ${limit ? `LIMIT ?` : ''})
@@ -255,7 +263,9 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
             null as importId,
             li.time
         FROM V3_Listing li
-        WHERE li.deleted is null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is null
             AND li.saleId is null
             AND li.collectedItemId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
@@ -270,9 +280,11 @@ const selectForCollectedItem = async (collectedItemId, limit, timeCutoff) => {
             null as saleId,
             null as giftId,
             null as importId,
-            li.deleted as time
+            listR.time as time
         FROM V3_Listing li
-        WHERE li.deleted is not null
+        left join V3_ListingRemoval listR
+            on listR.listingId = li.id
+        WHERE listR.id is not null
             AND li.collectedItemId = ?
             ${timeCutoff ? `AND li.time < ?` : ''}
         ${limit ? `LIMIT ?` : ''})
