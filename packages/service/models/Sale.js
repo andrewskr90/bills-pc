@@ -59,13 +59,13 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
             })
             queryQueue.push({ query: QueryFormatters.objectsToInsert(listingDiscounts, 'V3_ListingDiscount'), variables: [] })
         }
+        const offers = []
         if (listing.offers.length > 0) {
             if (!parseFloat(listing.offers[0].amount)) throw new Error("Offer amount is not a number.")
             if (parseFloat(listing.offers[0].amount) <= 0) throw new Error("Offer amount must be greater than 0.")     
             if (parseFloat(listing.offers[0].amount) === parseFloat(parseGroupConcat(fetchedListing.listingPrices)[0][1])) {
                 throw new Error("Offer amount must vary from current listing price.")
             }
-            const offers = []
             offers.push({
                 id: uuidV4(),
                 listingId: listing.id,
@@ -95,7 +95,16 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
             time
         }
         queryQueue.push({ query: `${QueryFormatters.objectsToInsert([formattedSale], 'V3_Sale')};`, variables: [] })
-        queryQueue.push({ query: `UPDATE V3_Listing SET saleId = ? WHERE V3_Listing.id = ?;`, variables: [formattedSale.id, listing.id] })
+        const listingUpdateVariables = []
+        let formattedListingUpdate = `UPDATE V3_Listing SET saleId = ?`
+        listingUpdateVariables.push(formattedSale.id)
+        if (offers.length > 0) {
+            formattedListingUpdate += `, offerId = ?`
+            listingUpdateVariables.push(offers[0].id)
+        }
+        formattedListingUpdate +=  ` WHERE V3_Listing.id = ?;`
+        listingUpdateVariables.push(listing.id)
+        queryQueue.push({ query: formattedListingUpdate, variables: listingUpdateVariables })
         if (sale.discounts.length > 0) {
             if (!parseFloat(sale.discounts[0].amount)) throw new Error("Sale discount is not a number.")
             if (parseFloat(sale.discounts[0].amount) <= 0) throw new Error("Sale discount must be greater than 0.")  
