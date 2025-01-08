@@ -26,22 +26,26 @@ const  formatListings = (listings) => {
             sellerId,
             sellerName,
             listingTime,
+            initialPrice,
             listingDescription: description,
             listingPrices,
             collectedItemId,
             bulkSplitId,
-            lotId 
+            lotId,
+            saleId
         } = listing
         return {
             id,
             sellerId,
             sellerName,
             listingTime,
+            initialPrice,
             description,
             listingPrices: parseThenFormatListingPrices(listingPrices),
             collectedItem: { id: collectedItemId },
             bulkSplit: { id: bulkSplitId },
             lot: { id: lotId },
+            saleId
         }
     }).sort((a, b) => {
         if (a.time > b.time) return -1
@@ -212,4 +216,4 @@ const createListing = async (req, res, next) => {
     next()
 }
 
-module.exports = { getListings, createListing, getListingById, tiePricesToItems }
+module.exports = { getListings, createListing, getListingById, tiePricesToItems, formatListings, parseThenFormatListingPrices }

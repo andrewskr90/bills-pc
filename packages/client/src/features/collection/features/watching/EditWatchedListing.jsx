@@ -8,7 +8,8 @@ import { convertLocalToUTC } from '../../../../utils/date'
 
 const EditWatchedListing = (props) => {
     const { listing, referenceData, setReferenceData } = props
-    const [updatedPrice, setUpdatedPrice] = useState(listing.listingPrices[0][1])
+    const currentPrice = listing.listingPrices.length > 0 ? listing.listingPrices[0][1] : listing.initialPrice
+    const [updatedPrice, setUpdatedPrice] = useState(currentPrice)
     const [insertedItems, setInsertedItems] = useState([])
     const [deletedCollectedItemIds, setDeletedCollectedItemIds] = useState([])
     const [timeOfPriceUpdate, setTimeOfPriceUpdate] = useState()
@@ -49,7 +50,7 @@ const EditWatchedListing = (props) => {
         }
     }
     const priceUpdateToBeHad = () => {
-        if (updatedPrice && parseFloat(updatedPrice) !== parseFloat(listing.listingPrices[0][1])) return true
+        if (updatedPrice && parseFloat(updatedPrice) !== parseFloat(currentPrice)) return true
         return false
     }
     const lotUpdateToBeHad = () => {

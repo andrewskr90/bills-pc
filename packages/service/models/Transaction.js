@@ -556,14 +556,22 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
             le.id as lotEditId,
             li.id as lotInsertId,
             lr.id as lotRemovalId,
+            lo.id as lotId,
             null as importId,
+            null as importerId,
+            null as importerName,
             null as listingId,
+            null as initialPrice,
             null as listingPriceId,
             null as price,
+            false as relisted,
             null as listingRemovalId,
             null as saleId,
+            null as purchaserId,
+            null as purchaserName,
             le.time
         from V3_LotEdit le
+        left join V3_Lot lo on lo.id = le.lotId
         left join V3_LotInsert li on li.lotEditId = le.id
         left join V3_LotRemoval lr on lr.lotEditId = le.id
         left join V3_CollectedItem ci on ci.id = li.collectedItemId or ci.id = lr.collectedItemId
@@ -573,29 +581,75 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
             null as lotEditId,
             null as lotInsertId,
             null as lotRemovalId,
+            null as lotId,
             i.id as importId,
+            i.importerId as importerId,
+            u.user_name as importerName,
             null as listingId,
+            null as initialPrice,
             null as listingPriceId,
             null as price,
+            false as relisted,
             null as listingRemovalId,
             null as saleId,
+            null as purchaserId,
+            null as purchaserName,
             i.time
         from V3_Import i
+        left join users u on u.user_id = i.importerId
         where i.collectedItemId = '${collectedItemId}'
         union
         select
             null as lotEditId,
             null as lotInsertId,
             null as lotRemovalId,
+            lo.id as lotId,
             null as importId,
-            lp.listingId as listingId,
-            lp.id as listingPriceId,
-            lp.price,
+            null as importerId,
+            null as importerName,
+            l.id as listingId,
+            l.price as initialPrice,
+            null as listingPriceId,
+            null as price,
+            false as relisted,
             null as listingRemovalId,
             null as saleId,
+            null as purchaserId,
+            null as purchaserName,
+            l.time
+        from V3_Listing l
+        left join V3_Lot lo on lo.id = l.lotId
+        left join V3_LotEdit le on le.lotId = lo.id
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
+        left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
+        left join V3_CollectedItem ci on ci.id = l.collectedItemId or ci.id = li.collectedItemId
+        where ci.id = '${collectedItemId}'
+            and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+            and (removalEdit.${timeWithBackticks} > l.${timeWithBackticks} or removalEdit.id is null)
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            lo.id as lotId,
+            null as importId,
+            null as importerId,
+            null as importerName,
+            l.id as listingId,
+            l.price as initialPrice,
+            lp.id as listingPriceId,
+            lp.price,
+            false as relisted,
+            null as listingRemovalId,
+            null as saleId,
+            null as purchaserId,
+            null as purchaserName,
             lp.time
         from V3_ListingPrice lp
         left join V3_Listing l on l.id = lp.listingId
+        left join V3_ListingRemoval listR on listR.listingId = l.id and listR.${timeWithBackticks} < lp.${timeWithBackticks}
+        left join V3_ListingPrice betweenPriceAndRemoval on betweenPriceAndRemoval.listingId = l.id and betweenPriceAndRemoval.${timeWithBackticks} < lp.${timeWithBackticks} and betweenPriceAndRemoval.${timeWithBackticks} > listR.${timeWithBackticks}
         left join V3_Lot lo on lo.id = l.lotId
         left join V3_LotEdit le on le.lotId = lo.id
         left join V3_LotInsert li on li.lotEditId = le.id
@@ -605,17 +659,58 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
         where ci.id = '${collectedItemId}'
             and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
             and (removalEdit.${timeWithBackticks} > lp.${timeWithBackticks} or removalEdit.id is null)
+            and (betweenPriceAndRemoval.id is not null or listR.id is null)
         union
         select
             null as lotEditId,
             null as lotInsertId,
             null as lotRemovalId,
+            lo.id as lotId,
             null as importId,
+            null as importerId,
+            null as importerName,
+            l.id as listingId,
+            l.price as initialPrice,
+            lp.id as listingPriceId,
+            lp.price,
+            true as relisted,
+            null as listingRemovalId,
+            null as saleId,
+            null as purchaserId,
+            null as purchaserName,
+            lp.time
+        from V3_ListingPrice lp
+        left join V3_Listing l on l.id = lp.listingId
+        left join V3_ListingRemoval listR on listR.listingId = l.id and listR.${timeWithBackticks} < lp.${timeWithBackticks}
+        left join V3_ListingPrice betweenPriceAndRemoval on betweenPriceAndRemoval.listingId = l.id and betweenPriceAndRemoval.${timeWithBackticks} < lp.${timeWithBackticks} and betweenPriceAndRemoval.${timeWithBackticks} > listR.${timeWithBackticks}
+        left join V3_Lot lo on lo.id = l.lotId
+        left join V3_LotEdit le on le.lotId = lo.id
+        left join V3_LotInsert li on li.lotEditId = le.id
+        left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
+        left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
+        left join V3_CollectedItem ci on ci.id = l.collectedItemId or ci.id = li.collectedItemId
+        where ci.id = '${collectedItemId}'
+            and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+            and (removalEdit.${timeWithBackticks} > lp.${timeWithBackticks} or removalEdit.id is null)
+            and (betweenPriceAndRemoval.id is null and listR.id is not null)
+        union
+        select
+            null as lotEditId,
+            null as lotInsertId,
+            null as lotRemovalId,
+            lo.id as lotId,
+            null as importId,
+            null as importerId,
+            null as importerName,
             listR.listingId as listingId,
+            null as initialPrice,
             null as listingPriceId,
             null as price,
+            false as relisted,
             listR.id as listingRemovalId,
             null as saleId,
+            null as purchaserId,
+            null as purchaserName,
             listR.time
         from V3_ListingRemoval listR
         left join V3_Listing l on l.id = listR.listingId
@@ -633,14 +728,22 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
             null as lotEditId,
             null as lotInsertId,
             null as lotRemovalId,
+            lo.id as lotId,
             null as importId,
+            null as importerId,
+            null as importerName,
             l.id as listingId,
+            l.price as initialPrice,
             lp.id as listingPriceId,
             lp.price as price,
+            false as relisted,
             null as listingRemovalId,
             s.id as saleId,
+            s.purchaserId,
+            u.user_name as purchaserName,
             s.time
         from V3_Sale s
+        left join users u on u.user_id = s.purchaserId
         left join V3_Listing l on l.saleId = s.id
         left join V3_ListingPrice lp on lp.listingId = l.id and lp.${timeWithBackticks} < s.${timeWithBackticks}
         left join V3_ListingPrice laterPrices on laterPrices.listingId = l.id and laterPrices.${timeWithBackticks} > lp.${timeWithBackticks} and lp.${timeWithBackticks} < s.${timeWithBackticks}
@@ -656,6 +759,7 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
             and laterPrices.id is null
         order by time desc;
     `    
+    // TODO add accepted offer price to sales
     const variables = []
     const req = { queryQueue: [{ query: query, variables }] }
     const res = {}

@@ -71,7 +71,6 @@ const PurchaseWatchedListing = ({ listing }) => {
         const params = { listing: true }
         await BillsPcService.postSale({ data, params })
             .then(res => {
-                console.log(res)
                 navigate('/gym-leader/collection/watching')
             })
             .catch(err => console.log(err))
@@ -94,7 +93,7 @@ const PurchaseWatchedListing = ({ listing }) => {
                 <div>
                     <div style={{ display: 'flex', marginTop: '10px' }}>
                         <label>Listing Price</label>
-                        <p>{listing.price}</p>
+                        <p>{parseFloat(listing.listingPrices.length > 0 ? listing.listingPrices[0][1] : listing.initialPrice)}</p>
                     </div>
                     <div className='flex flex-grow-0 mt-3'>
                         <label>An offer was accepted</label>

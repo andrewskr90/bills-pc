@@ -139,7 +139,17 @@ const getWatching = async (watcherId) => {
             V3_BulkSplit.id as bulkSplitId,
             V3_Lot.id as lotId,
             V3_Listing.${timeWithBackticks} as listingTime,
-            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
+            V3_Listing.price as initialPrice,
+            IFNULL(
+                GROUP_CONCAT(
+                    '[',
+                    UNIX_TIMESTAMP(V3_ListingPrice.time), 
+                    ',', 
+                    V3_ListingPrice.price, 
+                    ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ','
+                ),
+                ''
+            ) as listingPrices,
             V3_Listing.${descriptionWithBackticks} as listingDescription,
             V3_Watching.id as watchingId
         FROM V3_Listing
@@ -197,8 +207,19 @@ const getById = async (listingId) => {
             SKU.id as skuId,
             V3_BulkSplit.id as bulkSplitId,
             V3_Listing.${timeWithBackticks} as listingTime,
-            GROUP_CONCAT('[', '"', UNIX_TIMESTAMP(V3_ListingPrice.time), '"', ',', '"', V3_ListingPrice.price, '"', ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
+            V3_Listing.price as initialPrice,
+            IFNULL(
+                GROUP_CONCAT(
+                    '[',
+                    UNIX_TIMESTAMP(V3_ListingPrice.time), 
+                    ',', 
+                    V3_ListingPrice.price, 
+                    ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ','
+                ),
+                ''
+            ) as listingPrices,
             V3_Listing.${descriptionWithBackticks},
+            V3_Listing.saleId,
             Item.id as itemId,
             Item.name as name,
             Item.tcgpId as tcgpId,
@@ -515,18 +536,10 @@ const createExternal = async (listing, watcherId) => {
         lotId,
         description: listing.description,
         saleId: undefined,
-        time: listing.time
+        time: listing.time,
+        price: listing.price
     }
     queryQueue.push({ query: `${objectsToInsert([formattedListing], 'V3_Listing')};`, variables: [] })
-    // create ListingPrice
-    const listingPriceId = uuidV4()
-    const formattedListingPrice = {
-        id: listingPriceId,
-        listingId,
-        price: listing.price,
-        time: listing.time
-    }
-    queryQueue.push({ query: `${objectsToInsert([formattedListingPrice], 'V3_ListingPrice')};`, variables: [] })
     // create Watching
     const watchingId = uuidV4()
     const formattedWatching = { 

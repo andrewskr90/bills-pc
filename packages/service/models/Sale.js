@@ -3,7 +3,7 @@ const { executeQueries } = require('../db')
 const { v4: uuidV4 } = require('uuid')
 const QueryFormatters = require('../utils/queryFormatters')
 const Listing = require('../models/Listing')
-const { parseGroupConcat } = require('../utils')
+const { parseThenFormatListingPrices } = require('../middleware/listing-middleware')
 
 const findByUserId = async (req, res, next) => {
     QueueQueries.init(req, res, (err) => {
@@ -39,9 +39,15 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
     const queryQueue = []
     try {
         const fetchedListing = await Listing.getById(listing.id)
+        fetchedListing.listingPrices = parseThenFormatListingPrices(fetchedListing.listingPrices)
+
         if (fetchedListing.saleId) throw new Error("Listing has already been sold.")
-        if (fetchedListing.proxyCreatorId && fetchedListing.proxyCreatorId !== purchaserId) {
+        if (fetchedListing.ownerProxyCreatorId && fetchedListing.ownerProxyCreatorId !== purchaserId) {
             throw new Error("You don't have permission to purchase this proxy listing.")
+        }
+        const saleTime = new Date(sale.time)
+        if (fetchedListing.listingTime > saleTime) {
+            throw new Error("Time of sale must be later than time listed.")
         }
         // TODO: offer is auto created, this form of listing creation will not
         // work if the offer already exists and the seller agrees to the offer.
@@ -63,7 +69,7 @@ const createFromListing = async ({ sale, listing }, purchaserId) => {
         if (listing.offers.length > 0) {
             if (!parseFloat(listing.offers[0].amount)) throw new Error("Offer amount is not a number.")
             if (parseFloat(listing.offers[0].amount) <= 0) throw new Error("Offer amount must be greater than 0.")     
-            if (parseFloat(listing.offers[0].amount) === parseFloat(parseGroupConcat(fetchedListing.listingPrices)[0][1])) {
+            if (parseFloat(listing.offers[0].amount) === fetchedListing.listingPrices[0][1]) {
                 throw new Error("Offer amount must vary from current listing price.")
             }
             offers.push({

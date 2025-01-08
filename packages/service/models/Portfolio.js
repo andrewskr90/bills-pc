@@ -20,6 +20,7 @@ const getItemsByUserId = async (userId, reqQuery) => {
         lr.id as lotRemovalId,
         purchase.id as purchaseId,
         purchase.${timeWithBackticks} as purchaseTime,
+        l.price as initialPrice,
         lp.price as purchasePrice,
         o.amount as acceptedOfferPrice,
         ${reqQuery.itemId ? '' : `COUNT(ci.id) as quantity,`}
