@@ -211,7 +211,12 @@ const createListing = async (req, res, next) => {
             return next(err)
         }        
     } else {
-        return next({ status: 404, message: 'no such route' })
+        try {
+        const listingId = await Listing.create(req.body)
+        req.results = { message: "Created.", date: listingId }
+        } catch (err) {
+            return next(err)
+        }
     }
     next()
 }

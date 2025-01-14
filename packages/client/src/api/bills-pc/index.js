@@ -275,6 +275,14 @@ const BillsPcService = {
             url: `/api/v1/transactions/collected-item/${id}`,
             params: params
         })
+    },
+    createListing({ data }) {
+        return axios({
+            ...options,
+            url: `/api/v1/listings`,
+            data,
+            method: 'post'
+        })
     }
 }
 

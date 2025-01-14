@@ -7,6 +7,7 @@ const Gift = require('./Gift')
 const LotEdit = require('../models/LotEdit')
 const LotInsert = require('../models/LotInsert')
 const Import = require('../models/Import')
+const Sale = require('../models/Sale')
 
 const previousTransaction = async (subject) => {
 
@@ -69,7 +70,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -93,7 +97,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -117,7 +124,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -648,11 +658,40 @@ const createPrice = async ({ listingId, price, time }) => {
     return id
 }
 
+const create = async (listing) => {
+    // TODO only owner of item(s) should have permissions
+    // TODO if collected item in lot, can't list it seperately
+    // TODO write utility function declaring if item listing makes sense with given history
+    // create listing
+    const { collectedItemId, bulkSplitId, lotId, description, time, price } = listing
+    if (!collectedItemId && !bulkSplitId && !lotId) throw new Error('item, bulkSplit, or lot required to create listing.')
+    if (!time) throw new Error('Time listing was created is required.')
+    // TODO should mysql handle errors? It is successfully handling 'price cannot be null' error
+    const id = uuidV4()
+    const formattedListing = {
+        id,
+        collectedItemId,
+        bulkSplitId,
+        lotId,
+        description,
+        saleId: undefined,
+        time,
+        price
+    }
+    const req = { queryQueue: [{ query: `${objectsToInsert([formattedListing], 'V3_Listing')};`, variables: [] }] }
+    const res = {}
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+    })
+    return id
+}
+
 module.exports = { 
     getWatching, 
     createExternal, 
     convertSaleItemsToListings, 
     getById, 
     createPrice,
-    previousOwner
+    previousOwner,
+    create
 }

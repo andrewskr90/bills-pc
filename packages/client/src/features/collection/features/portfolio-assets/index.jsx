@@ -81,7 +81,7 @@ const PortfolioAssets = (props) => {
                     element={<AssetItemInfo />}
                 />
                 <Route 
-                    path="/collected-item/:id"
+                    path="/collected-item/:id/*"
                     element={<CollectedItemInfo />}
                 />
             </Routes>

@@ -1,9 +1,11 @@
 const { v4: uuidV4 } = require('uuid')
 const Label = require('../models/Label')
 const { formatSingularComponent } = require('../utils/label')
-const Sale = require('../models/Sale')
+const Listing = require('../models/Listing')
 const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { formatSaleFromPortfolioResult } = require('../utils/sale')
+const { parseThenFormatListingPrices } = require('./listing-middleware')
+const QueryFormatters = require('../utils/queryFormatters')
 
 const createSaleNote = (note, saleId, userId) => {
     if (!note) return null
@@ -364,10 +366,121 @@ const checkPurchaseBulkLabels = async (req, res, next) => {
     next()
 }
 
+const createSaleFromListing = async ({ sale, listing }, purchaserId) => {
+    const queryQueue = []
+    try {
+        const fetchedListing = await Listing.getById(listing.id)
+        fetchedListing.listingPrices = parseThenFormatListingPrices(fetchedListing.listingPrices)
+
+        if (fetchedListing.saleId) throw new Error("Listing has already been sold.")
+        if (fetchedListing.ownerProxyCreatorId && fetchedListing.ownerProxyCreatorId !== purchaserId) {
+            throw new Error("You don't have permission to purchase this proxy listing.")
+        }
+        const saleTime = new Date(sale.time)
+        if (fetchedListing.listingTime > saleTime) {
+            throw new Error("Time of sale must be later than time listed.")
+        }
+        // TODO: offer is auto created, this form of listing creation will not
+        // work if the offer already exists and the seller agrees to the offer.
+        // making an offer does not exist in the app yet, for now it is just storing 
+        // the final purchase price. *We are accepting an offer on behalf of the proxy user*
+        if (listing.discounts.length > 0) {
+            if (!parseFloat(listing.discounts[0].amount)) throw new Error("Listing discount is not a number.")
+            if (parseFloat(listing.discounts[0].amount) <= 0) throw new Error("Listing discount must be greater than 0.")       
+            const listingDiscounts = []
+            listingDiscounts.push({
+                id: uuidV4(),
+                listingId: listing.id,
+                amount: parseFloat(listing.discounts[0].amount),
+                percentage: null
+            })
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(listingDiscounts, 'V3_ListingDiscount'), variables: [] })
+        }
+        const offers = []
+        if (listing.offers.length > 0) {
+            if (!parseFloat(listing.offers[0].amount)) throw new Error("Offer amount is not a number.")
+            if (parseFloat(listing.offers[0].amount) <= 0) throw new Error("Offer amount must be greater than 0.")     
+            if (parseFloat(listing.offers[0].amount) === fetchedListing.listingPrices[0][1]) {
+                throw new Error("Offer amount must vary from current listing price.")
+            }
+            offers.push({
+                id: uuidV4(),
+                listingId: listing.id,
+                makerId: purchaserId,
+                amount: parseFloat(listing.offers[0].amount)
+            })
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(offers, 'V3_Offer'), variables: [] })
+        }
+        const { time } = sale
+        let shipping = null
+        let tax = null
+        if (sale.shipping) {
+            if (!parseFloat(sale.shipping)) throw new Error("Shipping is not a number.")
+            if (parseFloat(sale.shipping) <= 0) throw new Error("Shipping must be greater than 0.")
+            shipping = parseFloat(sale.shipping)
+        }
+        if (sale.tax) {
+            if (!parseFloat(sale.tax)) throw new Error("Tax is not a number.")
+            if (parseFloat(sale.tax) <= 0) throw new Error("Tax must be greater than 0.")  
+            tax = parseFloat(sale.tax)
+        }
+        const formattedSale = {
+            id: uuidV4(),
+            purchaserId,
+            shipping,
+            tax,
+            time
+        }
+        queryQueue.push({ query: `${QueryFormatters.objectsToInsert([formattedSale], 'V3_Sale')};`, variables: [] })
+        const listingUpdateVariables = []
+        let formattedListingUpdate = `UPDATE V3_Listing SET saleId = ?`
+        listingUpdateVariables.push(formattedSale.id)
+        if (offers.length > 0) {
+            formattedListingUpdate += `, offerId = ?`
+            listingUpdateVariables.push(offers[0].id)
+        }
+        formattedListingUpdate +=  ` WHERE V3_Listing.id = ?;`
+        listingUpdateVariables.push(listing.id)
+        queryQueue.push({ query: formattedListingUpdate, variables: listingUpdateVariables })
+        if (sale.discounts.length > 0) {
+            if (!parseFloat(sale.discounts[0].amount)) throw new Error("Sale discount is not a number.")
+            if (parseFloat(sale.discounts[0].amount) <= 0) throw new Error("Sale discount must be greater than 0.")  
+            const saleDiscounts = []
+            saleDiscounts.push({
+                id: uuidV4(),
+                saleId: formattedSale.id,
+                amount: parseFloat(sale.discounts[0].amount),
+                percentage: null
+            })
+            queryQueue.push({ query: QueryFormatters.objectsToInsert(saleDiscounts, 'V3_SaleDiscount'), variables: [] })
+        }
+        if (sale.notes.length > 0) {
+            const saleNotes = []
+            saleNotes.push({
+                id: uuidV4(),
+                saleId: formattedSale.id,
+                takerId: purchaserId,
+                note: sale.notes[0].note,
+                time
+            })
+            queryQueue.push({ query: `${QueryFormatters.objectsToInsert(saleNotes, 'V3_SaleNote')};`, variables: [] })
+        }
+        const req = { queryQueue }
+        const res = {}
+        await executeQueries(req, res, (err) => {
+            if (err) throw new Error(err)
+            sales = req.results
+        })    
+        return sale.id
+    } catch (err) {
+        throw err
+    }
+}
+
 const createSale = async (req, res, next) => {
     if (req.query.listing) {
         try {
-            const saleId = await Sale.createFromListing(req.body, req.claims.user_id)
+            const saleId = await createSaleFromListing(req.body, req.claims.user_id)
             req.results = { message: "Created.", data: saleId }
         } catch (err) {
             return next(err)
