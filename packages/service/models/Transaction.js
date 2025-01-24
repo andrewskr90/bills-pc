@@ -786,3 +786,246 @@ module.exports = {
      getByCollectedItemId,
      getByCollectedCardIdNew
 }
+
+
+
+
+// import
+    // item, lot, or split
+// gift
+    // to or from
+    // item, lot, or split
+// sale
+    // purchaser or seller
+    // item, lot, or split
+// listing
+    // must be in ownership
+    // 
+// listing price updated to
+// listing removed
+// sold for 
+// gifted to
+//
+// lot gifted
+// lot purchased for
+// added to lot
+// added to lot listed for
+// removed from lot
+// lot listed for
+// lot listing price updated to
+// lot listing removed
+// lot sold for
+// lot gifted to
+
+// every transaction type
+// import - has to occur before all other transactions
+// sale - has to occur after listing, and before listing has sold or has been removed
+// gift - 
+// lot edit
+    // insert - lot must be in ownership, cannot occur if already inserted, or item is currently listed
+    // removal - lot must be in ownership, cannot occur if already removed or never inserted
+// listing - cannot occur if item is within lot. Item/lot must be in ownership
+// listing price, must occur after listing created, cannot occur after listing sold
+// listing removal, must occur after insertion, cannot occur if already sold
+
+
+
+// lot edit edgecases
+// lotId    giftId  editId  time    recipient
+// 1        1               11      htmx
+// 1                1       12       
+// 1        2               13      frok
+// 1        3               14      htmx
+// 1                1       15       
+// 1        4               16      tyles
+
+const revisedUserLotEdits = `
+    SELECT
+		u.user_name,
+		i.id as importId,
+        i.time as importTime,
+        prevSale.id as saleId,
+        prevSale.time as saleTime,
+		le.id as lotEditId,
+        le.time as lotEditTime,
+        COALESCE(li.collectedItemId, lr.collectedItemId) as collectedItemId,
+        COALESCE(li.bulkSplitId, lr.bulkSplitId) as bulkSplitId,
+        COALESCE(prevSale.purchaserId, prevGift.recipientId, i.importerId) AS ownerId,
+        le.lotId
+	FROM V3_LotEdit le
+    LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
+    LEFT JOIN V3_LotInsert betweenInsert on betweenInsert.lotEditId = le.id AND betweenInsert.id > li.id
+    LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id AND li.id IS NULL
+    LEFT JOIN V3_LotRemoval betweenRemoval on betweenRemoval.lotEditId = le.id AND betweenRemoval.id > lr.id
+    LEFT JOIN V3_LotInsert otherLotInsert 
+		ON otherLotInsert.collectedItemId = li.collectedItemId 
+        OR otherLotInsert.collectedItemId = lr.collectedItemId
+        OR otherLotInsert.bulkSplitId = li.bulkSplitId
+        OR otherLotInsert.bulkSplitId = lr.bulkSplitId
+	LEFT JOIN V3_LotEdit prevLotEdit 
+        ON prevLotEdit.time < le.time
+        AND prevLotEdit.id = otherLotInsert.lotEditId
+    LEFT JOIN V3_Listing prevListing
+		ON prevListing.time < le.time
+		AND prevListing.saleId IS NOT NULL
+        AND (
+			prevListing.collectedItemId = li.collectedItemId
+			OR prevListing.collectedItemId = lr.collectedItemId
+			OR prevListing.bulkSplitId = li.bulkSplitId
+			OR prevListing.bulkSplitId = lr.bulkSplitId
+			OR prevListing.lotId = le.lotId
+			OR prevListing.lotId = prevLotEdit.lotId
+        )
+	LEFT JOIN V3_Sale prevSale
+        ON prevSale.id = prevListing.saleId
+        AND prevSale.time < le.time
+	LEFT JOIN V3_Sale saleBetween
+		ON saleBetween.id = prevListing.saleId
+        AND saleBetween.time < le.time AND saleBetween.time > prevSale.time
+	LEFT JOIN V3_Gift prevGift
+		ON prevGift.time < le.time
+        AND prevGift.time > prevSale.time
+        AND (
+			prevGift.collectedItemId = li.collectedItemId
+			OR prevGift.collectedItemId = lr.collectedItemId
+			OR prevGift.bulkSplitId = li.bulkSplitId
+			OR prevGift.bulkSplitId = lr.bulkSplitId
+			OR prevGift.lotId = le.lotId
+			OR prevGift.lotId = prevLotEdit.lotId
+        )
+	LEFT JOIN V3_Gift giftBetween
+		ON (
+			giftBetween.collectedItemId = li.collectedItemId
+			OR giftBetween.collectedItemId = lr.collectedItemId
+			OR giftBetween.bulkSplitId = li.bulkSplitId
+			OR giftBetween.bulkSplitId = lr.bulkSplitId
+			OR giftBetween.lotId = le.lotId
+			OR giftBetween.lotId = prevLotEdit.lotId
+        ) AND giftBetween.time < le.time 
+        AND giftBetween.time > prevGift.time
+	LEFT JOIN V3_Import i
+		ON (
+            i.collectedItemId = li.collectedItemId 
+            OR i.collectedItemId = lr.collectedItemId
+            OR i.bulkSplitId = li.bulkSplitId
+            OR i.bulkSplitId = lr.bulkSplitId
+        ) AND prevSale.id IS NULL 
+        AND prevGift.id IS NULL
+	LEFT JOIN users u on (
+		u.user_id = prevSale.purchaserId
+        OR u.user_id =  prevGift.recipientId
+        OR u.user_id =  i.importerId
+    )
+    WHERE (
+		(li.id IS NOT NULL AND betweenInsert.id IS NULL) 
+        OR (li.id IS NULL AND betweenRemoval.id IS NULL)
+	) AND saleBetween.id IS NULL 
+    AND giftBetween.id IS NULL
+    AND (
+		prevSale.purchaserId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
+        OR prevGift.recipientId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
+        OR i.importerId = '86e099e9-3952-46fd-b65e-99fd57c7422f'
+    );
+`
+
+
+const newQuery = `
+    SELECT
+        i.id as importId,
+        null as saleId,
+        null as giftId,
+        null as listingId,
+        null as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_Import i
+    WHERE i.importerId = ''
+    UNION
+    SELECT
+        null as importId,
+        s.id as saleId,
+        null as giftId,
+        null as listingId,
+        null as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_Sale s
+    WHERE s.purchaserId = ''
+        OR prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        g.id as giftId,
+        null as listingId,
+        null as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_Gift g
+    WHERE g.recipientId = ''
+        OR prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        g.id as giftId,
+
+        null as listingId,
+        null as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_LotEdit le
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        null as giftId,
+        l.id as listingId,
+        null as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_Listing l
+    WHERE prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        null as giftId,
+        l.id as listingId,
+        lp.id as listingPriceId,
+        null as listingRemovalId,
+        null as relistingId
+    FROM V3_ListingPrice lp
+    WHERE prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        null as giftId,
+        l.id as listingId,
+        null as listingPriceId,
+        listR.id as listingRemovalId,
+        null as relistingId
+    FROM V3_ListingRemoval listR
+    WHERE prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    UNION
+    SELECT
+        null as importId,
+        null as saleId,
+        null as giftId,
+        l.id as listingId,
+        lp.id as listingPriceId,
+        null as listingRemovalId,
+        relisting.id as relistingId
+    FROM V3_ListingPrice relisting
+    WHERE prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
+    ; 
+`
+
+// FILTER BY
+// collectedItemId
+// saleId, giftId, etc.
+// watched listings (listings where saleId is null, and watching is true)
+// listingId (initial listing, price change, removal, relisting, lot update, lot update, sale)
+// lotId (purchased, lot insert, lot removal, lot listed, lot removal, listing price change, lot sold)
+// giftId (plain and simple? composition of lot at time of sale)
