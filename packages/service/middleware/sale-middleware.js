@@ -6,6 +6,7 @@ const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { formatSaleFromPortfolioResult } = require('../utils/sale')
 const { parseThenFormatListingPrices } = require('./listing-middleware')
 const QueryFormatters = require('../utils/queryFormatters')
+const { adjustISOMinutes } = require('../utils/date')
 
 const createSaleNote = (note, saleId, userId) => {
     if (!note) return null
@@ -403,11 +404,14 @@ const createSaleFromListing = async ({ sale, listing }, purchaserId) => {
             if (parseFloat(listing.offers[0].amount) === fetchedListing.listingPrices[0][1]) {
                 throw new Error("Offer amount must vary from current listing price.")
             }
+            // TODO theres a chance Listing time will be after offer time
             offers.push({
                 id: uuidV4(),
                 listingId: listing.id,
                 makerId: purchaserId,
-                amount: parseFloat(listing.offers[0].amount)
+                amount: parseFloat(listing.offers[0].amount),
+                time: adjustISOMinutes(saleTime, -1),
+                accepted: true
             })
             queryQueue.push({ query: QueryFormatters.objectsToInsert(offers, 'V3_Offer'), variables: [] })
         }
@@ -435,10 +439,6 @@ const createSaleFromListing = async ({ sale, listing }, purchaserId) => {
         const listingUpdateVariables = []
         let formattedListingUpdate = `UPDATE V3_Listing SET saleId = ?`
         listingUpdateVariables.push(formattedSale.id)
-        if (offers.length > 0) {
-            formattedListingUpdate += `, offerId = ?`
-            listingUpdateVariables.push(offers[0].id)
-        }
         formattedListingUpdate +=  ` WHERE V3_Listing.id = ?;`
         listingUpdateVariables.push(listing.id)
         queryQueue.push({ query: formattedListingUpdate, variables: listingUpdateVariables })

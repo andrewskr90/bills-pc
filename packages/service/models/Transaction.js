@@ -849,6 +849,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingId,
         NULL AS initialPrice,
         NULL AS updatedPrice,
+        NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
         NULL AS giftId,
@@ -942,6 +943,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingId,
         NULL AS initialPrice,
         NULL AS updatedPrice,
+        NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
         NULL AS giftId,
@@ -961,6 +963,7 @@ const allTransactionsNoItemSpecifics = `
         l.id AS listingId,
         l.price AS initialPrice,
         NULL AS updatedPrice,
+        NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
         NULL AS giftId,
@@ -1069,6 +1072,7 @@ const allTransactionsNoItemSpecifics = `
         l.id AS listingId,
         l.price AS initialPrice,
         lp.price AS updatedPrice,
+        o.amount AS offerPrice,
         s.purchaserId,
         COALESCE(prevSale.purchaserId, prevGift.recipientId, i.importerId) AS sellerId,
         NULL AS giftId,
@@ -1083,6 +1087,9 @@ const allTransactionsNoItemSpecifics = `
     LEFT JOIN V3_ListingPrice laterPrice
         ON laterPrice.listingId = l.id 
         AND laterPrice.time > lp.time
+    LEFT JOIN V3_Offer o
+        ON o.listingId = l.id
+        AND o.accepted = TRUE
     LEFT JOIN V3_LotEdit le 
         ON le.lotId = l.lotId 
         AND le.time < s.time
@@ -1188,6 +1195,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingId,
         NULL AS initialPrice,
         NULL AS updatedPrice,
+        NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
         g.id AS giftId,

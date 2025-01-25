@@ -8,6 +8,7 @@ const LotEdit = require('../models/LotEdit')
 const LotInsert = require('../models/LotInsert')
 const Import = require('../models/Import')
 const Sale = require('../models/Sale')
+const { adjustISOHours } = require('../utils/date')
 
 const previousTransaction = async (subject) => {
 
@@ -370,11 +371,6 @@ const prepZuluForDB = (local) => {
         local.getUTCMinutes().toString().padStart(2, '0')}:${
         local.getUTCSeconds().toString().padStart(2, '0')}.${
         local.getMilliseconds().toString().padStart(3, '0')}`
-}
-const adjustISOHours = (stringDate, adjustment) => {
-    const oldDate = new Date(stringDate)
-    oldDate.setHours(oldDate.getHours() + adjustment)
-    return oldDate.toISOString()
 }
 
 const createExternal = async (listing, watcherId) => {
