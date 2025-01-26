@@ -46,12 +46,12 @@ const interpretTransactions = (transactions, userId) => {
             if (transaction.saleId) {
                 // sold listing
                 if (transaction.lotId) {
-                    transactionInfo = `Lot purchased by ${transaction.purchaserName} for $${transaction.price ? transaction.price : transaction.initialPrice}`
+                    transactionInfo = `Lot purchased by ${transaction.purchaserName} for $${transaction.updatedPrice ? transaction.updatedPrice : transaction.initialPrice}`
                     actions = [
                         actionTypes.viewLot
                     ]
                 } else {
-                    transactionInfo = `Purchased by ${transaction.purchaserName} for $${transaction.price ? transaction.price : transaction.initialPrice}`
+                    transactionInfo = `Purchased by ${transaction.purchaserName} for $${transaction.updatedPrice ? transaction.updatedPrice : transaction.initialPrice}`
                     if (transaction.purchaserId === userId) {
                         actions = [
                             actionTypes.list,
@@ -64,13 +64,13 @@ const interpretTransactions = (transactions, userId) => {
                     if (transaction.relisted) {
                         // listing relisted
                         if (transaction.lotId) {
-                            transactionInfo = `Lot relisted at ${transaction.price}`
+                            transactionInfo = `Lot relisted at ${transaction.updatedPrice}`
                             actions = [
                                 actionTypes.viewListing,
                                 actionTypes.viewLot
                             ]
                         } else {
-                            transactionInfo = `Relisted at ${transaction.price}`
+                            transactionInfo = `Relisted at ${transaction.updatedPrice}`
                             actions = [
                                 actionTypes.viewListing
                             ]
@@ -78,13 +78,13 @@ const interpretTransactions = (transactions, userId) => {
                     } else {
                         // price updated
                         if (transaction.lotId) {
-                            transactionInfo = `Lot listing price updated to $${transaction.price}`
+                            transactionInfo = `Lot listing price updated to $${transaction.updatedPrice}`
                             actions = [
                                 actionTypes.viewListing,
                                 actionTypes.viewLot
                             ]
                         } else {
-                            transactionInfo = `Listing price updated to $${transaction.price}`
+                            transactionInfo = `Listing price updated to $${transaction.updatedPrice}`
                             actions = [
                                 actionTypes.viewListing
                             ]
