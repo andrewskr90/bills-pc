@@ -851,6 +851,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingPriceId,
         FALSE AS relisted,
         NULL AS updatedPrice,
+        NULL AS listingRemovalId,
         NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
@@ -947,6 +948,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingPriceId,
         FALSE AS relisted,
         NULL AS updatedPrice,
+        NULL AS listingRemovalId,
         NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
@@ -969,6 +971,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingPriceId,
         FALSE AS relisted,
         NULL AS updatedPrice,
+        NULL AS listingRemovalId,
         NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
@@ -1083,6 +1086,7 @@ const allTransactionsNoItemSpecifics = `
             ELSE FALSE
         END) as relisted,
         lp.price AS updatedPrice,
+        NULL AS listingRemovalId,
         NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
@@ -1196,6 +1200,121 @@ const allTransactionsNoItemSpecifics = `
             prevSale.purchaserId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
             OR prevGift.recipientId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
             OR i.importerId = '86e099e9-3952-46fd-b65e-99fd57c7422f'
+        )
+    UNION
+    SELECT
+        NULL AS lotEditId,
+        NULL AS lotId,
+        NULL AS importId,
+        NULL AS importCount,
+        NULL AS saleId,
+        l.id AS listingId,
+        NULL AS initialPrice,
+        NULL AS listingPriceId,
+        NULL as relisted,
+        NULL AS updatedPrice,
+        listR.id as listingRemovalId,
+        NULL AS offerPrice,
+        NULL AS purchaserId,
+        NULL AS sellerId,
+        NULL AS giftId,
+        NULL AS recipientId,
+        NULL AS giverId,
+        listR.time
+    FROM V3_ListingRemoval listR
+    LEFT JOIN V3_Listing l
+        ON l.id = listR.listingId
+    LEFT JOIN V3_LotEdit le 
+        ON le.lotId = l.lotId 
+        AND le.time < l.time
+    LEFT JOIN V3_LotEdit betweenLotEdit
+        ON betweenLotEdit.lotId = l.lotId
+        AND betweenLotEdit.time < l.time 
+        AND betweenLotEdit.time > le.time 
+    LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
+    LEFT JOIN V3_LotInsert betweenInsert on betweenInsert.lotEditId = le.id AND betweenInsert.id > li.id
+    LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id AND li.id IS NULL
+    LEFT JOIN V3_LotRemoval betweenRemoval on betweenRemoval.lotEditId = le.id AND betweenRemoval.id > lr.id
+    LEFT JOIN V3_LotInsert prevLotInsert 
+        ON prevLotInsert.lotEditId != le.id
+        AND (
+            prevLotInsert.collectedItemId = li.collectedItemId 
+            OR prevLotInsert.collectedItemId = lr.collectedItemId
+            OR prevLotInsert.bulkSplitId = li.bulkSplitId
+            OR prevLotInsert.bulkSplitId = lr.bulkSplitId
+            OR prevLotInsert.collectedItemId = l.collectedItemId
+            OR prevLotInsert.bulkSplitId = l.bulkSplitId
+        )
+    LEFT JOIN V3_LotEdit prevLotEdit 
+        ON prevLotEdit.time < l.time -- listing time instead of lot edit time, because sale in question could be for collectedItem removed from purchased/gifted lot
+        AND prevLotEdit.id = prevLotInsert.lotEditId
+    LEFT JOIN V3_Listing prevListing
+        ON prevListing.time < l.time
+        AND prevListing.saleId IS NOT NULL
+        AND (
+            prevListing.collectedItemId = li.collectedItemId
+            OR prevListing.collectedItemId = lr.collectedItemId
+            OR prevListing.bulkSplitId = li.bulkSplitId
+            OR prevListing.bulkSplitId = lr.bulkSplitId
+            OR prevListing.lotId = l.lotId
+            OR prevListing.lotId = prevLotEdit.lotId
+            OR prevListing.collectedItemId = l.collectedItemId
+            OR prevListing.bulkSplitId = l.bulkSplitId
+        )
+    LEFT JOIN V3_Sale prevSale
+        ON prevSale.id = prevListing.saleId
+        AND prevSale.time < l.time
+    LEFT JOIN V3_Sale saleBetween
+        ON saleBetween.id = prevListing.saleId
+        AND saleBetween.time < l.time 
+        AND saleBetween.time > prevSale.time
+    LEFT JOIN V3_Gift prevGift
+        ON prevGift.time < l.time
+        AND prevGift.time > prevSale.time
+        AND (
+            prevGift.collectedItemId = li.collectedItemId
+            OR prevGift.collectedItemId = lr.collectedItemId
+            OR prevGift.bulkSplitId = li.bulkSplitId
+            OR prevGift.bulkSplitId = lr.bulkSplitId
+            OR prevGift.lotId = l.lotId
+            OR prevGift.lotId = prevLotEdit.lotId
+            OR prevGift.collectedItemId = l.collectedItemId
+            OR prevGift.bulkSplitId = l.bulkSplitId
+        )
+    LEFT JOIN V3_Gift giftBetween
+        ON (
+            giftBetween.collectedItemId = li.collectedItemId
+            OR giftBetween.collectedItemId = lr.collectedItemId
+            OR giftBetween.bulkSplitId = li.bulkSplitId
+            OR giftBetween.bulkSplitId = lr.bulkSplitId
+            OR giftBetween.lotId = l.lotId
+            OR giftBetween.lotId = prevLotEdit.lotId
+            OR giftBetween.collectedItemId = l.collectedItemId
+            OR giftBetween.bulkSplitId = l.bulkSplitId
+        ) AND giftBetween.time < l.time 
+        AND giftBetween.time > prevGift.time
+    LEFT JOIN V3_Import i
+        ON (
+            i.collectedItemId = li.collectedItemId 
+            OR i.collectedItemId = lr.collectedItemId
+            OR i.bulkSplitId = li.bulkSplitId
+            OR i.bulkSplitId = lr.bulkSplitId
+            OR i.collectedItemId = l.collectedItemId
+            OR i.bulkSplitId = l.bulkSplitId
+        ) AND prevSale.id IS NULL 
+        AND prevGift.id IS NULL
+    WHERE (
+            (li.id IS NOT NULL AND betweenInsert.id IS NULL) 
+            OR (li.id IS NULL AND betweenRemoval.id IS NULL)
+            OR l.collectedItemId IS NOT NULL
+            OR l.bulkSplitId IS NOT NULL
+        ) AND saleBetween.id IS NULL 
+        AND giftBetween.id IS NULL 
+        AND betweenLotEdit.id IS NULL
+        AND (
+            prevSale.purchaserId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
+            OR prevGift.recipientId = '86e099e9-3952-46fd-b65e-99fd57c7422f' 
+            OR i.importerId = '86e099e9-3952-46fd-b65e-99fd57c7422f'
         ) 
     UNION
     SELECT
@@ -1209,6 +1328,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingPriceId,
         FALSE AS relisted,
         lp.price AS updatedPrice,
+        NULL AS listingRemovalId,
         o.amount AS offerPrice,
         s.purchaserId,
         COALESCE(prevSale.purchaserId, prevGift.recipientId, i.importerId) AS sellerId,
@@ -1334,6 +1454,7 @@ const allTransactionsNoItemSpecifics = `
         NULL AS listingPriceId,
         FALSE AS relisted,
         NULL AS updatedPrice,
+        NULL AS listingRemovalId,
         NULL AS offerPrice,
         NULL AS purchaserId,
         NULL AS sellerId,
@@ -1435,27 +1556,6 @@ const allTransactionsNoItemSpecifics = `
 				OR i.importerId = '86e099e9-3952-46fd-b65e-99fd57c7422f'
 			)
 		) AND betweenLotEdit.id IS NULL;
-`
-
-
-const newQuery = `
-
-
-
-
-
-    UNION
-    SELECT
-        null as importId,
-        null as saleId,
-        null as giftId,
-        l.id as listingId,
-        null as listingPriceId,
-        listR.id as listingRemovalId,
-        null as relistingId
-    FROM V3_ListingRemoval listR
-    WHERE prevImporterId = '' OR prevPurchaserId = '' OR prevRecipientId = ''
-    ; 
 `
 
 // FILTER BY
