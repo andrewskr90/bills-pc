@@ -47,10 +47,6 @@ const  formatListings = (listings) => {
             lot: { id: lotId },
             saleId
         }
-    }).sort((a, b) => {
-        if (a.time > b.time) return -1
-        if (a.time < b.time) return 1
-        return 0
     })
 }
 
@@ -129,7 +125,8 @@ const tiePricesToItems = (items, itemPrices) => {
 const getListings = async (req, res, next) => {
     if (req.query.watching) {
         try {
-            req.results = await Listing.getWatching(req.claims.user_id)
+            const watchedListings = await Listing.getWatching(req.claims.user_id)
+            req.results = formatListings(watchedListings)
         } catch (err) {
             return next(err)
         }
@@ -220,4 +217,4 @@ const createListing = async (req, res, next) => {
     next()
 }
 
-module.exports = { getListings, createListing, getListingById, tiePricesToItems, formatListings, parseThenFormatListingPrices }
+module.exports = { getListings, createListing, getListingById, tiePricesToItems, parseThenFormatListingPrices }

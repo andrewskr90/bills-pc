@@ -39,11 +39,11 @@ const Watching = (props) => {
                                                 <p>{listing.sellerName}</p>
                                                 <p>${parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                                                 <p>
-                                                    {listing.lotId
+                                                    {listing.lot.id
                                                         ? 
                                                         `Item Lot` 
                                                         : 
-                                                        listing.collectedItemId
+                                                        listing.collectedItem.Id
                                                             ?
                                                             `Item`
                                                             :

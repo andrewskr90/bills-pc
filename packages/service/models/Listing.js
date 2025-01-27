@@ -291,53 +291,50 @@ const getById = async (listingId) => {
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            V3_Listing.id,
-            V3_CollectedItem.id as collectedItemId,
-            V3_CollectedItem.printingId as printingId,
-            V3_Appraisal.conditionId as conditionId,
+            l.id,
+            ci.id as collectedItemId,
+            ci.printingId as printingId,
+            a.conditionId as conditionId,
             SKU.id as skuId,
-            V3_BulkSplit.id as bulkSplitId,
-            V3_Listing.${timeWithBackticks} as listingTime,
-            V3_Listing.price as initialPrice,
-            IFNULL(
-                GROUP_CONCAT(
-                    '[',
-                    UNIX_TIMESTAMP(V3_ListingPrice.time), 
-                    ',', 
-                    V3_ListingPrice.price, 
-                    ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ','
-                ),
-                ''
-            ) as listingPrices,
-            V3_Listing.${descriptionWithBackticks},
-            V3_Listing.saleId,
-            Item.id as itemId,
-            Item.name as name,
-            Item.tcgpId as tcgpId,
-            V3_Lot.id as lotId,
+            bs.id as bulkSplitId,
+            l.${timeWithBackticks} as listingTime,
+            l.price as initialPrice,
+            lp.price AS updatedPrice,
+            l.${descriptionWithBackticks},
+            l.saleId,
+            i.id as itemId,
+            i.name as name,
+            i.tcgpId as tcgpId,
+            l.lotId as lotId,
             sets_v2.set_v2_id as setId,
             sets_v2.set_v2_name as setName
-        FROM V3_Listing
-        LEFT JOIN V3_ListingPrice
-            on V3_ListingPrice.listingId = V3_Listing.id
-        LEFT JOIN V3_Lot 
-            on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_CollectedItem 
-            on V3_CollectedItem.id = V3_Listing.collectedItemId
-        LEFT JOIN V3_Appraisal
-            on V3_Appraisal.collectedItemId = V3_CollectedItem.id
-        LEFT JOIN Item 
-            on Item.id = V3_CollectedItem.itemId
+        FROM V3_Listing l
+        LEFT JOIN V3_ListingPrice lp
+            on lp.listingId = l.id
+        LEFT JOIN V3_ListingPrice laterPrice
+            ON laterPrice.listingId = l.id
+            AND laterPrice.${timeWithBackticks} > lp.${timeWithBackticks}
+        LEFT JOIN V3_CollectedItem ci
+            on ci.id = l.collectedItemId
+        LEFT JOIN V3_Appraisal a
+            on a.collectedItemId = ci.id
+        LEFT JOIN V3_Appraisal laterAppraisal
+            ON laterAppraisal.collectedItemId = ci.id
+            AND laterAppraisal.${timeWithBackticks} > a.${timeWithBackticks}
+        LEFT JOIN Item i
+            on i.id = ci.itemId
         LEFT JOIN SKU
-            on SKU.itemId = Item.id
-            AND SKU.printingId = V3_CollectedItem.printingId
-            AND SKU.conditionId = V3_Appraisal.conditionId
+            on SKU.itemId = i.id
+            AND SKU.printingId = ci.printingId
+            AND SKU.conditionId = a.conditionId
         LEFT JOIN sets_v2
-            on Item.setId = sets_v2.set_v2_id
-        LEFT JOIN V3_BulkSplit
-            ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-        WHERE V3_Listing.id = ?
-        Group by V3_Listing.id;
+            on i.setId = sets_v2.set_v2_id
+        LEFT JOIN V3_BulkSplit bs
+            ON bs.id = l.bulkSplitId
+        WHERE l.id = ?
+            AND laterPrice.id IS NULL
+            AND laterAppraisal.id IS NULL
+        Group by l.id;
     `
     const req = { queryQueue: [{ query, variables: [listingId] }] }
     const res = {}

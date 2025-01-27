@@ -38,7 +38,7 @@ const Listing = (props) => {
                     <div style={{ height: '100%', overflow: 'auto', marginBottom: '64px' }}>
                         <p>{listing.listingTime}</p>
                         <p>{listing.sellerName}</p>
-                        <p>{parseFloat(listing.listingPrices.length > 0 ? listing.listingPrices[0][1] : listing.initialPrice)}</p>
+                        <p>{parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                         <button onClick={handleEditListing}>Edit</button>
                         <button onClick={handlePurchaseListing}>Purchase</button>
                         {listing.lot.id && (
