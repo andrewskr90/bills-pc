@@ -560,12 +560,12 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
             null as importId,
             null as importerId,
             null as importerName,
-            null as listingId,
+            l.id as listingId,
             null as initialPrice,
             null as listingPriceId,
-            null as price,
+            null as updatedPrice,
             false as relisted,
-            null as listingRemovalId,
+            listR.id as listingRemovalId,
             null as saleId,
             null as purchaserId,
             null as purchaserName,
@@ -574,8 +574,21 @@ const getByCollectedCardIdNew = async (collectedItemId, userId) => {
         left join V3_Lot lo on lo.id = le.lotId
         left join V3_LotInsert li on li.lotEditId = le.id
         left join V3_LotRemoval lr on lr.lotEditId = le.id
+        left join V3_Listing l on l.lotId = lo.id
+        left join V3_ListingPrice lp 
+            on lp.listingId = l.id 
+            and lp.${timeWithBackticks} < le.${timeWithBackticks}
+        left join V3_ListingPrice laterPrices 
+            on laterPrices.listingId = l.id 
+            and laterPrices.${timeWithBackticks} > lp.${timeWithBackticks} 
+            and lp.${timeWithBackticks} < le.${timeWithBackticks}
+        left join V3_ListingRemoval listR 
+            on listR.listingId = l.id 
+            and listR.${timeWithBackticks} < le.${timeWithBackticks} 
+            and listR.${timeWithBackticks} > lp.${timeWithBackticks}
         left join V3_CollectedItem ci on ci.id = li.collectedItemId or ci.id = lr.collectedItemId
         where ci.id = '${collectedItemId}'
+            and laterPrices.id is null
         union
         select
             null as lotEditId,
@@ -881,12 +894,6 @@ const select = async (req) => {
             OR acquisitionAsGift.recipientId = '${req.claims.user_id}'
             OR acquisitionAsImport.importerId = '${req.claims.user_id}'
         )
-        ${req.params.collectedItemId ? `
-            AND (
-                li.collectedItemId = '${req.params.collectedItemId}'
-                OR lr.collectedItemId = '${req.params.collectedItemId}'
-            )
-        ` : ''}
         UNION
         SELECT
             NULL AS lotEditId,
@@ -919,9 +926,6 @@ const select = async (req) => {
         LEFT JOIN users u
             ON u.user_id = i.importerId
         WHERE i.importerId = '${req.claims.user_id}'
-            ${req.params.collectedItemId ? `
-                AND i.collectedItemId = '${req.params.collectedItemId}'
-            ` : ''}
         GROUP BY i.time
         UNION
         SELECT
@@ -1043,13 +1047,6 @@ const select = async (req) => {
                     OR prevGift.recipientId = '${req.claims.user_id}'
                     OR i.importerId = '${req.claims.user_id}'
                 ) AND betweenLotEdit.id IS NULL
-                ${req.params.collectedItemId ? `
-                    AND (
-                        li.collectedItemId = '${req.params.collectedItemId}'
-                        OR lr.collectedItemId = '${req.params.collectedItemId}'
-                        OR l.collectedItemId = '${req.params.collectedItemId}'
-                    )
-                ` : ''}
         UNION
         SELECT
             NULL AS lotEditId,
@@ -1188,13 +1185,6 @@ const select = async (req) => {
                 OR prevGift.recipientId = '${req.claims.user_id}'
                 OR i.importerId = '${req.claims.user_id}'
             )
-            ${req.params.collectedItemId ? `
-                AND (
-                    li.collectedItemId = '${req.params.collectedItemId}'
-                    OR lr.collectedItemId = '${req.params.collectedItemId}'
-                    OR l.collectedItemId = '${req.params.collectedItemId}'
-                )
-            ` : ''}
         UNION
         SELECT
             NULL AS lotEditId,
@@ -1318,13 +1308,6 @@ const select = async (req) => {
                 OR prevGift.recipientId = '${req.claims.user_id}'
                 OR i.importerId = '${req.claims.user_id}'
             ) 
-            ${req.params.collectedItemId ? `
-                AND (
-                    li.collectedItemId = '${req.params.collectedItemId}'
-                    OR lr.collectedItemId = '${req.params.collectedItemId}'
-                    OR l.collectedItemId = '${req.params.collectedItemId}'
-                )
-            ` : ''}
         UNION
         SELECT
             NULL AS lotEditId,
@@ -1465,13 +1448,6 @@ const select = async (req) => {
                 )
             ) AND laterPrice.id IS NULL
             AND betweenLotEdit.id IS NULL
-            ${req.params.collectedItemId ? `
-                AND (
-                    li.collectedItemId = '${req.params.collectedItemId}'
-                    OR lr.collectedItemId = '${req.params.collectedItemId}'
-                    OR l.collectedItemId = '${req.params.collectedItemId}'
-                )
-            ` : ''}
         UNION
         SELECT
             NULL AS lotEditId,
@@ -1599,14 +1575,7 @@ const select = async (req) => {
                     OR prevGift.recipientId = '${req.claims.user_id}'
                     OR i.importerId = '${req.claims.user_id}'
                 )
-            ) AND betweenLotEdit.id IS NULL
-            ${req.params.collectedItemId ? `
-                AND (
-                    li.collectedItemId = '${req.params.collectedItemId}'
-                    OR lr.collectedItemId = '${req.params.collectedItemId}'
-                    OR g.collectedItemId = '${req.params.collectedItemId}'
-                )
-            ` : ''};
+            ) AND betweenLotEdit.id IS NULL;
     `
     console.log(query)
     const variables = []
