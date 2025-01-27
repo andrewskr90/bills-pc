@@ -27,8 +27,8 @@ const  formatListings = (listings) => {
             sellerName,
             listingTime,
             initialPrice,
-            listingDescription: description,
-            listingPrices,
+            description,
+            updatedPrice,
             collectedItemId,
             bulkSplitId,
             lotId,
@@ -41,7 +41,7 @@ const  formatListings = (listings) => {
             listingTime,
             initialPrice,
             description,
-            listingPrices: parseThenFormatListingPrices(listingPrices),
+            updatedPrice,
             collectedItem: { id: collectedItemId },
             bulkSplit: { id: bulkSplitId },
             lot: { id: lotId },
@@ -129,8 +129,7 @@ const tiePricesToItems = (items, itemPrices) => {
 const getListings = async (req, res, next) => {
     if (req.query.watching) {
         try {
-            const watchedListings = await Listing.getWatching(req.claims.user_id)
-            req.results = formatListings(watchedListings)
+            req.results = await Listing.getWatching(req.claims.user_id)
         } catch (err) {
             return next(err)
         }

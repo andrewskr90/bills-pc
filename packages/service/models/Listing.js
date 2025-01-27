@@ -151,33 +151,129 @@ const getWatching = async (watcherId) => {
             l.lotId,
             l.${timeWithBackticks} as listingTime,
             l.price as initialPrice,
-            IFNULL(
-                GROUP_CONCAT(
-                    '[',
-                    UNIX_TIMESTAMP(lp.time), 
-                    ',', 
-                    lp.price, 
-                    ']' ORDER BY lp.time DESC SEPARATOR ','
-                ),
-                ''
-            ) as listingPrices,
-            l.${descriptionWithBackticks} as listingDescription,
+            lp.price as updatedPrice,
+            l.${descriptionWithBackticks} as description,
+            seller.user_id as sellerId,
+            seller.user_name as sellerName,
             w.id as watchingId
         FROM V3_Listing l
         LEFT JOIN V3_ListingPrice lp
             on lp.listingId = l.id
+        LEFT JOIN V3_ListingPrice laterPrice
+            ON laterPrice.listingId = l.id
+            AND laterPrice.${timeWithBackticks} > lp.${timeWithBackticks}
+        LEFT JOIN V3_ListingRemoval listR
+            ON listR.listingId = l.id
+            AND listR.${timeWithBackticks} > lp.${timeWithBackticks}
         LEFT JOIN V3_CollectedItem ci
             on ci.id = l.collectedItemId
         LEFT JOIN Item 
             on Item.id = ci.itemId
         LEFT JOIN V3_BulkSplit bs
             on bs.id = l.bulkSplitId
+        LEFT JOIN V3_LotEdit le 
+            ON le.lotId = l.lotId
+            AND le.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_LotEdit lotEditBetweenLotEditAndListing
+            ON lotEditBetweenLotEditAndListing.lotId = l.lotId
+            AND lotEditBetweenLotEditAndListing.${timeWithBackticks} > le.${timeWithBackticks}
+            AND lotEditBetweenLotEditAndListing.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_LotInsert li 
+            on li.lotEditId = le.id
+        LEFT JOIN V3_LotInsert betweenInsert 
+            on betweenInsert.lotEditId = le.id 
+            AND betweenInsert.id > li.id
+        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id AND li.id IS NULL
+        LEFT JOIN V3_LotRemoval betweenRemoval on betweenRemoval.lotEditId = le.id AND betweenRemoval.id > lr.id
+        LEFT JOIN V3_LotInsert prevLotInsert 
+            ON prevLotInsert.lotEditId != le.id
+            AND (
+                prevLotInsert.collectedItemId = li.collectedItemId 
+                OR prevLotInsert.collectedItemId = lr.collectedItemId
+                OR prevLotInsert.bulkSplitId = li.bulkSplitId
+                OR prevLotInsert.bulkSplitId = lr.bulkSplitId
+                OR prevLotInsert.collectedItemId = l.collectedItemId
+                OR prevLotInsert.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_LotEdit prevLotEdit 
+            ON prevLotEdit.${timeWithBackticks} < l.${timeWithBackticks} -- listing time instead of lot edit time, because sale in question could be for collectedItem removed from purchased/gifted lot
+            AND prevLotEdit.id = prevLotInsert.lotEditId
+        LEFT JOIN V3_Listing prevListing
+            ON prevListing.${timeWithBackticks} < l.${timeWithBackticks}
+            AND prevListing.saleId IS NOT NULL
+            AND (
+                prevListing.collectedItemId = li.collectedItemId
+                OR prevListing.collectedItemId = lr.collectedItemId
+                OR prevListing.bulkSplitId = li.bulkSplitId
+                OR prevListing.bulkSplitId = lr.bulkSplitId
+                OR prevListing.lotId = l.lotId
+                OR prevListing.lotId = prevLotEdit.lotId
+                OR prevListing.collectedItemId = l.collectedItemId
+                OR prevListing.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_Sale prevSale
+            ON prevSale.id = prevListing.saleId
+            AND prevSale.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_Sale saleBetween
+            ON saleBetween.id = prevListing.saleId
+            AND saleBetween.${timeWithBackticks} < l.${timeWithBackticks} 
+            AND saleBetween.${timeWithBackticks} > prevSale.${timeWithBackticks}
+        LEFT JOIN V3_Gift prevGift
+            ON prevGift.${timeWithBackticks} < l.${timeWithBackticks}
+            AND prevGift.${timeWithBackticks} > prevSale.${timeWithBackticks}
+            AND (
+                prevGift.collectedItemId = li.collectedItemId
+                OR prevGift.collectedItemId = lr.collectedItemId
+                OR prevGift.bulkSplitId = li.bulkSplitId
+                OR prevGift.bulkSplitId = lr.bulkSplitId
+                OR prevGift.lotId = l.lotId
+                OR prevGift.lotId = prevLotEdit.lotId
+                OR prevGift.collectedItemId = l.collectedItemId
+                OR prevGift.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_Gift giftBetween
+            ON (
+                giftBetween.collectedItemId = li.collectedItemId
+                OR giftBetween.collectedItemId = lr.collectedItemId
+                OR giftBetween.bulkSplitId = li.bulkSplitId
+                OR giftBetween.bulkSplitId = lr.bulkSplitId
+                OR giftBetween.lotId = l.lotId
+                OR giftBetween.lotId = prevLotEdit.lotId
+                OR giftBetween.collectedItemId = l.collectedItemId
+                OR giftBetween.bulkSplitId = l.bulkSplitId
+            ) AND giftBetween.${timeWithBackticks} < l.${timeWithBackticks} 
+            AND giftBetween.${timeWithBackticks} > prevGift.${timeWithBackticks}
+        LEFT JOIN V3_Import i
+            ON (
+                i.collectedItemId = li.collectedItemId 
+                OR i.collectedItemId = lr.collectedItemId
+                OR i.bulkSplitId = li.bulkSplitId
+                OR i.bulkSplitId = lr.bulkSplitId
+                OR i.collectedItemId = l.collectedItemId
+                OR i.bulkSplitId = l.bulkSplitId
+            ) AND prevSale.id IS NULL 
+            AND prevGift.id IS NULL
         LEFT JOIN V3_Watching w
             on w.listingId = l.id
         LEFT JOIN users as watchers
             on watchers.user_id = w.watcherId
-        WHERE w.watcherId = ? AND l.saleId IS NULL
-        Group by l.id;
+        LEFT JOIN users seller
+            ON seller.user_id = prevSale.purchaserId
+            OR seller.user_id = prevGift.recipientId
+            OR seller.user_id = i.importerId
+        WHERE w.watcherId = ?
+            AND l.saleId IS NULL
+            AND (
+                (li.id IS NOT NULL AND betweenInsert.id IS NULL) 
+                OR (li.id IS NULL AND betweenRemoval.id IS NULL)
+                OR l.collectedItemId IS NOT NULL
+                OR l.bulkSplitId IS NOT NULL
+            ) AND saleBetween.id IS NULL 
+            AND giftBetween.id IS NULL 
+            AND lotEditBetweenLotEditAndListing.id IS NULL
+            AND laterPrice.id IS NULL
+            AND listR.id IS NULL
+        ORDER BY l.${timeWithBackticks} DESC;
     `
     const req = { queryQueue: [{ query, variables: [watcherId] }] }
     const res = {}
@@ -185,23 +281,8 @@ const getWatching = async (watcherId) => {
     await executeQueries(req, res, (err) => {
         if (err) throw err
         watchedListings = req.results
-        console.log(watchedListings)
     })
-    const withAddedSellers = []
-    for (let i=0; i<watchedListings.length; i++) {
-        const listing = watchedListings[i]
-        const { lotId, collectedItemId, bulkSplitId } = listing
-        const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
-        withAddedSellers.push({ ...listing, sellerId, sellerName, ownerProxyCreatorId })
-        // const mostRecentTransfer = await findMostRecentTransfer([], { collectedItemId: listing.collectedItemId, bulkSplitId: listing.bulkSplitId, lotId: listing.lotId })
-        // withAddedSellers.push({
-        //     ...listing,
-        //     sellerId: mostRecentTransfer.ownerId,
-        //     sellerName: mostRecentTransfer.ownerName,
-        //     proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
-        // })
-    }
-    return withAddedSellers
+    return watchedListings
 }
 
 
