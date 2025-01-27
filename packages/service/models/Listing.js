@@ -144,42 +144,40 @@ const getWatching = async (watcherId) => {
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            V3_Listing.id,
+            l.id,
             watchers.user_id as watcherId,
-            V3_CollectedItem.id as collectedItemId,
-            V3_BulkSplit.id as bulkSplitId,
-            V3_Lot.id as lotId,
-            V3_Listing.${timeWithBackticks} as listingTime,
-            V3_Listing.price as initialPrice,
+            ci.id as collectedItemId,
+            bs.id as bulkSplitId,
+            l.lotId,
+            l.${timeWithBackticks} as listingTime,
+            l.price as initialPrice,
             IFNULL(
                 GROUP_CONCAT(
                     '[',
-                    UNIX_TIMESTAMP(V3_ListingPrice.time), 
+                    UNIX_TIMESTAMP(lp.time), 
                     ',', 
-                    V3_ListingPrice.price, 
-                    ']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ','
+                    lp.price, 
+                    ']' ORDER BY lp.time DESC SEPARATOR ','
                 ),
                 ''
             ) as listingPrices,
-            V3_Listing.${descriptionWithBackticks} as listingDescription,
-            V3_Watching.id as watchingId
-        FROM V3_Listing
-        LEFT JOIN V3_ListingPrice
-            on V3_ListingPrice.listingId = V3_Listing.id
-        LEFT JOIN V3_Lot 
-            on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_CollectedItem 
-            on V3_CollectedItem.id = V3_Listing.collectedItemId
+            l.${descriptionWithBackticks} as listingDescription,
+            w.id as watchingId
+        FROM V3_Listing l
+        LEFT JOIN V3_ListingPrice lp
+            on lp.listingId = l.id
+        LEFT JOIN V3_CollectedItem ci
+            on ci.id = l.collectedItemId
         LEFT JOIN Item 
-            on Item.id = V3_CollectedItem.itemId
-        LEFT JOIN V3_BulkSplit
-            on V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Watching
-            on V3_Watching.listingId = V3_Listing.id
+            on Item.id = ci.itemId
+        LEFT JOIN V3_BulkSplit bs
+            on bs.id = l.bulkSplitId
+        LEFT JOIN V3_Watching w
+            on w.listingId = l.id
         LEFT JOIN users as watchers
-            on watchers.user_id = V3_Watching.watcherId
-        WHERE V3_Watching.watcherId = ? AND V3_Listing.saleId IS NULL
-        Group by V3_Listing.id;
+            on watchers.user_id = w.watcherId
+        WHERE w.watcherId = ? AND l.saleId IS NULL
+        Group by l.id;
     `
     const req = { queryQueue: [{ query, variables: [watcherId] }] }
     const res = {}
@@ -187,6 +185,7 @@ const getWatching = async (watcherId) => {
     await executeQueries(req, res, (err) => {
         if (err) throw err
         watchedListings = req.results
+        console.log(watchedListings)
     })
     const withAddedSellers = []
     for (let i=0; i<watchedListings.length; i++) {
