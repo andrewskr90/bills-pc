@@ -28,7 +28,7 @@ const getItemsByUserId = async (userId, reqQuery) => {
     from V3_Listing l
     left join V3_ListingPrice lp on lp.listingId = l.id
     left join V3_ListingPrice succeedingPrice on succeedingPrice.listingId = l.id and succeedingPrice.${timeWithBackticks} > lp.${timeWithBackticks}
-    left join V3_Offer o on o.id = l.offerId
+    left join V3_Offer o on o.listingId = l.id and o.accepted = TRUE
     left join V3_Sale purchase on purchase.id = l.saleId
     left join V3_Lot lo on lo.id = l.lotId
     left join V3_LotEdit le on le.lotId = lo.id
