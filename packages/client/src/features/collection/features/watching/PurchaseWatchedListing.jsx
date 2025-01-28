@@ -93,7 +93,7 @@ const PurchaseWatchedListing = ({ listing }) => {
                 <div>
                     <div style={{ display: 'flex', marginTop: '10px' }}>
                         <label>Listing Price</label>
-                        <p>{parseFloat(listing.listingPrices.length > 0 ? listing.listingPrices[0][1] : listing.initialPrice)}</p>
+                        <p>{parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                     </div>
                     <div className='flex flex-grow-0 mt-3'>
                         <label>An offer was accepted</label>

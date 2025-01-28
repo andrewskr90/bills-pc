@@ -300,6 +300,7 @@ const getById = async (listingId) => {
             l.${timeWithBackticks} as listingTime,
             l.price as initialPrice,
             lp.price AS updatedPrice,
+            lp.${timeWithBackticks} as updatedPriceTime,
             l.${descriptionWithBackticks},
             l.saleId,
             i.id as itemId,

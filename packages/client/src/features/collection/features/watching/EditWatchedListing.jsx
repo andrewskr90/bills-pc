@@ -8,7 +8,7 @@ import { convertLocalToUTC } from '../../../../utils/date'
 
 const EditWatchedListing = (props) => {
     const { listing, referenceData, setReferenceData } = props
-    const currentPrice = listing.listingPrices.length > 0 ? listing.listingPrices[0][1] : listing.initialPrice
+    const currentPrice = listing.updatedPrice ? listing.updatedPrice : listing.initialPrice
     const [updatedPrice, setUpdatedPrice] = useState(currentPrice)
     const [insertedItems, setInsertedItems] = useState([])
     const [deletedCollectedItemIds, setDeletedCollectedItemIds] = useState([])

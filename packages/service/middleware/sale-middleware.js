@@ -1,10 +1,7 @@
 const { v4: uuidV4 } = require('uuid')
-const Label = require('../models/Label')
-const { formatSingularComponent } = require('../utils/label')
 const Listing = require('../models/Listing')
 const { fetchOrCreateLabelIds } = require('../utils/bulk-splits')
 const { formatSaleFromPortfolioResult } = require('../utils/sale')
-const { parseThenFormatListingPrices } = require('./listing-middleware')
 const QueryFormatters = require('../utils/queryFormatters')
 const { adjustISOMinutes } = require('../utils/date')
 
@@ -371,7 +368,6 @@ const createSaleFromListing = async ({ sale, listing }, purchaserId) => {
     const queryQueue = []
     try {
         const fetchedListing = await Listing.getById(listing.id)
-        fetchedListing.listingPrices = parseThenFormatListingPrices(fetchedListing.listingPrices)
 
         if (fetchedListing.saleId) throw new Error("Listing has already been sold.")
         if (fetchedListing.ownerProxyCreatorId && fetchedListing.ownerProxyCreatorId !== purchaserId) {
@@ -401,7 +397,7 @@ const createSaleFromListing = async ({ sale, listing }, purchaserId) => {
         if (listing.offers.length > 0) {
             if (!parseFloat(listing.offers[0].amount)) throw new Error("Offer amount is not a number.")
             if (parseFloat(listing.offers[0].amount) <= 0) throw new Error("Offer amount must be greater than 0.")     
-            if (parseFloat(listing.offers[0].amount) === fetchedListing.listingPrices[0][1]) {
+            if (parseFloat(listing.offers[0].amount) === fetchedListing.updatedPrice) {
                 throw new Error("Offer amount must vary from current listing price.")
             }
             // TODO theres a chance Listing time will be after offer time
