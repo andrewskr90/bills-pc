@@ -202,4 +202,4 @@ const createListing = async (req, res, next) => {
     next()
 }
 
-module.exports = { getListings, createListing, getListingById, tiePricesToItems, parseThenFormatListingPrices }
+module.exports = { getListings, createListing, getListingById, tiePricesToItems }
