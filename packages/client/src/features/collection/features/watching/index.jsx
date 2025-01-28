@@ -5,15 +5,15 @@ import ImportListing from './ImportListing.jsx'
 import BillsPcService from '../../../../api/bills-pc'
 import Listing from './Listing.jsx'
 
-const MarketListings = (props) => {
+const Listings = (props) => {
     const { referenceData, setReferenceData } = props
-    const [watching, setWatching] = useState(undefined)
+    const [listings, setListings] = useState(undefined)
     const navigate = useNavigate()
     useEffect(() => {
         (async () => {
             try {
-                const watchingResults = await BillsPcService.getListings({ params: { watching: true }})
-                setWatching(watchingResults.data)
+                const listingsRes = await BillsPcService.getListings({ params: { watching: true }})
+                setListings(listingsRes.data)
             } catch (err) {
                 console.log(err)
             }
@@ -31,9 +31,9 @@ const MarketListings = (props) => {
                             <p className='mr-2'>Import Market Listing</p>
                             <PlusButton handleClick={() => navigate('import')} />
                         </div>
-                        {watching ? (<>
-                            {watching.length > 0 ? (<>
-                                {watching.map(listing => {
+                        {listings ? (<>
+                            {listings.length > 0 ? (<>
+                                {listings.map(listing => {
                                     return (
                                         <div style={{ width: 'full', display: 'flex', alignItems: 'center' }}>
                                             <div>
@@ -82,4 +82,4 @@ const MarketListings = (props) => {
     )
 }
 
-export default MarketListings
+export default Listings

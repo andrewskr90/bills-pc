@@ -9,7 +9,7 @@ const EditListingItem = (props) => {
     const idx = params['idx']
     useEffect(() => {
         if (listing[`${itemType}s`].length <= idx) {
-            navigate('/gym-leader/collection/watching/import')
+            navigate('/gym-leader/collection/listings/import')
         }
     }, [])
     const handleDeleteItem = () => {
@@ -19,10 +19,10 @@ const EditListingItem = (props) => {
                 return parseInt(idx) !== idxToDelete
             })
         })
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
     const handleSaveItem = () => {
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
     const handleChange = (e) => {
         setListing({

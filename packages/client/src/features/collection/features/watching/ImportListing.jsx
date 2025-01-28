@@ -35,7 +35,7 @@ const ImportListing = (props) => {
                 }
             ]
         })
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
     const handleSelectItems = (items) => {
         setExternalListing({
@@ -48,7 +48,7 @@ const ImportListing = (props) => {
                 printing: item.printing
             }))
         })
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
 
     const formatExternalListing = (listing) => {
@@ -72,7 +72,7 @@ const ImportListing = (props) => {
             await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
                 .then(res => {
                     console.log(res)
-                    navigate('/gym-leader/collection/watching')
+                    navigate('/gym-leader/collection/listings')
                 })
                 .catch(err => console.log(err))
         } catch (err) {
@@ -122,7 +122,7 @@ const ImportListing = (props) => {
                 }
             ]
         })
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
     const handleEditItem = (itemType, idx) => {
         navigate(`edit/${itemType}/${idx}`)
@@ -137,7 +137,7 @@ const ImportListing = (props) => {
             ...externalListing,
             bulkSplits: adjustedSplits
         })
-        navigate('/gym-leader/collection/watching/import')
+        navigate('/gym-leader/collection/listings/import')
     }
     
     return <Routes>

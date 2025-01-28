@@ -71,7 +71,7 @@ const PurchaseWatchedListing = ({ listing }) => {
         const params = { listing: true }
         await BillsPcService.postSale({ data, params })
             .then(res => {
-                navigate('/gym-leader/collection/watching')
+                navigate('/gym-leader/collection/listings')
             })
             .catch(err => console.log(err))
     }

@@ -7,7 +7,7 @@ import Header from '../../layouts/header/index.jsx'
 import CategorySelector from '../../components/category-selector/index.jsx'
 import Transactions from './features/transactions/index.jsx'
 import PortfolioAssets from './features/portfolio-assets/index.jsx'
-import MarketListings from './features/watching/index.jsx'
+import Listings from './features/watching/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
@@ -27,7 +27,7 @@ const Collection = (props) => {
             <>
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'market-listings']} 
+                    categories={['assets', 'listings']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -55,9 +55,9 @@ const Collection = (props) => {
                      />}
                 />
                 <Route 
-                    path='/market-listings/*'
+                    path='/listings/*'
                     element={
-                        <MarketListings 
+                        <Listings 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />

@@ -67,7 +67,7 @@ const CollectedItemInfo = () => {
                                     
                                     if (action === 'View Listing') {
                                         const { listingId } = collectedItem.transactions[0]
-                                        handleAction = () => navigate(`/gym-leader/collection/market-listings/${listingId}`)
+                                        handleAction = () => navigate(`/gym-leader/collection/listings/${listingId}`)
                                     } else if (action === 'Remove from lot') {
                                         
                                     } else if(action === 'List') {
