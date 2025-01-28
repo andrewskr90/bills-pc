@@ -1,5 +1,4 @@
 const Listing = require('../models/Listing')
-const { parseThenFormatListingPrices } = require('./listing-middleware')
 
 const createListingPrice = async (req, res, next) => {
     try {

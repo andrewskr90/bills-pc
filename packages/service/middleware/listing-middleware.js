@@ -1,23 +1,8 @@
 const Listing = require('../models/Listing')
-const LotEdit = require('../models/LotEdit')
 const CollectedItem = require('../models/CollectedItem')
 const BulkSplit = require('../models/BulkSplit')
 const MarketPrice = require('../models/MarketPrice')
 const { buildLotFromId } = require('./lot-middleware')
-const { parseGroupConcat } = require('../utils')
-
-const formatParsedDatePriceArray = (datePriceArray) => {
-    return datePriceArray.map(array => {
-        return array.map((value, idx) => {
-            if (idx === 0) return parseInt(value)
-            return parseFloat(value)
-        })
-    })
-}
-
-const parseThenFormatListingPrices = (unparsedListingPrices) => {
-    return formatParsedDatePriceArray(parseGroupConcat(unparsedListingPrices))
-}
 
 const  formatListings = (listings) => {    
     return listings.map((listing) => {
