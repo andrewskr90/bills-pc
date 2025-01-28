@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
 import BillsPcService from "../../../../api/bills-pc"
 import { initialExternalListing, initialSortingSplitValues } from "../../../../data/initialData"
@@ -9,11 +9,21 @@ import InputSelect from "../../../../components/input-select/index.jsx"
 import SelectItems from "../../../../components/select-items/index.jsx"
 
 const ImportListing = (props) => {
-    const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
+    const { referenceData, setReferenceData } = props
     const [externalListing, setExternalListing] = useState(initialExternalListing)
+    const [createdProxyUsers, setCreatedProxyUsers] = useState([])
     const navigate = useNavigate()
     const initialEmptyMessage = "Select item to import"
     const initialEmptyItemsMessage = "Select items to import"
+
+    useEffect(() => {
+        (async () => { 
+            await BillsPcService.getUsers({ params: { proxy: true } })
+                .then(res => setCreatedProxyUsers(res.data))
+                .catch(err => console.log(err))
+        })()
+    }, [])
+
     const handleSelectItem = (item) => {
         setExternalListing({
             ...externalListing,
@@ -76,7 +86,7 @@ const ImportListing = (props) => {
             setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
             setExternalListing({ ...externalListing, sellerId: id })
         } catch (err) {
-
+            console.log(err)
         }
     }
 

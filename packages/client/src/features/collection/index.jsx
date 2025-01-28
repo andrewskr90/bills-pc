@@ -14,18 +14,12 @@ import Watching from './features/watching/index.jsx'
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [portfolio, setPortfolio] = useState(initialPortfolioValues)
+    const [transactions, setTransactions] = useState([])
+    const [transactionCount, setTransactionCount] = useState()
     const [count, setCount] = useState()
-    const [createdProxyUsers, setCreatedProxyUsers] = useState([])
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        (async () => { 
-            await BillsPcService.getUsers({ params: { proxy: true } })
-                .then(res => setCreatedProxyUsers(res.data))
-                .catch(err => console.log(err))
-        })()
-    }, [userClaims])
 
     if (userClaims) {
         return (<div className='collection'>
@@ -52,31 +46,21 @@ const Collection = (props) => {
                         setReferenceData={setReferenceData}
                     />}
                 />
-                {/* <Route 
+                <Route 
                     path='/transactions/*'
                     element={<Transactions
+                        transactions={transactions} 
+                        setTransactions={setTransactions} 
+                        transactionCount={transactionCount} 
+                        setTransactionCount={setTransactionCount} 
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        portfolio={portfolio}
-                        userClaims={userClaims}
                      />}
-                /> */}
-                {/* <Route 
-                    path='/update/*'
-                    element={<UpdatePortfolio
-                        portfolio={portfolio}
-                        referenceData={referenceData}
-                        setReferenceData={setReferenceData}
-                        createdProxyUsers={createdProxyUsers}
-                        setCreatedProxyUsers={setCreatedProxyUsers}
-                     />}
-                /> */}
+                />
                 <Route 
                     path='/watching/*'
                     element={
                         <Watching 
-                            createdProxyUsers={createdProxyUsers}
-                            setCreatedProxyUsers={setCreatedProxyUsers}
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />
