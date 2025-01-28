@@ -108,9 +108,9 @@ const tiePricesToItems = (items, itemPrices) => {
 }
 
 const getListings = async (req, res, next) => {
-    if (req.query.watching) {
+    if (req.query.proxy) {
         try {
-            const watchedListings = await Listing.getWatching(req.claims.user_id)
+            const watchedListings = await Listing.getProxy(req.claims.user_id)
             req.results = formatListings(watchedListings)
         } catch (err) {
             return next(err)

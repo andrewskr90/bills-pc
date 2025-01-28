@@ -12,7 +12,7 @@ const Listings = (props) => {
     useEffect(() => {
         (async () => {
             try {
-                const listingsRes = await BillsPcService.getListings({ params: { watching: true }})
+                const listingsRes = await BillsPcService.getListings({ params: { proxy: true }})
                 setListings(listingsRes.data)
             } catch (err) {
                 console.log(err)
@@ -34,10 +34,11 @@ const Listings = (props) => {
                         {listings ? (<>
                             {listings.length > 0 ? (<>
                                 {listings.map(listing => {
+                                    console.log(listing)
                                     return (
                                         <div style={{ width: 'full', display: 'flex', alignItems: 'center' }}>
                                             <div>
-                                                <p>{listing.listingTime}</p>
+                                                <p>{new Date(listing.listingTime).toLocaleDateString()}</p>
                                                 <p>{listing.sellerName}</p>
                                                 <p>${parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                                                 <p>
@@ -45,7 +46,7 @@ const Listings = (props) => {
                                                         ? 
                                                         `Item Lot` 
                                                         : 
-                                                        listing.collectedItem.Id
+                                                        listing.collectedItem.id
                                                             ?
                                                             `Item`
                                                             :

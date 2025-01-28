@@ -139,7 +139,7 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
     return { sellerId, sellerName, ownerProxyCreatorId }
 }
 
-const getWatching = async (watcherId) => {
+const getProxy = async (userId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
@@ -261,7 +261,10 @@ const getWatching = async (watcherId) => {
             ON seller.user_id = prevSale.purchaserId
             OR seller.user_id = prevGift.recipientId
             OR seller.user_id = i.importerId
-        WHERE w.watcherId = ?
+        WHERE (
+                seller.proxyCreatorId = ?
+                OR seller.user_id = ?
+            )
             AND l.saleId IS NULL
             AND (
                 (li.id IS NOT NULL AND betweenInsert.id IS NULL) 
@@ -275,7 +278,7 @@ const getWatching = async (watcherId) => {
             AND listR.id IS NULL
         ORDER BY l.${timeWithBackticks} DESC;
     `
-    const req = { queryQueue: [{ query, variables: [watcherId] }] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     let watchedListings
     await executeQueries(req, res, (err) => {
@@ -761,7 +764,7 @@ const create = async (listing) => {
 }
 
 module.exports = { 
-    getWatching, 
+    getProxy, 
     createExternal, 
     convertSaleItemsToListings, 
     getById, 
