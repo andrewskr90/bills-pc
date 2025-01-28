@@ -5,7 +5,7 @@ import ImportListing from './ImportListing.jsx'
 import BillsPcService from '../../../../api/bills-pc'
 import Listing from './Listing.jsx'
 
-const Watching = (props) => {
+const MarketListings = (props) => {
     const { referenceData, setReferenceData } = props
     const [watching, setWatching] = useState(undefined)
     const navigate = useNavigate()
@@ -25,8 +25,10 @@ const Watching = (props) => {
                 path='/'
                 element={
                     <div style={{ height: '100%', width: 'full', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', paddingBottom: '80px' }}>
-                        <div style={{ display: 'flex', width: 'full', justifyContent: 'space-evenly', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
-                            <p>Watched External Listings</p>
+                        <div 
+                            className='flex justify-center items-center w-full my-3'
+                        >
+                            <p className='mr-2'>Import Market Listing</p>
                             <PlusButton handleClick={() => navigate('import')} />
                         </div>
                         {watching ? (<>
@@ -80,4 +82,4 @@ const Watching = (props) => {
     )
 }
 
-export default Watching
+export default MarketListings

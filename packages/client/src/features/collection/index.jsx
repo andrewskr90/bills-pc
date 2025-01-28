@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Route, Routes, Link, useNavigate } from 'react-router-dom'
-import BillsPcService from '../../api/bills-pc'
 import LoginForm from '../authenticate/LoginForm/index.jsx'
 import { initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.css'
-import UpdatePortfolio from './features/update-portfolio/index.jsx'
 import Header from '../../layouts/header/index.jsx'
 import CategorySelector from '../../components/category-selector/index.jsx'
 import Transactions from './features/transactions/index.jsx'
 import PortfolioAssets from './features/portfolio-assets/index.jsx'
-import Watching from './features/watching/index.jsx'
+import MarketListings from './features/watching/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
@@ -27,10 +25,9 @@ const Collection = (props) => {
                 <Link to='support-us'>Support Us</Link>
             </Header>
             <>
-                {/* <Link to='update/purchase'><button>Update Collection</button></Link> */}
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'watching']} 
+                    categories={['assets', 'market-listings']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -58,9 +55,9 @@ const Collection = (props) => {
                      />}
                 />
                 <Route 
-                    path='/watching/*'
+                    path='/market-listings/*'
                     element={
-                        <Watching 
+                        <MarketListings 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />
