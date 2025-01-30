@@ -8,6 +8,96 @@ import EditListingItem from './EditListingItem.jsx'
 import InputSelect from "../../../../components/input-select/index.jsx"
 import SelectItems from "../../../../components/select-items/index.jsx"
 
+const dummyItems = [
+    {
+        "id": "a299cba6-6d75-4783-96ff-15cbe4acac43",
+        "name": "Slakoth",
+        "tcgpId": 89300,
+        "printings": [
+            {
+                "id": "195da59e-fead-11ee-b8b9-0efd996651a9",
+                "name": "Normal"
+            },
+            {
+                "id": "2d1c5aa8-fead-11ee-b8b9-0efd996651a9",
+                "name": "Reverse Holofoil"
+            }
+        ],
+        "set": {
+            "id": "ba1774be-facb-4b18-a9ed-7111f553a2f2",
+            "name": "Dragons Exalted",
+            "series": "Black & White",
+            "release_date": "2012-08-15T14:00:00.000Z",
+            "ptcgio_id": "bw6"
+        },
+        "count": {
+            "195da59e-fead-11ee-b8b9-0efd996651a9": 1
+        },
+        "activePrinting": "195da59e-fead-11ee-b8b9-0efd996651a9",
+        "printing": "195da59e-fead-11ee-b8b9-0efd996651a9",
+        "note": "",
+        "condition": "0655c457-ff60-11ee-b8b9-0efd996651a9"
+    },
+    {
+        "id": "b74da95f-98ae-4cad-b079-40b416c6f224",
+        "name": "Slakoth",
+        "tcgpId": 89298,
+        "printings": [
+            {
+                "id": "195da59e-fead-11ee-b8b9-0efd996651a9",
+                "name": "Normal"
+            },
+            {
+                "id": "2d1c5aa8-fead-11ee-b8b9-0efd996651a9",
+                "name": "Reverse Holofoil"
+            }
+        ],
+        "set": {
+            "id": "8c525cfa-90af-4b0b-977d-8baf62355513",
+            "name": "Mysterious Treasures",
+            "series": "Diamond & Pearl",
+            "release_date": "2007-08-01T14:00:00.000Z",
+            "ptcgio_id": "dp2"
+        },
+        "count": {
+            "195da59e-fead-11ee-b8b9-0efd996651a9": 1
+        },
+        "activePrinting": "195da59e-fead-11ee-b8b9-0efd996651a9",
+        "printing": "195da59e-fead-11ee-b8b9-0efd996651a9",
+        "note": "",
+        "condition": "0655c457-ff60-11ee-b8b9-0efd996651a9"
+    },
+    {
+        "id": "dde46d43-7b66-4c87-9714-c012f9ab5fa6",
+        "name": "Slakoth",
+        "tcgpId": 89297,
+        "printings": [
+            {
+                "id": "195da59e-fead-11ee-b8b9-0efd996651a9",
+                "name": "Normal"
+            },
+            {
+                "id": "2d1c5aa8-fead-11ee-b8b9-0efd996651a9",
+                "name": "Reverse Holofoil"
+            }
+        ],
+        "set": {
+            "id": "7c10f246-686e-4c58-8a24-4d5c18e10414",
+            "name": "Power Keepers",
+            "series": "EX",
+            "release_date": "2007-02-02T16:00:00.000Z",
+            "ptcgio_id": "ex16"
+        },
+        "activePrinting": "2d1c5aa8-fead-11ee-b8b9-0efd996651a9",
+        "count": {
+            "2d1c5aa8-fead-11ee-b8b9-0efd996651a9": 1
+        },
+        "printing": "2d1c5aa8-fead-11ee-b8b9-0efd996651a9",
+        "note": "",
+        "condition": "0655c457-ff60-11ee-b8b9-0efd996651a9"
+    }
+]
+
 const ImportListing = (props) => {
     const { referenceData, setReferenceData } = props
     const [externalListing, setExternalListing] = useState(initialExternalListing)
@@ -139,7 +229,24 @@ const ImportListing = (props) => {
         })
         navigate('/gym-leader/collection/listings/import')
     }
-    
+
+    const handleChange = (e, idx) => {
+        setExternalListing({
+            ...externalListing,
+            items: externalListing.items.map((item, idxToUpdate) => {
+                if (parseInt(idx) === idxToUpdate) {
+                    return {
+                        ...item,
+                        [e.target.name]: e.target.value
+                    }
+                } else {
+                    return item
+                }
+            })
+        })
+    }
+
+    const { condition } = referenceData.bulk
     return <Routes>
             <Route
                 path="/"
@@ -181,15 +288,31 @@ const ImportListing = (props) => {
                         )}
                         {externalListing.items.map((item, idx) => {
                             return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around', paddingBottom: '4px' }}>
-                                <div style={{ display: 'flex ', alignItems: 'start', flexDirection: 'column', width: '90%' }}>
-                                    {item.name}
-                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                                        <p>{referenceData.bulk.condition.find(c => c.condition_id === item.condition).condition_name}</p>
-                                        <p>--</p>
-                                        <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printing).printing_name}</p>
+                                <div style={{ display: 'flex ', alignItems: 'start', width: '90%' }}>
+                                    <img 
+                                        className="w-1/5"
+                                        src={`https://product-images.tcgplayer.com/fit-in/656x656/${item.tcgpId}.jpg`} 
+                                    />
+                                    <div className="flex flex-col w-4/5">
+                                        <p>{item.name}</p>
+                                        <p>{item.set.name}</p>
+                                        <select name='condition' onChange={(e) => handleChange(e, idx)} value={item.condition}>
+                                            {item.sealed ? <>
+                                                <option value={'7e464ec6-0b23-11ef-b8b9-0efd996651a9'}>{condition.find(c => c.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9').condition_name}</option>
+                                            </> : <>
+                                                {condition.filter(c => c.condition_id !== '7e464ec6-0b23-11ef-b8b9-0efd996651a9').map(c => {
+                                                    return <option value={c.condition_id}>{c.condition_name}</option>
+                                                })}
+                                            </>}
+                                        </select>
+                                        <select name='printing' onChange={(e) => handleChange(e, idx)} value={item.printing}>
+                                            {item.printings.map(p => {
+                                                return <option value={p.id}>{p.name}</option>
+                                            })}
+                                        </select>
+                                        <button onClick={() => handleEditItem('item', idx)}>Add Note</button>
                                     </div>
                                 </div>
-                                <img src={editPNG} onClick={() => handleEditItem('item', idx)} />
                             </div>)
                         })}
                         {externalListing.bulkSplits.map((split, idx) => {
@@ -235,9 +358,9 @@ const ImportListing = (props) => {
             <Route 
                 path='/edit/:itemType/:idx'
                 element={<EditListingItem 
-                    referenceData={referenceData}
                     listing={externalListing}
                     setListing={setExternalListing}
+                    handleChange={handleChange}
                 />}
             />
         </Routes>

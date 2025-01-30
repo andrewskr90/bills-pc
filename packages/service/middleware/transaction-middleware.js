@@ -20,13 +20,29 @@ const interpretTransactions = (transactions, userId) => {
         let actions = []
 
         if (transaction.lotEditId) {
-            // TODO inserted or removed from listed lot
+            // TODO inserted or removed from listed lot. Look at collectedItemId = '49f7a6cb-cf28-4fa6-9b22-49776939c794', '32596c51-a138-4d14-93d3-f8ec99876795'
             if (transaction.lotInsertId) {
-                // inserted into lot
-                transactionInfo = 'Inserted in lot'
-                actions = [
-                    actionTypes.viewLot
-                ]
+                if (transaction.listingId) {
+                    if (transaction.listingRemovalId) {
+                        transactionInfo = 'Removed from lot'
+                        actions = [
+                            actionTypes.list,
+                            actionTypes.gift
+                        ]
+                    } else {
+                        transactionInfo = `Inserted in lot listed at ${transaction.updatedPrice ? transaction.updatedPrice : transaction.initialPrice}`
+                        actions = [
+                            actionTypes.viewLot,
+                            actionTypes.viewListing
+                        ]
+                    }
+                } else {
+                    // inserted into lot
+                    transactionInfo = 'Inserted in lot'
+                    actions = [
+                        actionTypes.viewLot
+                    ]
+                }
             } else if (transaction.lotRemovalId) {
                 // removed from lot
                 transactionInfo = 'Removed from lot'
