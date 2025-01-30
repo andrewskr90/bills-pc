@@ -23,6 +23,7 @@ const Search = (props) => {
             } else {
                 delete params.searchvalue
             }
+            params.page = 1
             const builtParamString = buildParamString(params)
             navigate((marketSearch ? '/market/search' : '') + builtParamString)
         }

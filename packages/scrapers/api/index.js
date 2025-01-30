@@ -156,34 +156,6 @@ export const patchSetBillsPc = async (cookies, setId, data) => {
     }
 }
 
-export const getCardsBillsPc = async (params, cookies) => {
-    try {
-        const billsPcCardsV2 = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/cards-v2',
-            headers: { Cookie: cookies },
-            params
-        })        
-        return billsPcCardsV2.data
-    } catch (err) {
-        throw err
-    }
-}
-
-export const getProductsBillsPc = async (params, cookies) => {
-    try {
-        const billsPcProducts = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/products',
-            headers: { Cookie: cookies },
-            params
-        })        
-        return billsPcProducts.data
-    } catch (err) {
-        throw err
-    }
-}
-
 export const postItemsBillsPc = async (data, cookies) => {
     try {
         const billsPcItems = await axios({

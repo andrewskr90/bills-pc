@@ -7,6 +7,8 @@ const Gift = require('./Gift')
 const LotEdit = require('../models/LotEdit')
 const LotInsert = require('../models/LotInsert')
 const Import = require('../models/Import')
+const Sale = require('../models/Sale')
+const { adjustISOHours } = require('../utils/date')
 
 const previousTransaction = async (subject) => {
 
@@ -69,7 +71,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -93,7 +98,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -117,7 +125,10 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
                 sellerName = imp.importerName
                 ownerProxyCreatorId = imp.proxyCreatorId
             } else if (prev.saleId) {
-                throw new Error('set up  lot sale id')
+                const sale = await Sale.getById(prev.saleId)
+                sellerId = sale.purchaserId
+                sellerName = sale.purchaserName
+                ownerProxyCreatoryId = sale.proxyCreatorId
             } else if (prev.lotEditId) {
                 subject = { ...subject, timeCutoff: prev.time.toISOString() }
             } else {
@@ -128,60 +139,153 @@ const previousOwner = async ({ lotId, collectedItemId, bulkSplitId }, startTime)
     return { sellerId, sellerName, ownerProxyCreatorId }
 }
 
-const getWatching = async (watcherId) => {
+const getProxy = async (userId) => {
     const timeWithBackticks = '`time`'
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            V3_Listing.id,
+            l.id,
             watchers.user_id as watcherId,
-            V3_CollectedItem.id as collectedItemId,
-            V3_BulkSplit.id as bulkSplitId,
-            V3_Lot.id as lotId,
-            V3_Listing.${timeWithBackticks} as listingTime,
-            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
-            V3_Listing.${descriptionWithBackticks} as listingDescription,
-            V3_Watching.id as watchingId
-        FROM V3_Listing
-        LEFT JOIN V3_ListingPrice
-            on V3_ListingPrice.listingId = V3_Listing.id
-        LEFT JOIN V3_Lot 
-            on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_CollectedItem 
-            on V3_CollectedItem.id = V3_Listing.collectedItemId
+            ci.id as collectedItemId,
+            bs.id as bulkSplitId,
+            l.lotId,
+            l.${timeWithBackticks} as listingTime,
+            l.price as initialPrice,
+            lp.price as updatedPrice,
+            l.${descriptionWithBackticks} as description,
+            seller.user_id as sellerId,
+            seller.user_name as sellerName,
+            w.id as watchingId
+        FROM V3_Listing l
+        LEFT JOIN V3_ListingPrice lp
+            on lp.listingId = l.id
+        LEFT JOIN V3_ListingPrice laterPrice
+            ON laterPrice.listingId = l.id
+            AND laterPrice.${timeWithBackticks} > lp.${timeWithBackticks}
+        LEFT JOIN V3_ListingRemoval listR
+            ON listR.listingId = l.id
+            AND listR.${timeWithBackticks} > lp.${timeWithBackticks}
+        LEFT JOIN V3_CollectedItem ci
+            on ci.id = l.collectedItemId
         LEFT JOIN Item 
-            on Item.id = V3_CollectedItem.itemId
-        LEFT JOIN V3_BulkSplit
-            on V3_BulkSplit.id = V3_Listing.bulkSplitId
-        LEFT JOIN V3_Watching
-            on V3_Watching.listingId = V3_Listing.id
+            on Item.id = ci.itemId
+        LEFT JOIN V3_BulkSplit bs
+            on bs.id = l.bulkSplitId
+        LEFT JOIN V3_LotEdit le 
+            ON le.lotId = l.lotId
+            AND le.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_LotEdit lotEditBetweenLotEditAndListing
+            ON lotEditBetweenLotEditAndListing.lotId = l.lotId
+            AND lotEditBetweenLotEditAndListing.${timeWithBackticks} > le.${timeWithBackticks}
+            AND lotEditBetweenLotEditAndListing.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_LotInsert li 
+            on li.lotEditId = le.id
+        LEFT JOIN V3_LotInsert betweenInsert 
+            on betweenInsert.lotEditId = le.id 
+            AND betweenInsert.id > li.id
+        LEFT JOIN V3_LotRemoval lr on lr.lotEditId = le.id AND li.id IS NULL
+        LEFT JOIN V3_LotRemoval betweenRemoval on betweenRemoval.lotEditId = le.id AND betweenRemoval.id > lr.id
+        LEFT JOIN V3_LotInsert prevLotInsert 
+            ON prevLotInsert.lotEditId != le.id
+            AND (
+                prevLotInsert.collectedItemId = li.collectedItemId 
+                OR prevLotInsert.collectedItemId = lr.collectedItemId
+                OR prevLotInsert.bulkSplitId = li.bulkSplitId
+                OR prevLotInsert.bulkSplitId = lr.bulkSplitId
+                OR prevLotInsert.collectedItemId = l.collectedItemId
+                OR prevLotInsert.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_LotEdit prevLotEdit 
+            ON prevLotEdit.${timeWithBackticks} < l.${timeWithBackticks} -- listing time instead of lot edit time, because sale in question could be for collectedItem removed from purchased/gifted lot
+            AND prevLotEdit.id = prevLotInsert.lotEditId
+        LEFT JOIN V3_Listing prevListing
+            ON prevListing.${timeWithBackticks} < l.${timeWithBackticks}
+            AND prevListing.saleId IS NOT NULL
+            AND (
+                prevListing.collectedItemId = li.collectedItemId
+                OR prevListing.collectedItemId = lr.collectedItemId
+                OR prevListing.bulkSplitId = li.bulkSplitId
+                OR prevListing.bulkSplitId = lr.bulkSplitId
+                OR prevListing.lotId = l.lotId
+                OR prevListing.lotId = prevLotEdit.lotId
+                OR prevListing.collectedItemId = l.collectedItemId
+                OR prevListing.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_Sale prevSale
+            ON prevSale.id = prevListing.saleId
+            AND prevSale.${timeWithBackticks} < l.${timeWithBackticks}
+        LEFT JOIN V3_Sale saleBetween
+            ON saleBetween.id = prevListing.saleId
+            AND saleBetween.${timeWithBackticks} < l.${timeWithBackticks} 
+            AND saleBetween.${timeWithBackticks} > prevSale.${timeWithBackticks}
+        LEFT JOIN V3_Gift prevGift
+            ON prevGift.${timeWithBackticks} < l.${timeWithBackticks}
+            AND prevGift.${timeWithBackticks} > prevSale.${timeWithBackticks}
+            AND (
+                prevGift.collectedItemId = li.collectedItemId
+                OR prevGift.collectedItemId = lr.collectedItemId
+                OR prevGift.bulkSplitId = li.bulkSplitId
+                OR prevGift.bulkSplitId = lr.bulkSplitId
+                OR prevGift.lotId = l.lotId
+                OR prevGift.lotId = prevLotEdit.lotId
+                OR prevGift.collectedItemId = l.collectedItemId
+                OR prevGift.bulkSplitId = l.bulkSplitId
+            )
+        LEFT JOIN V3_Gift giftBetween
+            ON (
+                giftBetween.collectedItemId = li.collectedItemId
+                OR giftBetween.collectedItemId = lr.collectedItemId
+                OR giftBetween.bulkSplitId = li.bulkSplitId
+                OR giftBetween.bulkSplitId = lr.bulkSplitId
+                OR giftBetween.lotId = l.lotId
+                OR giftBetween.lotId = prevLotEdit.lotId
+                OR giftBetween.collectedItemId = l.collectedItemId
+                OR giftBetween.bulkSplitId = l.bulkSplitId
+            ) AND giftBetween.${timeWithBackticks} < l.${timeWithBackticks} 
+            AND giftBetween.${timeWithBackticks} > prevGift.${timeWithBackticks}
+        LEFT JOIN V3_Import i
+            ON (
+                i.collectedItemId = li.collectedItemId 
+                OR i.collectedItemId = lr.collectedItemId
+                OR i.bulkSplitId = li.bulkSplitId
+                OR i.bulkSplitId = lr.bulkSplitId
+                OR i.collectedItemId = l.collectedItemId
+                OR i.bulkSplitId = l.bulkSplitId
+            ) AND prevSale.id IS NULL 
+            AND prevGift.id IS NULL
+        LEFT JOIN V3_Watching w
+            on w.listingId = l.id
         LEFT JOIN users as watchers
-            on watchers.user_id = V3_Watching.watcherId
-        WHERE V3_Watching.watcherId = ? AND V3_Listing.saleId IS NULL
-        Group by V3_Listing.id;
+            on watchers.user_id = w.watcherId
+        LEFT JOIN users seller
+            ON seller.user_id = prevSale.purchaserId
+            OR seller.user_id = prevGift.recipientId
+            OR seller.user_id = i.importerId
+        WHERE (
+                seller.proxyCreatorId = ?
+                OR seller.user_id = ?
+            )
+            AND l.saleId IS NULL
+            AND (
+                (li.id IS NOT NULL AND betweenInsert.id IS NULL) 
+                OR (li.id IS NULL AND betweenRemoval.id IS NULL)
+                OR l.collectedItemId IS NOT NULL
+                OR l.bulkSplitId IS NOT NULL
+            ) AND saleBetween.id IS NULL 
+            AND giftBetween.id IS NULL 
+            AND lotEditBetweenLotEditAndListing.id IS NULL
+            AND laterPrice.id IS NULL
+            AND listR.id IS NULL
+        ORDER BY l.${timeWithBackticks} DESC;
     `
-    const req = { queryQueue: [{ query, variables: [watcherId] }] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     let watchedListings
     await executeQueries(req, res, (err) => {
         if (err) throw err
         watchedListings = req.results
     })
-    const withAddedSellers = []
-    for (let i=0; i<watchedListings.length; i++) {
-        const listing = watchedListings[i]
-        const { lotId, collectedItemId, bulkSplitId } = listing
-        const { sellerId, sellerName, ownerProxyCreatorId } = await previousOwner({ lotId, collectedItemId, bulkSplitId }, listing.listingTime)
-        withAddedSellers.push({ ...listing, sellerId, sellerName, ownerProxyCreatorId })
-        // const mostRecentTransfer = await findMostRecentTransfer([], { collectedItemId: listing.collectedItemId, bulkSplitId: listing.bulkSplitId, lotId: listing.lotId })
-        // withAddedSellers.push({
-        //     ...listing,
-        //     sellerId: mostRecentTransfer.ownerId,
-        //     sellerName: mostRecentTransfer.ownerName,
-        //     proxyCreatorId: mostRecentTransfer.ownerProxyCreatorId
-        // })
-    }
-    return withAddedSellers
+    return watchedListings
 }
 
 
@@ -190,42 +294,51 @@ const getById = async (listingId) => {
     const descriptionWithBackticks = '`description`'
     const query = `
         SELECT 
-            V3_Listing.id,
-            V3_CollectedItem.id as collectedItemId,
-            V3_CollectedItem.printingId as printingId,
-            V3_Appraisal.conditionId as conditionId,
+            l.id,
+            ci.id as collectedItemId,
+            ci.printingId as printingId,
+            a.conditionId as conditionId,
             SKU.id as skuId,
-            V3_BulkSplit.id as bulkSplitId,
-            V3_Listing.${timeWithBackticks} as listingTime,
-            GROUP_CONCAT('[',UNIX_TIMESTAMP(V3_ListingPrice.time), ',', V3_ListingPrice.price,']' ORDER BY V3_ListingPrice.time DESC SEPARATOR ',') as listingPrices,
-            V3_Listing.${descriptionWithBackticks},
-            Item.id as itemId,
-            Item.name as name,
-            Item.tcgpId as tcgpId,
-            V3_Lot.id as lotId,
+            bs.id as bulkSplitId,
+            l.${timeWithBackticks} as listingTime,
+            l.price as initialPrice,
+            lp.price AS updatedPrice,
+            lp.${timeWithBackticks} as updatedPriceTime,
+            l.${descriptionWithBackticks},
+            l.saleId,
+            i.id as itemId,
+            i.name as name,
+            i.tcgpId as tcgpId,
+            l.lotId as lotId,
             sets_v2.set_v2_id as setId,
             sets_v2.set_v2_name as setName
-        FROM V3_Listing
-        LEFT JOIN V3_ListingPrice
-            on V3_ListingPrice.listingId = V3_Listing.id
-        LEFT JOIN V3_Lot 
-            on V3_Lot.id = V3_Listing.lotId
-        LEFT JOIN V3_CollectedItem 
-            on V3_CollectedItem.id = V3_Listing.collectedItemId
-        LEFT JOIN V3_Appraisal
-            on V3_Appraisal.collectedItemId = V3_CollectedItem.id
-        LEFT JOIN Item 
-            on Item.id = V3_CollectedItem.itemId
+        FROM V3_Listing l
+        LEFT JOIN V3_ListingPrice lp
+            on lp.listingId = l.id
+        LEFT JOIN V3_ListingPrice laterPrice
+            ON laterPrice.listingId = l.id
+            AND laterPrice.${timeWithBackticks} > lp.${timeWithBackticks}
+        LEFT JOIN V3_CollectedItem ci
+            on ci.id = l.collectedItemId
+        LEFT JOIN V3_Appraisal a
+            on a.collectedItemId = ci.id
+        LEFT JOIN V3_Appraisal laterAppraisal
+            ON laterAppraisal.collectedItemId = ci.id
+            AND laterAppraisal.${timeWithBackticks} > a.${timeWithBackticks}
+        LEFT JOIN Item i
+            on i.id = ci.itemId
         LEFT JOIN SKU
-            on SKU.itemId = Item.id
-            AND SKU.printingId = V3_CollectedItem.printingId
-            AND SKU.conditionId = V3_Appraisal.conditionId
+            on SKU.itemId = i.id
+            AND SKU.printingId = ci.printingId
+            AND SKU.conditionId = a.conditionId
         LEFT JOIN sets_v2
-            on Item.setId = sets_v2.set_v2_id
-        LEFT JOIN V3_BulkSplit
-            ON V3_BulkSplit.id = V3_Listing.bulkSplitId
-        WHERE V3_Listing.id = ?
-        Group by V3_Listing.id;
+            on i.setId = sets_v2.set_v2_id
+        LEFT JOIN V3_BulkSplit bs
+            ON bs.id = l.bulkSplitId
+        WHERE l.id = ?
+            AND laterPrice.id IS NULL
+            AND laterAppraisal.id IS NULL
+        Group by l.id;
     `
     const req = { queryQueue: [{ query, variables: [listingId] }] }
     const res = {}
@@ -339,11 +452,6 @@ const prepZuluForDB = (local) => {
         local.getUTCMinutes().toString().padStart(2, '0')}:${
         local.getUTCSeconds().toString().padStart(2, '0')}.${
         local.getMilliseconds().toString().padStart(3, '0')}`
-}
-const adjustISOHours = (stringDate, adjustment) => {
-    const oldDate = new Date(stringDate)
-    oldDate.setHours(oldDate.getHours() + adjustment)
-    return oldDate.toISOString()
 }
 
 const createExternal = async (listing, watcherId) => {
@@ -515,18 +623,10 @@ const createExternal = async (listing, watcherId) => {
         lotId,
         description: listing.description,
         saleId: undefined,
-        time: listing.time
+        time: listing.time,
+        price: listing.price
     }
     queryQueue.push({ query: `${objectsToInsert([formattedListing], 'V3_Listing')};`, variables: [] })
-    // create ListingPrice
-    const listingPriceId = uuidV4()
-    const formattedListingPrice = {
-        id: listingPriceId,
-        listingId,
-        price: listing.price,
-        time: listing.time
-    }
-    queryQueue.push({ query: `${objectsToInsert([formattedListingPrice], 'V3_ListingPrice')};`, variables: [] })
     // create Watching
     const watchingId = uuidV4()
     const formattedWatching = { 
@@ -635,11 +735,40 @@ const createPrice = async ({ listingId, price, time }) => {
     return id
 }
 
+const create = async (listing) => {
+    // TODO only owner of item(s) should have permissions
+    // TODO if collected item in lot, can't list it seperately
+    // TODO write utility function declaring if item listing makes sense with given history
+    // create listing
+    const { collectedItemId, bulkSplitId, lotId, description, time, price } = listing
+    if (!collectedItemId && !bulkSplitId && !lotId) throw new Error('item, bulkSplit, or lot required to create listing.')
+    if (!time) throw new Error('Time listing was created is required.')
+    // TODO should mysql handle errors? It is successfully handling 'price cannot be null' error
+    const id = uuidV4()
+    const formattedListing = {
+        id,
+        collectedItemId,
+        bulkSplitId,
+        lotId,
+        description,
+        saleId: undefined,
+        time,
+        price
+    }
+    const req = { queryQueue: [{ query: `${objectsToInsert([formattedListing], 'V3_Listing')};`, variables: [] }] }
+    const res = {}
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+    })
+    return id
+}
+
 module.exports = { 
-    getWatching, 
+    getProxy, 
     createExternal, 
     convertSaleItemsToListings, 
     getById, 
     createPrice,
-    previousOwner
+    previousOwner,
+    create
 }

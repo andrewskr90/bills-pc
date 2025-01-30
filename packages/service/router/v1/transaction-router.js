@@ -4,6 +4,15 @@ const { verifyCookie, decodeSessionToken } = require('../../middleware/auth-midd
 const { formatImportPurchase, formatImportGift, checkPurchaseBulkLabels } = require('../../middleware/sale-middleware')
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
+const { getCollectedItemTransactions } = require('../../middleware/transaction-middleware')
+
+transactionRouter.get('/collected-item/:id', 
+    verifyCookie, 
+    decodeSessionToken, 
+    getCollectedItemTransactions,
+    (req, res, next) => {
+        res.status(200).json(req.results)
+})
 
 transactionRouter.get('/sales', 
     verifyCookie, 

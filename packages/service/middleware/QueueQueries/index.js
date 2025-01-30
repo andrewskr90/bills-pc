@@ -1,8 +1,6 @@
 const users = require('./users')
-const sets = require('./sets')
 const collectedCards = require('./collectedCards')
 const collectedProducts = require('./collectedProducts')
-const cards = require('./cards')
 const sales = require('./sales')
 const saleNotes = require('./saleNotes')
 const collectedCardNotes = require('./collectedCardNotes')
@@ -12,7 +10,6 @@ const saleProducts = require('./saleProducts')
 const setsV2 = require('./setsV2')
 const marketPrices = require('./marketPrices')
 const cardsV2 = require('./cardsV2')
-const products = require('./products')
 const referenceData = require('./referenceData')
 const portfolio = require('./portfolio')
 const gifts = require('./gifts')
@@ -25,7 +22,6 @@ const sortings = require('./sortings')
 const sortingSplits = require('./sortingSplits')
 const sortingGems = require('./sortingGems')
 const giftBulkSplits = require('./giftBulkSplits')
-const items = require('./items')
 
 const init = (req, res, next) => {
     req.queryQueue = []
@@ -35,10 +31,8 @@ const init = (req, res, next) => {
 module.exports = {
     init,
     users,
-    sets,
     collectedCards,
     collectedProducts,
-    cards,
     sales,
     saleNotes,
     collectedCardNotes,
@@ -48,7 +42,6 @@ module.exports = {
     setsV2,
     marketPrices,
     cardsV2,
-    products,
     referenceData, 
     portfolio, 
     gifts,
@@ -60,6 +53,5 @@ module.exports = {
     sortings,
     sortingSplits,
     sortingGems,
-    giftBulkSplits,
-    items
+    giftBulkSplits
 }

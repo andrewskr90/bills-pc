@@ -1,31 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { Route, Routes, Link, useNavigate } from 'react-router-dom'
-import BillsPcService from '../../api/bills-pc'
 import LoginForm from '../authenticate/LoginForm/index.jsx'
 import { initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.css'
-import UpdatePortfolio from './features/update-portfolio/index.jsx'
 import Header from '../../layouts/header/index.jsx'
 import CategorySelector from '../../components/category-selector/index.jsx'
 import Transactions from './features/transactions/index.jsx'
 import PortfolioAssets from './features/portfolio-assets/index.jsx'
-import Watching from './features/watching/index.jsx'
+import Listings from './features/watching/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
     const [portfolio, setPortfolio] = useState(initialPortfolioValues)
+    const [transactions, setTransactions] = useState([])
+    const [transactionCount, setTransactionCount] = useState()
     const [count, setCount] = useState()
-    const [createdProxyUsers, setCreatedProxyUsers] = useState([])
 
     const navigate = useNavigate()
 
-    useEffect(() => {
-        (async () => { 
-            await BillsPcService.getUsers({ params: { proxy: true } })
-                .then(res => setCreatedProxyUsers(res.data))
-                .catch(err => console.log(err))
-        })()
-    }, [userClaims])
 
     if (userClaims) {
         return (<div className='collection'>
@@ -33,10 +25,9 @@ const Collection = (props) => {
                 <Link to='support-us'>Support Us</Link>
             </Header>
             <>
-                {/* <Link to='update/purchase'><button>Update Collection</button></Link> */}
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'watching']} 
+                    categories={['assets', 'listings']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -52,31 +43,21 @@ const Collection = (props) => {
                         setReferenceData={setReferenceData}
                     />}
                 />
-                {/* <Route 
+                <Route 
                     path='/transactions/*'
                     element={<Transactions
+                        transactions={transactions} 
+                        setTransactions={setTransactions} 
+                        transactionCount={transactionCount} 
+                        setTransactionCount={setTransactionCount} 
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
-                        portfolio={portfolio}
-                        userClaims={userClaims}
                      />}
-                /> */}
-                {/* <Route 
-                    path='/update/*'
-                    element={<UpdatePortfolio
-                        portfolio={portfolio}
-                        referenceData={referenceData}
-                        setReferenceData={setReferenceData}
-                        createdProxyUsers={createdProxyUsers}
-                        setCreatedProxyUsers={setCreatedProxyUsers}
-                     />}
-                /> */}
+                />
                 <Route 
-                    path='/watching/*'
+                    path='/listings/*'
                     element={
-                        <Watching 
-                            createdProxyUsers={createdProxyUsers}
-                            setCreatedProxyUsers={setCreatedProxyUsers}
+                        <Listings 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />

@@ -5,15 +5,15 @@ import ImportListing from './ImportListing.jsx'
 import BillsPcService from '../../../../api/bills-pc'
 import Listing from './Listing.jsx'
 
-const Watching = (props) => {
-    const { referenceData, setReferenceData, createdProxyUsers, setCreatedProxyUsers } = props
-    const [watching, setWatching] = useState(undefined)
+const Listings = (props) => {
+    const { referenceData, setReferenceData } = props
+    const [listings, setListings] = useState(undefined)
     const navigate = useNavigate()
     useEffect(() => {
         (async () => {
             try {
-                const watchingResults = await BillsPcService.getListings({ params: { watching: true }})
-                setWatching(watchingResults.data)
+                const listingsRes = await BillsPcService.getListings({ params: { proxy: true }})
+                setListings(listingsRes.data)
             } catch (err) {
                 console.log(err)
             }
@@ -25,19 +25,22 @@ const Watching = (props) => {
                 path='/'
                 element={
                     <div style={{ height: '100%', width: 'full', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', paddingBottom: '80px' }}>
-                        <div style={{ display: 'flex', width: 'full', justifyContent: 'space-evenly', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
-                            <p>Watched External Listings</p>
+                        <div 
+                            className='flex justify-center items-center w-full my-3'
+                        >
+                            <p className='mr-2'>Import Market Listing</p>
                             <PlusButton handleClick={() => navigate('import')} />
                         </div>
-                        {watching ? (<>
-                            {watching.length > 0 ? (<>
-                                {watching.map(listing => {
+                        {listings ? (<>
+                            {listings.length > 0 ? (<>
+                                {listings.map(listing => {
+                                    console.log(listing)
                                     return (
                                         <div style={{ width: 'full', display: 'flex', alignItems: 'center' }}>
                                             <div>
-                                                <p>{listing.listingTime}</p>
+                                                <p>{new Date(listing.listingTime).toLocaleDateString()}</p>
                                                 <p>{listing.sellerName}</p>
-                                                <p>${parseFloat(listing.listingPrices[0][1])}</p>
+                                                <p>${parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                                                 <p>
                                                     {listing.lot.id
                                                         ? 
@@ -65,8 +68,6 @@ const Watching = (props) => {
             <Route 
                 path="/import/*"
                 element={<ImportListing 
-                    createdProxyUsers={createdProxyUsers}
-                    setCreatedProxyUsers={setCreatedProxyUsers}
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData} 
                 />}
@@ -82,4 +83,4 @@ const Watching = (props) => {
     )
 }
 
-export default Watching
+export default Listings

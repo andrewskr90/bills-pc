@@ -1,23 +1,8 @@
 const Listing = require('../models/Listing')
-const LotEdit = require('../models/LotEdit')
 const CollectedItem = require('../models/CollectedItem')
 const BulkSplit = require('../models/BulkSplit')
 const MarketPrice = require('../models/MarketPrice')
 const { buildLotFromId } = require('./lot-middleware')
-const { parseGroupConcat } = require('../utils')
-
-const formatParsedDatePriceArray = (datePriceArray) => {
-    return datePriceArray.map(array => {
-        return array.map((value, idx) => {
-            if (idx === 0) return parseInt(value)
-            return parseFloat(value)
-        })
-    })
-}
-
-const parseThenFormatListingPrices = (unparsedListingPrices) => {
-    return formatParsedDatePriceArray(parseGroupConcat(unparsedListingPrices))
-}
 
 const  formatListings = (listings) => {    
     return listings.map((listing) => {
@@ -26,27 +11,27 @@ const  formatListings = (listings) => {
             sellerId,
             sellerName,
             listingTime,
-            listingDescription: description,
-            listingPrices,
+            initialPrice,
+            description,
+            updatedPrice,
             collectedItemId,
             bulkSplitId,
-            lotId 
+            lotId,
+            saleId
         } = listing
         return {
             id,
             sellerId,
             sellerName,
             listingTime,
+            initialPrice,
             description,
-            listingPrices: parseThenFormatListingPrices(listingPrices),
+            updatedPrice,
             collectedItem: { id: collectedItemId },
             bulkSplit: { id: bulkSplitId },
             lot: { id: lotId },
+            saleId
         }
-    }).sort((a, b) => {
-        if (a.time > b.time) return -1
-        if (a.time < b.time) return 1
-        return 0
     })
 }
 
@@ -123,9 +108,9 @@ const tiePricesToItems = (items, itemPrices) => {
 }
 
 const getListings = async (req, res, next) => {
-    if (req.query.watching) {
+    if (req.query.proxy) {
         try {
-            const watchedListings = await Listing.getWatching(req.claims.user_id)
+            const watchedListings = await Listing.getProxy(req.claims.user_id)
             req.results = formatListings(watchedListings)
         } catch (err) {
             return next(err)
@@ -207,7 +192,12 @@ const createListing = async (req, res, next) => {
             return next(err)
         }        
     } else {
-        return next({ status: 404, message: 'no such route' })
+        try {
+        const listingId = await Listing.create(req.body)
+        req.results = { message: "Created.", date: listingId }
+        } catch (err) {
+            return next(err)
+        }
     }
     next()
 }

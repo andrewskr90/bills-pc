@@ -6,7 +6,9 @@ const formatMarketPricesFromConcat = (req, res, next) => {
     const itemLookup = {}
     req.printingsAlreadyFormatted = true
     const formattedMarketPricesFromConcat = req.results.filter((itemPrinting, i) => {
-        const datesAndPrices = itemPrinting.prices ? parseGroupConcat(itemPrinting.prices) : []
+        const splitPrices = itemPrinting.prices.split('],[')
+        const shavedOffPartialPriceArray = splitPrices.filter((pair, idx) => idx !== splitPrices.length - 1)
+        const datesAndPrices = itemPrinting.prices ? parseGroupConcat(shavedOffPartialPriceArray.join('],[') + ']') : []
         if (itemPriceLookup[itemPrinting.id]) {
             itemPriceLookup[itemPrinting.id] = {
                 ...itemPriceLookup[itemPrinting.id],

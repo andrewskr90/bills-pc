@@ -11,7 +11,7 @@ const getById = async (id) => {
             s.set_v2_id as setId,
             s.set_v2_name as setName,
             c.printingId,
-            GROUP_CONCAT('[', UNIX_TIMESTAMP(a.time), ',', a.conditionId, ',', a.appraiserId, ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals
+            GROUP_CONCAT('[', '"', UNIX_TIMESTAMP(a.time), '"', ',', '"', a.conditionId, '"', ',', '"', a.appraiserId, '"', ']' ORDER BY a.time DESC SEPARATOR ',') as appraisals
         FROM V3_CollectedItem c
         LEFT JOIN Item i on i.id = c.itemId
         LEFT JOIN sets_v2 s on s.set_v2_id = i.setId

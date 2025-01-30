@@ -22,25 +22,12 @@ const BillsPcService = {
             data: formValues
         })
     },
-    getSets() {
-        return axios({
-            ...options,
-            url: `/api/v1/sets`
-        })
-    },
     getSetsV2(config) {
         const { params } = config
         return axios({
             ...options,
             url: `/api/v1/sets-v2`,
             params
-        })
-    },
-    getSetsBy(filter) {
-        return axios({
-            ...options,
-            url: `/api/v1/sets`,
-            params: filter
         })
     },
     getExpansionSeries(config) {
@@ -51,67 +38,11 @@ const BillsPcService = {
             params
         })
     },
-    postSetsToSets(setsArray) {
-        return axios({
-            ...options,
-            url: '/api/v1/sets',
-            method: 'post',
-            data: setsArray
-        })
-    },
-    getCardsBy(filter) {
-        return axios({
-            ...options,
-            url: `/api/v1/cards`,
-            params: filter
-        })
-    },
-    getCardsV2(filter) {
-        return axios({
-            ...options,
-            url:`/api/v1/cards-v2`,
-            params: filter
-        })
-    },
-    getCardsV2BySetId(setId) {
-        return axios({
-            ...options,
-            url: `api/v1/cards-v2/set-id/${setId}`
-        })
-    },
-    getCardsV2WithValues(filter) {
-        return axios({
-            ...options,
-            url:'/api/v1/cards-v2/values',
-            params: filter
-        })
-    },
-    getCardsBySetId(setId) {
-        return axios({
-            ...options,
-            url: `/api/v1/cards/set-id/${setId}`
-        })
-    },
-    postCardsToCards(cardsArray) {
-        return axios({
-            ...options,
-            url: '/api/v1/cards',
-            method: 'post',
-            data: cardsArray
-        })
-    },
     authenticateSession() {
         return axios({
             ...options,
             url: '/api/v1/auth',
             method: 'post'
-        })
-    },
-    getTransactionSales(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/transactions/sales',
-            params: filter
         })
     },
     postTransactionSales(sale) {
@@ -130,20 +61,6 @@ const BillsPcService = {
             data: gift
         })
     },
-    getCollectedCards(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/collected-cards',
-            params: filter
-        })
-    },
-    getCollectedProducts(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/collected-products',
-            params: filter
-        })
-    },
     getMarketPricesByItemId(itemId, params) {
         return axios({
             ...options,
@@ -151,30 +68,10 @@ const BillsPcService = {
             params
         })
     },
-    getProducts(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/products',
-            params: filter
-        })
-    },
-    getProductsWithValues(filter) {
-        return axios({
-            ...options,
-            url: '/api/v1/products/values',
-            params: filter
-        })
-    },
     getReferenceData() {
         return axios({
             ...options,
             url: '/api/v1/reference-data'
-        })
-    },
-    getSales() {
-        return axios({
-            ...options, 
-            url: '/api/v1/sales'
         })
     },
     postSale({ params, data }) {
@@ -369,6 +266,22 @@ const BillsPcService = {
             data,
             params,
             url: `/api/v1/lot-edits`
+        })
+    },
+    getCollectedItem(config) {
+        const { id, params } = config
+        return axios({
+            ...options,
+            url: `/api/v1/transactions/collected-item/${id}`,
+            params: params
+        })
+    },
+    createListing({ data }) {
+        return axios({
+            ...options,
+            url: `/api/v1/listings`,
+            data,
+            method: 'post'
         })
     }
 }

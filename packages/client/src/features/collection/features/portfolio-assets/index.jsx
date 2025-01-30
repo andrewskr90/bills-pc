@@ -4,9 +4,11 @@ import ItemContainer from "../../../../components/item-container/index.jsx"
 import CollectedItem from "../../../../components/collected-item/index.jsx"
 import BillsPcService from "../../../../api/bills-pc/index.js"
 import PageSelection from "../../../../components/page-selection/index.jsx"
-import { buildParams, buildParamString } from "../../../../utils/location/index.js"
+import { buildParams } from "../../../../utils/location/index.js"
 import Toolbar from "../../../../layouts/toolbar/index.jsx"
 import Search from "../../../search/index.jsx"
+import AssetItemInfo from "./AssetItemInfo.jsx"
+import CollectedItemInfo from "./CollectedItemInfo.jsx"
 // import BulkSplitInfo from "../../BulkSplitInfo.jsx"
 // import BulkSplit from "../../BulkSplit.jsx"
 const PortfolioAssets = (props) => {
@@ -18,7 +20,7 @@ const PortfolioAssets = (props) => {
         referenceData, 
         setReferenceData 
     } = props 
-    // const navigate = useNavigate()
+    const navigate = useNavigate()
     const location = useLocation()
     const [loading, setLoading] = useState(false)
     
@@ -40,6 +42,10 @@ const PortfolioAssets = (props) => {
         })()
     }, [location.search])
     const sortKey = 'portfolioItemSort'
+
+    const handleSelectAsset = (slug) => {
+        navigate(slug)
+    }
     return (<>
         {portfolio.length
         ?   
@@ -61,7 +67,7 @@ const PortfolioAssets = (props) => {
                             {portfolio.inventory.bulkSplits.map(split => {
                                 return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
                             })} */}
-                            {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={() => console.log(collectedItem)} />)}
+                            {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`item/${id}`)} />)}
                             <PageSelection location={location} count={count} />
                         </ItemContainer>
                     </>}
@@ -70,6 +76,14 @@ const PortfolioAssets = (props) => {
                     path={`/bulk/:bulkSplitId`}
                     element={<BulkSplitInfo portfolio={portfolio} userClaims={userClaims} />}
                 /> */}
+                <Route 
+                    path="/item/:itemId"
+                    element={<AssetItemInfo />}
+                />
+                <Route 
+                    path="/collected-item/:id/*"
+                    element={<CollectedItemInfo />}
+                />
             </Routes>
         :
             <div className='emptyCollection'>
