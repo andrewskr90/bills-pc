@@ -62,7 +62,7 @@ const PortfolioAssets = (props) => {
                             defaultAttribute='name'
                         />
                         <PageSelection location={location} count={count} />
-                        <ItemContainer loading={loading} >
+                        <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
                             {/* <h3>Bulk</h3>
                             {portfolio.inventory.bulkSplits.map(split => {
                                 return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
