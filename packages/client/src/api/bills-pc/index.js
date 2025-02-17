@@ -90,6 +90,13 @@ const BillsPcService = {
             params: params
         })
     },
+    getTransactions(params) {
+        return axios({
+            ...options,
+            url: '/api/v1/transactions',
+            params: params
+        })
+    },
     postType(config) {
         const { data } = config
         return axios({

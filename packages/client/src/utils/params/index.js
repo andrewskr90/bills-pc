@@ -17,3 +17,10 @@ export const eligableMarketSearchParams = (location) => {
     if (!parsedParams.value) return false
     return parsedParams
 }
+
+export const camelCaseToHyphenated = (camelCase) => {
+    return camelCase.split('').map(char => {
+        if (char === char.toUpperCase()) return '-' + char.toLowerCase()
+        return char
+    }).join('')
+}

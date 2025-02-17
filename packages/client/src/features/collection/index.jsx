@@ -27,7 +27,7 @@ const Collection = (props) => {
             <>
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'listings']} 
+                    categories={['assets', 'transactions', 'listings']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>

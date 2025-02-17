@@ -48,6 +48,16 @@ export const initialReferenceDataValues = {
             },
         }
     },
+    transactionSort: {
+        value: 'date',
+        direction: 'desc',
+        values: {
+            date: {
+                defaultDirection: 'desc',
+                formatted: 'Date'
+            },
+        }
+    },
     filter: {
         market: null
     }
