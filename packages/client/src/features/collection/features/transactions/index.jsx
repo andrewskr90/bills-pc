@@ -7,7 +7,7 @@ import BillsPcService from '../../../../api/bills-pc/index.js'
 import Toolbar from '../../../../layouts/toolbar/index.jsx'
 import ItemContainer from '../../../../components/item-container/index.jsx'
 import PageSelection from '../../../../components/page-selection/index.jsx'
-import { camelCaseToHyphenated } from '../../../../utils/params/index.js'
+import { handleViewTransaction } from '../../utils/transaction/index.js'
 
 const Transactions = (props) => {
     const {
@@ -57,9 +57,7 @@ const Transactions = (props) => {
                                 <p className='my-0'>{`${transaction.type} ${transaction.type === 'purchase' ? `from ${transaction.sellerName}` : ''}`}</p>
                             </div>
                             {transaction.type === 'purchase' && <p className='my-0'>{transaction.updatedPrice ? transaction.updatedPrice : transaction.initialPrice}</p>}
-                            <button onClick={() => {
-                                navigate(`${camelCaseToHyphenated(transaction.coreType)}/${transaction.id}`)
-                            }}>View</button>
+                            <button onClick={() => handleViewTransaction(transaction.id, transaction.coreType, navigate)}>View</button>
                         </div>)}
                     </ItemContainer>
                 </>}

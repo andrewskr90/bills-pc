@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PreviousRoutes from '../../../../layouts/previous-routes'
 import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import BillsPcService from '../../../../api/bills-pc'
+import { handleViewTransaction } from '../../utils/transaction'
 
 const initialListingValues = { collectedItemId: undefined, description: undefined, time: undefined, price: undefined }
 
@@ -29,7 +30,7 @@ const CollectedItemInfo = () => {
     }, [id])
 
     const handleSelectTransaction = (transaction) => {
-        
+        handleViewTransaction(transaction.id, transaction.coreType, navigate)
     }
 
     const handleCreateListing = async (e) => {
@@ -63,13 +64,13 @@ const CollectedItemInfo = () => {
                                 <p>{collectedItem.setName}</p>
                                 <p>{collectedItem.conditionName} - {collectedItem.printingName}</p>
                                 {collectedItem.transactions[0].actions.map(action => {
+
+                                    const { id, lotId, coreType } = collectedItem.transactions[0]
                                     let handleAction = () => {}
-                                    
                                     if (action === 'View Listing') {
-                                        const { listingId } = collectedItem.transactions[0]
-                                        handleAction = () => navigate(`/gym-leader/collection/listings/${listingId}`)
-                                    } else if (action === 'Remove from lot') {
-                                        
+                                        handleAction = () => handleViewTransaction(id, coreType, navigate)
+                                    } else if (action === 'View Lot') {
+                                        handleAction = () => navigate(`/gym-leader/collection/assets/lot/${lotId}`)
                                     } else if(action === 'List') {
                                         handleAction = () => navigate('list')
                                     } else if(action === 'Gift') {
