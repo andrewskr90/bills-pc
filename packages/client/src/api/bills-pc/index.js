@@ -238,6 +238,13 @@ const BillsPcService = {
             params
         })
     },
+    getLotById(id, params) {
+        return axios({
+            ...options,
+            url: `/api/v1/lots/${id}`,
+            params
+        })
+    },
     getListingById(id) {
         return axios({
             ...options,

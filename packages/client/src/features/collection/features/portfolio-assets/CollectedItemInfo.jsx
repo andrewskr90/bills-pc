@@ -68,7 +68,7 @@ const CollectedItemInfo = () => {
                                     const { id, lotId, coreType } = collectedItem.transactions[0]
                                     let handleAction = () => {}
                                     if (action === 'View Listing') {
-                                        handleAction = () => handleViewTransaction(id, coreType, navigate)
+                                        handleAction = () => navigate(`/gym-leader/collection/listings/${id}`)
                                     } else if (action === 'View Lot') {
                                         handleAction = () => navigate(`/gym-leader/collection/assets/lot/${lotId}`)
                                     } else if(action === 'List') {

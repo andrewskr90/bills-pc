@@ -34,7 +34,6 @@ const Listings = (props) => {
                         {listings ? (<>
                             {listings.length > 0 ? (<>
                                 {listings.map(listing => {
-                                    console.log(listing)
                                     return (
                                         <div style={{ width: 'full', display: 'flex', alignItems: 'center' }}>
                                             <div>
