@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Route, Routes, Link, useNavigate } from 'react-router-dom'
 import LoginForm from '../authenticate/LoginForm/index.jsx'
-import { initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.css'
 import Header from '../../layouts/header/index.jsx'
 import CategorySelector from '../../components/category-selector/index.jsx'
@@ -11,10 +10,8 @@ import Listings from './features/watching/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
-    const [portfolio, setPortfolio] = useState(initialPortfolioValues)
     const [transactions, setTransactions] = useState([])
     const [transactionCount, setTransactionCount] = useState()
-    const [count, setCount] = useState()
 
     const navigate = useNavigate()
 
@@ -35,10 +32,6 @@ const Collection = (props) => {
                 <Route 
                     path='/assets/*'
                     element={<PortfolioAssets 
-                        portfolio={portfolio} 
-                        setPortfolio={setPortfolio} 
-                        count={count} 
-                        setCount={setCount} 
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
                     />}

@@ -38,7 +38,7 @@ const LotInfo = () => {
             <PageSelection location={location} count={lot.count} />
             <div className='flex flex-wrap mb-20'>
                 {lot.items.map(item => {
-                    return <div className='mb-2 flex flex-col rounded-sm w-[100%]'>
+                    return <div key={item.collectedItemId} className='mb-2 flex flex-col rounded-sm w-[100%]'>
                         <div className='flex h-40'>
                             <div className='flex justify-center items-center w-1/4 h-full'>
                                 {loadImage 
