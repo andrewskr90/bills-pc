@@ -297,7 +297,15 @@ const BillsPcService = {
             data,
             method: 'post'
         })
-    }
+    },
+    createAppraisal({ data }) {
+        return axios({
+            ...options,
+            url: `/api/v1/appraisals`,
+            data,
+            method: 'post'
+        })
+    },
 }
 
 

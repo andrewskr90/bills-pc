@@ -55,7 +55,6 @@ const getById = async (id) => {
     await executeQueries(req, res, (err) => {
         if (err) throw err
         sales = req.results
-        console.log(sales)
     })
     return sales[0]
 }

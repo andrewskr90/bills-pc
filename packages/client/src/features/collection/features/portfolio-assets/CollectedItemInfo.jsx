@@ -5,17 +5,28 @@ import BillsPcService from '../../../../api/bills-pc'
 import { handleViewTransaction } from '../../utils/transaction'
 
 const initialListingValues = { collectedItemId: undefined, description: undefined, time: undefined, price: undefined }
+const initialAppraisalValues = { collectedItemId: undefined, time: undefined, conditionId: undefined }
 
 const CollectedItemInfo = () => {
     const location = useLocation()
     const navigate = useNavigate()
     const { id } = useParams()
     const [collectedItem, setCollectedItem] = useState()
+    const [conditions, setConditions] = useState([])
     const [loadImage, setLoadImage] = useState(true)
     const [listingValues, setListingValues] = useState({ ...initialListingValues, collectedItemId: id })
+    const [appraisalValues, setAppraisalValues] = useState({ ...initialAppraisalValues, collectedItemId: id })
     const handleImageError = () => {
         setLoadImage(false)
     }
+
+    useEffect(() => {
+        (async () => {
+            await BillsPcService.getConditions()
+                .then(res => setConditions(res.data))
+                .catch(err => console.log(err))
+        })()
+    }, [])
 
     useEffect(() => {
         (async () => {
@@ -23,6 +34,7 @@ const CollectedItemInfo = () => {
                 .then(res => {
                     if (res.data.collectedItemId) {
                         setCollectedItem(res.data)
+                        setAppraisalValues({ ...appraisalValues, conditionId: res.data.conditionId })
                     }
                 })
                 .catch(console.log)
@@ -36,6 +48,14 @@ const CollectedItemInfo = () => {
     const handleCreateListing = async (e) => {
         e.preventDefault()
         await BillsPcService.createListing({ data: listingValues })
+            .then(res => {
+                console.log(res)
+            })
+    }
+
+    const handleCreateAppraisal = async (e) => {
+        e.preventDefault()
+        await BillsPcService.createAppraisal({ data: appraisalValues })
             .then(res => {
                 console.log(res)
             })
@@ -75,6 +95,8 @@ const CollectedItemInfo = () => {
                                         handleAction = () => navigate('list')
                                     } else if(action === 'Gift') {
 
+                                    } else if(action === 'Appraise') {
+                                        handleAction = () => navigate('appraise')
                                     } else if(action === 'Update Price') {
 
                                     } else if(action === 'Remove Listing') {
@@ -125,6 +147,30 @@ const CollectedItemInfo = () => {
                             <textarea type='text' value={listingValues.description} onChange={(e) => setListingValues({ ...listingValues, description: e.target.value })}/>
                         </label>
                         <button onClick={handleCreateListing}>create</button>
+                    </form>
+                </>}
+            />
+
+            <Route
+                path='/appraise'
+                element={<>
+                    <p>Appraise Collected Item</p>
+                    <form>
+                        <div>
+                            <label style={{ display: 'flex', flexDirection: 'column' }}>
+                                Time
+                                <input type="datetime-local" value={appraisalValues.time} onChange={(e) => setAppraisalValues({ ...appraisalValues, time: e.target.value })} />
+                            </label>
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                            <label style={{ display: 'flex', flexDirection: 'column' }}>
+                                Condition
+                                <select value={appraisalValues.conditionId} onChange={(e) => setAppraisalValues({ ...appraisalValues, conditionId: e.target.value })}>
+                                    {conditions.map(condition => <option value={condition.condition_id}>{condition.condition_name}</option>)}
+                                </select>
+                            </label>
+                        </div>
+                        <button onClick={handleCreateAppraisal}>create</button>
                     </form>
                 </>}
             />

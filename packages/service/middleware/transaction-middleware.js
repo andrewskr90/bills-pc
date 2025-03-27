@@ -14,6 +14,7 @@ const collectedItemActionTypes = {
     updatePrice: 'Update Price',
     removeListing: 'Remove Listing',
     recordSale: 'Record Sale',
+    appraise: 'Appraise'
 }
 
 
@@ -77,20 +78,23 @@ const interpretTransactions = (transactions, userId) => {
                         transactionInfo = 'Removed from lot'
                         actions = [
                             collectedItemActionTypes.list,
-                            collectedItemActionTypes.gift
+                            collectedItemActionTypes.gift,
+                            collectedItemActionTypes.appraise
                         ]
                     } else {
                         transactionInfo = `Inserted in lot listed at ${updatedPrice ? updatedPrice : initialPrice}`
                         actions = [
                             collectedItemActionTypes.viewLot,
-                            collectedItemActionTypes.viewListing
+                            collectedItemActionTypes.viewListing,
+                            collectedItemActionTypes.appraise
                         ]
                     }
                 } else {
                     // inserted into lot
                     transactionInfo = 'Inserted in lot'
                     actions = [
-                        collectedItemActionTypes.viewLot
+                        collectedItemActionTypes.viewLot,
+                            collectedItemActionTypes.appraise
                     ]
                 }
             } else if (lotRemovalId) {
@@ -98,7 +102,8 @@ const interpretTransactions = (transactions, userId) => {
                 transactionInfo = 'Removed from lot'
                 actions = [
                     collectedItemActionTypes.list,
-                    collectedItemActionTypes.gift
+                    collectedItemActionTypes.gift,
+                            collectedItemActionTypes.appraise
                 ]
             }
 
@@ -116,7 +121,8 @@ const interpretTransactions = (transactions, userId) => {
             transactionInfo = `Imported by ${importerName}`
             actions = [
                 collectedItemActionTypes.list, 
-                collectedItemActionTypes.gift
+                collectedItemActionTypes.gift,
+                collectedItemActionTypes.appraise
             ]
 
 
@@ -130,14 +136,16 @@ const interpretTransactions = (transactions, userId) => {
                     transactionInfo = `Gift from ${giverName}`
                     actions = [
                         collectedItemActionTypes.list, 
-                        collectedItemActionTypes.gift, 
+                        collectedItemActionTypes.gift,
+                        collectedItemActionTypes.appraise
                     ]
 
                 } else {
                     // gifted
                     transactionInfo = `Lot gift from ${giverName}`
                     actions = [
-                        collectedItemActionTypes.viewLot, 
+                        collectedItemActionTypes.viewLot,
+                        collectedItemActionTypes.appraise
                     ]
                 }
             } else {
@@ -170,13 +178,15 @@ const interpretTransactions = (transactions, userId) => {
                     if (lotId) {
                         transactionInfo = `Lot purchased by ${purchaserName} for $${updatedPrice ? updatedPrice : initialPrice}`
                         actions = [
-                            collectedItemActionTypes.viewLot
+                            collectedItemActionTypes.viewLot,
+                            collectedItemActionTypes.appraise
                         ]
                     } else {
                         transactionInfo = `Purchased by ${purchaserName} for $${updatedPrice ? updatedPrice : initialPrice}`
                         actions = [
                             collectedItemActionTypes.list,
-                            collectedItemActionTypes.gift
+                            collectedItemActionTypes.gift,
+                            collectedItemActionTypes.appraise
                         ]
                     }
 
@@ -209,13 +219,15 @@ const interpretTransactions = (transactions, userId) => {
                     if (lotId) {
                         transactionInfo = `Lot listing removed`
                         actions = [
-                            collectedItemActionTypes.viewLot
+                            collectedItemActionTypes.viewLot,
+                            collectedItemActionTypes.appraise
                         ]
                     } else {
                         transactionInfo = `Item listing removed`
                         actions = [
                             collectedItemActionTypes.list, 
-                            collectedItemActionTypes.gift
+                            collectedItemActionTypes.gift,
+                            collectedItemActionTypes.appraise
                         ]
                     }
 
@@ -230,12 +242,14 @@ const interpretTransactions = (transactions, userId) => {
                             transactionInfo = `Relisted lot for $${updatedPrice}`
                             actions = [
                                 collectedItemActionTypes.viewListing,
-                                collectedItemActionTypes.viewLot
+                                collectedItemActionTypes.viewLot,
+                                collectedItemActionTypes.appraise
                             ]
                         } else {
                             transactionInfo = `Relisted for $${updatedPrice}`
                             actions = [
                                 collectedItemActionTypes.viewListing,
+                                collectedItemActionTypes.appraise
                             ]
                         }
 
@@ -248,12 +262,14 @@ const interpretTransactions = (transactions, userId) => {
                             transactionInfo = `Updated lot listing price to $${updatedPrice}`
                             actions = [
                                 collectedItemActionTypes.viewListing,
-                                collectedItemActionTypes.viewLot
+                                collectedItemActionTypes.viewLot,
+                                collectedItemActionTypes.appraise
                             ]
                         } else {
                             transactionInfo = `Updated listing price to $${updatedPrice}`
                             actions = [
                                 collectedItemActionTypes.viewListing,
+                                collectedItemActionTypes.appraise
                             ]
                         }
 
@@ -269,12 +285,14 @@ const interpretTransactions = (transactions, userId) => {
                         transactionInfo = `Listed in lot for $${initialPrice}`
                         actions = [
                             collectedItemActionTypes.viewListing,
-                            collectedItemActionTypes.viewLot
+                            collectedItemActionTypes.viewLot,
+                            collectedItemActionTypes.appraise
                         ]
                     } else {
                         transactionInfo = `Listed for $${initialPrice}`
                         actions = [
-                            collectedItemActionTypes.viewListing
+                            collectedItemActionTypes.viewListing,
+                            collectedItemActionTypes.appraise
                         ]
                     }
 
