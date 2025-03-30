@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise')
 const config = require('../../../config')
-const pool = mysql.createPool(config.MYSQL)
+const pool = mysql.createPool(config.MYSQL.production)
 
 pool.on('connection', conn => {
     console.log('Pool successfully connected.')
