@@ -15,7 +15,7 @@ const config = {
             user: process.env.TEST_DB_ROOT_USER,
             database: process.env.TEST_DB_NAME,
             password: process.env.TEST_DB_ROOT_PASS,
-            connectionLimit: 1
+            connectionLimit: 10
         }
     },
     PTCGIO_API: {
