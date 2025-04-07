@@ -51,6 +51,8 @@ const firstPriceOfFirstListing = { id: '0'+listingPriceBaseId, listingId: firstL
 const firstRemovalOfFirstListing  = { id: '0'+listingRemovalBaseId, listingId: firstListing.id, time: daysAfterStart(5, startISO) }
 const firstRelisting = { id: '1'+listingPriceBaseId, listingId: firstListing.id, price: firstPriceOfFirstListing.price -2, time: daysAfterStart(6, startISO) }
 const firstPriceOfFirstRelisting = { id: '2'+listingPriceBaseId, listingId: firstListing.id, price: firstPriceOfFirstListing.price +10, time: daysAfterStart(7, startISO) }
+const firstListingSale = { id: '0'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(8, startISO) }
+
 // TODO incrementing id is something I'll forget to do when creating dummy data, maybe create a util
 beforeAll(async () => {
     connection = await testPool.getConnection()
@@ -66,6 +68,7 @@ beforeAll(async () => {
     const firstRemovalOfFirstListingQ = QueryFormatters.bpcQueryObjectsToInsert([firstRemovalOfFirstListing], 'V3_ListingRemoval', [])
     const firstRelistingQ = QueryFormatters.bpcQueryObjectsToInsert([firstRelisting], 'V3_ListingPrice', [])
     const firstPriceOfFirstRelistingQ = QueryFormatters.bpcQueryObjectsToInsert([firstPriceOfFirstRelisting], 'V3_ListingPrice', [])
+    const firstListingSaleQ = QueryFormatters.bpcQueryObjectsToInsert([firstListingSale], 'V3_Sale', [])
     // const insertSaleQ = QueryFormatters.objectsToInsert([], 'V3_Sale')
     // const insertLotQ = QueryFormatters.objectsToInsert([], 'V3_Lot')
     // const insertLotEditQ = QueryFormatters.objectsToInsert([], 'V3_LotEdit')
@@ -83,7 +86,8 @@ beforeAll(async () => {
         firstPriceOfFirstListingQ,
         firstRemovalOfFirstListingQ,
         firstRelistingQ,
-        firstPriceOfFirstRelistingQ
+        firstPriceOfFirstRelistingQ,
+        firstListingSaleQ
     ]
     await executeQueryQueue(queryQueue, connection)
 })
@@ -157,6 +161,44 @@ test('price adjusted for relisted listing', async () => {
     expect(listing.relisted.id).toEqual(firstRelisting.id)
 })
 
+test('imported item sold', async () => {
+    const { query, variables } = buildGetByIdQuery(collectedItem.id, user.user_id, daysAfterStart(0.5, firstListingSale.time))
+    await connection.query(`UPDATE V3_Listing set saleId = '${firstListingSale.id}' where id = '${firstListing.id}'`, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { listing, sale } = rows[0]
+    expect(listing.removal.id).toBeNull()
+    expect(listing.updatedPrice.price).toEqual(firstPriceOfFirstRelisting.price)
+    expect(listing.price).toEqual(firstRelisting.price)
+    expect(listing.relisted.id).toEqual(firstRelisting.id)
+    expect(sale.id).toEqual(firstListingSale.id)
+    expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
+})
+
+// earliest sale or the latest listing
+
+// new item
+test.skip('purchased item', async () => {})
+test.skip('purchased item listed', async () => {})
+test.skip('purchased item listing price updated', async () => {})
+test.skip('purchased item listing removed', async () => {})
+test.skip('purchased item listing relisted', async () => {})
+test.skip('purchased item sold', async () => {})
+
+// new item
+test.skip('imported item added to lot', async () => {})
+test.skip('imported item removed from lot', async () => {})
+test.skip('imported item added to another lot', async () => {})
+test.skip('imported item listed within lot', async () => {})
+test.skip('imported item sold within lot', async () => {})
+
+// new item
+test.skip('purchased item within lot', async () => {})
+test.skip('item removed from purchased lot', async () => {})
+test.skip('item added to another lot', async () => {})
+test.skip('item removed from lot, then added to another lot already listed', async () => {})
+test.skip('item sold within listed lot', async () => {})
+
 // before all
     // build entire collected item history
 // after all
@@ -186,4 +228,24 @@ test('price adjusted for relisted listing', async () => {
 // relisted price
 
 // price
-// if 
+// if
+
+
+
+
+
+
+
+
+
+
+
+
+
+// earliest sold listing, or latest listing
+
+// l1   lt1   snull
+// l2   lt2   snull
+// l3   lt3   s1
+// l4   lt4   s2
+// l5   lt5   snull
