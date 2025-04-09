@@ -17,8 +17,12 @@ const tableIds = {
     appraisal: 'a',
     listing: 'l',
     listingPrice: 'lp',
-    listingRemoval: 'lr',
-    sale: 's'
+    listingRemoval: 'listR',
+    sale: 's',
+    lot: 'lo',
+    lotEdit: 'le',
+    lotInsert: 'li',
+    lotRemoval: 'lr'
 }
 const userBaseId = `-${tableIds.user}-${testId}`
 const collectedItemBaseId = `-${tableIds.collectedItem}-${testId}`
@@ -28,6 +32,10 @@ const listingBaseId = `-${tableIds.listing}-${testId}`
 const listingPriceBaseId = `-${tableIds.listingPrice}-${testId}`
 const listingRemovalBaseId = `-${tableIds.listingRemoval}-${testId}`
 const saleBaseId = `-${tableIds.sale}-${testId}`
+const lotBaseId = `-${tableIds.lot}-${testId}`
+const lotEditBaseId = `-${tableIds.lotEdit}-${testId}`
+const lotInsertBaseId = `-${tableIds.lotInsert}-${testId}`
+const lotRemovalBaseId = `-${tableIds.lotRemoval}-${testId}`
 
 const startISO = new Date().toISOString()
 
@@ -57,6 +65,20 @@ const firstRelistingOfSecondListing = { id: '4'+listingPriceBaseId, listingId: s
 const secondPriceOfSecondListing = { id: '5'+listingPriceBaseId, listingId: secondCollectedItem_secondListing.id, price: firstRelistingOfSecondListing.price -80, time: daysAfterStart(9, startISO) }
 const secondCollectedItem_sale = { id: '2'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(9, startISO) }
 const secondCollectedItem_outOfScopeListing = { id: '3'+listingBaseId, collectedItemId: secondCollectedItem.id, saleId: null, price: 300, time: daysAfterStart(10, startISO) }
+
+const thirdCollectedItem = { id: '2'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
+const thirdCollectedItem_import = { id: '2'+importBaseId, importerId: user.user_id, collectedItemId: thirdCollectedItem.id, time: daysAfterStart(0, startISO) }
+const thirdCollectedItem_firstAppraisal = { id: '4'+appraisalBaseId, collectedItemId: thirdCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
+const thirdCollectedItem_firstLot = { id: '0'+lotBaseId }
+const thirdCollectedItem_firstLotEdit = { id : '0'+lotEditBaseId, lotId: thirdCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
+const thirdCollectedItem_firstInsert = { id: '0'+lotInsertBaseId, lotEditId: thirdCollectedItem_firstLotEdit.id, collectedItemId: thirdCollectedItem.id, index: 0 }
+const thirdCollectedItem_secondLotEdit = { id : '1'+lotEditBaseId, lotId: thirdCollectedItem_firstLot.id, time: daysAfterStart(3, startISO) }
+const thirdCollectedItem_firstRemoval = { id: '0'+lotRemovalBaseId, lotEditId: thirdCollectedItem_secondLotEdit.id, collectedItemId: thirdCollectedItem.id }
+const thirdCollectedItem_secondLot = { id: '1'+lotBaseId }
+const thirdCollectedItem_thirdLotEdit = { id : '2'+lotEditBaseId, lotId: thirdCollectedItem_secondLot.id, time: daysAfterStart(4, startISO) }
+const thirdCollectedItem_secondInsert = { id: '1'+lotInsertBaseId, lotEditId: thirdCollectedItem_thirdLotEdit.id, collectedItemId: thirdCollectedItem.id, index: 0 }
+
+
 // TODO incrementing id is something I'll forget to do when creating dummy data, maybe create a util
 beforeAll(async () => {
     connection = await testPool.getConnection()
@@ -88,6 +110,17 @@ beforeAll(async () => {
         { data: secondPriceOfSecondListing, table: 'V3_ListingPrice' },
         { data: secondCollectedItem_sale, table: 'V3_Sale' },
         { data: secondCollectedItem_outOfScopeListing, table: 'V3_Listing' },
+        { data: thirdCollectedItem, table: 'V3_CollectedItem' },
+        { data: thirdCollectedItem_import, table: 'V3_Import' },
+        { data: thirdCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
+        { data: thirdCollectedItem_firstLot, table: 'V3_Lot' },
+        { data: thirdCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
+        { data: thirdCollectedItem_firstInsert, table: 'V3_LotInsert' },
+        { data: thirdCollectedItem_secondLotEdit, table: 'V3_LotEdit' },
+        { data: thirdCollectedItem_firstRemoval, table: 'V3_LotRemoval' },
+        { data: thirdCollectedItem_secondLot, table: 'V3_Lot' },
+        { data: thirdCollectedItem_thirdLotEdit, table: 'V3_LotEdit' },
+        { data: thirdCollectedItem_secondInsert, table: 'V3_LotInsert' },
     ], connection)
 })
 afterAll(async () => {
@@ -217,8 +250,6 @@ test('imported item sold', async () => {
     expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
 })
 
-// earliest sale or the latest listing
-
 // new item
 test('purchased item', async () => {
     const { query, variables } = buildGetByIdQuery(
@@ -324,7 +355,26 @@ test('purchased item sold', async () => {
 })
 
 // new item
-test.skip('imported item added to lot', async () => {})
+test('imported item added to lot', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        thirdCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, thirdCollectedItem_firstAppraisal.time)
+    )
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { id, item, printing, appraisal, listing, credit } = rows[0]
+    expect(id).toEqual('2'+collectedItemBaseId)
+    expect(item.id).toEqual(testItems[0].id)
+    expect(printing.id).toEqual(testPrintings[0].printing_id)
+    expect(appraisal.id).toEqual(thirdCollectedItem_firstAppraisal.id)
+    expect(appraisal.condition.id).toEqual(testConditions[0].condition_id)
+    expect(credit.import.id).toEqual(thirdCollectedItem_import.id)
+    // expect(credit.listing.id).toBeNull()
+    // expect(credit.sale.id).toBeNull()
+    // expect(credit.sale.purchaser.id).toBeNull()
+    // expect(listing.id).toBeNull()
+})
 test.skip('imported item removed from lot', async () => {})
 test.skip('imported item added to another lot', async () => {})
 test.skip('imported item listed within lot', async () => {})
