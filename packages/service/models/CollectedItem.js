@@ -40,60 +40,47 @@ const buildGetByIdQuery = (id, userId, time) => {
                     (CASE WHEN sale.listingId is null
                         THEN
                             (CASE WHEN 
-                                unsoldListR.id is null
+                                listR.id is null
                                 THEN unsoldL.price
                                 ELSE
-                                    (CASE WHEN unsoldRelistP.id is null
+                                    (CASE WHEN relistP.id is null
                                         THEN null
-                                        ELSE unsoldRelistP.price 
+                                        ELSE relistP.price 
                                     END)
                             END)
                         ELSE
                             (CASE WHEN 
-                                soldListR.id is null
+                                listR.id is null
                                 THEN sale.price
                                 ELSE
-                                    (CASE WHEN soldRelistP.id is null
+                                    (CASE WHEN relistP.id is null
                                         THEN null
-                                        ELSE soldRelistP.price 
+                                        ELSE relistP.price 
                                     END)
                             END)
                     END),
                 'relisted',
                     json_object(
                         'id',
-                        unsoldRelistP.id
+                        relistP.id
                     ),
                 'updatedPrice',
                     json_object(
                         'price',
-                            (CASE WHEN sale.listingId is null
-                                THEN
-                                    (CASE WHEN (
-                                        (unsoldListR.id is null) 
-                                        or (unsoldRelistP.id is not null and unsoldRelistP.id != unsoldListP.id)
-                                    )
-                                        THEN unsoldListP.price
-                                        ELSE
-                                            null
-                                    END)
-                                ELSE 
-                                    -- soldListR, soldRelistP
-                                    (CASE WHEN (
-                                        (soldListR.id is null) 
-                                        or (soldRelistP.id is not null and soldRelistP.id != saleListingP.id)
-                                    )
-                                        THEN saleListingP.price
-                                        ELSE
-                                            null
-                                    END)
-                            END)
+                            (CASE WHEN (
+                                (listR.id is null) 
+                                or (relistP.id is not null and relistP.id != lp.id)
+                            )
+                                THEN lp.price
+                                ELSE
+                                    null
+                            END)    
                     ),
                 'removal',
                     json_object(
                         'id',
-                        (CASE WHEN unsoldRelistP.id is null
-                            THEN unsoldListR.id
+                        (CASE WHEN relistP.id is null
+                            THEN listR.id
                             ELSE null
                         END)
                     )
@@ -239,29 +226,6 @@ const buildGetByIdQuery = (id, userId, time) => {
                 or (purchase.id is not null and betweenSale.listingTime > purchase.time)
             )
             and betweenSale.time < sale.time
-        left join V3_ListingPrice saleListingP
-            on saleListingP.listingId = sale.listingId
-            and saleListingP.time < '${time}'
-        left join V3_ListingPrice laterSoldListP
-            on laterSoldListP.listingId = sale.listingId
-            and laterSoldListP.time > saleListingP.time
-            and laterSoldListP.time < '${time}'
-        left join V3_ListingRemoval soldListR
-            on soldListR.listingId = sale.listingId
-            and soldListR.time > sale.listingTime
-            and soldListR.time < '${time}'
-        left join V3_ListingRemoval laterSoldListR
-            on laterSoldListR.listingId = sale.listingId
-            and laterSoldListR.time > soldListR.time
-            and laterSoldListR.time < '${time}'
-        left join V3_ListingPrice soldRelistP
-            on soldRelistP.listingId = soldListR.listingId
-            and soldRelistP.time > soldListR.time
-            and soldRelistP.time < '${time}'
-        left join V3_ListingPrice betweenSoldRelistP
-            on betweenSoldRelistP.listingId = soldListR.listingId
-            and betweenSoldRelistP.time < soldRelistP.time
-            and betweenSoldRelistP.time > soldListR.time
         left join V3_Listing unsoldL
             on (
                 (
@@ -279,29 +243,68 @@ const buildGetByIdQuery = (id, userId, time) => {
             on laterUnsoldL.collectedItemId = i.collectedItemId
             and laterUnsoldL.time > unsoldL.time
             and laterUnsoldL.time < '${time}'
-        left join V3_ListingPrice unsoldListP
-            on unsoldListP.listingId = unsoldL.id
-            and unsoldListP.time < '${time}'
-        left join V3_ListingPrice laterUnsoldListP
-            on laterUnsoldListP.listingId = unsoldL.id
-            and laterUnsoldListP.time > unsoldListP.time
-            and laterUnsoldListP.time < '${time}'
-        left join V3_ListingRemoval unsoldListR
-            on unsoldListR.listingId = unsoldL.id
-            and unsoldListR.time > unsoldL.time
-            and unsoldListR.time < '${time}'
-        left join V3_ListingRemoval laterUnsoldListR
-            on laterUnsoldListR.listingId = unsoldL.id
-            and laterUnsoldListR.time > unsoldListR.time
-            and laterUnsoldListR.time < '${time}'
-        left join V3_ListingPrice unsoldRelistP
-            on unsoldRelistP.listingId = unsoldListR.listingId
-            and unsoldRelistP.time > unsoldListR.time
-            and unsoldRelistP.time < '${time}'
+        left join V3_ListingPrice lp
+            on (
+                (
+                    sale.id is null 
+                    and lp.listingId = unsoldL.id
+                )
+                or (
+                    sale.id is not null 
+                    and lp.listingId = sale.listingId
+                )
+            ) and lp.time < '${time}'
+        left join V3_ListingPrice laterLp
+            on (
+                (
+                    sale.id is null 
+                    and laterLp.listingId = unsoldL.id
+                )
+                or (
+                    sale.id is not null 
+                    and laterLp.listingId = sale.listingId
+                )
+            ) and laterLp.time < '${time}'
+            and laterLp.time > lp.time
+        left join V3_ListingRemoval listR
+            on (
+                (
+                    sale.id is null
+                    and listR.listingId = unsoldL.id
+                    and listR.time > unsoldL.time
+                )
+                or (
+                    sale.id is not null
+                    and listR.listingId = sale.listingId
+                    and listR.time > sale.listingTime
+                )
+            ) and listR.time < '${time}'
+        left join V3_ListingRemoval laterListR
+            on (
+                (
+                    sale.id is null
+                    and laterListR.listingId = unsoldL.id
+                    and laterListR.time > unsoldL.time
+                )
+                or (
+                    sale.id is not null
+                    and laterListR.listingId = sale.listingId
+                    and laterListR.time > sale.listingTime
+                )
+            ) and laterListR.time < '${time}'
+            and laterListR.time > listR.time
+        left join V3_ListingPrice relistP
+            on (
+                relistP.listingId = listR.listingId
+                and relistP.time > listR.time
+                and relistP.time < '${time}'
+            )
         left join V3_ListingPrice betweenRelistP
-            on betweenRelistP.listingId = unsoldListR.listingId
-            and betweenRelistP.time < unsoldRelistP.time
-            and betweenRelistP.time > unsoldListR.time
+            on (
+                betweenRelistP.listingId = listR.listingId
+                and betweenRelistP.time < relistP.time
+                and betweenRelistP.time > listR.time
+            )
         -- item info
         left join Item it on it.id = ci.itemId
         left join sets_v2 se
@@ -327,12 +330,9 @@ const buildGetByIdQuery = (id, userId, time) => {
                 or (purchase.id is not null and purchase.time < '${time}')
             )
             and betweenSale.id is null
-            and laterSoldListP.id is null
-            and laterSoldListR.id is null
-            and betweenSoldRelistP.id is null
             and laterUnsoldL.id is null
-            and laterUnsoldListP.id is null
-            and laterUnsoldListR.id is null
+            and laterLp.id is null
+            and laterListR.id is null
             and betweenRelistP.id is null
             and laterA.id is null
             and laterPurchase.id is null
