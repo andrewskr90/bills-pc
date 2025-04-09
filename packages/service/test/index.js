@@ -1,3 +1,5 @@
+const QueryFormatters = require("../utils/queryFormatters")
+
 const testSets = [
     { set_v2_id: '0', set_v2_name: 'Test Set 0', set_v2_tcgplayer_set_id: '0' }
 ]
@@ -22,10 +24,38 @@ const executeQueryQueue = async (queryQueue, connection) => {
     }
 }
 
+const buildTestData = async (rowConfigs, connection) => {
+    await executeQueryQueue(
+        rowConfigs.map(rowConfig => {
+            return QueryFormatters.bpcQueryObjectsToInsert(
+                [rowConfig.data], 
+                rowConfig.table, 
+                []
+            )
+        }),
+        connection
+    )
+}
+
+const daysAfterStart = (days, startISO) => {
+    const startDate = new Date(startISO)
+    const daysInt = Math.floor(days)
+    let hours = 0
+    if (days - daysInt > 0) hours = Math.floor(24*(days-daysInt))
+    let unixDate = startDate.setDate(startDate.getDate()+days)
+    if (hours > 0) {
+        unixDate = new Date(unixDate).setHours(startDate.getHours()+hours)
+    }
+    return new Date(unixDate)
+        .toISOString()
+        .split('Z')[0]
+}
+
 module.exports = {
     testSets,
     testItems,
     testPrintings,
     testConditions,
-    executeQueryQueue
+    buildTestData,
+    daysAfterStart
 }
