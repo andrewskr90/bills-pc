@@ -271,7 +271,7 @@ test('purchased item listing price updated', async () => {
     expect(listing.updatedPrice.price).toEqual(firstPriceOfSecondListing.price)
     expect(sale.id).toBeNull()
 })
-test.skip('purchased item listing removed', async () => {
+test('purchased item listing removed', async () => {
     const { query, variables } = buildGetByIdQuery(
         secondCollectedItem.id, 
         user.user_id, 
@@ -286,7 +286,7 @@ test.skip('purchased item listing removed', async () => {
     expect(listing.removal.id).toEqual(firstRemovalOfSecondListing.id)
     expect(sale.id).toBeNull()
 })
-test.skip('purchased item listing relisted', async () => {
+test('purchased item listing relisted', async () => {
     const { query, variables } = buildGetByIdQuery(
         secondCollectedItem.id, 
         user.user_id, 
@@ -296,7 +296,7 @@ test.skip('purchased item listing relisted', async () => {
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
     expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
-    expect(listing.price).toEqual(secondCollectedItem_secondListing.price)
+    expect(listing.price).toEqual(firstRelistingOfSecondListing.price)
     expect(listing.updatedPrice.price).toBeNull()
     expect(listing.removal.id).toBeNull()
     expect(sale.id).toBeNull()

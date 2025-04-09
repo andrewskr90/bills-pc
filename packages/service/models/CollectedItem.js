@@ -37,26 +37,16 @@ const buildGetByIdQuery = (id, userId, time) => {
                         ELSE sale.listingTime
                     END),
                 'price',
-                    (CASE WHEN sale.listingId is null
-                        THEN
-                            (CASE WHEN 
-                                listR.id is null
+                    (CASE WHEN listR.id is null
+                        THEN 
+                            (CASE WHEN sale.listingId is null
                                 THEN unsoldL.price
-                                ELSE
-                                    (CASE WHEN relistP.id is null
-                                        THEN null
-                                        ELSE relistP.price 
-                                    END)
+                                ELSE sale.price
                             END)
                         ELSE
-                            (CASE WHEN 
-                                listR.id is null
-                                THEN sale.price
-                                ELSE
-                                    (CASE WHEN relistP.id is null
-                                        THEN null
-                                        ELSE relistP.price 
-                                    END)
+                            (CASE WHEN relistP.id is null
+                                THEN null
+                                ELSE relistP.price 
                             END)
                     END),
                 'relisted',
