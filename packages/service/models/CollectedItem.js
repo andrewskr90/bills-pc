@@ -27,6 +27,67 @@ const buildGetByIdQuery = (id, userId, time) => {
             ) appraisal,
             json_object(
                 'id', 
+                    (CASE WHEN sale.id is null
+                        THEN 
+                            (CASE WHEN removal.id is null 
+                                THEN le.lotId 
+                                ELSE null 
+                            END)
+                        ELSE 
+                            (CASE WHEN sale.removalId is null 
+                                THEN sale.lotId 
+                                ELSE null 
+                            END)
+                    END),
+                
+                'edit',
+                    (CASE WHEN sale.id is null
+                        THEN
+                            (CASE WHEN removal.id is null 
+                                THEN 
+                                    json_object(
+                                        'id', le.id,
+                                        'time', le.time,
+                                        'insert',
+                                            json_object(
+                                                'id', li.id
+                                            )
+                                    )
+                                ELSE
+                                    json_object(
+                                        'id', null, 
+                                        'time', null, 
+                                        'insert', 
+                                            json_object(
+                                                'id', null
+                                            )
+                                    )
+                            END)
+                        ELSE 
+                            (CASE WHEN sale.removalId is null 
+                                THEN 
+                                    json_object(
+                                        'id', sale.lotEditId,
+                                        'time', sale.lotEditTime,
+                                        'insert',
+                                            json_object(
+                                                'id', sale.insertId
+                                            )
+                                    )
+                                ELSE
+                                    json_object(
+                                        'id', null, 
+                                        'time', null, 
+                                        'insert', 
+                                            json_object(
+                                                'id', null
+                                            )
+                                    )
+                            END)
+                    END)
+            ) lot,
+            json_object(
+                'id', 
                     (CASE WHEN sale.listingId is null
                         THEN unsoldL.id
                         ELSE sale.listingId
@@ -175,64 +236,227 @@ const buildGetByIdQuery = (id, userId, time) => {
             on laterPurchase.collectedItemId = ci.id
             and laterPurchase.time > purchase.time
         -- current
+        -- latest lot status, for when sale is null
+        left join V3_LotInsert li
+            on li.collectedItemId = ci.id
+        left join V3_LotEdit le 
+            on le.id = li.lotEditId
+            and le.time < '${time}'
+        left join (
+            select
+                le.id,
+                li.collectedItemId,
+                le.time
+            from V3_LotInsert li
+            left join V3_LotEdit le 
+                on le.id = li.lotEditId
+            where li.collectedItemId = '${id}'
+        ) laterInsert
+            on laterInsert.collectedItemId = li.collectedItemId
+            and laterInsert.time > le.time
+            and laterInsert.time < '${time}'
+        left join (
+            select 
+                lr.id,
+                le.lotId,
+                le.time,
+                lr.collectedItemId
+            from V3_LotRemoval lr
+            left join V3_LotEdit le
+                on le.id = lr.lotEditId
+            where lr.collectedItemId = '${id}'
+        ) removal
+            on removal.collectedItemId = ci.id
+            and removal.lotId = le.lotId
+            and removal.time > le.time
+            and removal.time < '${time}'
+        left join (
+            select 
+                lr.id,
+                le.lotId,
+                le.time,
+                lr.collectedItemId
+            from V3_LotRemoval lr
+            left join V3_LotEdit le
+                on le.id = lr.lotEditId
+            where lr.collectedItemId = '${id}'
+        ) betweenRemoval
+            on betweenRemoval.collectedItemId = ci.id
+            and betweenRemoval.lotId = le.lotId
+            and betweenRemoval.time > le.time
+            and betweenRemoval.time < removal.time
         left join (
             select
                 s.id,
                 s.time,
                 s.purchaserId,
+                le.id lotEditId,
+                le.time lotEditTime,
                 l.id listingId,
                 l.collectedItemId,
+                l.lotId,
+                li.id insertId,
+                li.collectedItemId insertCollectedItemId,
+                removal.id removalId,
                 l.price price,
                 l.time listingTime
             from V3_Sale s
             left join V3_Listing l
                 on l.saleId = s.id
-            where l.collectedItemId = '${id}'
-                and s.time < '${time}'
+            left join V3_Lot lo on lo.id = l.lotId
+            left join V3_LotEdit le 
+                on le.lotId = lo.id
+                and le.time < s.time
+            left join V3_LotInsert li on li.lotEditId = le.id
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) removal
+                on removal.lotId = lo.id
+                and removal.time > le.time
+                and removal.time < s.time
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) betweenRemoval
+                on betweenRemoval.lotId = lo.id
+                and betweenRemoval.time > le.time
+                and betweenRemoval.time < removal.time
+            where (
+                l.collectedItemId = '${id}' 
+                or (li.collectedItemId = '${id}' and removal.id is null)
+            )
+            and s.time < '${time}'
+            and betweenRemoval.id is null
         ) sale
-            on sale.collectedItemId = ci.id
+            on (
+                sale.collectedItemId = ci.id 
+                or sale.insertCollectedItemId = ci.id
+            )
             and (
                 (purchase.id is null and sale.time > i.time)
-                or (purchase.id is not null and sale.listingTime > purchase.time)
+                or (purchase.id is not null and sale.time > purchase.time)
             )
         left join (
             select
                 s.id,
                 s.time,
                 s.purchaserId,
+                le.id lotEditId,
+                le.time lotEditTime,
                 l.id listingId,
                 l.collectedItemId,
+                l.lotId,
+                li.id insertId,
+                li.collectedItemId insertCollectedItemId,
+                removal.id removalId,
                 l.price price,
                 l.time listingTime
             from V3_Sale s
             left join V3_Listing l
                 on l.saleId = s.id
-            where l.collectedItemId = '${id}'
-                and s.time < '${time}'
+            left join V3_Lot lo on lo.id = l.lotId
+            left join V3_LotEdit le 
+                on le.lotId = lo.id
+                and le.time < s.time
+            left join V3_LotInsert li on li.lotEditId = le.id
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) removal
+                on removal.lotId = lo.id
+                and removal.time > le.time
+                and removal.time < s.time
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) betweenRemoval
+                on betweenRemoval.lotId = lo.id
+                and betweenRemoval.time > le.time
+                and betweenRemoval.time < removal.time
+            where (
+                l.collectedItemId = '${id}' 
+                or (li.collectedItemId = '${id}' and removal.id is null)
+            )
+            and s.time < '${time}'
+            and betweenRemoval.id is null
         ) betweenSale
-            on betweenSale.collectedItemId = ci.id
+            on (
+                betweenSale.collectedItemId = ci.id 
+                or betweenSale.insertCollectedItemId = ci.id
+            )
             and (
-                (purchase.id is null and betweenSale.listingTime > i.time)
-                or (purchase.id is not null and betweenSale.listingTime > purchase.time)
+                (purchase.id is null and betweenSale.time > i.time)
+                or (purchase.id is not null and betweenSale.time > purchase.time)
             )
             and betweenSale.time < sale.time
         left join V3_Listing unsoldL
             on (
                 (
                     purchase.id is null 
-                    and unsoldL.collectedItemId = i.collectedItemId
+                    and (
+                        unsoldL.collectedItemId = i.collectedItemId
+                        or (unsoldL.lotId = le.lotId and removal.id is null)
+                    )
                     and unsoldL.time > i.time
                 ) or (
                     purchase.id is not null 
-                    and unsoldL.collectedItemId = purchase.collectedItemId
+                    and (
+                        unsoldL.collectedItemId = purchase.collectedItemId
+                        or (unsoldL.lotId = le.lotId and removal.id is null)
+                    )   
                     and unsoldL.time > purchase.time
                 )
             )
             and unsoldL.time < '${time}'
         left join V3_Listing laterUnsoldL
-            on laterUnsoldL.collectedItemId = i.collectedItemId
-            and laterUnsoldL.time > unsoldL.time
+            on (
+                (
+                    purchase.id is null 
+                    and (
+                        laterUnsoldL.collectedItemId = i.collectedItemId
+                        or (laterUnsoldL.lotId = le.lotId and removal.id is null)
+                    )
+                    and laterUnsoldL.time > i.time
+                ) or (
+                    purchase.id is not null 
+                    and (
+                        laterUnsoldL.collectedItemId = purchase.collectedItemId
+                        or (laterUnsoldL.lotId = le.lotId and removal.id is null)
+                    )   
+                    and laterUnsoldL.time > purchase.time
+                )
+            )
             and laterUnsoldL.time < '${time}'
+            and laterUnsoldL.time > unsoldL.time
         left join V3_ListingPrice lp
             on (
                 (
@@ -319,6 +543,9 @@ const buildGetByIdQuery = (id, userId, time) => {
                 (purchase.id is null and i.time < '${time}') 
                 or (purchase.id is not null and purchase.time < '${time}')
             )
+            and (li.id is null or le.id is not null)
+            and betweenRemoval.id is null
+            and laterInsert.id is null
             and betweenSale.id is null
             and laterUnsoldL.id is null
             and laterLp.id is null
