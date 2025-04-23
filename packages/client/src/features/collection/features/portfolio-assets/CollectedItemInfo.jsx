@@ -32,9 +32,9 @@ const CollectedItemInfo = () => {
         (async () => {
             await BillsPcService.getCollectedItem({ id })
                 .then(res => {
-                    if (res.data.collectedItemId) {
+                    if (res.data.id) {
                         setCollectedItem(res.data)
-                        setAppraisalValues({ ...appraisalValues, conditionId: res.data.conditionId })
+                        setAppraisalValues({ ...appraisalValues, conditionId: res.data.appraisal.condition.id })
                     }
                 })
                 .catch(console.log)
@@ -73,16 +73,16 @@ const CollectedItemInfo = () => {
                             ?
                             <img 
                                 className='w-1/3 rounded-lg mx-4'
-                                src={`https://product-images.tcgplayer.com/fit-in/656x656/${collectedItem.tcgpId}.jpg`} 
+                                src={`https://product-images.tcgplayer.com/fit-in/656x656/${collectedItem.item.tcgpId}.jpg`} 
                                 onError={handleImageError} 
                             />
                             :
-                            <p className='flex items-center h-[85%] w-[90%] bg-[#ececec] text-[12px] p-[2px] text-center rounded-[5px] m-1'>{collectedItem.name}</p>
+                            <p className='flex items-center h-[85%] w-[90%] bg-[#ececec] text-[12px] p-[2px] text-center rounded-[5px] m-1'>{collectedItem.item.name}</p>
                             }
                             <div className='w-2/3'>
-                                <p className='font-bold text-lg'>{collectedItem.name}</p>
-                                <p>{collectedItem.setName}</p>
-                                <p>{collectedItem.conditionName} - {collectedItem.printingName}</p>
+                                <p className='font-bold text-lg'>{collectedItem.item.name}</p>
+                                <p>{collectedItem.item.setName}</p>
+                                <p>{collectedItem.appraisal.condition.name} - {collectedItem.printing.name}</p>
                                 {collectedItem.transactions[0].actions.map(action => {
 
                                     const { id, lotId, coreType } = collectedItem.transactions[0]
