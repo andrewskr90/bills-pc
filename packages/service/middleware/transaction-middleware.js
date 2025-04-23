@@ -314,21 +314,46 @@ const interpretTransactions = (transactions, userId) => {
     })
 }
 
+// current state of collected item
+const interpretCollectedItem = (it, userId) => {
+    // who owns it? me or proxy user
+    // either "Listed for ..." or "Listed by ____ for ..."
+    // is there no debit? still own it?
+    // if lotId is present
+        // it must mean item is in a lot, so return null from sql if removal is present
+        // it could also mean it was sold as a lot, and not currently owned
+    if (it.debit.saleId) {
+        
+    }
+    // is it currently listed?
+        // current price?
+
+    // is it currently in a lot?
+
+    // what is it's current condition?
+
+
+    if (it.debit.saleId) { // sold
+        if (it.debitListing) {
+
+        }
+    } else {
+
+    }
+}
+
 const getCollectedItemTransactions = async (req, res, next) => {
     const user_id = req.claims.user_id
     const collectedItemId = req.params.id
     try {
-        const collecteItemInfo = await CollectedItem.getById(collectedItemId)
+        const collectedItemInfo = await CollectedItem.getById(collectedItemId, user_id, new Date().toISOString())
         const collectedItemTransactions = await Transaction.select({ query: { collectedItemId }, claims: { user_id } })
-        const conditions = await Condition.find()
-        const printings = await Printing.find()
         const interpretedItemTransactions = interpretTransactions(collectedItemTransactions, user_id)
         // TODO only return acquisition transaction and current state. With count of transactions between
         // TODO filter transactions based on user permissions (only transactions they participated in)
         req.results = {
-            ...collecteItemInfo,
-            conditionName: conditions.find(condition => condition.condition_id === collecteItemInfo.appraisals[0][1]).condition_name,
-            printingName: printings.find(printing => printing.printing_id === collecteItemInfo.printingId).printing_name,
+            // ...interpretedCollectedItem(collectedItemInfo, user_id),
+            ...collectedItemInfo,
             transactions: interpretedItemTransactions
         }
         next()
