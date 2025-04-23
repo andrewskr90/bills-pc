@@ -108,6 +108,36 @@ const fifthCollectedItem_firstSale = { id: '8'+saleBaseId, purchaserId: proxyUse
 const fifthCollectedItem_secondListing = { id: '9'+listingBaseId, lotId: fifthCollectedItem_firstLot.id, saleId: null, price: 16, time: daysAfterStart(5, startISO) }
 const fifthCollectedItem_secondSale = { id: '9'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(6, startISO) }
 
+// proxy user import add to lot
+const sixthCollectedItem = { id: '5'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
+const sixthCollectedItem_import = { id: '5'+importBaseId, importerId: proxyUser1.user_id, collectedItemId: sixthCollectedItem.id, time: daysAfterStart(0, startISO) }
+const sixthCollectedItem_firstAppraisal = { id: '7'+appraisalBaseId, collectedItemId: sixthCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
+const sixthCollectedItem_firstLot = { id: '4'+lotBaseId }
+const sixthCollectedItem_firstLotEdit = { id : '6'+lotEditBaseId, lotId: sixthCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
+const sixthCollectedItem_firstInsert = { id: '4'+lotInsertBaseId, lotEditId: sixthCollectedItem_firstLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
+const sixthCollectedItem_firstListing = { id: '10'+listingBaseId, lotId: sixthCollectedItem_firstLot.id, saleId: null, price: 12, time: daysAfterStart(3, startISO) }
+// user purchases lot
+const sixthCollectedItem_firstSale = { id: '10'+saleBaseId, purchaserId: user.user_id, time: daysAfterStart(4, startISO) }
+// user removes item from lot
+const sixthCollectedItem_secondLotEdit = { id : '7'+lotEditBaseId, lotId: sixthCollectedItem_firstLot.id, time: daysAfterStart(5, startISO) }
+const sixthCollectedItem_firstRemoval = { id: '2'+lotRemovalBaseId, lotEditId: sixthCollectedItem_secondLotEdit.id, collectedItemId: sixthCollectedItem.id }
+// user adds item to another lot
+const sixthCollectedItem_secondLot = { id: '5'+lotBaseId }
+const sixthCollectedItem_thirdLotEdit = { id : '8'+lotEditBaseId, lotId: sixthCollectedItem_secondLot.id, time: daysAfterStart(6, startISO) }
+const sixthCollectedItem_secondInsert = { id: '5'+lotInsertBaseId, lotEditId: sixthCollectedItem_thirdLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
+// user removes item from lot
+const sixthCollectedItem_fourthLotEdit = { id : '9'+lotEditBaseId, lotId: sixthCollectedItem_secondLot.id, time: daysAfterStart(7, startISO) }
+const sixthCollectedItem_secondRemoval = { id: '3'+lotRemovalBaseId, lotEditId: sixthCollectedItem_fourthLotEdit.id, collectedItemId: sixthCollectedItem.id }
+// user adds item to already listed lot
+const sixthCollectedItem_thirdLot = { id: '6'+lotBaseId }
+const sixthCollectedItem_secondListing = { id: '11'+listingBaseId, lotId: sixthCollectedItem_thirdLot.id, saleId: null, price: 43, time: daysAfterStart(8, startISO) }
+const sixthCollectedItem_fifthLotEdit = { id : '10'+lotEditBaseId, lotId: sixthCollectedItem_thirdLot.id, time: daysAfterStart(9, startISO) }
+const sixthCollectedItem_thirdInsert = { id: '6'+lotInsertBaseId, lotEditId: sixthCollectedItem_fifthLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
+// item sold within already listed lot
+const sixthCollectedItem_secondAppraisal = { id: '8'+appraisalBaseId, collectedItemId: sixthCollectedItem.id, conditionId: testConditions[1].condition_id, appraiserId: user.user_id, time: daysAfterStart(10, startISO) }
+const sixthCollectedItem_firstPrice = { id: '6'+listingPriceBaseId, listingId: sixthCollectedItem_secondListing.id, price: sixthCollectedItem_secondListing.price +10, time: daysAfterStart(11, startISO) }
+const sixthCollectedItem_secondSale = { id: '11'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(12, startISO) }
+
 
 // TODO incrementing id is something I'll forget to do when creating dummy data, maybe create a util
 beforeAll(async () => {
@@ -179,6 +209,29 @@ beforeAll(async () => {
         { data: fifthCollectedItem_firstSale, table: 'V3_Sale' },
         { data: fifthCollectedItem_secondListing, table: 'V3_Listing' },
         { data: fifthCollectedItem_secondSale, table: 'V3_Sale' },
+        { data: sixthCollectedItem, table: 'V3_CollectedItem' },
+        { data: sixthCollectedItem_import, table: 'V3_Import' },
+        { data: sixthCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
+        { data: sixthCollectedItem_firstLot, table: 'V3_Lot' },
+        { data: sixthCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
+        { data: sixthCollectedItem_firstInsert, table: 'V3_LotInsert' },
+        { data: sixthCollectedItem_firstListing, table: 'V3_Listing' },
+        { data: sixthCollectedItem_firstSale, table: 'V3_Sale' },
+        { data: sixthCollectedItem_secondLotEdit, table: 'V3_LotEdit' },
+        { data: sixthCollectedItem_firstRemoval, table: 'V3_LotRemoval' },
+        { data: sixthCollectedItem_secondLot, table: 'V3_Lot' },
+        { data: sixthCollectedItem_thirdLotEdit, table: 'V3_LotEdit' },
+        { data: sixthCollectedItem_secondInsert, table: 'V3_LotInsert' },
+        { data: sixthCollectedItem_fourthLotEdit, table: 'V3_LotEdit' },
+        { data: sixthCollectedItem_secondRemoval, table: 'V3_LotRemoval' },
+        { data: sixthCollectedItem_thirdLot, table: 'V3_Lot' },
+        { data: sixthCollectedItem_secondListing, table: 'V3_Listing' },
+        { data: sixthCollectedItem_fifthLotEdit, table: 'V3_LotEdit' },
+        { data: sixthCollectedItem_thirdInsert, table: 'V3_LotInsert' },
+        { data: sixthCollectedItem_secondAppraisal, table: 'V3_Appraisal' },
+        { data: sixthCollectedItem_firstPrice, table: 'V3_ListingPrice' },
+        { data: sixthCollectedItem_secondSale, table: 'V3_Sale' },
+        
     ], connection)
 })
 afterAll(async () => {
@@ -530,7 +583,6 @@ test('item removed from lot before lot sold is still marked unsold', async () =>
         where id = '${fourthCollectedItem_firstListing.id}'
     `, [])
     const [rows, fields] = await connection.query(query, variables)
-    console.log(rows)
     expect(rows.length).toEqual(1)
     const { listing, sale, lot, credit } = rows[0]
     expect(listing.id).toBeNull()
@@ -541,7 +593,7 @@ test('item removed from lot before lot sold is still marked unsold', async () =>
     expect(credit.import.id).toEqual(fourthCollectedItem_import.id)
 })
 test('only most recent sold lot listing is returned', async () => {
-        const { query, variables } = buildGetByIdQuery(
+    const { query, variables } = buildGetByIdQuery(
         fifthCollectedItem.id, 
         user.user_id, 
         daysAfterStart(0.5, fifthCollectedItem_secondSale.time)
@@ -568,11 +620,105 @@ test('only most recent sold lot listing is returned', async () => {
 })
 
 // new item
-test.skip('purchased item within lot', async () => {})
-test.skip('item removed from purchased lot', async () => {})
-test.skip('item added to another lot', async () => {})
-test.skip('item removed from lot, then added to another lot already listed', async () => {})
-test.skip('item sold within listed lot', async () => {})
+test('purchased item within lot', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        sixthCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, sixthCollectedItem_firstSale.time)
+    )
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_firstSale.id}' 
+        where id = '${sixthCollectedItem_firstListing.id}'
+    `, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { credit, lot } = rows[0]
+    expect(credit.listing.id).toEqual(sixthCollectedItem_firstListing.id)
+    expect(credit.listing.price).toEqual(sixthCollectedItem_firstListing.price)
+    expect(credit.sale.id).toEqual(sixthCollectedItem_firstSale.id)
+    expect(credit.sale.purchaser.id).toEqual(user.user_id)
+    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
+    expect(lot.id).toEqual(sixthCollectedItem_firstLot.id)
+})
+test('purchased lot item removed from purchased lot', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        sixthCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, sixthCollectedItem_secondLotEdit.time)
+    )
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_firstSale.id}' 
+        where id = '${sixthCollectedItem_firstListing.id}'
+    `, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { lot } = rows[0]
+    expect(lot.id).toBeNull()
+})
+test('purchased lot item added to another lot', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        sixthCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, sixthCollectedItem_thirdLotEdit.time)
+    )
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_firstSale.id}' 
+        where id = '${sixthCollectedItem_firstListing.id}'
+    `, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { lot, credit } = rows[0]
+    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
+    expect(lot.id).toEqual(sixthCollectedItem_secondLot.id)
+})
+test('purchased lot item removed from lot, then added to another lot already listed', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        sixthCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, sixthCollectedItem_fifthLotEdit.time)
+    )
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_firstSale.id}' 
+        where id = '${sixthCollectedItem_firstListing.id}'
+    `, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { lot, credit, listing, sale } = rows[0]
+    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
+    expect(lot.id).toEqual(sixthCollectedItem_thirdLot.id)
+    expect(listing.id).toEqual(sixthCollectedItem_secondListing.id)
+    expect(sale.id).toBeNull()
+})
+test('purchased lot item sold within listed lot, with correct appraisal and price', async () => {
+    const { query, variables } = buildGetByIdQuery(
+        sixthCollectedItem.id, 
+        user.user_id, 
+        daysAfterStart(0.5, sixthCollectedItem_secondSale.time)
+    )
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_firstSale.id}' 
+        where id = '${sixthCollectedItem_firstListing.id}'
+    `, [])
+    await connection.query(`
+        UPDATE V3_Listing 
+        set saleId = '${sixthCollectedItem_secondSale.id}' 
+        where id = '${sixthCollectedItem_secondListing.id}'
+    `, [])
+    const [rows, fields] = await connection.query(query, variables)
+    expect(rows.length).toEqual(1)
+    const { lot, appraisal, listing, sale } = rows[0]
+    expect(lot.id).toEqual(sixthCollectedItem_thirdLot.id)
+    expect(listing.id).toEqual(sixthCollectedItem_secondListing.id)
+    expect(listing.updatedPrice.price).toEqual(sixthCollectedItem_firstPrice.price)
+    expect(sale.id).toEqual(sixthCollectedItem_secondSale.id)
+    expect(appraisal.id).toEqual(sixthCollectedItem_secondAppraisal.id)
+    expect(appraisal.condition.id).toEqual(sixthCollectedItem_secondAppraisal.conditionId)
+})
 
 // before all
     // build entire collected item history

@@ -2,7 +2,7 @@ const { executeQueries } = require("../db")
 
 const buildGetByIdQuery = (id, userId, time) => {
     // rumcguire card 8d99baae-f268-4fa3-8862-bc030d541bc5
-
+    // TODO test every single edge case
     const selectStatement = `
         SELECT
             ci.id,
@@ -10,7 +10,8 @@ const buildGetByIdQuery = (id, userId, time) => {
                 'id', it.id,
                 'name', it.name,
                 'setId', se.set_v2_id,
-                'setName', se.set_v2_name
+                'setName', se.set_v2_name,
+                'tcgpId', it.tcgpId
             ) item,
             json_object(
                 'id', p.printing_id,
@@ -146,6 +147,10 @@ const buildGetByIdQuery = (id, userId, time) => {
                     )
             ) sale,
             json_object(
+                'lot',
+                    json_object(
+                        'id', purchase.lotId
+                    ),
                 'sale',
                     json_object(
                         'id', purchase.id,
@@ -205,35 +210,125 @@ const buildGetByIdQuery = (id, userId, time) => {
                 s.id,
                 s.time,
                 s.purchaserId,
+                le.id lotEditId,
+                le.time lotEditTime,
                 l.id listingId,
                 l.collectedItemId,
+                l.lotId,
+                li.id insertId,
+                li.collectedItemId insertCollectedItemId,
+                removal.id removalId,
                 l.price price,
                 l.time listingTime
             from V3_Sale s
             left join V3_Listing l
                 on l.saleId = s.id
+            left join V3_Lot lo on lo.id = l.lotId
+            left join V3_LotEdit le 
+                on le.lotId = lo.id
+                and le.time < s.time
+            left join V3_LotInsert li on li.lotEditId = le.id
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) removal
+                on removal.lotId = lo.id
+                and removal.time > le.time
+                and removal.time < s.time
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) betweenRemoval
+                on betweenRemoval.lotId = lo.id
+                and betweenRemoval.time > le.time
+                and betweenRemoval.time < removal.time
             where s.purchaserId = '${userId}'
-                and l.collectedItemId = '${id}'
-                and s.time < '${time}'
+            and (
+                l.collectedItemId = '${id}' 
+                or (li.collectedItemId = '${id}' and removal.id is null)
+            )
+            and s.time < '${time}'
+            and betweenRemoval.id is null
         ) purchase
             on purchase.collectedItemId = ci.id
+            or purchase.insertCollectedItemId = ci.id
         left join (
             select
                 s.id,
                 s.time,
                 s.purchaserId,
+                le.id lotEditId,
+                le.time lotEditTime,
                 l.id listingId,
                 l.collectedItemId,
+                l.lotId,
+                li.id insertId,
+                li.collectedItemId insertCollectedItemId,
+                removal.id removalId,
                 l.price price,
                 l.time listingTime
             from V3_Sale s
             left join V3_Listing l
                 on l.saleId = s.id
+            left join V3_Lot lo on lo.id = l.lotId
+            left join V3_LotEdit le 
+                on le.lotId = lo.id
+                and le.time < s.time
+            left join V3_LotInsert li on li.lotEditId = le.id
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) removal
+                on removal.lotId = lo.id
+                and removal.time > le.time
+                and removal.time < s.time
+            left join (
+                select
+                    lr.id,
+                    le.lotId,
+                    le.time,
+                    lr.collectedItemId
+                from V3_LotRemoval lr
+                left join V3_LotEdit le 
+                    on le.id = lr.lotEditId
+                where lr.collectedItemId = '${id}'
+            ) betweenRemoval
+                on betweenRemoval.lotId = lo.id
+                and betweenRemoval.time > le.time
+                and betweenRemoval.time < removal.time
             where s.purchaserId = '${userId}'
-                and l.collectedItemId = '${id}'
-                and s.time < '${time}'
-        ) laterPurchase 
-            on laterPurchase.collectedItemId = ci.id
+            and (
+                l.collectedItemId = '${id}' 
+                or (li.collectedItemId = '${id}' and removal.id is null)
+            )
+            and s.time < '${time}'
+            and betweenRemoval.id is null
+        ) laterPurchase
+            on (
+                laterPurchase.collectedItemId = ci.id
+                or purchase.insertCollectedItemId = ci.id
+            )
             and laterPurchase.time > purchase.time
         -- current
         -- latest lot status, for when sale is null
@@ -557,9 +652,8 @@ const buildGetByIdQuery = (id, userId, time) => {
     `
     return { query, variables: [] }
 }
-const getById = async (id, userId) => {
-
-    const getByIdQuery = buildGetByIdQuery(id, userId)
+const getById = async (id, userId, time) => {
+    const getByIdQuery = buildGetByIdQuery(id, userId, time)
     const queryQueue = [getByIdQuery]
     const req = { queryQueue }
     const res = {}
@@ -567,7 +661,6 @@ const getById = async (id, userId) => {
     await executeQueries(req, res, (err) => {
         if (err) throw err
         collectedItemResults = req.results
-        console.log(collectedItemResults)
     })
     if (collectedItemResults.length > 1) throw new Error('Multiple rows returned.')
     return collectedItemResults[0]
