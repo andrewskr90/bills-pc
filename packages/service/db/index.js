@@ -5,7 +5,8 @@ const pool = mysql.createPool(config.MYSQL.production)
 pool.on('connection', conn => {
     console.log('Pool successfully connected.')
 })
-
+// TODO received error before server went down: Warning: got packets out of order. Expected 21 but received 0
+// look into connections not being closed, or connections failing after the server has been idle for a while
 const executeQueries = async (req, res, next) => {
     if (req.queryQueue.length === 0) {
         next({ message: 'No queries added to Query Queue'})

@@ -71,7 +71,7 @@ const Listing = (props) => {
                                         return <div style={{ marginBottom: '8px' }}>
                                             <p>{item.name}</p>
                                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
+                                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.appraisals[0][1]).condition_name}</p>
                                                 <p>--</p>
                                                 <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printingId).printing_name}</p>
                                                 <p>--</p>
