@@ -100,20 +100,13 @@ const getListingById = async (req, res, next) => {
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
         if (listing.lotId) {
-            let lotItems = await buildLotFromId(listing.lotId)
-            const lotCollectedItems = lotItems.filter(li => li.collectedItemId)
-            const lotItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
-                uniqueItemPrintingConditionInListings(lotCollectedItems), 
-                yesterday, 
-                today
-            )
-            const lotItemsWithPrices = tiePricesToItems(lotItems, lotItemsPrices)
+            const items = await buildLotFromId(listing.lotId)
             const formattedListing = formatListings([listing])[0]
             req.results = {
                 ...formattedListing,
                 lot: {
                     ...formattedListing.lot,
-                    items: lotItemsWithPrices
+                    items
                 }
             }
         } else if (listing.collectedItemId) {
