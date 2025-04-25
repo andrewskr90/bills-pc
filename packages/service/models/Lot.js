@@ -4,21 +4,19 @@ const selectById = async (id, userId, reqQuery) => {
     let query = `
         select
             lo.id,
-            latestPurchase.id acquisitionSaleId,
-            latestPurchase.time acquisitionSaleTime,
-            latestGift.id acquisitionGiftId,
-            latestGift.time acquisitionGiftTime,
-            (CASE WHEN IFNULL(i.id, FALSE)
-                THEN firstEdit.id
+            creditSale.id acquisitionSaleId,
+            creditSale.time acquisitionSaleTime,
+            (CASE WHEN IFNULL(firstEverEdit.id, FALSE)
+                THEN firstEverEdit.id
                 ELSE NULL
             END) as creationEditId,
-            (CASE WHEN IFNULL(i.id, FALSE)
-                THEN firstEdit.time
+            (CASE WHEN IFNULL(firstEverEdit.id, FALSE)
+                THEN firstEverEdit.time
                 ELSE NULL
             END) as creationTime,
-            nextSale.id nextSaleId,
-            nextSale.time nextSaleTime,
-            le.id lotEditId,
+            debitSale.id nextSaleId,
+            debitSale.time nextSaleTime,
+            insertEdit.id lotEditId,
             ci.id collectedItemId,
             ci.printingId,
             p.printing_name printingName,
@@ -30,159 +28,166 @@ const selectById = async (id, userId, reqQuery) => {
             a.conditionId,
             c.condition_name conditionName,
             count(*) OVER () as count
-        from users u
-        LEFT JOIN V3_Sale latestPurchase
-            ON latestPurchase.purchaserId = u.user_id
-        LEFT JOIN V3_Listing l
-            ON l.saleId = latestPurchase.id
-        LEFT JOIN V3_Sale afterLatestPurchase
-            ON afterLatestPurchase.id = l.saleId
-            AND afterLatestPurchase.time > latestPurchase.time
-        LEFT JOIN V3_Gift latestGift
-            ON latestGift.recipientId = u.user_id
-            AND latestGift.lotId = l.lotId
-            AND latestGift.time > latestPurchase.time
-        LEFT JOIN V3_Gift afterLatestGift
-            ON afterLatestGift.lotId = latestGift.lotId
-            AND afterLatestGift.time > latestGift.time
-        LEFT JOIN V3_Import i
-            ON i.importerId = u.user_id
-        LEFT JOIN V3_LotInsert firstInsert
-            ON firstInsert.collectedItemId = i.collectedItemId
-        LEFT JOIN V3_LotInsert beforeFirstInsert
-            ON beforeFirstInsert.lotEditId = firstInsert.lotEditId
-            AND beforeFirstInsert.id < firstInsert.id
-        -- TODO what if there areonly bulk splits
-        LEFT JOIN V3_LotEdit firstEdit
-            ON firstEdit.id = firstInsert.lotEditID
-        LEFT JOIN V3_LotEdit beforeFirstEdit
-            ON beforeFirstEdit.lotId = firstEdit.lotId
-            AND beforeFirstEdit.time < firstEdit.time
-        LEFT JOIN V3_Lot lo
-            ON lo.id = l.lotId
-            OR lo.id = latestGift.lotId
-            OR lo.id = firstEdit.lotId
-            
-        LEFT JOIN V3_Sale nextSale
-            ON nextSale.id = l.saleId
-            AND (
-                -- prev was purchase
-                (latestGift.id IS NULL AND i.id IS NULL AND nextSale.time > latestPurchase.time)
-                -- prev was gift
-                OR (latestGift.id IS NOT NULL AND nextSale.time > latestGift.time)
-                -- prev was import
-                OR (i.id IS NOT NULL AND nextSale.time > i.time)
+        from V3_Lot lo
+        left join V3_Listing creditListing
+            on creditListing.lotId = lo.id
+        left join V3_Sale creditSale
+            on creditSale.id = creditListing.saleId
+        left join V3_Sale laterCreditSale
+            on laterCreditSale.id = creditListing.saleId
+            and laterCreditSale.time > creditSale.time
+        -- if sale is null, user created it, this is the credit transactions1
+        left join V3_LotEdit firstEverEdit
+            on firstEverEdit.lotId = lo.id
+        left join V3_LotEdit beforeFirstEverEdit
+            on beforeFirstEverEdit.lotId = lo.id
+            and beforeFirstEverEdit.time < firstEverEdit.time
+        -- DEBIT --
+        -- debit transaction
+        left join (
+            select
+                s.id,
+                s.time,
+                l.collectedItemId,
+                l.lotId
+            from V3_Listing l
+            left join V3_Sale s on s.id = l.saleId
+            left join V3_ListingRemoval listR
+                on s.id is null and listR.listingId = l.id
+            left join V3_ListingRemoval laterListR
+                on laterListR.listingId = listR.listingId and laterListR.time > listR.time
+            left join V3_ListingPrice listPr
+                on listPr.listingId = l.id
+            left join V3_ListingPrice laterListPr
+                on laterListPr.listingId = listPr.listingId and laterListPr.time > listPr.time
+            where laterListR.id is null
+                and laterListPr.id is null
+        ) debitSale
+            on (
+                -- lot same lot
+                (debitSale.lotId = creditListing.lotId and debitSale.time > creditSale.time)
             )
-        LEFT JOIN V3_Sale betweenAcquisitionAndNextSale
-            ON betweenAcquisitionAndNextSale.id = l.saleId
-            AND (
-                -- prev was purchase
-                (
-                    latestGift.id IS NULL 
-                    AND i.id IS NULL 
-                    AND betweenAcquisitionAndNextSale.time > latestPurchase.time
-                    AND betweenAcquisitionAndNextSale.time < nextSale.time
-                )
-                -- prev was gift
-                OR (
-                    latestGift.id IS NOT NULL 
-                    AND betweenAcquisitionAndNextSale.time > latestGift.time
-                    AND betweenAcquisitionAndNextSale.time < nextSale.time
-                )
-                -- prev was import
-                OR (
-                    i.id IS NOT NULL 
-                    AND betweenAcquisitionAndNextSale.time > i.time
-                    AND betweenAcquisitionAndNextSale.time < nextSale.time
-                )
+        left join (
+            select
+                s.id,
+                s.time,
+                l.collectedItemId,
+                l.lotId
+            from V3_Listing l
+            left join V3_Sale s on s.id = l.saleId
+            left join V3_ListingRemoval listR
+                on s.id is null and listR.listingId = l.id
+            left join V3_ListingRemoval laterListR
+                on laterListR.listingId = listR.listingId and laterListR.time > listR.time
+            left join V3_ListingPrice listPr
+                on listPr.listingId = l.id
+            left join V3_ListingPrice laterListPr
+                on laterListPr.listingId = listPr.listingId and laterListPr.time > listPr.time
+            where laterListR.id is null
+                and laterListPr.id is null
+        ) beforeDebitSale
+            on (
+                -- lot same lot
+                (beforeDebitSale.lotId = creditListing.lotId and beforeDebitSale.time > creditSale.time)
+            ) and beforeDebitSale.time < debitSale.time
+        -- -- if debitSale is null, figure out the current state of the item
+        left join (
+            select
+                l.id,
+                l.time,
+                l.collectedItemId,
+                l.lotId,
+                s.id saleId,
+                s.time saleTime,
+                listR.id listingRemovalId,
+                listR.time listingRemovalTime,
+                listPr.id listingPriceId,
+                listPr.time listingPriceTime
+            from V3_Listing l
+            left join V3_Sale s on s.id = l.saleId
+            left join V3_ListingRemoval listR
+                on s.id is null and listR.listingId = l.id
+            left join V3_ListingRemoval laterListR
+                on laterListR.listingId = listR.listingId and laterListR.time > listR.time
+            left join V3_ListingPrice listPr
+                on listPr.listingId = l.id
+            left join V3_ListingPrice laterListPr
+                on laterListPr.listingId = listPr.listingId and laterListPr.time > listPr.time
+            where laterListR.id is null
+                and laterListPr.id is null
+        ) debitListing
+            on (
+                -- lot same lot
+                (debitListing.lotId = creditListing.lotId and debitListing.time > creditSale.time)
             )
-        LEFT JOIN V3_Gift nextGift
-            ON nextGift.lotId = lo.id
-            AND nextGift.time < nextSale.time
-            AND (
-                nextGift.time > latestGift.time
-                AND nextGift.time > latestPurchase.time
-            )
-        LEFT JOIN V3_Gift betweenAcquisitionAndNextGift
-            ON betweenAcquisitionAndNextGift.lotId = lo.id
-            AND betweenAcquisitionAndNextGift.time < nextGift.time
-            AND betweenAcquisitionAndNextGift.time > latestPurchase.time
-            AND betweenAcquisitionAndNextGift.time > latestGift.time
-        -- edits before latestTransfer
-        LEFT JOIN V3_LotEdit le
-            ON le.lotId = lo.id
-            AND (
-                -- edits up until sold
-                (
-                    nextGift.id IS NULL AND nextSale.id IS NOT NULL
-                    AND le.time < nextSale.time
-                )
-                -- edits up until gifted away
-                OR (
-                    nextGift.id IS NOT NULL
-                    AND le.time < nextGift.time
-                )
-                -- all edits
-                OR (
-                    nextSale.id IS NULL AND nextGift.id IS NULL
-                )
-            )
-        LEFT JOIN V3_LotInsert li on li.lotEditId = le.id
-        LEFT JOIN V3_LotRemoval lr 
-            ON lr.collectedItemId = li.collectedItemId
-            AND (
-                lr.collectedItemId = li.collectedItemId
-                OR lr.bulkSplitId = li.bulkSplitId
-            )
-        LEFT JOIN V3_LotEdit leRemovalAfter 
-            ON leRemovalAfter.lotId = le.lotId 
-            AND leRemovalAfter.id = lr.lotEditId
-            AND (
-                -- edits up until sold
-                (
-                    nextGift.id IS NULL AND nextSale.id IS NOT NULL
-                    AND leRemovalAfter.time < nextSale.time
-                    AND leRemovalAfter.time > le.time
-                )
-                -- edits up until gifted away
-                OR (
-                    nextGift.id IS NOT NULL
-                    AND leRemovalAfter.time < nextGift.time
-                    AND leRemovalAfter.time > le.time
-                )
-                -- all edits
-                OR (
-                    nextSale.id IS NULL AND nextGift.id IS NULL
-                    AND leRemovalAfter.time > le.time
-                )
-            )
-        -- item info
-        LEFT JOIN V3_CollectedItem ci
-            ON ci.id = li.collectedItemId
-        LEFT JOIN V3_BulkSplit bs
-            ON bs.id = li.bulkSplitId
-        LEFT JOIN Item it
-            ON it.id = ci.itemId
-        LEFT JOIN sets_v2 s
-            ON s.set_v2_id = it.setId
-        LEFT JOIN V3_Appraisal a
-            ON a.collectedItemId = ci.id
-        LEFT JOIN V3_Appraisal afterAppraisal
-            ON afterAppraisal.collectedItemId = ci.id
-            AND afterAppraisal.time > a.time
-        LEFT JOIN conditions c
-            ON c.condition_id = a.conditionId
-        LEFT JOIN printings p
-            ON p.printing_id = ci.printingId
-        -- giftGiver and saleSeller for lot
-        WHERE (
-                u.user_id = '${userId}'
-                OR u.proxyCreatorId = '${userId}'
-            ) AND lo.id = '${id}'
-            AND afterLatestPurchase.id IS NULL
-            AND afterLatestGift.id IS NULL
-            AND beforeFirstEdit.id IS NULL
-            AND beforeFirstInsert.id IS NULL
+        left join (
+            select
+                l.id,
+                l.time,
+                l.collectedItemId,
+                l.lotId,
+                s.id saleId,
+                s.time saleTime,
+                listR.id listingRemovalId,
+                listR.time listingRemovalTime,
+                listPr.id listingPriceId,
+                listPr.time listingPriceTime
+            from V3_Listing l
+            left join V3_Sale s on s.id = l.saleId
+            left join V3_ListingRemoval listR
+                on s.id is null and listR.listingId = l.id
+            left join V3_ListingRemoval laterListR
+                on laterListR.listingId = listR.listingId and laterListR.time > listR.time
+            left join V3_ListingPrice listPr
+                on listPr.listingId = l.id
+            left join V3_ListingPrice laterListPr
+                on laterListPr.listingId = listPr.listingId and laterListPr.time > listPr.time
+            where laterListR.id is null
+                and laterListPr.id is null
+        ) laterDebitListing
+            on (
+                -- lot same lot
+                (laterDebitListing.lotId = creditListing.lotId and laterDebitListing.time > creditSale.time)
+            ) and laterDebitListing.time > debitListing.time
+            and debitSale.id is null -- important
+        -- build lot
+        left join V3_LotEdit insertEdit
+            on insertEdit.lotId = lo.id
+        left join V3_LotInsert li
+            on li.lotEditId = insertEdit.id
+        left join V3_LotRemoval lr
+            on lr.collectedItemId = li.collectedItemid
+        left join V3_LotEdit removeEdit
+            on removeEdit.lotId = lo.id
+            and removeEdit.id = lr.lotEditId
+            and removeEdit.time > insertEdit.time
+        left join V3_LotEdit earlierRemoveEdit
+            on earlierRemoveEdit.lotId = lo.id
+            and earlierRemoveEdit.id = lr.lotEditId
+            and removeEdit.time > insertEdit.time
+        left join V3_CollectedItem ci
+            on ci.id = li.collectedItemId
+        left join Item it on it.id = ci.itemId
+        left join sets_v2 s on s.set_v2_id = it.setId
+        left join printings p on p.printing_id = ci.printingId
+        left join V3_Appraisal a on a.collectedItemId = ci.id
+        left join V3_Appraisal laterA 
+            on laterA.collectedItemId = ci.id
+            and laterA.time > a.time
+        left join V3_CollectedItemNote cin
+            on cin.collectedItemId = ci.id
+            and cin.note = 'PSA202503'
+        left join conditions c on c.condition_id = a.conditionId
+        left join SKU on SKU.itemId = it.id and SKU.conditionId = c.condition_id and SKU.printingId = p.printing_id
+        where (creditSale.purchaserId = '${userId}' OR creditSale.id IS NULL)
+            and lo.id = '${id}'
+            and beforeFirstEverEdit.id is null
+            and laterCreditSale.id IS NULL
+            and beforeDebitSale.id is null
+            and laterDebitListing.id is null
+            and (removeEdit.id is null or earlierRemoveEdit.id is null)
+            and li.id is not null
+            and laterA.id is null
     `
     const variables = []
     const direction = reqQuery.direction ? reqQuery.direction.toLowerCase() : undefined 

@@ -899,11 +899,8 @@ const select = async (req) => {
             )
             WHERE saleBetween.id IS NULL 
             AND giftBetween.id IS NULL
-            AND (
-                acquisitionAsSale.purchaserId = '${req.claims.user_id}'
-                OR acquisitionAsGift.recipientId = '${req.claims.user_id}'
-                OR acquisitionAsImport.importerId = '${req.claims.user_id}'
-            ) AND ${req.query.collectedItemId 
+            AND (u.user_id = '${req.claims.user_id}' OR u.proxyCreatorId = '${req.claims.user_id}')
+            AND ${req.query.collectedItemId 
                 ? `
                     (
                         li.collectedItemId = '${req.query.collectedItemId}' 
@@ -947,7 +944,7 @@ const select = async (req) => {
             FROM V3_Import i
             LEFT JOIN users u
                 ON u.user_id = i.importerId
-            WHERE i.importerId = '${req.claims.user_id}'
+            WHERE (u.user_id = '${req.claims.user_id}' OR u.proxyCreatorId = '${req.claims.user_id}')
             ${req.query.collectedItemId ? ` AND i.collectedItemId = '${req.query.collectedItemId}'` : ''}
             GROUP BY i.time
             UNION
@@ -1070,13 +1067,16 @@ const select = async (req) => {
                     OR i.bulkSplitId = l.bulkSplitId
                 ) AND prevSale.id IS NULL 
                 AND prevGift.id IS NULL
+            LEFT JOIN users u
+                ON (
+                    u.user_id = prevSale.purchaserId
+                    OR u.user_id = prevGift.recipientId
+                    OR u.user_id = i.importerId
+                )
             WHERE saleBetween.id IS NULL 
                 AND giftBetween.id IS NULL 
-                AND (
-                    prevSale.purchaserId = '${req.claims.user_id}'
-                    OR prevGift.recipientId = '${req.claims.user_id}'
-                    OR i.importerId = '${req.claims.user_id}'
-                ) AND ${req.query.collectedItemId 
+                AND (u.user_id = '${req.claims.user_id}' OR u.proxyCreatorId = '${req.claims.user_id}')
+                AND ${req.query.collectedItemId 
                     ? `
                         (
                             l.collectedItemId = '${req.query.collectedItemId}' 
@@ -1227,14 +1227,17 @@ const select = async (req) => {
                     OR i.bulkSplitId = l.bulkSplitId
                 ) AND prevSale.id IS NULL 
                 AND prevGift.id IS NULL
+            LEFT JOIN users u
+                ON (
+                    u.user_id = prevSale.purchaserId
+                    OR u.user_id = prevGift.recipientId
+                    OR u.user_id = i.importerId
+                )
             WHERE saleBetween.id IS NULL 
                 AND giftBetween.id IS NULL 
                 AND priceBetweenPriceBeforeAndPrice.id IS NULL
-                AND (
-                    prevSale.purchaserId = '${req.claims.user_id}'
-                    OR prevGift.recipientId = '${req.claims.user_id}'
-                    OR i.importerId = '${req.claims.user_id}'
-                ) AND ${req.query.collectedItemId 
+                AND (u.user_id = '${req.claims.user_id}' OR u.proxyCreatorId = '${req.claims.user_id}')
+                AND ${req.query.collectedItemId 
                     ? `
                         (
                             l.collectedItemId = '${req.query.collectedItemId}' 
@@ -1372,13 +1375,16 @@ const select = async (req) => {
                     OR i.bulkSplitId = l.bulkSplitId
                 ) AND prevSale.id IS NULL 
                 AND prevGift.id IS NULL
+            LEFT JOIN users u
+                ON (
+                    u.user_id = prevSale.purchaserId
+                    OR u.user_id = prevGift.recipientId
+                    OR u.user_id = i.importerId
+                )
             WHERE saleBetween.id IS NULL 
                 AND giftBetween.id IS NULL 
-                AND (
-                    prevSale.purchaserId = '${req.claims.user_id}'
-                    OR prevGift.recipientId = '${req.claims.user_id}'
-                    OR i.importerId = '${req.claims.user_id}'
-                ) AND ${req.query.collectedItemId 
+                AND (u.user_id = '${req.claims.user_id}' OR u.proxyCreatorId = '${req.claims.user_id}')
+                AND ${req.query.collectedItemId 
                     ? `
                         (
                             l.collectedItemId = '${req.query.collectedItemId}' 
@@ -1534,12 +1540,8 @@ const select = async (req) => {
             WHERE saleBetween.id IS NULL 
                 AND giftBetween.id IS NULL 
                 AND (
-                    s.purchaserId = '${req.claims.user_id}'
-                    OR (
-                        prevSale.purchaserId = '${req.claims.user_id}'
-                        OR prevGift.recipientId = '${req.claims.user_id}'
-                        OR i.importerId = '${req.claims.user_id}'
-                    )
+                    (purchaser.user_id = '${req.claims.user_id}' OR purchaser.proxyCreatorId = '${req.claims.user_id}')
+                    OR (seller.user_id = '${req.claims.user_id}' OR seller.proxyCreatorId = '${req.claims.user_id}')
                 ) AND laterPrice.id IS NULL
                 AND ${req.query.collectedItemId 
                     ? `
