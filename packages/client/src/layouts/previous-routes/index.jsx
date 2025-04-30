@@ -52,9 +52,16 @@ const PreviousRoutes = (props) => {
             return await formatPrevMarketRoutes(parsedPath)
         } else if (location.pathname.includes('/gym-leader/collection/assets')) {
             return [{
-                ['gym-leader']: {
+                ['assets']: {
                     formatted: 'Assets',
                     path: '/gym-leader/collection/assets'
+                }
+            }]
+        } else if (location.pathname.includes('/gym-leader/collection/vendors')) {
+            return [{
+                ['vendors']: {
+                    formatted: 'Vendors',
+                    path: '/gym-leader/collection/vendors'
                 }
             }]
         }

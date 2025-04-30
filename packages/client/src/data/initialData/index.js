@@ -58,6 +58,16 @@ export const initialReferenceDataValues = {
             },
         }
     },
+    vendorSort: {
+        value: 'user_name',
+        direction: 'asc',
+        values: {
+            ['user_name']: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
+            },
+        }
+    },
     filter: {
         market: null
     }
