@@ -16,6 +16,20 @@ import TCGPAPI from './api/tcgp.js'
 import dotenv from 'dotenv'
 dotenv.config()
 
+const intArraysMatch = (array1, array2) => {
+    const array1Sorted = array1.sort()
+    const array2Sorted = array2.sort()
+    if (array1Sorted.length !== array2Sorted.length) return false
+    let matching = true
+    for (let i=0; i< array1Sorted.length; i++) {
+        if (array1[i] !== array2[i]) {
+            matching = false
+            break
+        }
+    }
+    return matching
+}
+
 const pokemonCategoryIds = [
     3, // english
     50, // storage albums
@@ -168,10 +182,18 @@ const catalogueSync = async () => {
                             for (let i=0; i<currentPageItems.length; i++) {
                                 const itemNewSkus = []
                                 const curItem = currentPageItems[i]
-                                const bpcItemId = bpc_curSetItemLookup.items[curItem.productId].id
+                                const bpcItem = bpc_curSetItemLookup.items[curItem.productId]
+                                const bpcItemId = bpcItem.id
                                 const bpc_itemSkus = await getSkusBillsPc({ itemId: bpcItemId }, cookies)
                                 bpc_itemSkus.forEach(sku => bpc_curSetItemPageSkuLookup[sku.tcgpId] = sku)
+                                const justTCGPSkuFromBpc = bpc_itemSkus.map(skuObj => skuObj.tcgpId)
                                 const tcgp_itemSkus = await TCGPAPI.skus(apiToken, curItem.productId)
+                                const justTCGPSkuFromTCGP = tcgp_itemSkus.map(skuObj => skuObj.skuId)
+                                if (!intArraysMatch(justTCGPSkuFromBpc, justTCGPSkuFromTCGP)) {
+                                    console.log(`${bpcItem.name} not synced with tcgp. id = ${bpcItem.id}`)
+                                    console.log(`bpc skus: ${'[' + justTCGPSkuFromBpc.join(',') + ']'}`)
+                                    console.log(`tcgp skus: ${'[' + justTCGPSkuFromTCGP.join(',') + ']'}`)
+                                }
                                 for (let j=0; j<tcgp_itemSkus.length; j++) {
                                     const tcgpSku = tcgp_itemSkus[j]
                                     currentPageSkus += `${tcgpSku.skuId}`
