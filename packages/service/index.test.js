@@ -1,237 +1,240 @@
-const QueryFormatters = require('./utils/queryFormatters')
 const { buildGetByIdQuery } = require('./models/CollectedItem')
 const { v4: uuid } = require('uuid')
-const { testItems, testPrintings, testConditions, buildTestData, daysAfterStart } = require('./test')
+const { 
+    testItems, 
+    testPrintings, 
+    testConditions, 
+    buildTestData, 
+    daysAfterStart, 
+    BPCT
+} = require('./test')
 
 const { testPool } = globalThis
 let connection = undefined
-const testId = uuid()
-const tableIds = {
-    set: 'se',
-    item: 'it',
-    printing: 'p',
-    condition: 'c',
-    user: 'u',
-    collectedItem: 'ci',
-    import: 'i',
-    appraisal: 'a',
-    listing: 'l',
-    listingPrice: 'lp',
-    listingRemoval: 'listR',
-    sale: 's',
-    lot: 'lo',
-    lotEdit: 'le',
-    lotInsert: 'li',
-    lotRemoval: 'lr'
-}
-const userBaseId = `-${tableIds.user}-${testId}`
-const collectedItemBaseId = `-${tableIds.collectedItem}-${testId}`
-const importBaseId = `-${tableIds.import}-${testId}`
-const appraisalBaseId = `-${tableIds.appraisal}-${testId}`
-const listingBaseId = `-${tableIds.listing}-${testId}`
-const listingPriceBaseId = `-${tableIds.listingPrice}-${testId}`
-const listingRemovalBaseId = `-${tableIds.listingRemoval}-${testId}`
-const saleBaseId = `-${tableIds.sale}-${testId}`
-const lotBaseId = `-${tableIds.lot}-${testId}`
-const lotEditBaseId = `-${tableIds.lotEdit}-${testId}`
-const lotInsertBaseId = `-${tableIds.lotInsert}-${testId}`
-const lotRemovalBaseId = `-${tableIds.lotRemoval}-${testId}`
 
-const startISO = new Date().toISOString()
+// collectionBuilder(
+    
+// )
 
-const user = { user_id: '0'+userBaseId, user_name: '0'+userBaseId, user_password: '12345', user_role: 'Gym Leader' }
-const proxyUser1 = { user_id: '1'+userBaseId, user_name: '1'+userBaseId, proxyCreatorId: user.user_id }
-const proxyUser2 = { user_id: '2'+userBaseId, user_name: '2'+userBaseId, proxyCreatorId: user.user_id }
-const collectedItem = { id: '0'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const import_collectedItem = { id: '0'+importBaseId, importerId: user.user_id, collectedItemId: collectedItem.id, time: daysAfterStart(0, startISO) }
-const firstAppraisal = { id: '0'+appraisalBaseId, collectedItemId: collectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
-const secondAppraisal = { ...firstAppraisal, id: '1'+appraisalBaseId, conditionId: testConditions[1].condition_id, time: daysAfterStart(2, startISO) }
-const firstListing = { id: '0'+listingBaseId, collectedItemId: collectedItem.id, saleId: null, price: 10, time: daysAfterStart(3, startISO) }
-const firstPriceOfFirstListing = { id: '0'+listingPriceBaseId, listingId: firstListing.id, price: firstListing.price + 5, time: daysAfterStart(4, startISO) }
-const firstRemovalOfFirstListing  = { id: '0'+listingRemovalBaseId, listingId: firstListing.id, time: daysAfterStart(5, startISO) }
-const firstRelisting = { id: '1'+listingPriceBaseId, listingId: firstListing.id, price: firstPriceOfFirstListing.price -2, time: daysAfterStart(6, startISO) }
-const firstPriceOfFirstRelisting = { id: '2'+listingPriceBaseId, listingId: firstListing.id, price: firstPriceOfFirstListing.price +10, time: daysAfterStart(7, startISO) }
-const firstListingSale = { id: '0'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(8, startISO) }
-const secondListingAnotherUser = { id: '1'+listingBaseId, collectedItemId: collectedItem.id, saleId: null, price: 30, time: daysAfterStart(9, startISO) }
-const secondListingSaleAnotherUser = { id: '1'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(10, startISO) }
-const thirdListingBackToUser = { id: '2'+listingBaseId, collectedItemId: collectedItem.id, saleId: null, price: 35, time: daysAfterStart(11, startISO) }
-const thirdListingSaleBackToUser = { id: '2'+saleBaseId, purchaserId: user.user_id, time: daysAfterStart(12, startISO) }
+// ci(u(),i(),p(),a())
 
-const secondCollectedItem = { id: '1'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const secondCollectedItem_import = { id: '1'+importBaseId, importerId: proxyUser1.user_id, collectedItemId: secondCollectedItem.id, time: daysAfterStart(0, startISO) }
-const secondCollectedItem_firstAppraisal = { id: '2'+appraisalBaseId, collectedItemId: secondCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: proxyUser1.user_id, time: daysAfterStart(1, startISO) }
-const secondCollectedItem_secondAppraisal = { ...secondCollectedItem_firstAppraisal, id: '3'+appraisalBaseId, conditionId: testConditions[1].condition_id, time: daysAfterStart(2, startISO) }
-const secondCollectedItem_firstListing = { id: '3'+listingBaseId, collectedItemId: secondCollectedItem.id, saleId: null, price: 100, time: daysAfterStart(3, startISO) }
-const secondCollectedItem_purchase = { id: '3'+saleBaseId, purchaserId: user.user_id, time: daysAfterStart(4, startISO) }
-const secondCollectedItem_secondListing = { id: '4'+listingBaseId, collectedItemId: secondCollectedItem.id, saleId: null, price: 110, time: daysAfterStart(5, startISO) }
-const firstPriceOfSecondListing = { id: '3'+listingPriceBaseId, listingId: secondCollectedItem_secondListing.id, price: secondCollectedItem_secondListing.price + 50, time: daysAfterStart(6, startISO) }
-const firstRemovalOfSecondListing  = { id: '1'+listingRemovalBaseId, listingId: secondCollectedItem_secondListing.id, time: daysAfterStart(7, startISO) }
-const firstRelistingOfSecondListing = { id: '4'+listingPriceBaseId, listingId: secondCollectedItem_secondListing.id, price: firstPriceOfSecondListing.price -20, time: daysAfterStart(8, startISO) }
-const secondPriceOfSecondListing = { id: '5'+listingPriceBaseId, listingId: secondCollectedItem_secondListing.id, price: firstRelistingOfSecondListing.price -80, time: daysAfterStart(9, startISO) }
-const secondCollectedItem_sale = { id: '4'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(9, startISO) }
-const secondCollectedItem_outOfScopeListing = { id: '5'+listingBaseId, collectedItemId: secondCollectedItem.id, saleId: null, price: 300, time: daysAfterStart(10, startISO) }
-const secondCollectedItem_outOfScopeSale = { id: '5'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(11, startISO) }
+// bpt.import()
+// bpct.u.filter(u => u.proxyCreatorId)[0]
+// buildTransactions(
+//     import(ci),
+//     ci(),
+//     li(),
+//     lp(),
+//     s(),
+//     relist(),
+//     le(),
 
-const thirdCollectedItem = { id: '2'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const thirdCollectedItem_import = { id: '2'+importBaseId, importerId: user.user_id, collectedItemId: thirdCollectedItem.id, time: daysAfterStart(0, startISO) }
-const thirdCollectedItem_firstAppraisal = { id: '4'+appraisalBaseId, collectedItemId: thirdCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
-const thirdCollectedItem_firstLot = { id: '0'+lotBaseId }
-const thirdCollectedItem_firstLotEdit = { id : '0'+lotEditBaseId, lotId: thirdCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
-const thirdCollectedItem_firstInsert = { id: '0'+lotInsertBaseId, lotEditId: thirdCollectedItem_firstLotEdit.id, collectedItemId: thirdCollectedItem.id, index: 0 }
-const thirdCollectedItem_secondLotEdit = { id : '1'+lotEditBaseId, lotId: thirdCollectedItem_firstLot.id, time: daysAfterStart(3, startISO) }
-const thirdCollectedItem_firstRemoval = { id: '0'+lotRemovalBaseId, lotEditId: thirdCollectedItem_secondLotEdit.id, collectedItemId: thirdCollectedItem.id }
-const thirdCollectedItem_secondLot = { id: '1'+lotBaseId }
-const thirdCollectedItem_thirdLotEdit = { id : '2'+lotEditBaseId, lotId: thirdCollectedItem_secondLot.id, time: daysAfterStart(4, startISO) }
-const thirdCollectedItem_secondInsert = { id: '1'+lotInsertBaseId, lotEditId: thirdCollectedItem_thirdLotEdit.id, collectedItemId: thirdCollectedItem.id, index: 0 }
-const thirdCollectedItem_firstListing = { id: '6'+listingBaseId, lotId: thirdCollectedItem_secondLot.id, saleId: null, price: 16, time: daysAfterStart(5, startISO) }
-const thirdCollectedItem_firstSale = { id: '6'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(6, startISO) }
+// )
 
-const fourthCollectedItem = { id: '3'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const fourthCollectedItem_import = { id: '3'+importBaseId, importerId: user.user_id, collectedItemId: fourthCollectedItem.id, time: daysAfterStart(0, startISO) }
-const fourthCollectedItem_firstAppraisal = { id: '5'+appraisalBaseId, collectedItemId: fourthCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
-const fourthCollectedItem_firstLot = { id: '2'+lotBaseId }
-const fourthCollectedItem_firstLotEdit = { id : '3'+lotEditBaseId, lotId: fourthCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
-const fourthCollectedItem_firstInsert = { id: '2'+lotInsertBaseId, lotEditId: fourthCollectedItem_firstLotEdit.id, collectedItemId: fourthCollectedItem.id, index: 0 }
-const fourthCollectedItem_firstListing = { id: '7'+listingBaseId, lotId: fourthCollectedItem_firstLot.id, saleId: null, price: 16, time: daysAfterStart(3, startISO) }
-const fourthCollectedItem_secondLotEdit = { id : '4'+lotEditBaseId, lotId: fourthCollectedItem_firstLot.id, time: daysAfterStart(4, startISO) }
-const fourthCollectedItem_firstRemoval = { id: '1'+lotRemovalBaseId, lotEditId: fourthCollectedItem_secondLotEdit.id, collectedItemId: fourthCollectedItem.id }
-const fourthCollectedItem_firstSale = { id: '7'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(5, startISO) }
+// const bpct = bptcInit(
+//     createUsers()
+// )
 
-const fifthCollectedItem = { id: '4'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const fifthCollectedItem_import = { id: '4'+importBaseId, importerId: user.user_id, collectedItemId: fifthCollectedItem.id, time: daysAfterStart(0, startISO) }
-const fifthCollectedItem_firstAppraisal = { id: '6'+appraisalBaseId, collectedItemId: fifthCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
-const fifthCollectedItem_firstLot = { id: '3'+lotBaseId }
-const fifthCollectedItem_firstLotEdit = { id : '5'+lotEditBaseId, lotId: fifthCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
-const fifthCollectedItem_firstInsert = { id: '3'+lotInsertBaseId, lotEditId: fifthCollectedItem_firstLotEdit.id, collectedItemId: fifthCollectedItem.id, index: 0 }
-const fifthCollectedItem_firstListing = { id: '8'+listingBaseId, lotId: fifthCollectedItem_firstLot.id, saleId: null, price: 16, time: daysAfterStart(3, startISO) }
-const fifthCollectedItem_firstSale = { id: '8'+saleBaseId, purchaserId: proxyUser1.user_id, time: daysAfterStart(4, startISO) }
-const fifthCollectedItem_secondListing = { id: '9'+listingBaseId, lotId: fifthCollectedItem_firstLot.id, saleId: null, price: 16, time: daysAfterStart(5, startISO) }
-const fifthCollectedItem_secondSale = { id: '9'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(6, startISO) }
+// create users 
+// create collected items
+// create transactions in order
 
-// proxy user import add to lot
-const sixthCollectedItem = { id: '5'+collectedItemBaseId, itemId: testItems[0].id, printingId: testPrintings[0].printing_id }
-const sixthCollectedItem_import = { id: '5'+importBaseId, importerId: proxyUser1.user_id, collectedItemId: sixthCollectedItem.id, time: daysAfterStart(0, startISO) }
-const sixthCollectedItem_firstAppraisal = { id: '7'+appraisalBaseId, collectedItemId: sixthCollectedItem.id, conditionId: testConditions[0].condition_id, appraiserId: user.user_id, time: daysAfterStart(1, startISO) }
-const sixthCollectedItem_firstLot = { id: '4'+lotBaseId }
-const sixthCollectedItem_firstLotEdit = { id : '6'+lotEditBaseId, lotId: sixthCollectedItem_firstLot.id, time: daysAfterStart(2, startISO) }
-const sixthCollectedItem_firstInsert = { id: '4'+lotInsertBaseId, lotEditId: sixthCollectedItem_firstLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
-const sixthCollectedItem_firstListing = { id: '10'+listingBaseId, lotId: sixthCollectedItem_firstLot.id, saleId: null, price: 12, time: daysAfterStart(3, startISO) }
+
+// bpct.ci[0].i // import of first collected item
+// bpct.ci[0].a[0]
+// bpct.li[0].lp[0] // first listing price of first listing
+// bpct.li[0].listR[0]
+
+
+// const bpct = initSnapshot({}) // create ci, import, first appraisal
+//     .newSnapshot() // each additional method is an event occuring after the prev and before the next.
+//     .l() // multiple transactions can occur during each snapshot... maybe
+//     .lr() 
+
+// 3 users independantly import items into their collection
+// transactions intertwice between the 3, at times only 2 are interacting while the 3 is doing their own thing
+// test config generation clearly shows where items are at any given time
+// it rejects creating a lot when an item is clearly elsewhere in its transaction lifecycle
+
+
+// const user1Transactions = ['import', 'appraisal', 'listing']
+
+// import = ci.import({ importerId: 123 })
+
+// listing = import.listing({ price: 12 })
+
+// import   listing sale
+//      import      purchase    lotInsert
+//          import
+
+// const ci1 = import().appraisal().listing() // time is not required. This config will be passed into a generator which  will auto calc the time
+
+const bpct = new BPCT(uuid()) // init user
+bpct.buildUsers(2) // create number of proxy users, default 1
+const users = bpct.getUsers()
+const user = users[0]
+const proxyUser1 = users[1]
+const proxyUser2 = users[2]
+
+// create first collected item
+const { collectedItem: firstCollectedItem, createdImport: firstCollectedItemImport,  appraisal: firstCollectedItemFirstAppraisal } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    user.user_id
+)
+const { id: firstCollectedItemId } = bpct.getCollectedItems()[0]
+const firstCollectedItemSecondAppraisal = bpct.appraise(firstCollectedItemId, testConditions[1].condition_id, user.user_id)
+const firstCollectedItemFirstListing = bpct.listItem(firstCollectedItemId, 10)
+const firstItemFirstListingPrice = bpct.priceListing(firstCollectedItemFirstListing.id, firstCollectedItemFirstListing.price + 5)
+const firstItemFirstListingRemoval = bpct.removeListing(firstCollectedItemFirstListing.id)
+const firstItemSecondListingPrice = bpct.priceListing(firstCollectedItemFirstListing.id, firstItemFirstListingPrice.price-2)
+const firstItemThirdListingPrice = bpct.priceListing(firstCollectedItemFirstListing.id, firstItemFirstListingPrice.price+10)
+const firstItemFirstListingSale = bpct.sale(firstCollectedItemFirstListing.id, proxyUser1.user_id)
+const firstItemSecondListing = bpct.listItem(firstCollectedItemId, 30)
+bpct.sale(firstItemSecondListing.id, proxyUser2.user_id)
+const firstItemThirdListing = bpct.listItem(firstCollectedItemId, 35)
+bpct.sale(firstItemThirdListing.id, user.user_id)
+
+// create second collected item
+bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    proxyUser1.user_id
+)
+const { id: secondCollectedItemId } = bpct.getCollectedItems()[1]
+bpct.appraise(secondCollectedItemId, testConditions[1].condition_id, proxyUser1.user_id)
+const secondItemFirstListing = bpct.listItem(secondCollectedItemId, 100)
+bpct.sale(secondItemFirstListing.id, user.user_id)
+const secondItemSecondListing = bpct.listItem(secondCollectedItemId, 110)
+const secondItemSecondListingFirstPrice = bpct.priceListing(secondItemSecondListing.id, secondItemSecondListing.price + 50)
+bpct.removeListing(secondItemSecondListing.id)
+const secondItemSecondListingFirstRelisting = bpct.priceListing(secondItemSecondListing.id, secondItemSecondListingFirstPrice.price - 20)
+bpct.priceListing(secondItemSecondListing.id, secondItemSecondListingFirstRelisting.price - 80)
+bpct.sale(secondItemSecondListing.id, proxyUser1.user_id)
+const secondItemThirdListing = bpct.listItem(secondCollectedItemId, 300)
+bpct.sale(secondItemThirdListing.id, proxyUser2.user_id)
+
+// create third collected item
+const { collectedItem: thirdCollectedItem, createdImport: thirdCollectedItemImport } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    user.user_id
+)
+const thirdCollectedItemLotItem = { collectedItemId: thirdCollectedItem.id }
+const { lot: thirdCollectedItemFirstLot, lotEdit: thirdCollectedItemFirstLotEdit } = bpct.createLot([thirdCollectedItemLotItem]) // first insert
+const { lotEdit: thirdCollectedItemSecondLotEdit } = bpct.createLotEdit(thirdCollectedItemFirstLot.id, [], [thirdCollectedItemLotItem]) // first removal
+const { lot: thirdCollectedItemSecondLot, lotEdit: thirdCollectedItemThirdLotEdit } = bpct.createLot([thirdCollectedItemLotItem]) // first insert
+const thirdCollectedItemLotFirstListing = bpct.listLot(thirdCollectedItemSecondLot.id, 16)
+const thirdCollectedItemLotFirstSale = bpct.sale(thirdCollectedItemLotFirstListing.id, proxyUser1.user_id)
+
+// create fourth collected item
+const { collectedItem: fourthCollectedItem, createdImport: fourthCollectedItemImport } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    user.user_id
+)
+// create lot
+const fourthCollectedItemLotItem = { collectedItemId: fourthCollectedItem.id }
+const { lot: fourthCollectedItemFirstLot } = bpct.createLot([fourthCollectedItemLotItem])
+// list lot
+const fourthCollectedItemLotFirstListing = bpct.listLot(fourthCollectedItemFirstLot.id, 16)
+// remove from lot
+bpct.createLotEdit(fourthCollectedItemFirstLot.id, [], [fourthCollectedItemLotItem])
+// sell lot
+const fourthCollectedItemLotFirstSale = bpct.sale(fourthCollectedItemLotFirstListing.id, proxyUser1.user_id)
+
+// create fifth collected item
+const { collectedItem: fifthCollectedItem, createdImport: fifthCollectedItemImport } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    user.user_id
+)
+// create lot
+const fifthCollectedItemLotItem = { collectedItemId: fifthCollectedItem.id }
+const { lot: fifthCollectedItemFirstLot, lotEdit: fifthCollectedItemLotFirstLotEdit } = bpct.createLot([fifthCollectedItemLotItem])
+// list lot
+const fifthCollectedItemLotFirstListing = bpct.listLot(fifthCollectedItemFirstLot.id, 16)
+// sell lot
+const fifthCollectedItemLotFirstSale = bpct.sale(fifthCollectedItemLotFirstListing.id, proxyUser1.user_id)
+// list lot, next user
+const fifthCollectedItemLotSecondListing = bpct.listLot(fifthCollectedItemFirstLot.id, 16)
+// sell lot to third user
+const fifthCollectedItemLotSecondSale = bpct.sale(fifthCollectedItemLotSecondListing.id, proxyUser2.user_id)
+
+// create sixth collected item
+const { collectedItem: sixthCollectedItem } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    proxyUser1.user_id
+)
+// proxy user1 creates lot and lists it
+const sixthCollectedItemLotItem = { collectedItemId: sixthCollectedItem.id }
+const { lot: sixthCollectedItemFirstLot, lotEdit: sixthCollectedItemLotFirstLotEdit } = bpct.createLot([sixthCollectedItemLotItem])
+const sixthCollectedItemLotFirstListing = bpct.listLot(sixthCollectedItemFirstLot.id, 12)
 // user purchases lot
-const sixthCollectedItem_firstSale = { id: '10'+saleBaseId, purchaserId: user.user_id, time: daysAfterStart(4, startISO) }
-// user removes item from lot
-const sixthCollectedItem_secondLotEdit = { id : '7'+lotEditBaseId, lotId: sixthCollectedItem_firstLot.id, time: daysAfterStart(5, startISO) }
-const sixthCollectedItem_firstRemoval = { id: '2'+lotRemovalBaseId, lotEditId: sixthCollectedItem_secondLotEdit.id, collectedItemId: sixthCollectedItem.id }
-// user adds item to another lot
-const sixthCollectedItem_secondLot = { id: '5'+lotBaseId }
-const sixthCollectedItem_thirdLotEdit = { id : '8'+lotEditBaseId, lotId: sixthCollectedItem_secondLot.id, time: daysAfterStart(6, startISO) }
-const sixthCollectedItem_secondInsert = { id: '5'+lotInsertBaseId, lotEditId: sixthCollectedItem_thirdLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
-// user removes item from lot
-const sixthCollectedItem_fourthLotEdit = { id : '9'+lotEditBaseId, lotId: sixthCollectedItem_secondLot.id, time: daysAfterStart(7, startISO) }
-const sixthCollectedItem_secondRemoval = { id: '3'+lotRemovalBaseId, lotEditId: sixthCollectedItem_fourthLotEdit.id, collectedItemId: sixthCollectedItem.id }
-// user adds item to already listed lot
-const sixthCollectedItem_thirdLot = { id: '6'+lotBaseId }
-const sixthCollectedItem_secondListing = { id: '11'+listingBaseId, lotId: sixthCollectedItem_thirdLot.id, saleId: null, price: 43, time: daysAfterStart(8, startISO) }
-const sixthCollectedItem_fifthLotEdit = { id : '10'+lotEditBaseId, lotId: sixthCollectedItem_thirdLot.id, time: daysAfterStart(9, startISO) }
-const sixthCollectedItem_thirdInsert = { id: '6'+lotInsertBaseId, lotEditId: sixthCollectedItem_fifthLotEdit.id, collectedItemId: sixthCollectedItem.id, index: 0 }
-// item sold within already listed lot
-const sixthCollectedItem_secondAppraisal = { id: '8'+appraisalBaseId, collectedItemId: sixthCollectedItem.id, conditionId: testConditions[1].condition_id, appraiserId: user.user_id, time: daysAfterStart(10, startISO) }
-const sixthCollectedItem_firstPrice = { id: '6'+listingPriceBaseId, listingId: sixthCollectedItem_secondListing.id, price: sixthCollectedItem_secondListing.price +10, time: daysAfterStart(11, startISO) }
-const sixthCollectedItem_secondSale = { id: '11'+saleBaseId, purchaserId: proxyUser2.user_id, time: daysAfterStart(12, startISO) }
+const sixthCollectedItemLotFirstSale = bpct.sale(sixthCollectedItemLotFirstListing.id, user.user_id)
+// removes item from lot
+const { lotEdit: sixthCollectedItemFirstLotSecondLotEdit } = bpct.createLotEdit(sixthCollectedItemFirstLot.id, [], [sixthCollectedItemLotItem])
+// adds item to another lot
+const { lot: sixthCollectedItemSecondLot, lotEdit: sixthCollectedItemSecondLotFirstLotEdit } = bpct.createLot([sixthCollectedItemLotItem])
+// removes item from lot
+bpct.createLotEdit(sixthCollectedItemSecondLot.id, [], [sixthCollectedItemLotItem])
+// create a separate lot item and lot, then list it
+const { collectedItem: seventhCollectedItem } = bpct.import(
+    testItems[0].id, 
+    testPrintings[0].printing_id, 
+    testConditions[0].condition_id, 
+    user.user_id
+)
+const seventhCollectedItemLotItem = { collectedItemId: seventhCollectedItem.id }
+const { lot: seventhCollectedItemFirstLot } = bpct.createLot([seventhCollectedItemLotItem])
+const seventhCollectedItemFirstLotFirstListing = bpct.listLot(seventhCollectedItemFirstLot.id, 43)
+// adds item to another listed lot
+const { lotEdit: sixthCollectedItemSecondLotFirstEdit } = bpct.createLotEdit(seventhCollectedItemFirstLot.id, [sixthCollectedItemLotItem])
+// appraise sixth item, changes price of listing
+const sixthCollectedItemFirstAppraisal = bpct.appraise(sixthCollectedItem.id, testConditions[1].condition_id, user.user_id)
+const seventhCollectedItemFirstListingFirstPricing = bpct.priceListing(seventhCollectedItemFirstLotFirstListing.id, seventhCollectedItemFirstLotFirstListing.price + 10)
+// sells lot
+const seventhCollectedItemLotFirstSale = bpct.sale(seventhCollectedItemFirstLotFirstListing.id, proxyUser2.user_id)
 
+const u = bpct.getUsers()
+const ci = bpct.getCollectedItems()
+const i = bpct.getImports()
+const a = bpct.getAppraisals()
+const l = bpct.getListings()
+const lp = bpct.getListingPrices()
+const listR = bpct.getListingRemovals()
+const s = bpct.getSales()
+const updateL = bpct.getListingUpdates()
+const lo = bpct.getLots()
+const le = bpct.getLotEdits()
+const li = bpct.getLotInserts()
+const lr = bpct.getLotRemovals()
 
 // TODO incrementing id is something I'll forget to do when creating dummy data, maybe create a util
 beforeAll(async () => {
     connection = await testPool.getConnection()
     await connection.query('START TRANSACTION')
-    
     await buildTestData([
-        { data: user, table: 'users' },
-        { data: proxyUser1, table: 'users' },
-        { data: proxyUser2, table: 'users' },
-        { data: collectedItem, table: 'V3_CollectedItem' },
-        { data: import_collectedItem, table: 'V3_Import' },
-        { data: firstAppraisal, table: 'V3_Appraisal' },
-        { data: secondAppraisal, table:'V3_Appraisal' },
-        { data: firstListing, table: 'V3_Listing' },
-        { data: firstPriceOfFirstListing, table: 'V3_ListingPrice' },
-        { data: firstRemovalOfFirstListing, table: 'V3_ListingRemoval' },
-        { data: firstRelisting, table: 'V3_ListingPrice' },
-        { data: firstPriceOfFirstRelisting, table: 'V3_ListingPrice' },
-        { data: firstListingSale, table: 'V3_Sale' },
-        { data: secondCollectedItem, table: 'V3_CollectedItem' },
-        { data: secondCollectedItem_import, table: 'V3_Import' },
-        { data: secondCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
-        { data: secondCollectedItem_secondAppraisal, table: 'V3_Appraisal' },
-        { data: secondCollectedItem_firstListing, table: 'V3_Listing' },
-        { data: secondCollectedItem_purchase, table: 'V3_Sale' },
-        { data: secondCollectedItem_secondListing, table: 'V3_Listing' },
-        { data: firstPriceOfSecondListing, table: 'V3_ListingPrice' },
-        { data: firstRemovalOfSecondListing, table: 'V3_ListingRemoval' },
-        { data: firstRelistingOfSecondListing, table: 'V3_ListingPrice' },
-        { data: secondPriceOfSecondListing, table: 'V3_ListingPrice' },
-        { data: secondCollectedItem_sale, table: 'V3_Sale' },
-        { data: secondCollectedItem_outOfScopeListing, table: 'V3_Listing' },
-        { data: secondCollectedItem_outOfScopeSale, table: 'V3_Sale' },
-        { data: thirdCollectedItem, table: 'V3_CollectedItem' },
-        { data: thirdCollectedItem_import, table: 'V3_Import' },
-        { data: thirdCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
-        { data: thirdCollectedItem_firstLot, table: 'V3_Lot' },
-        { data: thirdCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
-        { data: thirdCollectedItem_firstInsert, table: 'V3_LotInsert' },
-        { data: thirdCollectedItem_secondLotEdit, table: 'V3_LotEdit' },
-        { data: thirdCollectedItem_firstRemoval, table: 'V3_LotRemoval' },
-        { data: thirdCollectedItem_secondLot, table: 'V3_Lot' },
-        { data: thirdCollectedItem_thirdLotEdit, table: 'V3_LotEdit' },
-        { data: thirdCollectedItem_secondInsert, table: 'V3_LotInsert' },
-        { data: thirdCollectedItem_firstListing, table: 'V3_Listing' },
-        { data: thirdCollectedItem_firstSale, table: 'V3_Sale' },
-        { data: secondListingAnotherUser, table: 'V3_Listing' },
-        { data: secondListingSaleAnotherUser, table: 'V3_Sale '},
-        { data: thirdListingBackToUser, table: 'V3_Listing' },
-        { data: thirdListingSaleBackToUser, table: 'V3_Sale '},
-        { data: fourthCollectedItem, table: 'V3_CollectedItem' },
-        { data: fourthCollectedItem_import, table: 'V3_Import' },
-        { data: fourthCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
-        { data: fourthCollectedItem_firstLot, table: 'V3_Lot' },
-        { data: fourthCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
-        { data: fourthCollectedItem_firstInsert, table: 'V3_LotInsert' },
-        { data: fourthCollectedItem_firstListing, table: 'V3_Listing' },
-        { data: fourthCollectedItem_secondLotEdit, table: 'V3_LotEdit' },
-        { data: fourthCollectedItem_firstRemoval, table: 'V3_LotRemoval' },
-        { data: fourthCollectedItem_firstSale, table: 'V3_Sale' },
-        { data: fifthCollectedItem, table: 'V3_CollectedItem' },
-        { data: fifthCollectedItem_import, table: 'V3_Import' },
-        { data: fifthCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
-        { data: fifthCollectedItem_firstLot, table: 'V3_Lot' },
-        { data: fifthCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
-        { data: fifthCollectedItem_firstInsert, table: 'V3_LotInsert' },
-        { data: fifthCollectedItem_firstListing, table: 'V3_Listing' },
-        { data: fifthCollectedItem_firstSale, table: 'V3_Sale' },
-        { data: fifthCollectedItem_secondListing, table: 'V3_Listing' },
-        { data: fifthCollectedItem_secondSale, table: 'V3_Sale' },
-        { data: sixthCollectedItem, table: 'V3_CollectedItem' },
-        { data: sixthCollectedItem_import, table: 'V3_Import' },
-        { data: sixthCollectedItem_firstAppraisal, table: 'V3_Appraisal' },
-        { data: sixthCollectedItem_firstLot, table: 'V3_Lot' },
-        { data: sixthCollectedItem_firstLotEdit, table: 'V3_LotEdit' },
-        { data: sixthCollectedItem_firstInsert, table: 'V3_LotInsert' },
-        { data: sixthCollectedItem_firstListing, table: 'V3_Listing' },
-        { data: sixthCollectedItem_firstSale, table: 'V3_Sale' },
-        { data: sixthCollectedItem_secondLotEdit, table: 'V3_LotEdit' },
-        { data: sixthCollectedItem_firstRemoval, table: 'V3_LotRemoval' },
-        { data: sixthCollectedItem_secondLot, table: 'V3_Lot' },
-        { data: sixthCollectedItem_thirdLotEdit, table: 'V3_LotEdit' },
-        { data: sixthCollectedItem_secondInsert, table: 'V3_LotInsert' },
-        { data: sixthCollectedItem_fourthLotEdit, table: 'V3_LotEdit' },
-        { data: sixthCollectedItem_secondRemoval, table: 'V3_LotRemoval' },
-        { data: sixthCollectedItem_thirdLot, table: 'V3_Lot' },
-        { data: sixthCollectedItem_secondListing, table: 'V3_Listing' },
-        { data: sixthCollectedItem_fifthLotEdit, table: 'V3_LotEdit' },
-        { data: sixthCollectedItem_thirdInsert, table: 'V3_LotInsert' },
-        { data: sixthCollectedItem_secondAppraisal, table: 'V3_Appraisal' },
-        { data: sixthCollectedItem_firstPrice, table: 'V3_ListingPrice' },
-        { data: sixthCollectedItem_secondSale, table: 'V3_Sale' },
-        
+        ...u.map(data => ({ data, table: 'users' })),
+        ...ci.map(data => ({ data, table: 'V3_CollectedItem' })),
+        ...i.map(data => ({ data, table: 'V3_Import' })),
+        ...a.map(data => ({ data, table: 'V3_Appraisal' })),
+        ...lo.map(data => ({ data, table: 'V3_Lot' })),
+        ...le.map(data => ({ data, table: 'V3_LotEdit' })),
+        ...li.map(data => ({ data, table: 'V3_LotInsert' })),        
+        ...lr.map(data => ({ data, table: 'V3_LotRemoval' })),        
+        ...l.map(data => ({ data, table: 'V3_Listing' })),
+        ...lp.map(data => ({ data, table: 'V3_ListingPrice' })),
+        ...listR.map(data => ({ data, table: 'V3_ListingRemoval' })),
+        ...s.map(data => ({ data, table: 'V3_Sale' })),
+        ...updateL.map(data => ({ update: true, data, table: 'V3_Listing', idKey: 'id' })),
     ], connection)
 })
 afterAll(async () => {
@@ -239,22 +242,25 @@ afterAll(async () => {
     await connection.release()
 })
 
+// ci[0].l[0].lp[1]
+// ci[0].l[0].s
+
 test('User imports item, no transactions', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstAppraisal.time)
+        daysAfterStart(0.5, firstCollectedItemFirstAppraisal.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { id, item, printing, appraisal, listing, credit } = rows[0]
-    expect(id).toEqual('0'+collectedItemBaseId)
-    expect(item.id).toEqual(testItems[0].id)
-    expect(printing.id).toEqual(testPrintings[0].printing_id)
-    expect(appraisal.id).toEqual(firstAppraisal.id)
-    expect(appraisal.condition.id).toEqual(testConditions[0].condition_id)
-    expect(credit.import.id).toEqual(import_collectedItem.id)
+    expect(id).toEqual(firstCollectedItem.id)
+    expect(item.id).toEqual(firstCollectedItem.itemId)
+    expect(printing.id).toEqual(firstCollectedItem.printingId)
+    expect(appraisal.id).toEqual(firstCollectedItemFirstAppraisal.id)
+    expect(appraisal.condition.id).toEqual(firstCollectedItemFirstAppraisal.conditionId)
+    expect(credit.import.id).toEqual(firstCollectedItemImport.id)
     expect(credit.listing.id).toBeNull()
     expect(credit.sale.id).toBeNull()
     expect(credit.sale.purchaser.id).toBeNull()
@@ -263,54 +269,54 @@ test('User imports item, no transactions', async () => {
 
 test('User imports item, appraises it, then creates listing', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstListing.time)
+        daysAfterStart(0.5, firstCollectedItemFirstListing.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { appraisal, listing } = rows[0]
-    expect(appraisal.id).toEqual('1'+appraisalBaseId)
-    expect(appraisal.condition.id).toEqual(testConditions[1].condition_id)
-    expect(listing.id).toEqual(firstListing.id)
+    expect(appraisal.id).toEqual(firstCollectedItemSecondAppraisal.id)
+    expect(appraisal.condition.id).toEqual(firstCollectedItemSecondAppraisal.conditionId)
+    expect(listing.id).toEqual(firstCollectedItemFirstListing.id)
     expect(listing.removal.id).toBeNull()
 })
 
 test('adjusts price of listing', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstPriceOfFirstListing.time)
+        daysAfterStart(0.5, firstItemFirstListingPrice.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing } = rows[0]
-    expect(listing.updatedPrice.price).toEqual(firstPriceOfFirstListing.price)
+    expect(listing.updatedPrice.price).toEqual(firstItemFirstListingPrice.price)
 })
 
 test('removes listing', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstRemovalOfFirstListing.time)
+        daysAfterStart(0.5, firstItemFirstListingRemoval.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing } = rows[0]
-    expect(listing.removal.id).toEqual(firstRemovalOfFirstListing.id)
-    expect(listing.id).toEqual(firstListing.id)
+    expect(listing.removal.id).toEqual(firstItemFirstListingRemoval.id)
+    expect(listing.id).toEqual(firstCollectedItemFirstListing.id)
     expect(listing.price).toBeNull()
     expect(listing.updatedPrice.price).toBeNull()
 })
 
 test('relists listing', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstRelisting.time)
+        daysAfterStart(0.5, firstItemSecondListingPrice.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
@@ -318,208 +324,178 @@ test('relists listing', async () => {
     const { listing } = rows[0]
     expect(listing.removal.id).toBeNull()
     expect(listing.updatedPrice.price).toBeNull()
-    expect(listing.price).toEqual(firstRelisting.price)
-    expect(listing.relisted.id).toEqual(firstRelisting.id)
+    expect(listing.price).toEqual(firstItemSecondListingPrice.price)
+    expect(listing.relisted.id).toEqual(firstItemSecondListingPrice.id)
 })
 
 test('price adjusted for relisted listing', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstPriceOfFirstRelisting.time)
+        daysAfterStart(0.5, firstItemThirdListingPrice.time)
     
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing } = rows[0]
     expect(listing.removal.id).toBeNull()
-    expect(listing.updatedPrice.price).toEqual(firstPriceOfFirstRelisting.price)
-    expect(listing.price).toEqual(firstRelisting.price)
-    expect(listing.relisted.id).toEqual(firstRelisting.id)
+    expect(listing.updatedPrice.price).toEqual(firstItemThirdListingPrice.price)
+    expect(listing.price).toEqual(firstItemSecondListingPrice.price)
+    expect(listing.relisted.id).toEqual(firstItemSecondListingPrice.id)
 })
 
 test('imported item sold', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, firstListingSale.time)
+        daysAfterStart(0.5, s[0].time)
     
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${firstListingSale.id}' 
-        where id = '${firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
     expect(listing.removal.id).toBeNull()
-    expect(listing.updatedPrice.price).toEqual(firstPriceOfFirstRelisting.price)
-    expect(listing.price).toEqual(firstRelisting.price)
-    expect(listing.relisted.id).toEqual(firstRelisting.id)
-    expect(sale.id).toEqual(firstListingSale.id)
+    expect(listing.updatedPrice.price).toEqual(firstItemThirdListingPrice.price)
+    expect(listing.price).toEqual(firstItemSecondListingPrice.price)
+    expect(listing.relisted.id).toEqual(firstItemSecondListingPrice.id)
+    expect(sale.id).toEqual(firstItemFirstListingSale.id)
     expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
 })
 
 test('sold imported item returns the correct purchaser id', async () => {
     const { query, variables } = buildGetByIdQuery(
-        collectedItem.id, 
+        firstCollectedItem.id, 
         user.user_id, 
-        daysAfterStart(0.5, secondListingSaleAnotherUser.time)
+        daysAfterStart(0.5, s[1].time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${firstListingSale.id}' 
-        where id = '${firstListing.id}'
-    `, [])
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${secondListingSaleAnotherUser.id}' 
-        where id = '${secondListingAnotherUser.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(firstListing.id)
+    expect(listing.id).toEqual(l[0].id)
     expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
 })
 
 // new item
 test('purchased item', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, secondCollectedItem_purchase.time)
+        daysAfterStart(0.5, s[3].time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${secondCollectedItem_purchase.id}' 
-        where id = '${secondCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { credit, listing, item, printing, appraisal } = rows[0]
     expect(listing.id).toBeNull()
-    expect(item.id).toEqual(secondCollectedItem.itemId)
-    expect(printing.id).toEqual(secondCollectedItem.printingId)
-    expect(appraisal.id).toEqual(secondCollectedItem_secondAppraisal.id)
-    expect(credit.listing.id).toEqual(secondCollectedItem_firstListing.id)
-    expect(credit.listing.price).toEqual(secondCollectedItem_firstListing.price)
+    expect(item.id).toEqual(ci[1].itemId)
+    expect(printing.id).toEqual(ci[1].printingId)
+    expect(appraisal.id).toEqual(a[3].id)
+    expect(credit.listing.id).toEqual(l[3].id)
+    expect(credit.listing.price).toEqual(l[3].price)
     expect(credit.import.id).toBeNull()
-    expect(credit.sale.id).toEqual(secondCollectedItem_purchase.id)
+    expect(credit.sale.id).toEqual(s[3].id)
 })
 
 test('purchased item listed', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, secondCollectedItem_secondListing.time)
+        daysAfterStart(0.5, l[4].time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
-    expect(listing.price).toEqual(secondCollectedItem_secondListing.price)
+    expect(listing.id).toEqual(l[4].id)
+    expect(listing.price).toEqual(l[4].price)
     expect(sale.id).toBeNull()
 })
 test('purchased item listing price updated', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, firstPriceOfSecondListing.time)
+        daysAfterStart(0.5, lp[3].time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
-    expect(listing.price).toEqual(secondCollectedItem_secondListing.price)
-    expect(listing.updatedPrice.price).toEqual(firstPriceOfSecondListing.price)
+    expect(listing.id).toEqual(l[4].id)
+    expect(listing.price).toEqual(l[4].price)
+    expect(listing.updatedPrice.price).toEqual(lp[3].price)
     expect(sale.id).toBeNull()
 })
 test('purchased item listing removed', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, firstRemovalOfSecondListing.time)
+        daysAfterStart(0.5, listR[1].time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
+    expect(listing.id).toEqual(l[4].id)
     expect(listing.price).toBeNull()
     expect(listing.updatedPrice.price).toBeNull()
-    expect(listing.removal.id).toEqual(firstRemovalOfSecondListing.id)
+    expect(listing.removal.id).toEqual(listR[1].id)
     expect(sale.id).toBeNull()
 })
 test('purchased item listing relisted', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, firstRelistingOfSecondListing.time)
+        daysAfterStart(0.5, lp[4].time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
-    expect(listing.price).toEqual(firstRelistingOfSecondListing.price)
+    expect(listing.id).toEqual(l[4].id)
+    expect(listing.price).toEqual(lp[4].price)
     expect(listing.updatedPrice.price).toBeNull()
     expect(listing.removal.id).toBeNull()
     expect(sale.id).toBeNull()
 })
 test('purchased item sold', async () => {
     const { query, variables } = buildGetByIdQuery(
-        secondCollectedItem.id, 
+        ci[1].id, 
         user.user_id, 
-        daysAfterStart(0.5, secondCollectedItem_outOfScopeSale.time)
+        daysAfterStart(0.5, s[5].time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${secondCollectedItem_sale.id}' 
-        where id = '${secondCollectedItem_secondListing.id}'
-    `, [])
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${secondCollectedItem_outOfScopeSale.id}' 
-        where id = '${secondCollectedItem_outOfScopeListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale } = rows[0]
-    expect(listing.id).toEqual(secondCollectedItem_secondListing.id)
+    expect(listing.id).toEqual(l[4].id)
     expect(listing.removal.id).toBeNull()
-    expect(listing.price).toEqual(firstRelistingOfSecondListing.price)
-    expect(listing.updatedPrice.price).toEqual(secondPriceOfSecondListing.price)
-    expect(sale.id).toEqual(secondCollectedItem_sale.id)
-    expect(sale.purchaser.id).toEqual(secondCollectedItem_sale.purchaserId)
+    expect(listing.price).toEqual(lp[4].price)
+    expect(listing.updatedPrice.price).toEqual(lp[5].price)
+    expect(sale.id).toEqual(s[4].id)
+    expect(sale.purchaser.id).toEqual(s[4].purchaserId)
 })
 
 // new item
 test('imported item added to lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        thirdCollectedItem.id, 
+        ci[2].id, 
         user.user_id, 
-        daysAfterStart(0.5, thirdCollectedItem_firstLotEdit.time)
+        daysAfterStart(0.5, thirdCollectedItemFirstLotEdit.time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { id, item, printing, appraisal, listing, credit, lot } = rows[0]
-    expect(id).toEqual(thirdCollectedItem.id)
-    expect(item.id).toEqual(testItems[0].id)
-    expect(printing.id).toEqual(testPrintings[0].printing_id)
-    expect(appraisal.id).toEqual(thirdCollectedItem_firstAppraisal.id)
-    expect(appraisal.condition.id).toEqual(testConditions[0].condition_id)
-    expect(credit.import.id).toEqual(thirdCollectedItem_import.id)
+    expect(id).toEqual(ci[2].id)
+    expect(item.id).toEqual(ci[2].itemId)
+    expect(printing.id).toEqual(ci[2].printingId)
+    expect(appraisal.id).toEqual(a[4].id)
+    expect(appraisal.condition.id).toEqual(a[4].conditionId)
+    expect(credit.import.id).toEqual(thirdCollectedItemImport.id)
     expect(credit.listing.id).toBeNull()
     expect(credit.sale.id).toBeNull()
     expect(credit.sale.purchaser.id).toBeNull()
     expect(listing.id).toBeNull()
-    expect(lot.id).toEqual(thirdCollectedItem_firstLot.id)
+    expect(lot.id).toEqual(thirdCollectedItemFirstLot.id)
 })
 test('imported item removed from lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        thirdCollectedItem.id, 
+        ci[2].id, 
         user.user_id, 
-        daysAfterStart(0.5, thirdCollectedItem_secondLotEdit.time)
+        daysAfterStart(0.5, thirdCollectedItemSecondLotEdit.time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
@@ -528,60 +504,50 @@ test('imported item removed from lot', async () => {
 })
 test('imported item added to another lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        thirdCollectedItem.id, 
+        ci[2].id, 
         user.user_id, 
-        daysAfterStart(0.5, thirdCollectedItem_thirdLotEdit.time)
+        daysAfterStart(0.5, thirdCollectedItemThirdLotEdit.time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot } = rows[0]
-    expect(lot.id).toEqual(thirdCollectedItem_secondLot.id)
+    expect(lot.id).toEqual(thirdCollectedItemSecondLot.id)
 })
 test('imported item listed within lot', async () => {
     // thirdCollectedItem_firstListing
     const { query, variables } = buildGetByIdQuery(
-        thirdCollectedItem.id, 
+        ci[2].id, 
         user.user_id, 
-        daysAfterStart(0.5, thirdCollectedItem_firstListing.time)
+        daysAfterStart(0.5, thirdCollectedItemLotFirstListing.time)
     )
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot, listing } = rows[0]
-    expect(lot.id).toEqual(thirdCollectedItem_secondLot.id)
-    expect(listing.id).toEqual(thirdCollectedItem_firstListing.id)
+    expect(lot.id).toEqual(thirdCollectedItemSecondLot.id)
+    expect(listing.id).toEqual(thirdCollectedItemLotFirstListing.id)
 })
 test('imported item sold within lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        thirdCollectedItem.id, 
+        ci[2].id, 
         user.user_id, 
-        daysAfterStart(0.5, thirdCollectedItem_firstSale.time)
+        daysAfterStart(0.5, thirdCollectedItemLotFirstSale.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${thirdCollectedItem_firstSale.id}' 
-        where id = '${thirdCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale, lot } = rows[0]
-    expect(listing.id).toEqual(thirdCollectedItem_firstListing.id)
-    expect(lot.id).toEqual(thirdCollectedItem_secondLot.id)
-    expect(lot.edit.id).toEqual(thirdCollectedItem_thirdLotEdit.id)
-    expect(sale.id).toEqual(thirdCollectedItem_firstSale.id)
+    expect(listing.id).toEqual(thirdCollectedItemLotFirstListing.id)
+    expect(lot.id).toEqual(thirdCollectedItemSecondLot.id)
+    expect(lot.edit.id).toEqual(thirdCollectedItemThirdLotEdit.id)
+    expect(sale.id).toEqual(thirdCollectedItemLotFirstSale.id)
     expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
 })
 
 test('item removed from lot before lot sold is still marked unsold', async () => {
     const { query, variables } = buildGetByIdQuery(
-        fourthCollectedItem.id, 
+        ci[3].id, 
         user.user_id, 
-        daysAfterStart(0.5, fourthCollectedItem_firstSale.time)
+        daysAfterStart(0.5, fourthCollectedItemLotFirstSale.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${fourthCollectedItem_firstSale.id}' 
-        where id = '${fourthCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale, lot, credit } = rows[0]
@@ -590,68 +556,48 @@ test('item removed from lot before lot sold is still marked unsold', async () =>
     expect(lot.edit.id).toBeNull()
     expect(sale.id).toBeNull()
     expect(sale.purchaser.id).toBeNull()
-    expect(credit.import.id).toEqual(fourthCollectedItem_import.id)
+    expect(credit.import.id).toEqual(fourthCollectedItemImport.id)
 })
 test('only most recent sold lot listing is returned', async () => {
     const { query, variables } = buildGetByIdQuery(
-        fifthCollectedItem.id, 
+        ci[4].id, 
         user.user_id, 
-        daysAfterStart(0.5, fifthCollectedItem_secondSale.time)
+        daysAfterStart(0.5, fifthCollectedItemLotSecondSale.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${fifthCollectedItem_firstSale.id}' 
-        where id = '${fifthCollectedItem_firstListing.id}'
-    `, [])
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${fifthCollectedItem_secondSale.id}' 
-        where id = '${fifthCollectedItem_secondListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { listing, sale, lot, credit } = rows[0]
-    expect(listing.id).toEqual(fifthCollectedItem_firstListing.id)
-    expect(lot.id).toEqual(fifthCollectedItem_firstLot.id)
-    expect(lot.edit.id).toEqual(fifthCollectedItem_firstLotEdit.id)
-    expect(sale.id).toEqual(fifthCollectedItem_firstSale.id)
+    expect(listing.id).toEqual(fifthCollectedItemLotFirstListing.id)
+    expect(lot.id).toEqual(fifthCollectedItemFirstLot.id)
+    expect(lot.edit.id).toEqual(fifthCollectedItemLotFirstLotEdit.id)
+    expect(sale.id).toEqual(fifthCollectedItemLotFirstSale.id)
     expect(sale.purchaser.id).toEqual(proxyUser1.user_id)
-    expect(credit.import.id).toEqual(fifthCollectedItem_import.id)
+    expect(credit.import.id).toEqual(fifthCollectedItemImport.id)
 })
 
 // new item
 test('purchased item within lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        sixthCollectedItem.id, 
+        ci[5].id, 
         user.user_id, 
-        daysAfterStart(0.5, sixthCollectedItem_firstSale.time)
+        daysAfterStart(0.5, sixthCollectedItemLotFirstSale.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_firstSale.id}' 
-        where id = '${sixthCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { credit, lot } = rows[0]
-    expect(credit.listing.id).toEqual(sixthCollectedItem_firstListing.id)
-    expect(credit.listing.price).toEqual(sixthCollectedItem_firstListing.price)
-    expect(credit.sale.id).toEqual(sixthCollectedItem_firstSale.id)
+    expect(credit.listing.id).toEqual(sixthCollectedItemLotFirstListing.id)
+    expect(credit.listing.price).toEqual(sixthCollectedItemLotFirstListing.price)
+    expect(credit.sale.id).toEqual(sixthCollectedItemLotFirstSale.id)
     expect(credit.sale.purchaser.id).toEqual(user.user_id)
-    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
-    expect(lot.id).toEqual(sixthCollectedItem_firstLot.id)
+    expect(credit.lot.id).toEqual(sixthCollectedItemFirstLot.id)
+    expect(lot.id).toEqual(sixthCollectedItemFirstLot.id)
 })
 test('purchased lot item removed from purchased lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        sixthCollectedItem.id, 
+        ci[5].id, 
         user.user_id, 
-        daysAfterStart(0.5, sixthCollectedItem_secondLotEdit.time)
+        daysAfterStart(0.5, sixthCollectedItemFirstLotSecondLotEdit.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_firstSale.id}' 
-        where id = '${sixthCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot } = rows[0]
@@ -659,65 +605,45 @@ test('purchased lot item removed from purchased lot', async () => {
 })
 test('purchased lot item added to another lot', async () => {
     const { query, variables } = buildGetByIdQuery(
-        sixthCollectedItem.id, 
+        ci[5].id, 
         user.user_id, 
-        daysAfterStart(0.5, sixthCollectedItem_thirdLotEdit.time)
+        daysAfterStart(0.5, sixthCollectedItemSecondLotFirstLotEdit.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_firstSale.id}' 
-        where id = '${sixthCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot, credit } = rows[0]
-    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
-    expect(lot.id).toEqual(sixthCollectedItem_secondLot.id)
+    expect(credit.lot.id).toEqual(sixthCollectedItemFirstLot.id)
+    expect(lot.id).toEqual(sixthCollectedItemSecondLot.id)
 })
 test('purchased lot item removed from lot, then added to another lot already listed', async () => {
     const { query, variables } = buildGetByIdQuery(
-        sixthCollectedItem.id, 
+        ci[5].id, 
         user.user_id, 
-        daysAfterStart(0.5, sixthCollectedItem_fifthLotEdit.time)
+        daysAfterStart(0.5, sixthCollectedItemSecondLotFirstEdit.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_firstSale.id}' 
-        where id = '${sixthCollectedItem_firstListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot, credit, listing, sale } = rows[0]
-    expect(credit.lot.id).toEqual(sixthCollectedItem_firstLot.id)
-    expect(lot.id).toEqual(sixthCollectedItem_thirdLot.id)
-    expect(listing.id).toEqual(sixthCollectedItem_secondListing.id)
+    expect(credit.lot.id).toEqual(sixthCollectedItemFirstLot.id)
+    expect(lot.id).toEqual(seventhCollectedItemFirstLot.id)
+    expect(listing.id).toEqual(seventhCollectedItemFirstLotFirstListing.id)
     expect(sale.id).toBeNull()
 })
 test('purchased lot item sold within listed lot, with correct appraisal and price', async () => {
     const { query, variables } = buildGetByIdQuery(
-        sixthCollectedItem.id, 
+        ci[5].id, 
         user.user_id, 
-        daysAfterStart(0.5, sixthCollectedItem_secondSale.time)
+        daysAfterStart(0.5, seventhCollectedItemLotFirstSale.time)
     )
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_firstSale.id}' 
-        where id = '${sixthCollectedItem_firstListing.id}'
-    `, [])
-    await connection.query(`
-        UPDATE V3_Listing 
-        set saleId = '${sixthCollectedItem_secondSale.id}' 
-        where id = '${sixthCollectedItem_secondListing.id}'
-    `, [])
     const [rows, fields] = await connection.query(query, variables)
     expect(rows.length).toEqual(1)
     const { lot, appraisal, listing, sale } = rows[0]
-    expect(lot.id).toEqual(sixthCollectedItem_thirdLot.id)
-    expect(listing.id).toEqual(sixthCollectedItem_secondListing.id)
-    expect(listing.updatedPrice.price).toEqual(sixthCollectedItem_firstPrice.price)
-    expect(sale.id).toEqual(sixthCollectedItem_secondSale.id)
-    expect(appraisal.id).toEqual(sixthCollectedItem_secondAppraisal.id)
-    expect(appraisal.condition.id).toEqual(sixthCollectedItem_secondAppraisal.conditionId)
+    expect(lot.id).toEqual(seventhCollectedItemFirstLot.id)
+    expect(listing.id).toEqual(seventhCollectedItemFirstLotFirstListing.id)
+    expect(listing.updatedPrice.price).toEqual(seventhCollectedItemFirstListingFirstPricing.price)
+    expect(sale.id).toEqual(seventhCollectedItemLotFirstSale.id)
+    expect(appraisal.id).toEqual(sixthCollectedItemFirstAppraisal.id)
+    expect(appraisal.condition.id).toEqual(sixthCollectedItemFirstAppraisal.conditionId)
 })
 
 // before all
