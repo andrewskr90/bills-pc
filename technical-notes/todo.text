@@ -1,3 +1,23 @@
+2025-05-13
+update item name in tcgp api script
+
+2025-04-23
+mvp brainstorm
+user flow
+-login
+-create external listing
+    -save lots as items are added. Edit them in place
+    -only save as one single lot edit for external listing creation
+-view external listing
+    -as long as it hasn't been purchased
+    -can view purchased listing if they are purchaser
+
+2025-03-27
+-integration test db queries
+    -set up test db
+        -create migration / schema
+    
+
 refactor EditListingItem to work with update created listing item
 revisit import csv file
 investigate connection pools, should I be releasing them?
