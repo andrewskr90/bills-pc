@@ -211,7 +211,6 @@ const l = bpct.getListings()
 const lp = bpct.getListingPrices()
 const listR = bpct.getListingRemovals()
 const s = bpct.getSales()
-const updateL = bpct.getListingUpdates()
 const lo = bpct.getLots()
 const le = bpct.getLotEdits()
 const li = bpct.getLotInserts()
@@ -230,11 +229,10 @@ beforeAll(async () => {
         ...le.map(data => ({ data, table: 'V3_LotEdit' })),
         ...li.map(data => ({ data, table: 'V3_LotInsert' })),        
         ...lr.map(data => ({ data, table: 'V3_LotRemoval' })),        
+        ...s.map(data => ({ data, table: 'V3_Sale' })),
         ...l.map(data => ({ data, table: 'V3_Listing' })),
         ...lp.map(data => ({ data, table: 'V3_ListingPrice' })),
         ...listR.map(data => ({ data, table: 'V3_ListingRemoval' })),
-        ...s.map(data => ({ data, table: 'V3_Sale' })),
-        ...updateL.map(data => ({ update: true, data, table: 'V3_Listing', idKey: 'id' })),
     ], connection)
 })
 afterAll(async () => {

@@ -46,22 +46,6 @@ const executeQueryQueue = async (queryQueue, connection) => {
 const buildTestData = async (rowConfigs, connection) => {
     await executeQueryQueue(
         rowConfigs.map(rowConfig => {
-            if (rowConfig.update) {
-                const dataKeys = Object.keys(rowConfig.data)
-                const queryConfig = {
-                    query: `
-                        UPDATE ${rowConfig.table}
-                        SET ${dataKeys.map((key, idx) => {
-                            const statement = `${key} = '${rowConfig.data[key]}'`
-                            const separator = idx < dataKeys.length-1 ? ', ' : ' '
-                            return statement + separator
-                        }).join('')}
-                        WHERE ${rowConfig.idKey} = '${rowConfig.data[rowConfig.idKey]}';
-                    `,
-                    variables: []
-                }
-                return queryConfig
-            }
             return QueryFormatters.bpcQueryObjectsToInsert(
                 [rowConfig.data], 
                 rowConfig.table, 
@@ -127,7 +111,6 @@ class BPCT {
         this.le = []
         this.li = []
         this.lr = []
-        this.updateL = []
     }
     compileTransactions() {
         return [
@@ -272,9 +255,15 @@ class BPCT {
         const id = this.buildId(this.s.length, this.tableBaseIds.saleBaseId)
         const sale = { id, purchaserId, time: this.addDay() }
         this.s = [...this.s, sale]
-        const listingToUpdate = this.l.find(row => row.id === listingId)
-        const updatedListing = { ...listingToUpdate, saleId: id }
-        this.updateL = [...this.updateL, updatedListing]
+        this.l = this.l.map(listing => {
+            if (listing.id === listingId) {
+                return {
+                    ...listing,
+                    saleId: id
+                }
+            }
+            return listing
+        })
         return sale
     }
     createLot(inserts) {
@@ -346,9 +335,6 @@ class BPCT {
     }
     getSales() {
         return this.s
-    }
-    getListingUpdates() {
-        return this.updateL
     }
     getLots() {
         return this.lo
