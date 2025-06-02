@@ -43,9 +43,38 @@ const executeQueryQueue = async (queryQueue, connection) => {
     }
 }
 
-const buildTestData = async (rowConfigs, connection) => {
+const buildTestData = async (bpct, connection) => {
+    const generateConfigs = (bpct) => {
+        const u = bpct.getUsers()
+        const ci = bpct.getCollectedItems()
+        const i = bpct.getImports()
+        const a = bpct.getAppraisals()
+        const l = bpct.getListings()
+        const lp = bpct.getListingPrices()
+        const listR = bpct.getListingRemovals()
+        const s = bpct.getSales()
+        const lo = bpct.getLots()
+        const le = bpct.getLotEdits()
+        const li = bpct.getLotInserts()
+        const lr = bpct.getLotRemovals()
+        return [
+            ...u.map(data => ({ data, table: 'users' })),
+            ...ci.map(data => ({ data, table: 'V3_CollectedItem' })),
+            ...i.map(data => ({ data, table: 'V3_Import' })),
+            ...a.map(data => ({ data, table: 'V3_Appraisal' })),
+            ...lo.map(data => ({ data, table: 'V3_Lot' })),
+            ...le.map(data => ({ data, table: 'V3_LotEdit' })),
+            ...li.map(data => ({ data, table: 'V3_LotInsert' })),        
+            ...lr.map(data => ({ data, table: 'V3_LotRemoval' })),        
+            ...s.map(data => ({ data, table: 'V3_Sale' })),
+            ...l.map(data => ({ data, table: 'V3_Listing' })),
+            ...lp.map(data => ({ data, table: 'V3_ListingPrice' })),
+            ...listR.map(data => ({ data, table: 'V3_ListingRemoval' })),
+        ]
+    }
+    await connection.query('START TRANSACTION')
     await executeQueryQueue(
-        rowConfigs.map(rowConfig => {
+        generateConfigs(bpct).map(rowConfig => {
             return QueryFormatters.bpcQueryObjectsToInsert(
                 [rowConfig.data], 
                 rowConfig.table, 
@@ -54,6 +83,7 @@ const buildTestData = async (rowConfigs, connection) => {
         }),
         connection
     )
+    return connection
 }
 
 const daysAfterStart = (days, startISO) => {
@@ -96,10 +126,10 @@ class BPCT {
         const baseUserId = this.buildId(0, this.tableBaseIds.userBaseId)
         const baseUser = { user_id: baseUserId, user_name: baseUserId, user_password: '12345', user_role: 'Gym Leader' }
         this.u = [baseUser]
-        this.se = []
-        this.it = []
-        this.p = []
-        this.c = []
+        this.se = [...testSets]
+        this.it = [...testItems]
+        this.p = [...testPrintings]
+        this.c = [...testConditions]
         this.ci = [] // ci
         this.i = [] // ci.import
         this.a = [] // ci.appraisal
@@ -127,50 +157,6 @@ class BPCT {
             else return 0
         })
     }
-    // groupTransactionsByAsset() {
-    //     const groupedTransactionsByAsset = this.compileTransactions().reduce((prev, cur) => {
-    //         if (cur.table === 'i') {
-    //             const { collectedItemId } = cur.row
-    //             return {
-    //                 ...prev,
-    //                 [collectedItemId]: [cur]
-    //             }
-    //         } else if (cur.table === 'a') {
-
-    //             // TODO should all ci transactions be nested within the ci,
-    //             // so li then lr (le) transactions would appear back to back, then you would
-    //             // need to refer to the lo transactions to see what happened within that span of time
-
-    //             const { collectedItemId } = cur.row
-    //             // will there ever be a case when prev[collectedItemId] is false?
-    //             // if so it is a bug. The a cannot be created without an import, so no
-    //             return { ...prev, [collectedItemId]: [...prev[collectedItemId], cur]}
-    //         } else if (cur.table === 'le') {
-    //             const lotInserts = this.li.filter(insert => insert.lotEditId === cur.row.id)
-    //             const lotRemovals = this.li.filter(removal => removal.lotEditId === cur.row.id)
-    //             lotInserts.forEach(insert => {
-    //                 const { collectedItemId } = insert
-    //                 // const inheritedListingTransactions = prev.listings
-    //                 // TODO start working here
-    //                 return { ...prev, [collectedItemId]: [...prev[collectedItemId], cur]}
-    //             })
-    //             lotRemovals.forEach(removal => {
-    //                 const { collectedItemId } = removal
-    //                 return { ...prev, [collectedItemId]: [...prev[collectedItemId], cur]}
-    //             })
-    //         } else if (cur.table === 'l') {
-    //             const { lotId, collectedItemId } = cur.row
-    //             if (lotId) {
-    //                 const lotEdits =
-    //             } else {
-
-    //             }
-    //         } else if (cur.table === 'lp') {
-    //         } else if (cur.table === 'listR') {
-    //         } else if (cur.table === 's') {}
-
-    //     }, { ci: [], lo: []})
-    // }
     addDay() {
         const allTransactions = this.compileTransactions()
         if (allTransactions.length === 0) {
@@ -315,8 +301,76 @@ class BPCT {
     getUsers() {
         return this.u
     }
+    getItems() {
+        return this.it
+    }
+    getPrintings() {
+        return this.p
+    }
+    getConditions() {
+        return this.c
+    }
     getCollectedItems() {
         return this.ci
+    }
+    compileAssets() {
+        return {
+            u: this.u,
+            ci: this.getCollectedItemsPlus(),
+            lo: this.getLotsPlus()
+        }
+    }
+    getCollectedItemsPlus() {
+        return this.ci.map(collectedItem => {
+            return {
+                ...collectedItem,
+                it: {
+                    ...this.it.find(it => it.id === collectedItem.itemId),
+                    se: this.se.find(se => se.set_v2_id === it.setId),
+                },
+                i: this.i.find(imp => imp.collectedItemId === collectedItem.id),
+                a: this.a.filter(appr => appr.collectedItemId === collectedItem.id),
+                l: this.l.filter(l => l.collectedItemId === collectedItem.id).map(l => {
+                    return {
+                        ...l,
+                        lp: this.lp.filter(lp => lp.listingId === l.id),
+                        listR: this.listR.filter(listR => listR.listingId === l.id),
+                        s: this.s.find(s => s.id === l.saleId)
+                    }
+                }),
+                le: this.le.filter(le => {
+                    const li = this.li.find(li => li.collectedItemId === collectedItem.id && li.lotEditId === le.id)
+                    const lr = this.lr.find(lr => lr.collectedItemId === collectedItem.id && lr.lotEditId === le.id)
+                    if (li || lr) return true
+                }).map(le => {
+                    const li = this.li.find(li => li.collectedItemId === collectedItem.id && li.lotEditId === le.id)
+                    const lr = this.lr.find(lr => lr.collectedItemId === collectedItem.id && lr.lotEditId === le.id)
+                    return { ...le, li, lr }
+                })
+            }
+        })
+    }
+    getLotsPlus() {
+        return this.lo.map(lo => {
+            return {
+                ...lo,
+                le: this.le.filter(le => le.lotId === lo.id).map(le => {
+                    return {
+                        ...le,
+                        li: this.li.filter(li => li.lotEditId === le.id),
+                        lr: this.lr.filter(lr => lr.lotEditId === le.id)
+                    }
+                }),
+                l: this.l.filter(l => l.lotId === lo.id).map(l => {
+                    return {
+                        ...l,
+                        lp: this.lp.filter(lp => lp.listingId === l.id),
+                        listR: this.listR.filter(listR => listR.listingId === l.id),
+                        s: this.s.find(s => s.id === l.saleId)
+                    }
+                }),
+            }
+        })
     }
     getImports() {
         return this.i
