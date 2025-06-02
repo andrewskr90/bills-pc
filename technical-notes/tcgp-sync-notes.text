@@ -1,0 +1,47 @@
+This file is for documenting any updates made to item SKUs and their associated market prices.
+The script deleteSKUThatIsNotInTCGPData.sql can be used for auditing the various prices tied to each sku
+so a decision of how to edit or delete the data can be made.
+
+2025-05-12 - Found 21 items that needed editing
+- jolteon ex - pristmatic evolutions - 'f5259eb3-7d75-45a4-ad84-67883e7e7bbd'
+deleted 39 nm reverse holofoil prices and skus for jolteon ex - pristmatic evolutions
+- Aegislash - 060 - SV: Scarlet & Violet Promo Cards - '17f7b84a-8ebc-496e-9896-663b35a5235f'
+updated normal printing prices to be holofoil prices, the first 28 days of prices were collected under the wrong printing name
+- Tinkaton - SVP140	SV: Scarlet & Violet Promo Cards - 'd89317fe-63a5-458c-ac56-1e46aded87ae'
+updated 1 normal printing price to be a holofoil price, the first day the price was collected under the wrong printing name
+- Sprigatito - SV: Scarlet & Violet Promo Cards - '1b33678b-fbe6-4344-8ae2-58b380bd9508'
+updated 11/2024 to 04/2025 prices from normal printings to holofoil printings for all conditions
+- Fuecoco - SV: Scarlet & Violet Promo Cards - '89b28f1f-a316-49df-863a-d9bd23e498d5'
+updated 11/2024 to 04/2025 prices from normal printings to holofoil printings for all conditions
+- Toxtricity ex - SV: Scarlet & Violet Promo Cards - '55f0ef84-b38c-4779-a51e-d031e599ced9'
+updated 1 price from holofoil printing to normal printing for all conditions
+- Magnezone ex - Prize Pack Series Cards - '31b52fb5-5eec-4b97-bdaa-9c571162a285'
+updated 05/2024 to 07/2024 prices from normal printings to holofoil printings for all conditions
+- Roaring Moon - 109/162 (Cosmos Holo) - Miscellaneous Cards & Products - '75e84762-bc08-4869-b40a-e2b46b6b623e'
+deleted 5 normal skus which had no prices associated with it
+- Leon - 154/185 - Deck Exclusives - '690bbe74-bc7a-4688-9d58-056dc231599e'
+deleted 111 prices for nm reverse holo. nm normal printing prices were being collected during the same timeframe. reverse deck exclusive leon doesnt exist
+- Salamence - 8/20 (Regional Championship Promo) - League & Championship Cards - 'fd0c345d-944f-437a-9231-c3b360df9baf'
+deleted normal printing prices and normal printing skus collected from 05/2024 - 10/2024
+- Salamence - 8/20 (Regional Championship Promo) [Staff] - League & Championship Cards - '806ac4e7-d243-4d37-8388-06ab29691b68'
+updated normal prices to be reverse holo prices, 05/2024 to 10/2024 timeframe
+- Machoke - 41/101 (State Championship Promo) - League & Championship Cards - '2abc39e4-735f-4862-a6a3-2d8e61a8d502'
+updating holo prices to be normal prices from 05/2024-06/2024
+- Rhydon (#25) - XY Trainer Kit: Latias & Latios - '70301dc5-b176-45f0-ae93-a6137e62d8e0'
+updating holo prices to be normal prices from 05/2024-10/2024
+- Professor's Research - 189/198 (2023) - Professor Program Promos - 'a3fed859-1a64-490f-97a9-167126c1f392'
+deleted 5 unused skus with normal printing
+- Dark Marowak - Team Rocket Returns - 'b8cb3bb2-cac6-453a-a221-4b5f921cb2a7'
+deleted prices from 05/2024 to 07/2024 for normal printing, and its skus. Holo and reverse holo prices were collected throughout that period
+- Rocket's Moltres ex - Team Rocket Returns - '3f60e8ef-ff3e-4b25-a3a5-247c8c12d29b'
+deleted 17 nm normal prices first two weeks of 02/2025. nm holofoil is the correct sku. deleted all normal printing skus
+- Torchic Star - Team Rocket Returns - 'c4bc32df-2e19-421b-b236-8adb72abc608'
+deleted 179 nm normal prices from 05/2024 to 11/2024. nm holofoil is the correct sku. deleted all normal printing skus
+- Charizard ex - FireRed & LeafGreen - 'b26110af-f758-49ea-a562-3e73043ee028'
+deleted 27 nm normal prices from 05/2024 to 06/2024. nm holofoil is the correct sku. deleted all normal printing skus
+- Mew - SV: Premium Trainer Box ex - 'cdf0a893-8e8a-48fb-ab2a-2d87a59c8567'
+deleted normal printing skus, no prices were collected under that sku
+- Galarian Slowking - SI: Start Deck 100 - '2c85ef0c-08f0-41d8-857b-245a4d78cfc2'
+deleted normal printing skus, no prices were collected under that sku
+- Jasmine's Jolteon - Pokemon VS - 'ac054f6f-e6d3-4e12-abb4-ba31f6fa9504'
+deleted unopened condition sku as it is a card
