@@ -148,6 +148,55 @@ const ImportListing = (props) => {
     }
 
     const { condition } = referenceData.bulk
+
+    const handleUploadFile = async (e) => {
+        const text = await e.target.files[0].text()
+        const items = []
+        let headers = []
+        const rows = text.split('\n')
+        let offset = 50
+        let productIds = ''
+        const itemLookup = {}
+        for (let i=0; i<rows.length; i++) {
+            const row = rows[i]
+            const values = row.split(',')
+            if (i ===0) headers.push(values)
+            else {
+                const quantity = values[0]
+                const printing = values[6]
+                const condition = values[7]
+                const rarity = values[9]
+                const productId = values[10]
+                const sku = values[11]
+                const price = values[12]
+                itemLookup[productId] = {
+                    quantity,
+                    printing,
+                    condition,
+                    rarity,
+                    productId,
+                    sku,
+                    price
+                }
+                if (i === offset-1 || i === rows.length-1) {
+                    productIds += `${productId}`
+                    const matchedItems = await BillsPcService.getItemsByTcgpIds(productIds)
+                    matchedItems.forEach(item => {
+                        items.push({
+                            id: item.id,
+                            
+                        })
+                    })
+                } else if (i < offset-1) productIds += `${productId},`
+            }
+        }
+        console.log(items.sort((a,b) => {
+            const aFloat = a.price ? parseFloat(a.price.split('$')[1]) : 0
+            const bFloat = b.price ? parseFloat(b.price.split('$')[1]) : 0
+            return bFloat - aFloat
+        }))
+    }
+
     return <Routes>
             <Route
                 path="/"
@@ -187,7 +236,10 @@ const ImportListing = (props) => {
                             Description
                             <textarea type='text' value={externalListing.description} onChange={(e) => setExternalListing({ ...externalListing, description: e.target.value })}/>
                         </label>
-
+                        <form>
+                            <input type='file' accept='.csv' name='tcgpcsv' onChange={handleUploadFile} />
+                            {/* <button onClick={}>Import</button> */}
+                        </form>
                         {externalListing.items.length + 
                         externalListing.bulkSplits.length > 1  ? (
                             <p>Lot Items</p> 
