@@ -32,6 +32,21 @@ export const getPortfolioBillsPc = async (cookies) => {
     }
 }
 
+export const getWatchedListings = async (cookies) => {
+    try {
+        const watchedListingRes = await axios({
+            baseURL, baseurl,
+            url: '/api/v1/listings',
+            params: { watching: true },
+            headers: { Cookie: cookies }
+        })
+        const watchedListings = watchedListingRes.data
+        return watchedListings
+    } catch (err) {
+        throw err
+    }
+}
+
 export const getProxyUsers = async (cookies) => {
     try {
         const proxyUserRes = await axios({
@@ -99,7 +114,7 @@ export const getSetsBillsPc = async (cookies, params) => {
             params,
             headers: { Cookie: cookies }
         })
-        const expansions = expansionsRes.data
+        const expansions = expansionsRes.data.expansions
         expansions.sort((a, b) => {
             if (a.set_v2_name < b.set_v2_name) return 1
             else if (a.set_v2_name > b.set_v2_name) return -1
@@ -141,34 +156,6 @@ export const patchSetBillsPc = async (cookies, setId, data) => {
     }
 }
 
-export const getCardsBillsPc = async (params, cookies) => {
-    try {
-        const billsPcCardsV2 = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/cards-v2',
-            headers: { Cookie: cookies },
-            params
-        })        
-        return billsPcCardsV2.data
-    } catch (err) {
-        throw err
-    }
-}
-
-export const getProductsBillsPc = async (params, cookies) => {
-    try {
-        const billsPcProducts = await axios({
-            baseURL: baseurl,
-            url: '/api/v1/products',
-            headers: { Cookie: cookies },
-            params
-        })        
-        return billsPcProducts.data
-    } catch (err) {
-        throw err
-    }
-}
-
 export const postItemsBillsPc = async (data, cookies) => {
     try {
         const billsPcItems = await axios({
@@ -184,11 +171,31 @@ export const postItemsBillsPc = async (data, cookies) => {
     }
 }
 
-export const getItemsBillsPc = async (params, cookies) => {
+export const getAllItemsInExpansionBillsPc = async (expansionid, cookies) => {
+    const items = []
+    let moreItems = true
+    let page = 1
+    while (moreItems) {
+        try {
+            const currentPageItems = await getItemsBillsPc(cookies, { page, expansionid })
+            items.push(...currentPageItems.items)
+            if (currentPageItems.items.length > 0) {
+                page += 1
+            } else {
+                moreItems = false
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    return items
+}
+
+export const getItemsBillsPc = async (cookies, params) => {
     try {
         const billsPcItems = await axios({
             baseURL: baseurl,
-            url: '/api/v1/items',
+            url: `/api/v1/items`,
             headers: { Cookie: cookies },
             params
         })        
@@ -292,6 +299,112 @@ export const patchItemByFilterBillsPc = async (params, data, cookies) => {
             headers: { Cookie: cookies },
         })        
         return billsPcUpdatedItem.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const patchGiftByFilter = async (params, data, cookies) => {
+    try {
+        const billsPcUpdatedGift = await axios({
+            baseURL: baseurl,
+            method: 'patch',
+            url: '/api/v1/gifts',
+            params,
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcUpdatedGift.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const patchLotEditByFilter = async (params, data, cookies) => {
+    try {
+        const billsPcUpdatedLotEdit = await axios({
+            baseURL: baseurl,
+            method: 'patch',
+            url: '/api/v1/lot-edits',
+            params,
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return billsPcUpdatedLotEdit.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const getGiftByFilter = async (params, cookies) => {
+        try {
+        const giftRes = await axios({
+            baseURL: baseurl,
+            method: 'get',
+            url: '/api/v1/gifts',
+            params,
+            headers: { Cookie: cookies },
+        })        
+        return giftRes.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const getLotEditsByFilter = async (params, cookies) => {
+        try {
+        const lotEditRes = await axios({
+            baseURL: baseurl,
+            method: 'get',
+            url: '/api/v1/lot-edits',
+            params,
+            headers: { Cookie: cookies },
+        })        
+        return lotEditRes.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const createImports = async (data, cookies) => {
+    try {
+        const createImportRes = await axios({
+            baseURL: baseurl,
+            method: 'post',
+            url: '/api/v1/imports',
+            data,
+            headers: { Cookie: cookies },
+        })        
+        return createImportRes.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const deleteGiftById = async (giftId, cookies) => {
+    try {
+        const deletedGiftRes = await axios({
+            baseURL: baseurl,
+            method: 'delete',
+            url: `/api/v1/gifts/${giftId}`,
+            headers: { Cookie: cookies },
+        })        
+        return deletedGiftRes.data
+    } catch (err) {
+        throw err
+    }
+}
+
+export const getLotInsertsByFilter = async (params, cookies) => {
+        try {
+        const lotInsertsRes = await axios({
+            baseURL: baseurl,
+            method: 'get',
+            url: '/api/v1/lot-inserts',
+            params,
+            headers: { Cookie: cookies },
+        })        
+        return lotInsertsRes.data
     } catch (err) {
         throw err
     }

@@ -2,17 +2,16 @@ import { localYYYYMMDD } from "../../utils/date"
 
 export const initialReferenceDataValues = {
     sets: [],
-    cards: [],
     expansionFilters: [],
     expansionItemFilters: [],
-    products: [],
     rarities: [],
     marketSearchResults: [],
     bulk: {
-        rarities: [],
-        types: [],
-        printings: [],
-        expansions: []
+        rarity: [],
+        type: [],
+        printing: [],
+        set: [],
+        condition: []
     },
     dateRange: 'week',
     setSort: {
@@ -23,10 +22,6 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'asc',
                 formatted: 'Name'
             },
-            // topTenAverageToday: {
-            //     defaultDirection: 'desc',
-            //     formatted: 'Top 10 Average'
-            // },
             release_date: {
                 defaultDirection: 'desc',
                 formatted: 'Release Date'
@@ -41,13 +36,36 @@ export const initialReferenceDataValues = {
                 defaultDirection: 'asc',
                 formatted: 'Name'
             },
-            marketValue: {
-                defaultDirection: 'desc',
-                formatted: 'Market Value'
+        }
+    },
+    portfolioItemSort: {
+        value: 'name',
+        direction: 'asc',
+        values: {
+            name: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
             },
-            percentChange: {
+        }
+    },
+    transactionSort: {
+        value: 'date',
+        direction: 'desc',
+        values: {
+            date: {
                 defaultDirection: 'desc',
-                formatted: 'Percent Change'}
+                formatted: 'Date'
+            },
+        }
+    },
+    vendorSort: {
+        value: 'user_name',
+        direction: 'asc',
+        values: {
+            ['user_name']: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
+            },
         }
     },
     filter: {
@@ -191,21 +209,20 @@ export const initialSortingValues = {
 }
 
 export const initialSplitLabelFormValues = {
-    rarities: [null],
-    types: [null],
-    printings: [null],
-    expansions: [null]
+    rarity: [null],
+    type: [null],
+    printing: [null],
+    set: [null]
 }
 
 export const initialBulkSplitsValues = []
 
 export const initialExternalListing = {
-    date: undefined,
+    time: undefined,
     description: undefined,
     sellerId: undefined,
     price: undefined,
-    cards: [],
-    products: [],
+    items: [],
     bulkSplits: []
 }
 
@@ -214,17 +231,18 @@ export const initialListingValues = {
     sellerId: undefined,
     sellerName: undefined,
     date: undefined,
-    price: undefined,
+    listingPrices: [],
     description: undefined,
-    collectedCard: {
-        id: undefined
-    },
-    collectedProduct: {
+    discounts: [],
+    collectedItem: {
         id: undefined
     },
     lot: {
         id: undefined,
         items: []
+    },
+    bulkSplit: {
+        id: undefined
     }
 }
 

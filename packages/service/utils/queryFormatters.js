@@ -7,10 +7,14 @@ const QueryFormatters = {
         let columns = "("
         keys.sort()
         keys.forEach((key, i) => {
+            let conditionedKey = key
+            if (conditionedKey === 'index') {
+                conditionedKey = '`index`'
+            }
             if (i !== keys.length -1) {
-                columns += `${key}, `
+                columns += `${conditionedKey}, `
             } else {
-                columns += `${key})`
+                columns += `${conditionedKey})`
             }
         })
         query += `${columns} VALUES `
@@ -53,6 +57,13 @@ const QueryFormatters = {
         })
         query += `${valuesString}`
         return query
+    },
+
+    bpcQueryObjectsToInsert(objectsArray, tableName, variables) {
+        return { 
+            query: this.objectsToInsert(objectsArray, tableName),
+            variables
+        }
     },
 
     seperateColumnsValues(object) {
@@ -115,18 +126,20 @@ const QueryFormatters = {
         return stringForSetStatement
     },
 
-    searchValueToWhereLike(searchValue, nameColumn) {
-        const splitSearchValues = searchValue.split(' ')
-        let whereAnd = ''
+    searchValueToLikeAnd(searchvalue, nameColumn) {
+        const splitSearchValues = searchvalue.split(' ')
+        let likeAnd = ''
+        const searchVariables = []
         splitSearchValues.forEach((value, idx) => {
             let lowerCaseValue = value.toLowerCase()
             if (idx === 0) {
-                whereAnd += ` WHERE ${nameColumn} LIKE '%${lowerCaseValue}%'`
+                likeAnd += ` ${nameColumn} LIKE ?`
             } else {
-                whereAnd += ` AND ${nameColumn} LIKE '%${lowerCaseValue}%'`
+                likeAnd += ` AND ${nameColumn} LIKE ?`
             }
+            searchVariables.push(`%${lowerCaseValue}%`)
         })
-        return whereAnd
+        return { likeAnd, searchVariables }
     }
 }
 

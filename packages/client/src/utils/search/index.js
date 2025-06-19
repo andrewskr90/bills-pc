@@ -7,42 +7,15 @@ export const conditionSearchString = (value) => {
     return escapeApostrophes(value)
 }
 
-export const searchForItems = async (category, searchValue) => {
-    let marketSearchResults = []
-    const conditionedValue = conditionSearchString(searchValue)
-    if (category === 'all' || category === 'cards') {
-        if (conditionedValue === '') {
-            await BillsPcService.getCardsV2WithValues()
-                .then(res => marketSearchResults = [
-                    ...marketSearchResults,
-                    ...res.data
-                ])
+export const searchForItems = async (unconditionedSearchValue, params) => {
+    let marketSearchResults = { items: [] }
+    params.searchvalue = conditionSearchString(unconditionedSearchValue)
+    if (params.searchvalue) {
+        marketSearchResults = await BillsPcService.getItems({ params })
+                .then(res => res.data)
                 .catch(err => console.log(err))
-
-        } else {
-            await BillsPcService.getCardsV2WithValues({ searchValue: conditionedValue })
-                    .then(res => marketSearchResults = [
-                    ...marketSearchResults,
-                    ...res.data
-                ])
-        }
-    } if (category === 'all' || category === 'products') {
-        if (conditionedValue === '') {
-            await BillsPcService.getProductsWithValues()
-                .then(res => marketSearchResults = [
-                    ...marketSearchResults,
-                    ...res.data
-                ])
-                .catch(err => console.log(err))
-
-        } else {
-            await BillsPcService.getProductsWithValues({ searchValue: conditionedValue })
-                    .then(res => marketSearchResults = [
-                    ...marketSearchResults,
-                    ...res.data
-                ])
-                    .catch(err => console.log(err))
-        }
     }
-    return { data: marketSearchResults }
+    return { 
+        data: marketSearchResults
+    }
 }

@@ -1,5 +1,8 @@
+const { executeQueries } = require('../../db')
+const { formatItems } = require('../../middleware')
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
 const { createItems, getItems, patchItem } = require('../../middleware/item-middleware')
+const QueueQueries = require('../../middleware/QueueQueries')
 
 const itemRouter = require('express').Router()
 
@@ -13,9 +16,10 @@ itemRouter.post('/',
 })
 
 itemRouter.get('/', 
-    verifyCookie,
-    decodeSessionToken,
+    QueueQueries.init,
     getItems,
+    executeQueries,
+    formatItems,
     (req, res, next) => {
         res.status(200).json(req.results)
 })

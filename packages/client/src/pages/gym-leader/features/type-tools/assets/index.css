@@ -1,0 +1,19 @@
+.typeManager {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 10px;
+    margin-bottom: 100px;
+}
+.typeManager .type {
+    /* // height: 40px; */
+    box-shadow: 2px 2px 4px grey;
+    margin-bottom: 10px;
+    display: flex;
+}
+.typeManager .type .name, .parentName {
+    display: flex;
+    flex-direction: column;
+}

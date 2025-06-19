@@ -1,5 +1,5 @@
 const selectByUserId = (req, res, next) => {
-    let queryString = `select * FROM (select 
+    let query = `select * FROM (select 
         sale_card_id, null as sale_product_id, sale_card_price, null as sale_product_price,
         sale_id, sale_seller_id, sale_purchaser_id, sale_date, sale_vendor, sale_subtotal, sale_discount, sale_shipping, sale_tax_amount, sale_total,
         sale_note_id, sale_note_note,
@@ -31,7 +31,7 @@ const selectByUserId = (req, res, next) => {
     where sale_purchaser_id = '${req.claims.user_id}'
         OR sale_seller_id = '${req.claims.user_id}') as portfolio_results
     ORDER BY sale_date, sale_id`
-    req.queryQueue.push(queryString)
+    req.queryQueue.push({ query, variables: [] })
     next()
 }
 

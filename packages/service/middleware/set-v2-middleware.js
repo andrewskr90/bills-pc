@@ -19,7 +19,23 @@ const formatSetFromTcgPlayerDetails = (req, res, next) => {
     next()
 }
 
+const formatExpansions = (req, res, next) => {
+    let count = 0
+    if (req.results.length > 0) {
+        count = req.results[0].count
+    }
+    req.results = {
+        expansions: req.results.map(expansion => {
+            delete expansion.count
+            return expansion
+        }),
+        count
+    }
+    next()
+}
+
 module.exports = {
     generateSetV2Ids,
-    formatSetFromTcgPlayerDetails
+    formatSetFromTcgPlayerDetails,
+    formatExpansions
 }

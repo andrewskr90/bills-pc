@@ -9,7 +9,7 @@ const insert = (req, res, next) => {
                 sorting_gem_sorting_id, 
                 sorting_gem_collected_card_id
             }], 'sorting_gems')
-            req.queryQueue.push(`${query};`)
+            req.queryQueue.push({ query: `${query};`, variables: [] })
         })
     })
     next()

@@ -5,7 +5,6 @@ const { formatReferenceData } = require('../../middleware/reference-data-middlew
 
 referenceDataRouter.get('/', 
     QueueQueries.init,
-    // QueueQueries.setsV2.select,
     QueueQueries.referenceData.select,
     executeQueries,
     formatReferenceData,

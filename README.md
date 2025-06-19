@@ -32,7 +32,7 @@ build from port 7070
 
 #### EC2 instance
 - ssh into instance
-    - `ssh -i "~/.ssh/Thinkpad.pem" ec2-user@ec2-54-185-51-99.us-west-2.compute.amazonaws.com`
+    - `ssh -i "~/.ssh/Thinkpad.pem" ec2-user@44.243.201.214`
 - log into ECR, pull new image, replace old container with new
     - `aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 529244651941.dkr.ecr.us-west-2.amazonaws.com`
     - `docker pull 529244651941.dkr.ecr.us-west-2.amazonaws.com/bills-pc-app`

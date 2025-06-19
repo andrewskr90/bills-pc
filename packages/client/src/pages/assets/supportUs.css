@@ -1,0 +1,22 @@
+.supportUs {
+    width: 80%;
+    max-width: 500px;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.supportUs h2, p, img {
+    margin: 10px 0;
+}
+.supportUs p {
+    text-align: center;
+}
+.supportUs a {
+    width: auto;
+    display: inline-block;
+}
+/* .supportUs img {
+    // width: 80%;
+    // margin: auto auto;
+} */

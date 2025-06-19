@@ -31,3 +31,8 @@ export const formatDate = (dateCode) => {
     const dateParts = dateCode.split('-')
     return `${dateParts[1]}-${dateParts[2].split('T')[0]}-${dateParts[0]}`
 }
+
+export const convertLocalToUTC = (local) => {
+    const utcDate = new Date(local)
+    return utcDate.toISOString()
+}

@@ -1,18 +1,16 @@
 const setV2Router = require('express').Router()
 const { checkReqBody } = require('../../middleware')
 const { verifyCookie, decodeSessionToken, gymLeaderOnly } = require('../../middleware/auth-middleware')
-const { addSetsV2MySQL, getSetsV2MySQL } = require('../../db/queries/setV2Queries')
-const { generateSetV2Ids } = require('../../middleware/set-v2-middleware')
+const { generateSetV2Ids, formatExpansions } = require('../../middleware/set-v2-middleware')
 
 const QueueQueries = require('../../middleware/QueueQueries')
 const { executeQueries } = require('../../db')
 
 setV2Router.get('/', 
-    // verifyCookie,
-    // decodeSessionToken,
     QueueQueries.init,
     QueueQueries.setsV2.select,
     executeQueries,
+    formatExpansions,
     (req, res, next) => {
         const results = req.results
         res.status(200).json(results)

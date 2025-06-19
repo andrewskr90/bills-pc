@@ -1,19 +1,37 @@
 const { executeQueries } = require('../db')
 const { stringifyDateYYYYMMDD } = require('../utils/date')
 
-const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
-    let query = `SELECT * FROM market_prices 
+const selectByItemIdsBetweenDates = async (items, formerDate, latterDate) => {
+    if (items.length === 0) return []
+    const dateWithTicks = '`date`'
+    let query = `
+        SELECT 
+            i.id as itemId, 
+            m.price as marketPrice, 
+            m.${dateWithTicks} as marketPriceDate,
+            p.printing_id as printingId,
+            c.condition_id as conditionId,
+            SKU.id as skuId
+        FROM MarketPrice as m
+        LEFT JOIN SKU
+            ON SKU.id = m.skuId
+        LEFT JOIN conditions c
+            ON c.condition_id = SKU.conditionId
+        LEFT JOIN printings p
+            ON p.printing_id = SKU.printingId
+        LEFT JOIN Item as i
+            ON i.id = SKU.itemId
         WHERE 
             (
-            ${ids.map((id, idx) => {
-                if (idx === 0) return `market_price_card_id = '${id}' `
-                return `OR market_price_card_id = '${id}' `
+            ${items.map((item, idx) => {
+                if (idx === 0) return `(SKU.itemId = '${item.itemId}' AND SKU.printingId = '${item.printingId}' AND SKU.conditionId = '${item.conditionId}') `
+                return `OR (SKU.itemId = '${item.itemId}' AND SKU.printingId = '${item.printingId}' AND SKU.conditionId = '${item.conditionId}') `
             }).join('')}
             )
-        AND created_date >= '${stringifyDateYYYYMMDD(formerDate)}'
-        AND created_date < '${stringifyDateYYYYMMDD(latterDate)}'
-        ORDER BY market_price_card_id`
-    const req = { queryQueue: [query] }
+        AND m.date >= '${stringifyDateYYYYMMDD(formerDate)}'
+        AND m.date < '${stringifyDateYYYYMMDD(latterDate)}'
+        ORDER BY itemId`
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let marketPrices
     await executeQueries(req, res, (err) => {
@@ -23,27 +41,4 @@ const selectByCardIdsBetweenDates = async (ids, formerDate, latterDate) => {
     return marketPrices
 }
 
-const selectByProductIdsBetweenDates = async (ids, formerDate, latterDate) => {
-    let query = `SELECT * FROM market_prices 
-        WHERE 
-            (
-            ${ids.map((id, idx) => {
-                if (idx === 0) return `market_price_product_id = '${id}' `
-                return `OR market_price_product_id = '${id}' `
-            }).join('')}
-            )
-        AND created_date >= '${formerDate}'
-        AND created_date < '${latterDate}'
-        ORDER BY market_price_product_id`
-    const req = { queryQueue: [query] }
-    const res = {}
-    let marketPrices
-    await executeQueries(req, res, (err) => {
-        if (err) throw new Error(err)
-        marketPrices = req.results
-    })
-    return marketPrices
-}
-
-
-module.exports = { selectByCardIdsBetweenDates, selectByProductIdsBetweenDates }
+module.exports = { selectByItemIdsBetweenDates }

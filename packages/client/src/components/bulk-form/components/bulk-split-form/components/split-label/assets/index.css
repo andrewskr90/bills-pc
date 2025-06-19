@@ -1,0 +1,17 @@
+.splitLabel {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+}
+.splitLabel p {
+    width: 90%;
+    text-align: center;
+}
+.splitLabel h3 {
+    width: 90%;
+}
+.splitLabel .edit {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+}

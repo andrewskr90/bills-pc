@@ -4,19 +4,19 @@ export const formatLabel = (label, bulkReferenceData) => {
         const labelComponents = label[key]
         let idKey
         let nameKey
-        if (key === 'rarities') {
+        if (key === 'rarity') {
             idKey = 'rarity_id'
             nameKey = 'rarity_name'
         }
-        if (key === 'types') {
+        if (key === 'type') {
             idKey = 'type_id'
             nameKey = 'type_name'
         }
-        if (key === 'printings') {
+        if (key === 'printing') {
             idKey = 'printing_id'
             nameKey = 'printing_name'
         }
-        if (key === 'expansions') {
+        if (key === 'set') {
             idKey = 'set_v2_id'
             nameKey = 'set_v2_name'
         }

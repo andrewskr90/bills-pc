@@ -19,17 +19,17 @@ const getLabelByExactComponents = async (label) => {
                 return 0
             })
             const idString = sortedIds.map(id => id).join(',')
-            havingPortion += ` GROUP_CONCAT(label_component_${formattedComponentType}_id ORDER BY label_component_${formattedComponentType}_id) ${idString ? `= '${idString}'` : 'IS NULL'}`
+            havingPortion += ` GROUP_CONCAT(${formattedComponentType}Id ORDER BY ${formattedComponentType}Id) ${idString ? `= '${idString}'` : 'IS NULL'}`
             return havingPortion
         }).join('')
     }
     let query = `
-        SELECT label_component_label_id
-        FROM label_components
-        GROUP BY label_component_label_id
+        SELECT labelId
+        FROM V3_LabelComponent
+        GROUP BY labelId
         ${buildHaving()}
     ;`   
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let labels
     await executeQueries(req, res, (err) => {
@@ -40,14 +40,15 @@ const getLabelByExactComponents = async (label) => {
     return labels   
 }
 
-const createLabel = async (label_id, label) => {
+const createLabel = async (labelId, label) => {
     const queryQueue = []
-    queryQueue.push(`INSERT INTO labels (label_id) VALUES ('${label_id}');`)
+    queryQueue.push({ query: `INSERT INTO V3_Label (id) VALUES (?);`, variables: [labelId] })
     Object.keys(label).filter(component => label[component].length !== 0).forEach(component => {
-        label[component].forEach(id => queryQueue.push(`
-            INSERT INTO label_components (label_component_id, label_component_label_id, label_component_${formatSingularComponent(component)}_id) 
-                VALUES ('${uuidV4()}', '${label_id}', '${id}');
-        `))
+        label[component].forEach(componentId => queryQueue.push({
+            query: `INSERT INTO V3_LabelComponent (id, labelId, ${formatSingularComponent(component)}Id) 
+                VALUES ('${uuidV4()}', ?, ?);`,
+            variables: [labelId, componentId]
+        }))
     })
     const req = { queryQueue }
     const res = {}

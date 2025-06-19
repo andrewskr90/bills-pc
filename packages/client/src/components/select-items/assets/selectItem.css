@@ -1,0 +1,15 @@
+div.selectItems {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+div.selectItems .banner .search, .toolbar { margin-bottom: 10px; }
+div.selectItems .itemTypeSelector {
+    margin-bottom: 20px;
+}
+div.selectItems .itemFinder {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    align-items: center;
+}

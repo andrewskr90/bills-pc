@@ -10,7 +10,7 @@ const insert = (req, res, next) => {
                 sale_bulk_split_bulk_split_id: bulk_split_id,
                 sale_bulk_split_rate
             }], 'sale_bulk_splits')
-            req.queryQueue.push(`${query};`)
+            req.queryQueue.push({ query: `${query};`, variables: [] })
         })
     })
     next()

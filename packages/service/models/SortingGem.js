@@ -18,9 +18,9 @@ const select = async (userId) => {
         LEFT JOIN cards_v2 on card_v2_id = collected_card_card_id
         LEFT JOIN sets_v2 on set_v2_id = card_v2_set_id
         LEFT JOIN sortings on sorting_id = sorting_gem_sorting_id
-        WHERE sorting_sorter_id = '${userId}'
+        WHERE sorting_sorter_id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId] }] }
     const res = {}
     try {
         let sortingGems

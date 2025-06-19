@@ -41,6 +41,7 @@ export const camelCaseToLowerCase = (camelCase) => {
 }
 
 export const escapeApostrophes = (string) => {
+    if (!string) return undefined
     const stringArray = string.split('')
     const escapeApostrophes = stringArray.map(letter => {
         if (letter === "'") letter += letter

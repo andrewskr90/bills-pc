@@ -15,8 +15,12 @@ export const eligableMarketSearchParams = (location) => {
     if (!location.search) return false
     const parsedParams = parseParams(location.search)
     if (!parsedParams.value) return false
-    if (parsedParams.category !== 'cards' && parsedParams.category !== 'products') {
-        parsedParams.category = 'all'
-    }
     return parsedParams
+}
+
+export const camelCaseToHyphenated = (camelCase) => {
+    return camelCase.split('').map(char => {
+        if (char === char.toUpperCase()) return '-' + char.toLowerCase()
+        return char
+    }).join('')
 }

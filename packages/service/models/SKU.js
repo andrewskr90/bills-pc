@@ -3,7 +3,7 @@ const QueryFormatters = require("../utils/queryFormatters")
 
 const find = async () => {
     let query = `SELECT * FROM SKU LIMIT 10;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let skus
     await executeQueries(req, res, (err) => {
@@ -18,7 +18,7 @@ const findBy = async (filter) => {
         SELECT * FROM SKU
         WHERE ${QueryFormatters.filterConcatinated(filter)}
     `
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [] }] }
     const res = {}
     let skus
     await executeQueries(req, res, (err) => {
@@ -31,7 +31,7 @@ const findBy = async (filter) => {
 const create = async (skus) => {
     const queryQueue = []
     const query = QueryFormatters.objectsToInsert(skus, 'SKU')
-    queryQueue.push(query)
+    queryQueue.push({ query, variables: [] })
     const req = { queryQueue }
     const res = {}
     await executeQueries(req, res, (err) => {

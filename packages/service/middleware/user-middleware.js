@@ -6,7 +6,14 @@ const createUser = async (req, res, next) => {
         req.body.user_id = uuidV4()
         req.body.proxyCreatorId = req.claims.user_id
         req.body.user_name = req.body.user_name.toLowerCase()
-        req.results = await User.createProxyUser(req.body)
+        try {
+            req.results = await User.createProxyUser(req.body)
+        } catch (err) {
+            if (err.message.includes('Duplicate entry')) {
+                return next({ status: 400, message: 'You already created a vendor with this name.' })
+            }
+            return next(err)
+        }
     } else {
         return next('Route does not exist')
     }
@@ -15,7 +22,14 @@ const createUser = async (req, res, next) => {
 
 const selectUsers = async (req, res, next) => {
     if (req.query.proxy) {
-        req.results = await User.findProxyByCreatorId(req.claims.user_id)
+        const users = await User.findProxyByCreatorId({ claims: req.claims, query: req.query })
+        req.results = {
+            count: users[0].count,
+            users: users.map(user => {
+                delete user.count
+                return user
+            })
+        }
     } else {
         return next('Route does not exist')
     }    

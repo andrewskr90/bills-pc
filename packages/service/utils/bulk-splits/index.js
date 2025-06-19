@@ -104,32 +104,32 @@ const generateNewOrExistingLabelId = async (label) => {
     const matchedLabels = await Label.getLabelByExactComponents(label)
     if (matchedLabels.length === 0) {
         try {
-            const label_id = uuidV4()
-            await Label.createLabel(label_id, label)
-            return label_id
+            const labelId = uuidV4()
+            await Label.createLabel(labelId, label)
+            return labelId
         } catch (err) {
             throw err
         }
     } else {
-        return matchedLabels[0].label_component_label_id
+        return matchedLabels[0].labelId
     }
 }
 
 const fetchOrCreateLabelIds = async (split) => {
+    const { bulkSplitId } = split
     const labels = split.labels.map(label => ({
-        rarities: label.rarities.filter(label => label),
-        types: label.types.filter(label => label),
-        printings: label.printings.filter(label => label),
-        expansions: label.expansions.filter(label => label)
+        rarities: label.rarity.filter(label => label),
+        types: label.type.filter(label => label),
+        printings: label.printing.filter(label => label),
+        expansions: label.set.filter(label => label)
     }))
-
     for (let i=0; i<labels.length; i++) {
         try {
             const labelId = await generateNewOrExistingLabelId(labels[i])
             labels[i] = {
-                bulk_split_label_assignment_id: uuidV4(),
-                bulk_split_label_assignment_bulk_split_id: split.bulk_split_id,
-                bulk_split_label_assignment_label_id: labelId
+                id: uuidV4(),
+                bulkSplitId,
+                labelId
             }
         } catch (err) {
             throw err

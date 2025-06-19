@@ -43,10 +43,10 @@ const select = async (userId) => {
         LEFT JOIN sets_v2 on set_v2_id = label_component_set_v2_id
         LEFT JOIN sale_bulk_splits on sale_bulk_split_bulk_split_id = bulk_split_id
         LEFT JOIN sales on sale_id = sale_bulk_split_sale_id
-        WHERE sale_purchaser_id = '${userId}'
-            OR sale_seller_id = '${userId}'
+        WHERE sale_purchaser_id = ?
+            OR sale_seller_id = ?
     ;`
-    const req = { queryQueue: [query] }
+    const req = { queryQueue: [{ query, variables: [userId, userId] }] }
     const res = {}
     try {
         let saleBulkSplits

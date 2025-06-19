@@ -4,7 +4,6 @@ export const calcItemMarketData = (prices) => {
 
     const keyMarketDates = generateKeyMarketDates()
     const { today, yesterday, lastWeek, twoWeeks, lastMonth, lastYear } = keyMarketDates
-
     const latestPrice = []
     const todayPrice = []
     const yesterdayPrice = []
@@ -93,17 +92,21 @@ export const calcItemMarketData = (prices) => {
 
 export const applyMarketChanges = (itemsArray) => {
     return itemsArray.map((item, idx) => {
-        const itemMarketData = calcItemMarketData(item.market_prices)
-        let itemValue = null
-        if (itemMarketData) {
-            if (itemMarketData.prices.latest) {
-                itemValue = itemMarketData.prices.latest[0]
+        const formattedPrices = {}
+        const marketValue = {}
+        item.printings.forEach(printing => {
+            const itemMarketData = calcItemMarketData(item.prices[printing.id])
+            if (itemMarketData) {
+                formattedPrices[printing.id] = itemMarketData
+                if (itemMarketData.prices.latest) {
+                    marketValue[printing.id] = itemMarketData.prices.latest[0]
+                }
             }
-        }
+        })
         return {
             ...item,
-            formattedPrices: itemMarketData,
-            marketValue: itemValue
+            formattedPrices,
+            marketValue
         }
     })
 }
