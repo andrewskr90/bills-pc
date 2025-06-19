@@ -1,8 +1,7 @@
 const { executeQueries } = require("../db")
 
 const buildGetByIdQuery = (id, userId, time) => {
-    // rumcguire card 8d99baae-f268-4fa3-8862-bc030d541bc5
-    // TODO test every single edge case
+    // TODO - card that was giving me trouble... rumcguire card 8d99baae-f268-4fa3-8862-bc030d541bc5
     const selectStatement = `
         SELECT
             ci.id,
@@ -665,58 +664,5 @@ const getById = async (id, userId, time) => {
     if (collectedItemResults.length > 1) throw new Error('Multiple rows returned.')
     return collectedItemResults[0]
 }
-
-const mostRecentAcquisition = async (id, userId) => {
-    // this will not count instances where proxyUser imported card and user hs not yet purchased it.
-    // only if user imported or purchased card
-    const query = `
-    SELECT
-        *
-    FROM V3_CollectedItem ci
-    -- user imported it
-    
-    -- user purchased it
-    left join (
-        select
-            l.collectedItemId,
-            li.collectedItemId,
-            s.time,
-            s.purchaserId
-        from V3_Sale s
-        left join V3_Listing l
-            on l.saleId = s.id
-        left join V3_CollectedItem ci
-            on ci.id = l.collectedItemId
-        left join V3_LotEdit le
-            on le.lotId = l.lotId
-            and le.time < s.time
-            and ci.id is null
-        left join V3_LotInsert li
-            on li.lotEditId = le.id
-        left join V3_LotRemoval lr
-            on lr.collectedItemId = li.collectedItemId
-        left join V3_LotEdit leR
-            on leR.id = lr.lotEditId
-            and leR.lotId = le.lotId
-            and leR.time > le.time
-            and leR.time < s.time
-        left join V3_LotEdit betweenLeR
-            on betweenLeR.id = lr.lotEditId
-            and betweenLeR.lotId = le.lotId
-            and betweenLeR.time > le.time
-            and betweenLeR.time < leR.time
-        left join 
-        where s.purchaserId = '${userId}'
-            and (
-                l.collectedItemId = '${id}'
-                or li.collectedItemId = '${id}'
-            )
-    ) creditSale
-        on creditSale.collectedItemId = ci.id
-            or creditSale.lotInsert.collectedItemId = ci.id
-    where (creditImport.importerId = '${userId}' )
-`
-
-} 
 
 module.exports = { getById, buildGetByIdQuery }
