@@ -9,7 +9,6 @@ const getItemsByUserId = async (userId, reqQuery) => {
 
     let query = `select 
         ci.id as collectedItemId,
-        bs.id as bulkSplitId,
         i.id as itemId,
         i.name,
         i.tcgpId,
@@ -36,11 +35,11 @@ const getItemsByUserId = async (userId, reqQuery) => {
     left join V3_LotRemoval lr on lr.collectedItemId = li.collectedItemId or lr.bulkSplitId = li.bulkSplitId
     left join V3_LotEdit removalEdit on removalEdit.id = lr.lotEditId
     left join V3_CollectedItem ci on ci.id = li.collectedItemId or ci.id = l.collectedItemId
-    left join V3_BulkSplit bs on bs.id = li.bulkSplitId or bs.id = l.bulkSplitId
     left join Item i on i.id = ci.itemId
     left join sets_v2 s on s.set_v2_id = i.setId
     where purchase.purchaserId = ?
-        and (li.id is not null or l.lotId is null) -- consider lot edits which only contain removals
+        and ((li.id is not null and li.collectedItemId is not null) or l.lotId is null) -- consider lot edits which only contain removals
+        and l.bulkSplitId is null
         and (removalEdit.${timeWithBackticks} > purchase.${timeWithBackticks} or removalEdit.id is null)
         and succeedingPrice.id is null
     `
@@ -59,7 +58,7 @@ const getItemsByUserId = async (userId, reqQuery) => {
     if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
     else orderBy += ' ASC'
     let groupBy = ''
-    if (!reqQuery.itemId) groupBy += ` group by i.id, bs.id`
+    if (!reqQuery.itemId) groupBy += ` group by i.id`
 
     query += additionalWhere
     query += groupBy
@@ -238,4 +237,104 @@ const getBulkSplitsByUserId = async (userId) => {
     }
 }
 
-module.exports = { getItemsByUserId, getBulkSplitsByUserId }
+const buildGetPortfolioQuery = (userId) => {
+    const selectStatement = `
+        select 
+            ci.id collectedItemId,
+            i.id importId,
+            i.time import.time
+            purchase.id purchaseId,
+            purchase.time purchaseTime
+    `
+    // tests
+    // acquisition
+        // import
+        // purchased item
+        // purchased lot
+    // removal from lot
+    // sold
+        // from item as item
+        // from lot as item
+        // same lot
+        // new lot, from item
+        // new lot, from lot
+    // unsold 
+        // as item, same lot, new lot
+        // listed or not
+    
+    // import   latestPurchase      earliestSale    latestListing
+
+
+    // li   le      laterLe     lr
+    // 1    1
+    const withStatement = `
+        with
+            cteRemoval as (
+                select
+                    lr.id,
+                    lr.collectedItemId,
+                    le.lotId,
+                    le.time
+                from V3_LotRemoval lr
+                left join V3_LotEdit le on le.id = lr.lotEditId
+            )
+            ctePurchase as (
+                select
+                    l.id listingId,
+                    l.collectedItemId,
+                    l.lotId,
+                    s.id,
+                    s.time
+                from V3_Sale s
+                left join V3_Listing l on l.saleId = s.id
+                where s.purchaserId = '${userId}'
+            )
+
+    `
+    // TODO what if i use cte to query for edits that occur in between acquisitions and sales
+    // first get all imports and purchases/sales from user, then get edits that occur between
+    // I haven't thought much about it, but wanted to jot this down
+    const query = `
+        ${withStatement}
+        ${selectStatement}
+        from V3_CollectedItem ci
+        left join V3_Import i on i.collectedItemId = ci.id
+        left join (
+            select
+                li.collectedItemId
+                le.lotId,
+                removalEdit.time
+            from V3_LotInsert li
+            left join V3_LotEdit le on le.id = li.lotEditId
+            left join cteRemoval removal
+                on removal.lotId = le.lotId 
+                and removal.collectedItemId = li.collectedItemId
+                and removal.time > le.time 
+            left join cteRemoval betweenRemoval
+                on betweenRemoval.lotId = le.lotId 
+                and betweenRemoval.collectedItemId = li.collectedItemId
+                and betweenRemoval.time > le.time 
+                and betweenRemoval.time < removal.time 
+            where betweenRemoval.id is null
+        ) purchasedLot on purchasedLot.collectedItemId = ci.id
+        
+        left join ctePurchase purchase 
+            on purchase.collectedItemId = ci.id 
+            or (purchase.lotId = purchasedLot.lotId and purchase.lotId is not null)
+        left join ctePurchase laterPurchase 
+            on laterPurchase.time > purchase.time 
+            and (
+                laterPurchase.collectedItemId = ci.id 
+                or (laterPurchase.lotId = purchasedLot.lotId and laterPurchase.lotId is not null)
+            )
+        where laterPurchase.id is null
+        and (purchase.id is null and i.importerId = '${userId}');
+    `
+    return query
+}
+
+const getPortfolio = async (userId) => {
+
+}
+
+module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioQuery }
