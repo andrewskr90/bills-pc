@@ -1,3 +1,4 @@
+const { v4: uuid } = require('uuid')
 const QueryFormatters = require("../utils/queryFormatters")
 
 const tableIds = {
@@ -95,7 +96,6 @@ const daysAfterStart = (days, startISO) => {
     if (hours > 0) {
         unixDate = new Date(unixDate).setHours(startDate.getHours()+hours)
     }
-    const newDate = new Date(unixDate)
     return new Date(unixDate)
         .toISOString()
         .split('Z')[0]
@@ -103,23 +103,24 @@ const daysAfterStart = (days, startISO) => {
 
 const buildTableBaseIds = (testId) => {
     return {
-        userBaseId: `-${tableIds.user}-${testId}`,
-        collectedItemBaseId: `-${tableIds.collectedItem}-${testId}`,
-        importBaseId: `-${tableIds.import}-${testId}`,
-        appraisalBaseId: `-${tableIds.appraisal}-${testId}`,
-        listingBaseId: `-${tableIds.listing}-${testId}`,
-        listingPriceBaseId: `-${tableIds.listingPrice}-${testId}`,
-        listingRemovalBaseId: `-${tableIds.listingRemoval}-${testId}`,
-        saleBaseId: `-${tableIds.sale}-${testId}`,
-        lotBaseId: `-${tableIds.lot}-${testId}`,
-        lotEditBaseId: `-${tableIds.lotEdit}-${testId}`,
-        lotInsertBaseId: `-${tableIds.lotInsert}-${testId}`,
-        lotRemovalBaseId: `-${tableIds.lotRemoval}-${testId}`,
+        userBaseId: `:${tableIds.user}:${testId}`,
+        collectedItemBaseId: `:${tableIds.collectedItem}:${testId}`,
+        importBaseId: `:${tableIds.import}:${testId}`,
+        appraisalBaseId: `:${tableIds.appraisal}:${testId}`,
+        listingBaseId: `:${tableIds.listing}:${testId}`,
+        listingPriceBaseId: `:${tableIds.listingPrice}:${testId}`,
+        listingRemovalBaseId: `:${tableIds.listingRemoval}:${testId}`,
+        saleBaseId: `:${tableIds.sale}:${testId}`,
+        lotBaseId: `:${tableIds.lot}:${testId}`,
+        lotEditBaseId: `:${tableIds.lotEdit}:${testId}`,
+        lotInsertBaseId: `:${tableIds.lotInsert}:${testId}`,
+        lotRemovalBaseId: `:${tableIds.lotRemoval}:${testId}`,
     }
 }
 
 class BPCT {
-    constructor(testId) {
+    constructor() {
+        const testId = uuid()
         const startISO = new Date()
         this.startISO = startISO.toISOString()
         this.tableBaseIds = buildTableBaseIds(testId)
@@ -130,11 +131,11 @@ class BPCT {
         this.it = [...testItems]
         this.p = [...testPrintings]
         this.c = [...testConditions]
-        this.ci = [] // ci
-        this.i = [] // ci.import
-        this.a = [] // ci.appraisal
-        this.l = [] // ci.listing
-        this.lp = [] // ci.listing[0].updatedPrice
+        this.ci = []
+        this.i = []
+        this.a = []
+        this.l = []
+        this.lp = []
         this.listR = []
         this.s = []
         this.lo = []
@@ -187,6 +188,222 @@ class BPCT {
         }
         return builtUserIds
     }
+    tableFromId(id) {
+        return id.split(':')[1]
+    }
+    compileItemHistory(collectedItemId, time) {
+        const collectedItem = this.ci.find(ci => ci.id === collectedItemId)
+        let imported = false
+        let listingId = undefined
+        let listingRemovalId = undefined
+        let saleId = undefined
+        const nextInsert = this.li.find(li => li.collectedItemId === collectedItemId)
+        let lotId = undefined
+        let nextInsertLotEditId = nextInsert ? nextInsert.lotEditId : undefined
+        let nextRemovalLotEditId = undefined
+        let conditionId = undefined
+        let printingId = collectedItem.printingId
+        const transactions = this.compileTransactions().filter(transaction => {
+            if (transaction.time > time) return false
+            const { table, row: data } = transaction
+            if (table === 'i' && data.collectedItemId === collectedItemId) {
+                imported = true
+                return true
+            }
+            if (imported) {
+                if (table === 'a' && data.collectedItemId === collectedItemId) {
+                    conditionId = data.conditionId
+                    return true
+                }
+                if (table === 'le') {
+                    if (data.id === nextInsertLotEditId) {
+                        lotId = data.lotId
+                        nextInsertLotEditId = undefined
+                        const nextRemoval = this.lr.find(lr => {
+                            if (lr.collectedItemId === collectedItemId) {
+                                const removalEdit = this.le.find(le => le.id === lr.lotEditId)
+                                if (removalEdit.time > data.time) return true
+                            }
+                        })
+                        if (nextRemoval) nextRemovalLotEditId = nextRemoval.lotEditId
+                        return true
+                    } else if (data.id === nextRemovalLotEditId) {
+                        nextRemovalLotEditId = undefined
+                        const nextInsert = this.li.find(li => {
+                            if (li.collectedItemId === collectedItemId) {
+                                const insertEdit = this.le.find(le => le.id === li.lotEditId)
+                                if (insertEdit.time > data.time) return true
+                            }
+                        })
+                        if (nextInsert) nextInsertLotEditId = nextInsert.lotEditId
+                        return true
+                    }
+                }
+                if (table === 'l') {
+                    if (data.collectedItemId === collectedItemId) {
+                        listingId = data.id
+                        saleId = data.saleId
+                        return true
+                    }
+                }
+
+                if (listingId) {
+                    if (!listingRemovalId) {
+                        if (table === 'lp' && data.listingId === listingId) {
+                            return true
+                        }
+                        if (table === 'listR' && data.listingId === listingId) {
+                            listingRemovalId = data.id
+                            return true
+                        }
+                        if (table === 's' && data.id === saleId) {
+                            listingId = undefined
+                            saleId = undefined
+                            return true
+                        }
+                    } else {
+                        if (table === 'lp' && data.listingId === listingId) {
+                            listingRemovalId = undefined
+                            return true
+                        }
+                    }
+                }
+            }
+            return false
+        })
+        return { 
+            transactions,
+            imported, 
+            listingId, 
+            listingRemovalId,
+            lotId,
+            conditionId,
+            printingId
+        }
+    }
+
+    contextualizeItemMethods(collectedItemId, time) {
+        const {
+            transactions,
+            imported, 
+            listingId, 
+            listingRemovalId,
+            lotId,
+            conditionId,
+            printingId
+        } = this.compileItemHistory(collectedItemId, time)
+        if (!imported) return {}
+        const appraise = (conditionId, appraiserId) => {
+            return this.appraise(collectedItemId, conditionId, appraiserId)
+        }
+        const contextualizedItemMethods = { appraise }
+        if (!listingId && !listingRemovalId) {
+            const list = (price) => {
+                return this.listItem(collectedItemId, price)
+            }
+            contextualizedItemMethods.list = list
+        }
+        if (listingId) {
+            const price = (price) => {
+                return this.priceListing(listingId, price)
+            }
+            let priceMethodName = 'relist'
+            if (!listingRemovalId) {
+                priceMethodName = 'price'
+                const removeListing = () => this.removeListing(listingId)
+                contextualizedItemMethods.removeListing = removeListing
+                const sale = (purchaserId) => this.sale(listingId, purchaserId)
+                contextualizedItemMethods.sale = sale
+            }
+            contextualizedItemMethods[priceMethodName] = price
+        }
+
+        return contextualizedItemMethods
+    }
+
+    compileLotHistory(lotId, time) {
+        const lot = this.lo.find(lo => lo.id === lotId)
+        let created = false
+        let listingId = undefined
+        let listingRemovalId = undefined
+        let saleId = undefined
+        const transactions = this.compileTransactions().filter(transaction => {
+            if (transaction.time > time) return false
+            const { table, row: data } = transaction
+            if (table === 'le' && data.lotId === lotId) {
+                return true
+            }
+            if (table === 'l' && data.lotId === lotId) {
+                listingId = data.id
+                saleId = data.saleId
+                return true
+            }
+            if (listingId) {
+                if (!listingRemovalId) {
+                    if (table === 'lp' && data.listingId === listingId) {
+                        return true
+                    }
+                    if (table === 'listR' && data.listingId === listingId) {
+                        listingRemovalId = data.id
+                        return true
+                    }
+                    if (table === 's' && data.id === saleId) {
+                        listingId = undefined
+                        saleId = undefined
+                        return true
+                    }
+                } else {
+                    if (table === 'lp' && data.listingId === listingId) {
+                        listingRemovalId = undefined
+                        return true
+                    }
+                }
+            }
+            return false
+        })
+        return { 
+            transactions, 
+            created, 
+            listingId, 
+            listingRemovalId,
+        }
+    }
+
+    contextualizeLotMethods(lotId, time) {
+        const {
+            created,
+            listingId,
+            listingRemovalId,
+            collectedItemId
+        } = this.compileLotHistory(lotId, time)
+        const edit = (inserts, removals) => {
+            return this.createLotEdit(lotId, inserts, removals)
+        }
+        const methods = { edit }
+        if (!listingId && !listingRemovalId) {
+            const list = (price) => {
+                return this.listLot(lotId, price)
+            }
+            methods.list = list
+        }
+        if (listingId) {
+            const price = (price) => {
+                return this.priceListing(listingId, price)
+            }
+            let priceMethodName = 'relist'
+            if (!listingRemovalId) {
+                priceMethodName = 'price'
+                const removeListing = () => this.removeListing(listingId)
+                methods.removeListing = removeListing
+                const sale = (purchaserId) => this.sale(listingId, purchaserId)
+                methods.sale = sale
+            }
+            methods[priceMethodName] = price
+        }
+
+        return methods
+    }
+
     import(itemId, printingId, conditionId, importerId) {
         /// TODO incorporate import into test
         const collectedItem = this.buildCollectedItem(itemId, printingId)
@@ -198,8 +415,14 @@ class BPCT {
             importerId
         }
         this.i = [...this.i, createdImport]
-        const appraisal = this.appraise(collectedItemId, conditionId, importerId)
-        return { collectedItem, createdImport, appraisal }
+        const { appraisal } = this.appraise(collectedItemId, conditionId, importerId)
+        const methods = this.contextualizeItemMethods(collectedItemId, appraisal.time)
+        return { 
+            collectedItem, 
+            createdImport, 
+            appraisal, 
+            ...methods 
+        }
     }
     buildCollectedItem(itemId, printingId) {
         const id = this.buildId(this.ci.length, this.tableBaseIds.collectedItemBaseId)
@@ -211,36 +434,58 @@ class BPCT {
         const id = this.buildId(this.a.length, this.tableBaseIds.appraisalBaseId)
         const appraisal = { id, collectedItemId, conditionId, time: this.addDay(), appraiserId }
         this.a = [...this.a, appraisal]
-        return appraisal
+        const methods = this.contextualizeItemMethods(collectedItemId, appraisal.time)
+        const collectedItem = this.ci.find(ci => ci.id === collectedItemId)
+        return { appraisal, collectedItem, ...methods }
     }
     listItem(collectedItemId, price) {
         const id = this.buildId(this.l.length, this.tableBaseIds.listingBaseId)
         const listing = { id, collectedItemId, price, time: this.addDay() }
         this.l = [...this.l, listing]
-        return listing
+        const methods = this.contextualizeItemMethods(collectedItemId, listing.time)
+        const collectedItem = this.ci.find(ci => ci.id === collectedItemId)
+        return { listing, collectedItem, ...methods }
     }
     listLot(lotId, price) {
         const id = this.buildId(this.l.length, this.tableBaseIds.listingBaseId)
         const listing = { id, lotId, price, time: this.addDay() }
         this.l = [...this.l, listing]
-        return listing
+        const methods = this.contextualizeLotMethods(lotId, listing.time)
+        return { listing, ...methods }
     }
     priceListing(listingId, price) {
+        const listing = this.l.find(l => l.id === listingId)
         const id = this.buildId(this.lp.length, this.tableBaseIds.listingPriceBaseId)
         const listingPrice = { id, listingId, price, time: this.addDay() }
         this.lp = [...this.lp, listingPrice]
-        return listingPrice
+        if (listing.collectedItemId) {
+            const methods = this.contextualizeItemMethods(listing.collectedItemId, listingPrice.time)
+            return { listingPrice, ...methods }
+        } else {
+            const methods = this.contextualizeLotMethods(listing.lotId, listingPrice.time)
+            return { listingPrice, ...methods }
+        }
     }
     removeListing(listingId) {
+        const listing = this.l.find(l => l.id === listingId)
         const id = this.buildId(this.listR.length, this.tableBaseIds.listingRemovalBaseId)
         const listingRemoval = { id, listingId, time: this.addDay() }
         this.listR = [...this.listR, listingRemoval]
-        return listingRemoval
+        if (listing.collectedItemId) {
+            const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
+            const methods = this.contextualizeItemMethods(listing.collectedItemId, listingRemoval.time)
+            return { listingRemoval, collectedItem, ...methods }
+        } else {
+            const methods = this.contextualizeLotMethods(listing.lotId, listingRemoval.time)
+            return { listingRemoval, ...methods }
+        }
     }
     sale(listingId, purchaserId) {
+        const listing = this.l.find(l => l.id === listingId)
         const id = this.buildId(this.s.length, this.tableBaseIds.saleBaseId)
         const sale = { id, purchaserId, time: this.addDay() }
         this.s = [...this.s, sale]
+
         this.l = this.l.map(listing => {
             if (listing.id === listingId) {
                 return {
@@ -250,22 +495,33 @@ class BPCT {
             }
             return listing
         })
-        return sale
+        if (listing.collectedItemId) {
+            const methods = this.contextualizeItemMethods(listing.collectedItemId, sale.time)
+            const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
+            return { sale, collectedItem, ...methods }
+        } else {
+            const methods = this.contextualizeLotMethods(listing.lotId, sale.time)
+            return { sale, ...methods }
+        }
     }
-    createLot(inserts) {
+    createLot(insertCollectedItemIds) {
         const id = this.buildId(this.lo.length, this.tableBaseIds.lotBaseId)
         const lot = { id }
         this.lo = [...this.lo, lot]
-        const { lotEdit, lotInserts, lotRemovals } = this.createLotEdit(lot.id, inserts)
-        return { lot, lotEdit, lotInserts, lotRemovals }
+        const { lotEdit, lotInserts, lotRemovals } = this.createLotEdit(lot.id, insertCollectedItemIds)
+        const methods = this.contextualizeLotMethods(id, lotEdit.time)
+        return { lot, lotEdit, lotInserts, lotRemovals, ...methods }
     }
-    createLotEdit(lotId, inserts, removals) {
+    createLotEdit(lotId, insertCollectedItemIds, removalCollectedItemIds) {
+        const inserts = insertCollectedItemIds.map(collectedItemId => ({ collectedItemId }))
+        const removals = removalCollectedItemIds ? removalCollectedItemIds.map(collectedItemId => ({ collectedItemId })) : []
         const id = this.buildId(this.le.length, this.tableBaseIds.lotEditBaseId)
         const lotEdit = { id, lotId, time: this.addDay() }
         this.le = [...this.le, lotEdit]
         const lotInserts = this.createLotInserts(lotEdit.id, inserts)
-        const lotRemovals = removals ? this.createLotRemovals(lotEdit.id, removals) : []
-        return { lotEdit, lotInserts, lotRemovals }
+        const lotRemovals = this.createLotRemovals(lotEdit.id, removals)
+        const methods = this.contextualizeLotMethods(lotId, lotEdit.time)
+        return { lotEdit, lotInserts, lotRemovals, ...methods }
     }
     createLotInsert(lotEditId, { collectedItemId, bulkSplitId }, index) {
         const id = this.buildId(this.li.length, this.tableBaseIds.lotInsertBaseId)
