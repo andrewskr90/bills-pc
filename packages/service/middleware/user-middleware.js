@@ -24,7 +24,7 @@ const selectUsers = async (req, res, next) => {
     if (req.query.proxy) {
         const users = await User.findProxyByCreatorId({ claims: req.claims, query: req.query })
         req.results = {
-            count: users[0].count,
+            count: users.length === 0 ? 0 : users[0].count,
             users: users.map(user => {
                 delete user.count
                 return user
