@@ -223,7 +223,8 @@ export const initialExternalListing = {
     sellerId: undefined,
     price: undefined,
     items: [],
-    bulkSplits: []
+    bulkSplits: [],
+    csvItems: []
 }
 
 export const initialListingValues = {

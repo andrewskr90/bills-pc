@@ -13,7 +13,6 @@ const ImportListing = (props) => {
     const [externalListing, setExternalListing] = useState(initialExternalListing)
     const [createdProxyUsers, setCreatedProxyUsers] = useState([])
     const navigate = useNavigate()
-    const initialEmptyMessage = "Select item to import"
     const initialEmptyItemsMessage = "Select items to import"
     const [vendorName, setVendorName] = useState("")
     const [timeoutId, setTimeoutId] = useState()
@@ -36,19 +35,6 @@ const ImportListing = (props) => {
         })
     })
 
-    const handleSelectItem = (item) => {
-        setExternalListing({
-            ...externalListing,
-            items: [
-                ...externalListing.items,
-                {
-                    ...item,
-                    note: ''
-                }
-            ]
-        })
-        navigate('/gym-leader/collection/listings/import')
-    }
     const handleSelectItems = (items) => {
         setExternalListing({
             ...externalListing,
@@ -58,7 +44,8 @@ const ImportListing = (props) => {
                     ? referenceData.bulk.condition.find(cond => cond.condition_name === 'Unopened').condition_id 
                     : referenceData.bulk.condition.find(cond => cond.condition_name === 'Near Mint').condition_id,
                 printing: item.printing
-            }))
+            })),
+            csvItems: []
         })
         navigate('/gym-leader/collection/listings/import')
     }
@@ -78,15 +65,14 @@ const ImportListing = (props) => {
             }),
         }
     }
-    const handleCreateExternalListing = async () => {   
+    const handleCreateExternalListing = async () => {
         try {
-            
-            await BillsPcService.postListing({ data: formatExternalListing(externalListing), params: { external: true } })
-                .then(res => {
-                    console.log(res)
-                    navigate('/gym-leader/collection/listings')
-                })
-                .catch(err => console.log(err))
+            await BillsPcService.postListing({ 
+                data: formatExternalListing(externalListing), 
+                params: { external: true } 
+            }).then(res => {
+                navigate('/gym-leader/collection/listings')
+            }).catch(err => console.log(err))
         } catch (err) {
             console.log(err)
         }
@@ -111,7 +97,8 @@ const ImportListing = (props) => {
                     ...splitToAdd,
                     note: ''
                 }
-            ]
+            ],
+            csvItems: []
         })
         navigate('/gym-leader/collection/listings/import')
     }
@@ -148,6 +135,30 @@ const ImportListing = (props) => {
     }
 
     const { condition } = referenceData.bulk
+
+    const handleUploadFile = async (e) => {
+        const text = await e.target.files[0].text()
+        const csvItems = []
+        const rows = text.split('\r\n')
+        for (let i=1; i<rows.length; i++) {
+            const row = rows[i]
+            const values = row.split(',')
+            const quantity = values[0]
+            const sku = values[11]
+            const item = {
+                quantity,
+                sku
+            }
+            csvItems.push(item)
+        }
+        setExternalListing({
+            ...externalListing,
+            csvItems,
+            items: [],
+            bulkSplits: []
+        })
+    }
+
     return <Routes>
             <Route
                 path="/"
@@ -187,13 +198,18 @@ const ImportListing = (props) => {
                             Description
                             <textarea type='text' value={externalListing.description} onChange={(e) => setExternalListing({ ...externalListing, description: e.target.value })}/>
                         </label>
-
-                        {externalListing.items.length + 
-                        externalListing.bulkSplits.length > 1  ? (
-                            <p>Lot Items</p> 
-                        ) : (
-                            <p>Item</p>
-                        )}
+                        <form>
+                            <input type='file' accept='.csv' name='tcgpcsv' onChange={handleUploadFile} />
+                            {/* <button onClick={}>Import</button> */}
+                        </form>
+                        {externalListing.csvItems === 0 && <>
+                            {externalListing.items.length + 
+                            externalListing.bulkSplits.length > 1  ? (
+                                <p>Lot Items</p> 
+                            ) : (
+                                <p>Item</p>
+                            )}
+                        </>}
                         {externalListing.items.map((item, idx) => {
                             return (<div style={{ display: 'flex ', width: '100%', justifyContent: 'space-around', paddingBottom: '4px' }}>
                                 <div style={{ display: 'flex ', alignItems: 'start', width: '90%' }}>
@@ -229,10 +245,12 @@ const ImportListing = (props) => {
                                 <img src={editPNG} onClick={() => handleEditItem('bulkSplit', idx)} />
                             </div>)
                         })}
-                        <div style={{ display: 'flex' }}>
-                            <button onClick={() => navigate('add-bulk')}>Add Bulk</button>
-                            <button onClick={() => navigate('add-lot')}>Add Lot</button>
-                        </div>
+                        {externalListing.csvItems.length === 0 && <>
+                            <div style={{ display: 'flex' }}>
+                                <button onClick={() => navigate('add-bulk')}>Add Bulk</button>
+                                <button onClick={() => navigate('add-lot')}>Add Lot</button>
+                            </div>
+                        </>}
                         <button onClick={handleCreateExternalListing}>Create Listing</button>
                     </div>
                 }
