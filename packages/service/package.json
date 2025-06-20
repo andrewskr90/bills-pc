@@ -9,7 +9,7 @@
     "server": "set TZ=utc && nodemon index.js",
     "start": "node index.js",
     "dbdev": "nodemon ./db",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
