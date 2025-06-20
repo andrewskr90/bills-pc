@@ -40,4 +40,24 @@ const create = async (skus) => {
     return skus.map(sku => sku.id)
 }
 
-module.exports = { find, findBy, create }
+const findByTcgpIds = async (tcgpIds) => {
+    const query = `
+        SELECT * FROM SKU
+        WHERE ${tcgpIds.map((tcgpId, idx) => {
+            if (idx === 0) return `tcgpId = '${tcgpId}'`
+            else {
+                return ` OR tcgpId = '${tcgpId}'`
+            }
+        }).join('')};
+    `
+    const req = { queryQueue: [{ query, variables: [] }] }
+    const res = {}
+    let skus
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        skus = req.results
+    })
+    return skus
+}
+
+module.exports = { find, findBy, create, findByTcgpIds }

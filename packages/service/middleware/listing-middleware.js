@@ -1,4 +1,5 @@
 const Listing = require('../models/Listing')
+const SKU = require('../models/SKU')
 const CollectedItem = require('../models/CollectedItem')
 const BulkSplit = require('../models/BulkSplit')
 const MarketPrice = require('../models/MarketPrice')
@@ -151,10 +152,45 @@ const getListingById = async (req, res, next) => {
     next()
 }
 
+const formatCsvItems = async (csvItems) => {
+    const offset = 50
+    let pageSkus = []
+    const formattedCsvItems = []
+    for (let i=0; i<csvItems.length; i++) {
+        pageSkus.push(csvItems[i].sku)
+        if (((i+1)%offset === 0) || i === csvItems.length-1) {
+            const skus = await SKU.findByTcgpIds(pageSkus)
+            const skusWithMultiples = skus.reduce((prev, cur) => {
+                const itemsBySku = []
+                const { quantity } = csvItems.find(item => parseInt(item.sku) === cur.tcgpId)
+                const formattedItem = {
+                    id: cur.itemId,
+                    printing: cur.printingId,
+                    condition: cur.conditionId
+                }
+                for (let l=0; l<quantity; l++) {
+                    itemsBySku.push(formattedItem)
+                }
+                return [...prev, ...itemsBySku]
+            }, [])
+
+            formattedCsvItems.push(...skusWithMultiples)
+            pageSkus = []
+        }
+    }
+    return formattedCsvItems
+}
+
 const createListing = async (req, res, next) => {
     if (req.query.external) {
         try {
-            const listingId = await Listing.createExternal(req.body, req.claims.user_id)
+            const { csvItems } = req.body
+            delete req.body.csvItems
+            const externalListing = req.body
+            if (csvItems.length > 0) {
+                externalListing.items = await formatCsvItems(csvItems)
+            }
+            const listingId = await Listing.createExternal(externalListing, req.claims.user_id)
             req.results = { message: "Created.", data: listingId }
         } catch (err) {
             return next(err)
