@@ -176,7 +176,6 @@ const selectById = async (id, userId, reqQuery) => {
             and laterA.time > a.time
         left join V3_CollectedItemNote cin
             on cin.collectedItemId = ci.id
-            and cin.note = 'PSA202503'
         left join conditions c on c.condition_id = a.conditionId
         left join SKU on SKU.itemId = it.id and SKU.conditionId = c.condition_id and SKU.printingId = p.printing_id
         where (creditSale.purchaserId = '${userId}' OR creditSale.id IS NULL)
@@ -188,11 +187,15 @@ const selectById = async (id, userId, reqQuery) => {
             and (removeEdit.id is null or earlierRemoveEdit.id is null)
             and li.id is not null
             and laterA.id is null
+            and cin.id is null
     `
     const variables = []
     const direction = reqQuery.direction ? reqQuery.direction.toLowerCase() : undefined 
     // const attribute = reqQuery.attribute ? reqQuery.attribute.toLowerCase() : undefined
-    let orderBy =  ' ORDER BY name'
+    let orderBy =  ' ORDER BY setName'
+    if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
+    else orderBy += ' ASC'
+    orderBy += ', name'
     if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
     else orderBy += ' ASC'
 
