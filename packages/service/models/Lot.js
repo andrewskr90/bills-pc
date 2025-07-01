@@ -187,7 +187,6 @@ const selectById = async (id, userId, reqQuery) => {
             and (removeEdit.id is null or earlierRemoveEdit.id is null)
             and li.id is not null
             and laterA.id is null
-            and cin.id is null
     `
     const variables = []
     const direction = reqQuery.direction ? reqQuery.direction.toLowerCase() : undefined 
