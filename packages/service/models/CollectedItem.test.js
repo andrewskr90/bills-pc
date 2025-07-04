@@ -13,12 +13,7 @@ const p = bpct.getPrintings()
 const c = bpct.getConditions()
 
 // create first collected item
-bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
-    c[0].condition_id, 
-    u[0].user_id
-).appraise(c[1].condition_id, u[0].user_id)
+bpct.import().appraise(c[1].condition_id, u[0].user_id)
 .list(10).price(15).removeListing()
 .relist(13).price(25).sale(u[1].user_id)
 .list(30).sale(u[2].user_id)
@@ -37,12 +32,7 @@ bpct.import(
 .list(300).sale(u[2].user_id)
 
 // create third collected item
-const { collectedItem: thirdCollectedItem } = bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
-    c[0].condition_id, 
-    u[0].user_id
-)
+const { collectedItem: thirdCollectedItem } = bpct.import()
 bpct.createLot([thirdCollectedItem.id])
 .edit([], [thirdCollectedItem.id])
 
@@ -50,23 +40,13 @@ bpct.createLot([thirdCollectedItem.id])
 .list(16).sale(u[1].user_id)
 
 // create fourth collected item
-const { collectedItem: fourthCollectedItem } = bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
-    c[0].condition_id, 
-    u[0].user_id
-)
+const { collectedItem: fourthCollectedItem } = bpct.import()
 // create lot
 bpct.createLot([fourthCollectedItem.id])
 .list(16).edit([], [fourthCollectedItem.id]).sale(u[1].user_id)
 
 // create fifth collected item
-const { collectedItem: fifthCollectedItem } = bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
-    c[0].condition_id, 
-    u[0].user_id
-)
+const { collectedItem: fifthCollectedItem } = bpct.import()
 bpct.createLot([fifthCollectedItem.id])
 .list(16).sale(u[1].user_id)
 .list(16).sale(u[2].user_id)
@@ -86,12 +66,7 @@ bpct.createLot([sixthImport.collectedItem.id])
 bpct.createLot([sixthImport.collectedItem.id])
 .edit([], [sixthImport.collectedItem.id])
 
-const { collectedItem: seventhCollectedItem } = bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
-    c[0].condition_id, 
-    u[0].user_id
-)
+const { collectedItem: seventhCollectedItem } = bpct.import()
 
 const seventhLot = bpct.createLot([seventhCollectedItem.id])
 .list(43).edit([sixthImport.collectedItem.id])

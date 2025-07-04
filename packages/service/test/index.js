@@ -411,7 +411,13 @@ class BPCT {
         return methods
     }
 
-    import(itemId, printingId, conditionId, importerId) {
+    import(
+        itemId=this.it[0].id, 
+        printingId=this.p[0].printing_id, 
+        conditionId=this.c[0].condition_id, 
+        importerId=this.u[0].user_id
+    ) {
+
         /// TODO incorporate import into test
         const collectedItem = this.buildCollectedItem(itemId, printingId)
         const collectedItemId = collectedItem.id
