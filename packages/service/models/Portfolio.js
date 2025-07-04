@@ -291,9 +291,6 @@ const buildGetPortfolioQuery = (userId) => {
             )
 
     `
-    // TODO what if i use cte to query for edits that occur in between acquisitions and sales
-    // first get all imports and purchases/sales from user, then get edits that occur between
-    // I haven't thought much about it, but wanted to jot this down
     const query = `
         ${withStatement}
         ${selectStatement}
@@ -330,11 +327,125 @@ const buildGetPortfolioQuery = (userId) => {
         where laterPurchase.id is null
         and (purchase.id is null and i.importerId = '${userId}');
     `
-    return query
+    return { query, variables: [] }
+}
+
+const buildGetPortfolioExperimental = async (userId) => {
+    // TODO what if i use cte to query for edits that occur in between acquisitions and sales
+    // first get all imports and purchases/sales from user, then get edits that occur between
+    // I haven't thought much about it, but wanted to jot this down
+
+    // purchLot     remove  addLot  remove  soldAsItem
+    // purchLot     remove  addLot  remove  addLot      soldAsLot
+
+
+    const query = `
+
+        with insertEditCTE as (
+            select
+                le.id,
+                le.lotId,
+                le.time,
+                li.collectedItemId
+            from V3_LotEdit le
+            left join V3_LotInsert li on li.lotEditId = le.id
+        ),
+        removalEditCTE as (
+            select
+                le.id,
+                le.lotId,
+                le.time,
+                lr.collectedItemId
+            from V3_LotEdit le
+            left join V3_LotRemoval lr on lr.lotEditId = le.id
+        ),
+        importCTE as (
+            select
+                i.id importId,
+                i.time,
+                i.collectedItemId
+            from V3_Import i
+            where i.importerId = '${userId}'
+        ),
+        purchaseCTE as (
+            select
+                s.id,
+                s.purchaserId,
+                s.time,
+                l.id listingId,
+                l.collectedItemId,
+                l.lotId,
+                l.time listingTime
+            from V3_Sale s
+            left join V3_Listing l on l.saleId = s.id
+            where s.purchaserId = '${userId}'
+        ),
+        purchaseItemCTE as (
+            select
+                purchase.id,
+                purchase.purchaserId,
+                purchase.time,
+                purchase.listingId,
+                purchase.lotId,
+                purchase.time listingTime,
+                insertEdit.id insertEditId,
+                insertEdit.time insertEditTime,
+                removalEdit.id removalEditId,
+                removalEdit.time removalEditTime,
+                (CASE WHEN purchase.collectedItemId is not null
+                    THEN purchase.collectedItemId
+                    ELSE insertEdit.collectedItemId
+                END) collectedItemId
+            from purchaseCTE purchase
+            left join insertEditCTE insertEdit
+                on insertEdit.lotId = purchase.lotId
+                and insertEdit.time < purchase.time
+            left join removalEditCTE removalEdit
+                on removalEdit.lotId = purchase.lotId
+                and removalEdit.collectedItemId = insertEdit.collectedItemId
+                and removalEdit.time > insertEdit.time
+            left join removalEditCTE betweenRemovalEdit
+                on betweenRemovalEdit.lotId = purchase.lotId
+                and betweenRemovalEdit.collectedItemId = insertEdit.collectedItemId
+                and betweenRemovalEdit.time > insertEdit.time
+                and betweenRemovalEdit.time < removalEdit.time
+            where purchase.collectedItemId is not null
+                or removalEdit.lotId is null
+                or ( -- removal is not null, but it is the correlated removal of the insert, and it occurs after the purchase
+                    betweenRemovalEdit.lotId is null
+                    and removalEdit.time > purchase.time
+                )
+        )
+        select
+            i.id importId,
+            i.importerId,
+            i.bulkSplitId,
+            i.collectedItemId,
+            i.time importTime,
+            purchaseItem.id purchaseId,
+            purchaseItem.time purchaseTime,
+            purchaseItem.listingId,
+            purchaseItem.lotId
+        from purchaseItemCTE purchaseItem
+        left join purchaseItemCTE laterPurchaseItem
+            on laterPurchaseItem.collectedItemId = purchaseItem.collectedItemId
+            and laterPurchaseItem.time > purchaseItem.time
+        right join V3_Import i
+            on i.collectedItemId = purchaseItem.collectedItemId
+        left join V3_CollectedItem ci on ci.id = purchaseItem.collectedItemId or ci.id = i.collectedItemId
+        left join Item it on it.id = ci.itemId
+        where (
+            purchaseItem.id is not null
+            or (purchaseItem.id is null and i.importerId = '${userId}')
+        ) and laterPurchaseItem.id is null
+
+    `
+
+    return { query, variables: [] }
 }
 
 const getPortfolio = async (userId) => {
 
 }
 
-module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioQuery }
+module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioQuery, buildGetPortfolioExperimental }
