@@ -118,6 +118,12 @@ const buildTableBaseIds = (testId) => {
     }
 }
 
+const uniqueCollectedItem = (rows, collectedItemId) => {
+    const filteredByCiId = rows.filter(row => row.collectedItemId === collectedItemId)
+    if (filteredByCiId.length === 1) return true
+    return false
+}
+
 class BPCT {
     constructor() {
         const testId = uuid()
@@ -142,6 +148,7 @@ class BPCT {
         this.le = []
         this.li = []
         this.lr = []
+        this.tests = []
     }
     compileTransactions() {
         return [
@@ -658,6 +665,58 @@ class BPCT {
     getLotRemovals() {
         return this.lr
     }
+    db() {
+        return {
+            u: this.u,
+            se: this.se,
+            it: this.it,
+            p: this.p,
+            c: this.c,
+            ci: this.ci,
+            i: this.i,
+            a: this.a,
+            l: this.l,
+            lp: this.lp,
+            listR: this.listR,
+            s: this.s,
+            lo: this.lo,
+            le: this.le,
+            li: this.li,
+            lr: this.lr
+        }
+    }
+    test(testCase, cb) {
+        this.tests = [...this.tests, { testCase, cb }]
+    }
+    getTests() {
+        return this.tests
+    }
+    runTests() {
+        let connection = undefined
+        beforeAll(async () => {
+            const { testPool } = globalThis
+            connection = await testPool.getConnection()
+            await buildTestData(this, connection)
+        })
+        afterAll(async () => {
+            await connection.rollback()
+            await connection.release()
+        })
+
+        this.tests.forEach(async (config) => {
+            const { testCase, cb } = config
+            if (cb) {
+                const { builtQuery, check } = cb()
+                test(testCase, async () => {
+                    const { query, variables } = builtQuery
+                    const [rows] = await connection.query(query, variables)
+                    check(rows)
+                })
+            } else {
+                test.todo(testCase)
+            }
+        })
+    }
 }
 
 module.exports = {
@@ -668,5 +727,6 @@ module.exports = {
     buildTestData,
     daysAfterStart, 
     buildTableBaseIds,
+    uniqueCollectedItem,
     BPCT
 }

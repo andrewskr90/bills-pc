@@ -330,7 +330,7 @@ const buildGetPortfolioQuery = (userId) => {
     return { query, variables: [] }
 }
 
-const buildGetPortfolioExperimental = async (userId) => {
+const buildGetPortfolioExperimental = (userId) => {
     // TODO what if i use cte to query for edits that occur in between acquisitions and sales
     // first get all imports and purchases/sales from user, then get edits that occur between
     // I haven't thought much about it, but wanted to jot this down
