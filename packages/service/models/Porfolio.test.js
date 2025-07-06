@@ -61,11 +61,96 @@ bpct.test('purchasing lot containing previously imported item yeilds one instanc
     }
     return { builtQuery, check }
 })
-bpct.test('purchasing previously purchased item yeilds one instance of that item')
-bpct.test('purchasing lot containing previously purchased item yeilds one instance of that item')
-bpct.test('purchasing previously purchased lot item yeilds one instance of that item')
-bpct.test('purchasing lot containing previously purchased lot item yeilds one instance of that item')
-bpct.test('previously imported item, previously purchased lot item within new lot, and brand new item are purchased within a lot')
+bpct.test('purchasing previously purchased item yeilds one instance of that item', () => {
+    const { collectedItem } = bpct.import()
+        .list(5).sale(u[1].user_id)
+        .list(6).sale(u[2].user_id)
+        .list(7).sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const check = (rows) => {
+        expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
+    }
+    return { builtQuery, check }
+})
+bpct.test('purchasing lot containing previously purchased item yeilds one instance of that item', () => {
+    const { collectedItem } = bpct.import()
+        .list(5).sale(u[1].user_id)
+        .list(6).sale(u[2].user_id)
+    bpct.createLot([collectedItem.id])
+        .list(7).sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const check = (rows) => {
+        expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
+    }
+    return { builtQuery, check }
+})
+bpct.test('purchasing previously purchased lot item yeilds one instance of that item', () => {
+    const { collectedItem } = bpct.import()
+    const { lot } = bpct.createLot([collectedItem.id])
+        .list(5).sale(u[1].user_id)
+        .list(6).sale(u[2].user_id)
+    bpct.createLotEdit(lot.id, [], [collectedItem.id])
+    bpct.listItem(collectedItem.id, 10)
+        .sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const check = (rows) => {
+        expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
+    }
+    return { builtQuery, check }
+})
+bpct.test('purchasing lot containing previously purchased lot item yeilds one instance of that item', () => {
+    const { collectedItem } = bpct.import()
+    const { lot: lotA } = bpct.createLot([collectedItem.id])
+        .list(5).sale(u[1].user_id)
+        .list(6).sale(u[2].user_id)
+    bpct.createLotEdit(lotA.id, [], [collectedItem.id])
+
+    bpct.createLot([collectedItem.id])
+        .list(5).sale(u[1].user_id)
+
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const check = (rows) => {
+        expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
+    }
+    return { builtQuery, check }
+})
+bpct.test(
+    `previously imported item, previously purchased lot item, 
+    and brand new item are purchased within a new lot`, 
+    () => {
+        const { collectedItem: collectedItemA } = bpct.import()
+            .list(4).sale(u[2].user_id)
+        const { collectedItem: collectedItemB } = bpct.import(
+            it[0].id, 
+            p[0].printing_id, 
+            c[0].condition_id, 
+            u[1].user_id
+        )
+        const { lot: lotA } = bpct.createLot([collectedItemB.id])
+            .list(60).sale(u[0].user_id)
+            .list(50).sale(u[2].user_id)
+        bpct.createLotEdit(lotA.id, [], [collectedItemB.id])
+        const { collectedItem: collectedItemC } = bpct.import(
+            it[0].id, 
+            p[0].printing_id, 
+            c[0].condition_id, 
+            u[2].user_id
+        )
+        bpct.createLot([
+            collectedItemA.id,
+            collectedItemB.id,
+            collectedItemC.id
+        ]).list(20).sale(u[0].user_id)
+
+        const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+        const check = (rows) => {
+            expect(uniqueCollectedItem(rows, collectedItemA.id)).toBeTruthy()
+            expect(uniqueCollectedItem(rows, collectedItemB.id)).toBeTruthy()
+            expect(uniqueCollectedItem(rows, collectedItemC.id)).toBeTruthy()
+        }
+        return { builtQuery, check }
+    }
+)
 
 
 bpct.test('imported item that is sold is not present in portfolio', 

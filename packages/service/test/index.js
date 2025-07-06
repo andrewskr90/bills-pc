@@ -514,7 +514,8 @@ class BPCT {
             return { sale, collectedItem, ...methods }
         } else {
             const methods = this.contextualizeLotMethods(listing.lotId, sale.time)
-            return { sale, ...methods }
+            const lot = this.lo.find(lo => lo.id === listing.lotId)
+            return { sale, lot, ...methods }
         }
     }
     createLot(insertCollectedItemIds) {
