@@ -119,7 +119,7 @@ const buildTableBaseIds = (testId) => {
 }
 
 const uniqueCollectedItem = (rows, collectedItemId) => {
-    const filteredByCiId = rows.filter(row => row.collectedItemId === collectedItemId)
+    const filteredByCiId = rows.filter(row => row.id === collectedItemId)
     if (filteredByCiId.length === 1) return true
     return false
 }

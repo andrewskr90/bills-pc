@@ -204,6 +204,7 @@ const buildGetByIdQuery = (id, userId, time) => {
         from V3_CollectedItem ci
         -- acquisition
         left join V3_Import i on i.collectedItemId = ci.id
+            and i.time < '${time}'
         left join (
             select
                 s.id,

@@ -1,5 +1,5 @@
 const { buildGetPortfolioExperimental } = require('./Portfolio')
-const { BPCT, uniqueCollectedItem } = require('../test')
+const { BPCT, uniqueCollectedItem, daysAfterStart } = require('../test')
 
 const bpct = new BPCT() // init user
 bpct.buildUsers(2) // create number of proxy users, default 1
@@ -10,9 +10,9 @@ const { u, it, p, c } = bpct.db()
 
 bpct.test('imported item that is not sold is present in portfolio', () => {
     // create data
-    const { collectedItem } = bpct.import()
+    const { collectedItem, createdImport } = bpct.import()
     // build query
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, createdImport.time))
     // write check
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
@@ -24,13 +24,13 @@ bpct.test('imported item that is not sold is present in portfolio', () => {
 bpct.test('two imported items, added to lot, that are not sold are present in portfolio as lot items', () => {
     const { collectedItem: collectedItemA } = bpct.import()
     const { collectedItem: collectedItemB } = bpct.import()
-    bpct.createLot([collectedItemA.id, collectedItemB.id])
+    const { lotEdit } = bpct.createLot([collectedItemA.id, collectedItemB.id])
 
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
     const check = (rows) => {
         const filteredByCiId = rows.filter(row => {
-            return row.collectedItemId === collectedItemA.id
-                || row.collectedItemId === collectedItemB.id
+            return row.id === collectedItemA.id
+                || row.id === collectedItemB.id
         })
         expect(filteredByCiId.length).toEqual(2)
     }
@@ -39,11 +39,11 @@ bpct.test('two imported items, added to lot, that are not sold are present in po
 
 
 bpct.test('purchasing previously imported item yeilds one instance of that item', () => {
-    const { collectedItem } = bpct.import().list(10).sale(u[1].user_id)
+    const { collectedItem, sale } = bpct.import().list(10).sale(u[1].user_id)
     .list(9).sale(u[2].user_id)
     .list(7).sale(u[0].user_id)
 
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -53,20 +53,20 @@ bpct.test('purchasing previously imported item yeilds one instance of that item'
 
 bpct.test('purchasing lot containing previously imported item yeilds one instance of that item', () => {
     const { collectedItem } = bpct.import().list(5).sale(u[1].user_id)
-    bpct.createLot([collectedItem.id])
+    const { sale } = bpct.createLot([collectedItem.id])
         .list(4).sale(u[0].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
     return { builtQuery, check }
 })
 bpct.test('purchasing previously purchased item yeilds one instance of that item', () => {
-    const { collectedItem } = bpct.import()
+    const { collectedItem, sale } = bpct.import()
         .list(5).sale(u[1].user_id)
         .list(6).sale(u[2].user_id)
         .list(7).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -76,9 +76,9 @@ bpct.test('purchasing lot containing previously purchased item yeilds one instan
     const { collectedItem } = bpct.import()
         .list(5).sale(u[1].user_id)
         .list(6).sale(u[2].user_id)
-    bpct.createLot([collectedItem.id])
+    const { sale } = bpct.createLot([collectedItem.id])
         .list(7).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -90,9 +90,8 @@ bpct.test('purchasing previously purchased lot item yeilds one instance of that 
         .list(5).sale(u[1].user_id)
         .list(6).sale(u[2].user_id)
     bpct.createLotEdit(lot.id, [], [collectedItem.id])
-    bpct.listItem(collectedItem.id, 10)
-        .sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const { sale } = bpct.listItem(collectedItem.id, 10).sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -105,10 +104,10 @@ bpct.test('purchasing lot containing previously purchased lot item yeilds one in
         .list(6).sale(u[2].user_id)
     bpct.createLotEdit(lotA.id, [], [collectedItem.id])
 
-    bpct.createLot([collectedItem.id])
+    const { sale } = bpct.createLot([collectedItem.id])
         .list(5).sale(u[1].user_id)
 
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -136,13 +135,13 @@ bpct.test(
             c[0].condition_id, 
             u[2].user_id
         )
-        bpct.createLot([
+        const { sale } = bpct.createLot([
             collectedItemA.id,
             collectedItemB.id,
             collectedItemC.id
         ]).list(20).sale(u[0].user_id)
 
-        const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
+        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
         const check = (rows) => {
             expect(uniqueCollectedItem(rows, collectedItemA.id)).toBeTruthy()
             expect(uniqueCollectedItem(rows, collectedItemB.id)).toBeTruthy()
