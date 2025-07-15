@@ -21,10 +21,10 @@ bpct.import().appraise(c[1].condition_id, u[0].user_id)
 
 // create second collected item
 bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
+    u[1].user_id,
     c[0].condition_id, 
-    u[1].user_id
+    p[0].printing_id, 
+    it[0].id
 ).appraise(c[1].condition_id, u[1].user_id)
 .list(100).sale(u[0].user_id)
 .list(110).price(160).removeListing()
@@ -53,10 +53,10 @@ bpct.createLot([fifthCollectedItem.id])
 
 // create sixth collected item
 const sixthImport = bpct.import(
-    it[0].id, 
-    p[0].printing_id, 
+    u[1].user_id,
     c[0].condition_id, 
-    u[1].user_id
+    p[0].printing_id, 
+    it[0].id
 )
 bpct.createLot([sixthImport.collectedItem.id])
 .list(12).sale(u[0].user_id)

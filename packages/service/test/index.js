@@ -412,10 +412,10 @@ class BPCT {
     }
 
     import(
-        itemId=this.it[0].id, 
-        printingId=this.p[0].printing_id, 
+        importerId=this.u[0].user_id,
         conditionId=this.c[0].condition_id, 
-        importerId=this.u[0].user_id
+        printingId=this.p[0].printing_id, 
+        itemId=this.it[0].id, 
     ) {
 
         /// TODO incorporate import into test

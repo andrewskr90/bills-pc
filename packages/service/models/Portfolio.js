@@ -237,99 +237,6 @@ const getBulkSplitsByUserId = async (userId) => {
     }
 }
 
-const buildGetPortfolioQuery = (userId) => {
-    const selectStatement = `
-        select 
-            ci.id collectedItemId,
-            i.id importId,
-            i.time import.time
-            purchase.id purchaseId,
-            purchase.time purchaseTime
-    `
-    // tests
-    // acquisition
-        // import
-        // purchased item
-        // purchased lot
-    // removal from lot
-    // sold
-        // from item as item
-        // from lot as item
-        // same lot
-        // new lot, from item
-        // new lot, from lot
-    // unsold 
-        // as item, same lot, new lot
-        // listed or not
-    
-    // import   latestPurchase      earliestSale    latestListing
-
-
-    // li   le      laterLe     lr
-    // 1    1
-    const withStatement = `
-        with
-            cteRemoval as (
-                select
-                    lr.id,
-                    lr.collectedItemId,
-                    le.lotId,
-                    le.time
-                from V3_LotRemoval lr
-                left join V3_LotEdit le on le.id = lr.lotEditId
-            )
-            ctePurchase as (
-                select
-                    l.id listingId,
-                    l.collectedItemId,
-                    l.lotId,
-                    s.id,
-                    s.time
-                from V3_Sale s
-                left join V3_Listing l on l.saleId = s.id
-                where s.purchaserId = '${userId}'
-            )
-
-    `
-    const query = `
-        ${withStatement}
-        ${selectStatement}
-        from V3_CollectedItem ci
-        left join V3_Import i on i.collectedItemId = ci.id
-        left join (
-            select
-                li.collectedItemId
-                le.lotId,
-                removalEdit.time
-            from V3_LotInsert li
-            left join V3_LotEdit le on le.id = li.lotEditId
-            left join cteRemoval removal
-                on removal.lotId = le.lotId 
-                and removal.collectedItemId = li.collectedItemId
-                and removal.time > le.time 
-            left join cteRemoval betweenRemoval
-                on betweenRemoval.lotId = le.lotId 
-                and betweenRemoval.collectedItemId = li.collectedItemId
-                and betweenRemoval.time > le.time 
-                and betweenRemoval.time < removal.time 
-            where betweenRemoval.id is null
-        ) purchasedLot on purchasedLot.collectedItemId = ci.id
-        
-        left join ctePurchase purchase 
-            on purchase.collectedItemId = ci.id 
-            or (purchase.lotId = purchasedLot.lotId and purchase.lotId is not null)
-        left join ctePurchase laterPurchase 
-            on laterPurchase.time > purchase.time 
-            and (
-                laterPurchase.collectedItemId = ci.id 
-                or (laterPurchase.lotId = purchasedLot.lotId and laterPurchase.lotId is not null)
-            )
-        where laterPurchase.id is null
-        and (purchase.id is null and i.importerId = '${userId}');
-    `
-    return { query, variables: [] }
-}
-
 const buildGetPortfolioExperimental = (userId, time) => {
     // TODO what if i use cte to query for edits that occur in between acquisitions and sales
     // first get all imports and purchases/sales from user, then get edits that occur between
@@ -822,4 +729,4 @@ const getPortfolio = async (userId) => {
 
 }
 
-module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioQuery, buildGetPortfolioExperimental }
+module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioExperimental }

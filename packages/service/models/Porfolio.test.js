@@ -120,20 +120,20 @@ bpct.test(
         const { collectedItem: collectedItemA } = bpct.import()
             .list(4).sale(u[2].user_id)
         const { collectedItem: collectedItemB } = bpct.import(
-            it[0].id, 
-            p[0].printing_id, 
+            u[1].user_id,
             c[0].condition_id, 
-            u[1].user_id
+            p[0].printing_id, 
+            it[0].id
         )
         const { lot: lotA } = bpct.createLot([collectedItemB.id])
             .list(60).sale(u[0].user_id)
             .list(50).sale(u[2].user_id)
         bpct.createLotEdit(lotA.id, [], [collectedItemB.id])
         const { collectedItem: collectedItemC } = bpct.import(
-            it[0].id, 
-            p[0].printing_id, 
+            u[2].user_id,
             c[0].condition_id, 
-            u[2].user_id
+            p[0].printing_id, 
+            it[0].id
         )
         const { sale } = bpct.createLot([
             collectedItemA.id,
@@ -207,10 +207,10 @@ bpct.test(`purchased lot item, removed from lot, added to another lot which sell
     then is removed by purchaser is not present in portfolio`,
     () => {
         const { collectedItem } = bpct.import(
-            it[0].id, 
-            p[0].printing_id, 
+            u[1].user_id,
             c[0].condition_id, 
-            u[1].user_id
+            p[0].printing_id, 
+            it[0].id
         )
         const soldLot = bpct.createLot([collectedItem.id]).list(2).sale(u[0].user_id)
         soldLot.edit([], [collectedItem.id])
