@@ -727,23 +727,25 @@ const buildGetPortfolioExperimental = (userId, time) => {
         right join V3_Import i
             on i.collectedItemId = purchase.collectedItemId
         left join saleCTE sale
-            on sale.removalEditId is null
-            and (
+            on (
                 sale.collectedItemId = purchase.collectedItemId
-                or (
-                    purchase.id is null 
-                    and sale.collectedItemId = i.collectedItemId
-                )
+                and sale.time > purchase.time
+            ) or (
+                purchase.id is null 
+                and sale.collectedItemId = i.collectedItemId
+
             )
         left join saleCTE betweenSale
-            on betweenSale.removalEditId is null
-            and (
-                betweenSale.collectedItemId = purchase.collectedItemId
-                or (
+            on (
+                (
+                    betweenSale.collectedItemId = purchase.collectedItemId
+                    and betweenSale.time > purchase.time
+                ) or (
                     purchase.id is null 
                     and betweenSale.collectedItemId = i.collectedItemId
                 )
-            ) and betweenSale.time < sale.time
+            )
+            and betweenSale.time < sale.time
         left join unsoldListingCTE unsoldListing
             on (
                 unsoldListing.collectedItemId = purchase.collectedItemId
@@ -781,8 +783,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 or laterUnsoldLot.collectedItemId = immediateRemoval.collectedItemId
             ) and laterUnsoldLot.removalEditId is null
             and laterUnsoldLot.insertTime > unsoldLot.insertTime
-
-
         left join V3_CollectedItem ci 
             on ci.id = purchase.collectedItemId 
             or ci.id = i.collectedItemId
@@ -802,7 +802,8 @@ const buildGetPortfolioExperimental = (userId, time) => {
             or (purchase.id is null and u.user_id = i.importerId)
         left join users salePurchaser
             on salePurchaser.user_id = sale.purchaserId
-        where laterPurchase.id is null
+        where sale.id is null
+            and laterPurchase.id is null
             and (
                 purchase.id is not null
                 or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')

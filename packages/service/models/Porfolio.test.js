@@ -153,21 +153,58 @@ bpct.test(
 
 
 bpct.test('imported item that is sold is not present in portfolio', 
-    // () => {
-    //     // TODO once sale status is in query
-    //     const secondImport = bpct.import().list(13).sale(u[1].user_id)
-    //     const builtQuery = buildGetPortfolioExperimental(u[0].user_id)
-    //     const check = (rows) => {
-    //         const filteredByCiId = rows.filter(row => row.collectedItemId === secondImport.collectedItem.id)
-    //         expect(filteredByCiId.length).toEqual(0)
-    //     }
-    //     return { builtQuery, check }
-    // }
+    () => {
+        const { collectedItem, sale } = bpct.import().list(13).sale(u[1].user_id)
+        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+        const check = (rows) => {
+            const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
+            expect(filteredByCiId.length).toEqual(0)
+        }
+        return { builtQuery, check }
+    }
 )
 
-bpct.test('imported item, added to lot, that is sold is not present in portfolio')
-bpct.test('imported item, added to lot, removed from lot, is still in portfolio after the lot sells')
-bpct.test('item sold within lot, which is removed after the sale, appears to have been sold within the lot')
+bpct.test('imported item, added to lot, that is sold is not present in portfolio', () => {
+    const { collectedItem } = bpct.import()
+    const { sale } = bpct.createLot([collectedItem.id]).list(200).sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const check = (rows) => {
+        const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
+        expect(filteredByCiId.length).toEqual(0)
+    }
+    return { builtQuery, check }
+})
+
+bpct.test('imported item, added to lot, removed from lot, is still in portfolio after the lot sells', () => {
+    const { collectedItem } = bpct.import()
+    const { collectedItem: collectedItemB } = bpct.import()
+    const lot = bpct.createLot([collectedItem.id, collectedItemB.id])
+    lot.edit([], [collectedItem.id])
+    const { sale } = lot.list(200).sale(u[1].user_id)
+    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const check = (rows) => {
+        const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
+        expect(filteredByCiId.length).toEqual(1)
+    }
+    return { builtQuery, check }
+})
+
+bpct.test('item sold within lot, which is removed after the sale, appears to have been sold within the lot',
+    () => {
+        const { collectedItem } = bpct.import()
+        const soldLot = bpct.createLot([collectedItem.id]).list(200).sale(u[1].user_id)
+        const { lotEdit } = soldLot.edit([], [collectedItem.id])
+        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
+        
+        const check = (rows) => {
+            console.log(rows)
+            const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
+            console.log(filteredByCiId)
+            expect(filteredByCiId.length).toEqual(0)
+        }
+        return { builtQuery, check }
+    }
+)
 bpct.test('accurately conveys purchased lot item, removed from lot, added to lot which sells, then is removed by purchaser')
 
 // TODO I think I will forget to run this every new test file
