@@ -458,7 +458,16 @@ const buildGetPortfolioExperimental = (userId, time) => {
                                     END)
                             END)
                     )
-            ) listing
+            ) listing,
+            json_object(
+                'id', sale.id,
+                'time', sale.time,
+                'purchaser',
+                    json_object(
+                        'id', salePurchaser.user_id,
+                        'name', salePurchaser.user_name
+                    )
+            ) sale
     `
 
 
@@ -505,9 +514,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 and betweenRemovalEdit.time < removalEdit.time
             where betweenRemovalEdit.lotId is null
         ),
-        -- always the latest listing price
-        -- always the latest listing removal
-        -- always the first relisted price
         listingCTE as (
             select
                 l.id,
@@ -709,6 +715,8 @@ const buildGetPortfolioExperimental = (userId, time) => {
             and laterA.time > a.time
         left join conditions c on c.condition_id = a.conditionId
         left join printings p on p.printing_id = ci.printingId
+        left join users salePurchaser
+            on salePurchaser.user_id = sale.purchaserId
         where laterPurchase.id is null
             and (
                 purchase.id is not null
