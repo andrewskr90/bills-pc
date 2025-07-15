@@ -467,7 +467,89 @@ const buildGetPortfolioExperimental = (userId, time) => {
                         'id', salePurchaser.user_id,
                         'name', salePurchaser.user_name
                     )
-            ) sale
+            ) sale,
+            json_object(
+                'lot',
+                    json_object(
+                        'id', purchase.lotId
+                    ),
+                'sale',
+                    json_object(
+                        'id', purchase.id,
+                        'time', purchase.time,
+                        'purchaser',
+                            (CASE WHEN purchase.id is not null
+                                THEN
+                                    json_object(
+                                        'id', u.user_id,
+                                        'name', u.user_name
+                                    )
+                                ELSE 
+                                    json_object(
+                                        'id', null,
+                                        'name', null
+                                    )
+                            END)
+                    ),
+                'listing',
+                    json_object(
+                        'id', purchase.listingId,
+                        'time', purchase.listingTime,
+                        'price',
+                            (CASE WHEN purchase.relistedPrice is null
+                                THEN purchase.price
+                                ELSE purchase.relistedPrice
+                            END),
+                        'relisted',
+                            json_object(
+                                'id', purchase.relistedId
+                            ),
+                        'updatedPrice',
+                            json_object(
+                                'id',
+                                    (CASE WHEN purchase.relistedId is null
+                                        THEN purchase.updatedPriceId
+                                        ELSE 
+                                            (CASE WHEN purchase.relistedId != purchase.updatedPriceId
+                                                THEN purchase.updatedPriceId
+                                                ELSE null
+                                            END)
+                                    END),
+                                'price',
+                                    (CASE WHEN purchase.relistedId is null
+                                        THEN purchase.updatedPrice
+                                        ELSE 
+                                            (CASE WHEN purchase.relistedId != purchase.updatedPriceId
+                                                THEN purchase.updatedPrice
+                                                ELSE null
+                                            END)
+                                    END) 
+                            )
+                    ),
+                'import',
+                    (CASE WHEN purchase.id is null
+                        THEN 
+                            json_object(
+                                'id', i.id,
+                                'time', i.time,
+                                'importer',
+                                    json_object(
+                                        'id', u.user_id,
+                                        'name', u.user_name
+                                    )
+                            )
+                        ELSE 
+                            json_object(
+                                'id', null,
+                                'time', null,
+                                'importer',
+                                    json_object(
+                                        'id', null,
+                                        'name', null
+                                    )
+                            )
+                    END)
+            ) credit
     `
 
 
@@ -715,6 +797,9 @@ const buildGetPortfolioExperimental = (userId, time) => {
             and laterA.time > a.time
         left join conditions c on c.condition_id = a.conditionId
         left join printings p on p.printing_id = ci.printingId
+        left join users u 
+            on u.user_id = purchase.purchaserId
+            or (purchase.id is null and u.user_id = i.importerId)
         left join users salePurchaser
             on salePurchaser.user_id = sale.purchaserId
         where laterPurchase.id is null
