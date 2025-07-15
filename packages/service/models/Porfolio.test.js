@@ -189,7 +189,7 @@ bpct.test('imported item, added to lot, removed from lot, is still in portfolio 
     return { builtQuery, check }
 })
 
-bpct.test('item sold within lot, which is removed after the sale, appears to have been sold within the lot',
+bpct.test('item sold within lot, which is removed after the sale, is not present within portfolio',
     () => {
         const { collectedItem } = bpct.import()
         const soldLot = bpct.createLot([collectedItem.id]).list(200).sale(u[1].user_id)
@@ -197,15 +197,34 @@ bpct.test('item sold within lot, which is removed after the sale, appears to hav
         const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
         
         const check = (rows) => {
-            console.log(rows)
             const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
-            console.log(filteredByCiId)
             expect(filteredByCiId.length).toEqual(0)
         }
         return { builtQuery, check }
     }
 )
-bpct.test('accurately conveys purchased lot item, removed from lot, added to lot which sells, then is removed by purchaser')
+bpct.test(`purchased lot item, removed from lot, added to another lot which sells, 
+    then is removed by purchaser is not present in portfolio`,
+    () => {
+        const { collectedItem } = bpct.import(
+            it[0].id, 
+            p[0].printing_id, 
+            c[0].condition_id, 
+            u[1].user_id
+        )
+        const soldLot = bpct.createLot([collectedItem.id]).list(2).sale(u[0].user_id)
+        soldLot.edit([], [collectedItem.id])
+        const soldAnotherLot = bpct.createLot([collectedItem.id]).list(3).sale(u[2].user_id)
+        const { lotEdit: lotEditAgain } = soldAnotherLot.edit([], [collectedItem.id])
+        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEditAgain.time))
+        
+        const check = (rows) => {
+            const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
+            expect(filteredByCiId.length).toEqual(0)
+        }
+        return { builtQuery, check }
+    }
+)
 
 // TODO I think I will forget to run this every new test file
 bpct.runTests()
