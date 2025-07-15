@@ -398,42 +398,65 @@ const buildGetPortfolioExperimental = (userId, time) => {
                         ELSE sale.listingTime
                     END),
                 'price',
-                    (CASE WHEN listR.id is null
+                    (CASE WHEN sale.listingId is null
                         THEN 
-                            (CASE WHEN sale.listingId is null
+                            (CASE WHEN unsoldListing.relistedPrice is null
                                 THEN unsoldListing.price
-                                ELSE sale.price
+                                ELSE unsoldListing.relistedPrice
                             END)
-                        ELSE
-                            (CASE WHEN relistP.id is null
-                                THEN null
-                                ELSE relistP.price 
+                        ELSE 
+                            (CASE WHEN sale.relistedPrice is null
+                                THEN sale.price
+                                ELSE sale.relistedPrice
                             END)
                     END),
                 'relisted',
                     json_object(
                         'id',
-                        relistP.id
+                            (CASE WHEN sale.listingId is null
+                                THEN unsoldListing.relistedId
+                                ELSE sale.relistedId
+                            END)
                     ),
                 'updatedPrice',
                     json_object(
                         'price',
-                            (CASE WHEN (
-                                (listR.id is null) 
-                                or (relistP.id is not null and relistP.id != lp.id)
-                            )
-                                THEN lp.price
-                                ELSE
-                                    null
-                            END)    
+                            (CASE WHEN sale.listingId is null
+                                THEN 
+                                    (CASE WHEN unsoldListing.relistedId is null
+                                        THEN unsoldListing.updatedPrice
+                                        ELSE 
+                                            (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
+                                                THEN unsoldListing.updatedPrice
+                                                ELSE null
+                                            END)
+                                    END) 
+                                ELSE 
+                                    (CASE WHEN sale.relistedId is null
+                                        THEN sale.updatedPrice
+                                        ELSE 
+                                            (CASE WHEN sale.relistedId != sale.updatedPriceId
+                                                THEN sale.updatedPrice
+                                                ELSE null
+                                            END)
+                                    END) 
+                            END) 
                     ),
                 'removal',
                     json_object(
                         'id',
-                        (CASE WHEN relistP.id is null
-                            THEN listR.id
-                            ELSE null
-                        END)
+                            (CASE WHEN sale.listingId is null
+                                THEN 
+                                    (CASE WHEN unsoldListing.relistedId is null
+                                        THEN unsoldListing.listingRemovalId
+                                        ELSE null
+                                    END)
+                                ELSE
+                                    (CASE WHEN sale.relistedId is null
+                                        THEN sale.listingRemovalId
+                                        ELSE null
+                                    END)
+                            END)
                     )
             ) listing
     `
@@ -482,6 +505,49 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 and betweenRemovalEdit.time < removalEdit.time
             where betweenRemovalEdit.lotId is null
         ),
+        -- always the latest listing price
+        -- always the latest listing removal
+        -- always the first relisted price
+        listingCTE as (
+            select
+                l.id,
+                l.collectedItemId,
+                l.lotId,
+                l.price,
+                l.saleId,
+                l.time,
+                lp.id updatedPriceId,
+                lp.price updatedPrice,
+                listR.id listingRemovalId,
+                relistP.id relistedId,
+                relistP.price relistedPrice
+            from V3_Listing l
+            left join V3_ListingPrice lp
+                on lp.listingId = l.id
+                and lp.time < '${time}'
+            left join V3_ListingPrice laterLp
+                on lp.listingId = l.id
+                and lp.time < '${time}'
+                and laterLp.time > lp.time
+            left join V3_ListingRemoval listR
+                on listR.listingId = l.id
+                and listR.time < '${time}'
+            left join V3_ListingRemoval laterListR
+                on listR.listingId = l.id
+                and listR.time < '${time}'
+                and laterListR.time > listR.time
+            left join V3_ListingPrice relistP
+                on relistP.listingId = listR.listingId
+                    and relistP.time > listR.time
+                    and relistP.time < '${time}'
+            left join V3_ListingPrice betweenRelistP
+                on betweenRelistP.listingId = listR.listingId
+                    and betweenRelistP.time < relistP.time
+                    and betweenRelistP.time > listR.time
+            where laterLp.id is null
+                and laterListR.id is null
+                and betweenRelistP.id is null
+        ),
         saleCTE as (
             select
                 s.id,
@@ -491,6 +557,11 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 l.lotId,
                 l.price,
                 l.time listingTime,
+                l.updatedPriceId,
+                l.updatedPrice,
+                l.listingRemovalId,
+                l.relistedId,
+                l.relistedPrice,
                 insertAndRemoval.insertEditId,
                 insertAndRemoval.insertTime,
                 insertAndRemoval.lotInsertId,
@@ -501,7 +572,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                     ELSE insertAndRemoval.collectedItemId
                 END) collectedItemId
             from V3_Sale s
-            left join V3_Listing l on l.saleId = s.id
+            left join listingCTE l on l.saleId = s.id
             left join insertAndRemovalCTE insertAndRemoval
                 on insertAndRemoval.lotId = l.lotId
                 and insertAndRemoval.insertTime < s.time
@@ -520,6 +591,11 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 s.lotId,
                 s.price,
                 s.listingTime,
+                s.updatedPriceId,
+                s.updatedPrice,
+                s.listingRemovalId,
+                s.relistedId,
+                s.relistedPrice,
                 s.insertEditId,
                 s.insertTime,
                 s.removalEditId,
@@ -534,6 +610,11 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 l.time,
                 l.price,
                 l.lotId,
+                l.updatedPriceId,
+                l.updatedPrice,
+                l.listingRemovalId,
+                l.relistedId,
+                l.relistedPrice,
                 insertAndRemoval.insertEditId,
                 insertAndRemoval.insertTime,
                 insertAndRemoval.removalEditId,
@@ -542,7 +623,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                     THEN l.collectedItemId
                     ELSE insertAndRemoval.collectedItemId
                 END) collectedItemId
-            from V3_Listing l
+            from listingCTE l
             left join insertAndRemovalCTE insertAndRemoval
                 on insertAndRemoval.lotId = l.lotId
                 and insertAndRemoval.lotRemovalTime is null
@@ -613,68 +694,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
             ) and laterUnsoldLot.removalEditId is null
             and laterUnsoldLot.insertTime > unsoldLot.insertTime
 
-        left join V3_ListingPrice lp
-            on (
-                (
-                    sale.id is null 
-                    and lp.listingId = unsoldListing.id
-                )
-                or (
-                    sale.id is not null 
-                    and lp.listingId = sale.listingId
-                )
-            ) and lp.time < '${time}'
-        left join V3_ListingPrice laterLp
-            on (
-                (
-                    sale.id is null 
-                    and laterLp.listingId = unsoldListing.id
-                )
-                or (
-                    sale.id is not null 
-                    and laterLp.listingId = sale.listingId
-                )
-            ) and laterLp.time < '${time}'
-            and laterLp.time > lp.time
-        left join V3_ListingRemoval listR
-            on (
-                (
-                    sale.id is null
-                    and listR.listingId = unsoldListing.id
-                    and listR.time > unsoldListing.time
-                )
-                or (
-                    sale.id is not null
-                    and listR.listingId = sale.listingId
-                    and listR.time > sale.listingTime
-                )
-            ) and listR.time < '${time}'
-        left join V3_ListingRemoval laterListR
-            on (
-                (
-                    sale.id is null
-                    and laterListR.listingId = unsoldListing.id
-                    and laterListR.time > unsoldListing.time
-                )
-                or (
-                    sale.id is not null
-                    and laterListR.listingId = sale.listingId
-                    and laterListR.time > sale.listingTime
-                )
-            ) and laterListR.time < '${time}'
-            and laterListR.time > listR.time
-        left join V3_ListingPrice relistP
-            on (
-                relistP.listingId = listR.listingId
-                and relistP.time > listR.time
-                and relistP.time < '${time}'
-            )
-        left join V3_ListingPrice betweenRelistP
-            on (
-                betweenRelistP.listingId = listR.listingId
-                and betweenRelistP.time < relistP.time
-                and betweenRelistP.time > listR.time
-            )
 
         left join V3_CollectedItem ci 
             on ci.id = purchase.collectedItemId 
@@ -699,9 +718,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
             and laterUnsoldListing.id is null
             and betweenImmediateRemoval.id is null
             and laterUnsoldLot.lotId is null
-            and laterLp.id is null
-            and laterListR.id is null
-            and betweenRelistP.id is null
             and laterA.id is null
     `
 
