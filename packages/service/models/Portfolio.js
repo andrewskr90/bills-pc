@@ -245,221 +245,241 @@ const buildGetPortfolioExperimental = (userId, time) => {
     // purchLot     remove  addLot  remove  soldAsItem
     // purchLot     remove  addLot  remove  addLot      soldAsLot
 
-        const selectValues = `
-            ci.id,
-            json_object(
-                'id', it.id,
-                'name', it.name,
-                'setId', se.set_v2_id,
-                'setName', se.set_v2_name,
-                'tcgpId', it.tcgpId
-            ) item,
-            json_object(
-                'id', p.printing_id,
-                'name', p.printing_name
-            ) printing,
-            json_object(
-                'id', a.id,
-                'time', a.time,
-                'condition', 
-                    json_object(
-                        'id', c.condition_id, 
-                        'name', c.condition_name
-                    )
-            ) appraisal,
-            json_object(
-                'id', 
-                    (CASE WHEN sale.id is null
-                        THEN unsoldLot.lotId
-                        ELSE sale.lotId
-                    END),
-                'edit',
-                    (CASE WHEN sale.id is null
-                        THEN json_object(
-                            'id', unsoldLot.insertEditId,
-                            'time', unsoldLot.insertTime,
-                            'insert',
-                                json_object(
-                                    'id', unsoldLot.lotInsertId
-                                )
-                        )
-                        ELSE json_object(
-                            'id', sale.insertEditId,
-                            'time', sale.insertTime,
-                            'insert',
-                                json_object(
-                                    'id', sale.lotInsertId
-                                )
-                        )
-                    END)
-            ) lot,
-            json_object(
-                'id', 
-                    (CASE WHEN sale.listingId is null
-                        THEN unsoldListing.id
-                        ELSE sale.listingId
-                    END),
-                'time', 
-                    (CASE WHEN sale.listingId is null
-                        THEN unsoldListing.time
-                        ELSE sale.listingTime
-                    END),
-                'price',
-                    (CASE WHEN sale.listingId is null
-                        THEN 
-                            (CASE WHEN unsoldListing.relistedPrice is null
-                                THEN unsoldListing.price
-                                ELSE unsoldListing.relistedPrice
-                            END)
-                        ELSE 
-                            (CASE WHEN sale.relistedPrice is null
-                                THEN sale.price
-                                ELSE sale.relistedPrice
-                            END)
-                    END),
-                'relisted',
-                    json_object(
-                        'id',
-                            (CASE WHEN sale.listingId is null
-                                THEN unsoldListing.relistedId
-                                ELSE sale.relistedId
-                            END)
-                    ),
-                'updatedPrice',
-                    json_object(
-                        'price',
-                            (CASE WHEN sale.listingId is null
-                                THEN 
-                                    (CASE WHEN unsoldListing.relistedId is null
-                                        THEN unsoldListing.updatedPrice
-                                        ELSE 
-                                            (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
-                                                THEN unsoldListing.updatedPrice
-                                                ELSE null
-                                            END)
-                                    END) 
-                                ELSE 
-                                    (CASE WHEN sale.relistedId is null
-                                        THEN sale.updatedPrice
-                                        ELSE 
-                                            (CASE WHEN sale.relistedId != sale.updatedPriceId
-                                                THEN sale.updatedPrice
-                                                ELSE null
-                                            END)
-                                    END) 
-                            END) 
-                    ),
-                'removal',
-                    json_object(
-                        'id',
-                            (CASE WHEN sale.listingId is null
-                                THEN 
-                                    (CASE WHEN unsoldListing.relistedId is null
-                                        THEN unsoldListing.listingRemovalId
-                                        ELSE null
-                                    END)
-                                ELSE
-                                    (CASE WHEN sale.relistedId is null
-                                        THEN sale.listingRemovalId
-                                        ELSE null
-                                    END)
-                            END)
-                    )
-            ) listing,
-            json_object(
-                'id', sale.id,
-                'time', sale.time,
-                'purchaser',
-                    json_object(
-                        'id', salePurchaser.user_id,
-                        'name', salePurchaser.user_name
-                    )
-            ) sale,
-            json_object(
-                'lot',
-                    json_object(
-                        'id', purchase.lotId
-                    ),
-                'sale',
-                    json_object(
-                        'id', purchase.id,
-                        'time', purchase.time,
-                        'purchaser',
-                            (CASE WHEN purchase.id is not null
-                                THEN
-                                    json_object(
-                                        'id', u.user_id,
-                                        'name', u.user_name
-                                    )
-                                ELSE 
-                                    json_object(
-                                        'id', null,
-                                        'name', null
-                                    )
-                            END)
-                    ),
-                'listing',
-                    json_object(
-                        'id', purchase.listingId,
-                        'time', purchase.listingTime,
-                        'price',
-                            (CASE WHEN purchase.relistedPrice is null
-                                THEN purchase.price
-                                ELSE purchase.relistedPrice
-                            END),
-                        'relisted',
-                            json_object(
-                                'id', purchase.relistedId
-                            ),
-                        'updatedPrice',
-                            json_object(
-                                'id',
-                                    (CASE WHEN purchase.relistedId is null
-                                        THEN purchase.updatedPriceId
-                                        ELSE 
-                                            (CASE WHEN purchase.relistedId != purchase.updatedPriceId
-                                                THEN purchase.updatedPriceId
-                                                ELSE null
-                                            END)
-                                    END),
-                                'price',
-                                    (CASE WHEN purchase.relistedId is null
-                                        THEN purchase.updatedPrice
-                                        ELSE 
-                                            (CASE WHEN purchase.relistedId != purchase.updatedPriceId
-                                                THEN purchase.updatedPrice
-                                                ELSE null
-                                            END)
-                                    END) 
-                            )
-                    ),
-                'import',
-                    (CASE WHEN purchase.id is null
-                        THEN 
-                            json_object(
-                                'id', i.id,
-                                'time', i.time,
-                                'importer',
-                                    json_object(
-                                        'id', u.user_id,
-                                        'name', u.user_name
-                                    )
-                            )
-                        ELSE 
-                            json_object(
-                                'id', null,
-                                'time', null,
-                                'importer',
-                                    json_object(
-                                        'id', null,
-                                        'name', null
-                                    )
-                            )
-                    END)
-            ) credit
+    const itemSelect = `
+        json_object(
+            'id', it.id,
+            'name', it.name,
+            'setId', se.set_v2_id,
+            'setName', se.set_v2_name,
+            'tcgpId', it.tcgpId
+        ) item
     `
-
-
+    const printingSelect = `
+        json_object(
+            'id', p.printing_id,
+            'name', p.printing_name
+        ) printing
+    `
+    const appraisalSelect = `
+        json_object(
+            'id', a.id,
+            'time', a.time,
+            'condition', 
+                json_object(
+                    'id', c.condition_id, 
+                    'name', c.condition_name
+                )
+        ) appraisal
+    `
+    const lotSelect = `
+        json_object(
+            'id', 
+                (CASE WHEN sale.id is null
+                    THEN unsoldLot.lotId
+                    ELSE sale.lotId
+                END),
+            'edit',
+                (CASE WHEN sale.id is null
+                    THEN json_object(
+                        'id', unsoldLot.insertEditId,
+                        'time', unsoldLot.insertTime,
+                        'insert',
+                            json_object(
+                                'id', unsoldLot.lotInsertId
+                            )
+                    )
+                    ELSE json_object(
+                        'id', sale.insertEditId,
+                        'time', sale.insertTime,
+                        'insert',
+                            json_object(
+                                'id', sale.lotInsertId
+                            )
+                    )
+                END)
+        ) lot
+    `
+    const listingSelect = `
+        json_object(
+            'id', 
+                (CASE WHEN sale.listingId is null
+                    THEN unsoldListing.id
+                    ELSE sale.listingId
+                END),
+            'time', 
+                (CASE WHEN sale.listingId is null
+                    THEN unsoldListing.time
+                    ELSE sale.listingTime
+                END),
+            'price',
+                (CASE WHEN sale.listingId is null
+                    THEN 
+                        (CASE WHEN unsoldListing.relistedPrice is null
+                            THEN unsoldListing.price
+                            ELSE unsoldListing.relistedPrice
+                        END)
+                    ELSE 
+                        (CASE WHEN sale.relistedPrice is null
+                            THEN sale.price
+                            ELSE sale.relistedPrice
+                        END)
+                END),
+            'relisted',
+                json_object(
+                    'id',
+                        (CASE WHEN sale.listingId is null
+                            THEN unsoldListing.relistedId
+                            ELSE sale.relistedId
+                        END)
+                ),
+            'updatedPrice',
+                json_object(
+                    'price',
+                        (CASE WHEN sale.listingId is null
+                            THEN 
+                                (CASE WHEN unsoldListing.relistedId is null
+                                    THEN unsoldListing.updatedPrice
+                                    ELSE 
+                                        (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
+                                            THEN unsoldListing.updatedPrice
+                                            ELSE null
+                                        END)
+                                END) 
+                            ELSE 
+                                (CASE WHEN sale.relistedId is null
+                                    THEN sale.updatedPrice
+                                    ELSE 
+                                        (CASE WHEN sale.relistedId != sale.updatedPriceId
+                                            THEN sale.updatedPrice
+                                            ELSE null
+                                        END)
+                                END) 
+                        END) 
+                ),
+            'removal',
+                json_object(
+                    'id',
+                        (CASE WHEN sale.listingId is null
+                            THEN 
+                                (CASE WHEN unsoldListing.relistedId is null
+                                    THEN unsoldListing.listingRemovalId
+                                    ELSE null
+                                END)
+                            ELSE
+                                (CASE WHEN sale.relistedId is null
+                                    THEN sale.listingRemovalId
+                                    ELSE null
+                                END)
+                        END)
+                )
+        ) listing
+    `
+    const saleSelect = `
+        json_object(
+            'id', sale.id,
+            'time', sale.time,
+            'purchaser',
+                json_object(
+                    'id', salePurchaser.user_id,
+                    'name', salePurchaser.user_name
+                )
+        ) sale
+    `
+    const creditSelect = `
+        json_object(
+            'appraisal'
+            'lot',
+                json_object(
+                    'id', purchase.lotId
+                ),
+            'sale',
+                json_object(
+                    'id', purchase.id,
+                    'time', purchase.time,
+                    'purchaser',
+                        (CASE WHEN purchase.id is not null
+                            THEN
+                                json_object(
+                                    'id', u.user_id,
+                                    'name', u.user_name
+                                )
+                            ELSE 
+                                json_object(
+                                    'id', null,
+                                    'name', null
+                                )
+                        END)
+                ),
+            'listing',
+                json_object(
+                    'id', purchase.listingId,
+                    'time', purchase.listingTime,
+                    'price',
+                        (CASE WHEN purchase.relistedPrice is null
+                            THEN purchase.price
+                            ELSE purchase.relistedPrice
+                        END),
+                    'relisted',
+                        json_object(
+                            'id', purchase.relistedId
+                        ),
+                    'updatedPrice',
+                        json_object(
+                            'id',
+                                (CASE WHEN purchase.relistedId is null
+                                    THEN purchase.updatedPriceId
+                                    ELSE 
+                                        (CASE WHEN purchase.relistedId != purchase.updatedPriceId
+                                            THEN purchase.updatedPriceId
+                                            ELSE null
+                                        END)
+                                END),
+                            'price',
+                                (CASE WHEN purchase.relistedId is null
+                                    THEN purchase.updatedPrice
+                                    ELSE 
+                                        (CASE WHEN purchase.relistedId != purchase.updatedPriceId
+                                            THEN purchase.updatedPrice
+                                            ELSE null
+                                        END)
+                                END) 
+                        )
+                ),
+            'import',
+                (CASE WHEN purchase.id is null
+                    THEN 
+                        json_object(
+                            'id', i.id,
+                            'time', i.time,
+                            'importer',
+                                json_object(
+                                    'id', u.user_id,
+                                    'name', u.user_name
+                                )
+                        )
+                    ELSE 
+                        json_object(
+                            'id', null,
+                            'time', null,
+                            'importer',
+                                json_object(
+                                    'id', null,
+                                    'name', null
+                                )
+                        )
+                END)
+        ) credit
+    `
+    const selectValues = `
+        ci.id,
+        ${itemSelect},
+        ${printingSelect},
+        ${appraisalSelect},
+        ${lotSelect},
+        ${listingSelect},
+        ${saleSelect},
+        ${creditSelect}
+    `
     const query = `
         with insertEditCTE as (
             select
