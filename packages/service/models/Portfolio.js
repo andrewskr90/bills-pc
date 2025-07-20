@@ -245,144 +245,76 @@ const buildGetPortfolioExperimental = (userId, time) => {
     // purchLot     remove  addLot  remove  soldAsItem
     // purchLot     remove  addLot  remove  addLot      soldAsLot
 
-    const itemSelect = `
+    const itemSelect = (id, name, setId, setName, tcgpId) => `
         json_object(
-            'id', it.id,
-            'name', it.name,
-            'setId', se.set_v2_id,
-            'setName', se.set_v2_name,
-            'tcgpId', it.tcgpId
-        ) item
+            'id', ${id},
+            'name', ${name},
+            'setId', ${setId},
+            'setName', ${setName},
+            'tcgpId', ${tcgpId}
+        )
     `
-    const printingSelect = `
+    const printingSelect = (id, name) => `
         json_object(
-            'id', p.printing_id,
-            'name', p.printing_name
-        ) printing
+            'id', ${id},
+            'name', ${name}
+        )
     `
-    const appraisalSelect = `
+    const conditionSelect = (id, name) => `
         json_object(
-            'id', a.id,
-            'time', a.time,
+            'id', ${id}, 
+            'name', ${name}
+        )
+    `
+    const appraisalSelect = (id, time, condition) => `
+        json_object(
+            'id', ${id},
+            'time', ${time},
             'condition', 
-                json_object(
-                    'id', c.condition_id, 
-                    'name', c.condition_name
-                )
-        ) appraisal
+                ${condition}
+        )
     `
-    const lotSelect = `
+    const insertSelect = (id) => `json_object('id', ${id})`
+    const editSelect = (id, time, insert) => `
         json_object(
-            'id', 
-                (CASE WHEN sale.id is null
-                    THEN unsoldLot.lotId
-                    ELSE sale.lotId
-                END),
-            'edit',
-                (CASE WHEN sale.id is null
-                    THEN json_object(
-                        'id', unsoldLot.insertEditId,
-                        'time', unsoldLot.insertTime,
-                        'insert',
-                            json_object(
-                                'id', unsoldLot.lotInsertId
-                            )
-                    )
-                    ELSE json_object(
-                        'id', sale.insertEditId,
-                        'time', sale.insertTime,
-                        'insert',
-                            json_object(
-                                'id', sale.lotInsertId
-                            )
-                    )
-                END)
-        ) lot
+            'id', ${id},
+            'time', ${time},
+            'insert', ${insert}
+        )
     `
-    const listingSelect = `
+    const lotSelect = (id, edit) => `
         json_object(
-            'id', 
-                (CASE WHEN sale.listingId is null
-                    THEN unsoldListing.id
-                    ELSE sale.listingId
-                END),
-            'time', 
-                (CASE WHEN sale.listingId is null
-                    THEN unsoldListing.time
-                    ELSE sale.listingTime
-                END),
-            'price',
-                (CASE WHEN sale.listingId is null
-                    THEN 
-                        (CASE WHEN unsoldListing.relistedPrice is null
-                            THEN unsoldListing.price
-                            ELSE unsoldListing.relistedPrice
-                        END)
-                    ELSE 
-                        (CASE WHEN sale.relistedPrice is null
-                            THEN sale.price
-                            ELSE sale.relistedPrice
-                        END)
-                END),
-            'relisted',
-                json_object(
-                    'id',
-                        (CASE WHEN sale.listingId is null
-                            THEN unsoldListing.relistedId
-                            ELSE sale.relistedId
-                        END)
-                ),
-            'updatedPrice',
-                json_object(
-                    'price',
-                        (CASE WHEN sale.listingId is null
-                            THEN 
-                                (CASE WHEN unsoldListing.relistedId is null
-                                    THEN unsoldListing.updatedPrice
-                                    ELSE 
-                                        (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
-                                            THEN unsoldListing.updatedPrice
-                                            ELSE null
-                                        END)
-                                END) 
-                            ELSE 
-                                (CASE WHEN sale.relistedId is null
-                                    THEN sale.updatedPrice
-                                    ELSE 
-                                        (CASE WHEN sale.relistedId != sale.updatedPriceId
-                                            THEN sale.updatedPrice
-                                            ELSE null
-                                        END)
-                                END) 
-                        END) 
-                ),
-            'removal',
-                json_object(
-                    'id',
-                        (CASE WHEN sale.listingId is null
-                            THEN 
-                                (CASE WHEN unsoldListing.relistedId is null
-                                    THEN unsoldListing.listingRemovalId
-                                    ELSE null
-                                END)
-                            ELSE
-                                (CASE WHEN sale.relistedId is null
-                                    THEN sale.listingRemovalId
-                                    ELSE null
-                                END)
-                        END)
-                )
-        ) listing
+            'id', ${id},
+            'edit', ${edit}
+        )
     `
-    const saleSelect = `
+    const updatedPriceSelect = (price) => `
         json_object(
-            'id', sale.id,
-            'time', sale.time,
-            'purchaser',
-                json_object(
-                    'id', salePurchaser.user_id,
-                    'name', salePurchaser.user_name
-                )
+            'price', ${price}
+        )
+    `
+    const listingSelect = (id, time, price, relisted, updatedPrice, removal) => `
+        json_object(
+            'id', ${id},
+            'time', ${time},
+            'price', ${price},
+            'relisted', ${relisted},
+            'updatedPrice', ${updatedPrice},
+            'removal', ${removal}
+        )
+    `
+    const removalSelect = (id) => `json_object('id', ${id})`
+    const purchaserSelect = (id, name) => `
+        json_object(
+            'id', ${id},
+            'name', ${name}
+        )
+    `
+    const saleSelect = (id, time, purchaser) => `
+        json_object(
+            'id', ${id},
+            'time', ${time},
+            'purchaser', ${purchaser}
         ) sale
     `
     const creditSelect = `
@@ -470,14 +402,92 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 END)
         ) credit
     `
+    
     const selectValues = `
         ci.id,
-        ${itemSelect},
-        ${printingSelect},
-        ${appraisalSelect},
-        ${lotSelect},
-        ${listingSelect},
-        ${saleSelect},
+        ${itemSelect(
+            'it.id',
+            'it.name',
+            'se.set_v2_id',
+            'se.set_v2_name',
+            'it.tcgpId'
+        )} item,
+        ${printingSelect(
+            'p.printing_id',
+            'p.printing_name'
+        )} printing,
+        ${appraisalSelect(
+            'a.id', 
+            'a.time', 
+            conditionSelect('c.condition_id', 'c.condition_name')
+        )} appraisal,
+        CASE WHEN sale.id is null
+            THEN ${lotSelect(
+                'unsoldLot.lotId', 
+                editSelect(
+                    'unsoldLot.insertEditId', 
+                    'unsoldLot.insertTime', 
+                    insertSelect('unsoldLot.lotInsertId')
+                )
+            )}
+            ELSE ${lotSelect(
+                'sale.lotId',
+                editSelect(
+                    'sale.insertEditId', 
+                    'sale.insertTime', 
+                    insertSelect('sale.lotInsertId')
+                )
+            )}
+        END as lot,
+        (CASE WHEN sale.listingId is null
+            THEN ${listingSelect(
+                'unsoldListing.id',
+                'unsoldListing.time',
+                `(CASE WHEN unsoldListing.relistedPrice is null
+                    THEN unsoldListing.price
+                    ELSE unsoldListing.relistedPrice
+                END)`,
+                'unsoldListing.relistedId',
+                updatedPriceSelect(`(CASE WHEN unsoldListing.relistedId is null
+                    THEN unsoldListing.updatedPrice
+                    ELSE 
+                        (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
+                            THEN unsoldListing.updatedPrice
+                            ELSE null
+                        END)
+                END)`),
+                removalSelect(`(CASE WHEN unsoldListing.relistedId is null
+                    THEN unsoldListing.listingRemovalId
+                    ELSE null
+                END)`)
+            )}
+            ELSE ${listingSelect(
+                'sale.listingId',
+                'sale.listingTime',
+                `(CASE WHEN sale.relistedPrice is null
+                    THEN sale.price
+                    ELSE sale.relistedPrice
+                END)`,
+                'sale.relistedId',
+                updatedPriceSelect(`(CASE WHEN sale.relistedId is null
+                    THEN sale.updatedPrice
+                    ELSE 
+                        (CASE WHEN sale.relistedId != sale.updatedPriceId
+                            THEN sale.updatedPrice
+                            ELSE null
+                        END)
+                END) `),
+                removalSelect(`(CASE WHEN sale.relistedId is null
+                    THEN sale.listingRemovalId
+                    ELSE null
+                END)`)
+            )}
+        END) as listing,
+        ${saleSelect(
+            'sale.id', 
+            'sale.time', 
+            purchaserSelect('salePurchaser.user_id', 'salePurchaser.user_name')
+        )},
         ${creditSelect}
     `
     const query = `
