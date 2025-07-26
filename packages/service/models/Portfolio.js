@@ -309,8 +309,8 @@ const buildGetPortfolioExperimental = (userId, time) => {
         json_object(
             'appraisal', ${appraisal},
             'lot', ${lot},
-            'sale', ${sale},
             'listing', ${listing},
+            'sale', ${sale},
             'import', ${imp}
         )
     `
@@ -379,7 +379,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                     THEN unsoldListing.price
                     ELSE unsoldListing.relistedPrice
                 END)`,
-                'unsoldListing.relistedId',
+                idJson('unsoldListing.relistedId'),
                 `CASE WHEN unsoldListing.relistedId is null
                     THEN ${updatedPriceJson('unsoldListing.updatedPriceId', 'unsoldListing.updatedPrice')}
                     ELSE (CASE WHEN unsoldListing.relistedId != unsoldListing.updatedPriceId
@@ -445,14 +445,13 @@ const buildGetPortfolioExperimental = (userId, time) => {
                     )  
                 )}
             END`,
-            lotJson('purchase.lotId', 'purchase.insertEditId'),
-            saleJson(
-                'purchase.id',
-                'purchase.time',
-                `(CASE WHEN purchase.id is not null
-                    THEN ${userJson('u.user_id', 'u.user_name')}
-                    ELSE ${userJson('null', 'null')}
-                END)`
+            lotJson(
+                'purchase.lotId', 
+                editJson(
+                    'purchase.insertEditId', 
+                    'purchase.insertTime', 
+                    idJson('purchase.lotInsertId')
+                )
             ),
             listingJson(
                 'purchase.listingId',
@@ -470,6 +469,14 @@ const buildGetPortfolioExperimental = (userId, time) => {
                     END)
                 END`,
                 idJson('null')
+            ),
+            saleJson(
+                'purchase.id',
+                'purchase.time',
+                `(CASE WHEN purchase.id is not null
+                    THEN ${userJson('u.user_id', 'u.user_name')}
+                    ELSE ${userJson('null', 'null')}
+                END)`
             ),
             `(CASE WHEN purchase.id is null
                 THEN ${importJson('i.id', 'i.time', userJson('u.user_id', 'u.user_name'))}
@@ -631,6 +638,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 s.relistedPrice,
                 s.insertEditId,
                 s.insertTime,
+                s.lotInsertId,
                 s.removalEditId,
                 s.lotRemovalTime,
                 s.collectedItemId
