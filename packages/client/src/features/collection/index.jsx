@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Route, Routes, Link, useNavigate } from 'react-router-dom'
 import LoginForm from '../authenticate/LoginForm/index.jsx'
-import { initialPortfolioValues } from '../../data/initialData'
 import './assets/collection.css'
 import Header from '../../layouts/header/index.jsx'
 import CategorySelector from '../../components/category-selector/index.jsx'
 import Transactions from './features/transactions/index.jsx'
 import PortfolioAssets from './features/portfolio-assets/index.jsx'
 import Listings from './features/watching/index.jsx'
+import Vendors from './features/vendors/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
-    const [portfolio, setPortfolio] = useState(initialPortfolioValues)
     const [transactions, setTransactions] = useState([])
     const [transactionCount, setTransactionCount] = useState()
-    const [count, setCount] = useState()
 
     const navigate = useNavigate()
 
@@ -27,7 +25,7 @@ const Collection = (props) => {
             <>
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'listings']} 
+                    categories={['assets', 'transactions', 'listings', 'vendors']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -35,10 +33,6 @@ const Collection = (props) => {
                 <Route 
                     path='/assets/*'
                     element={<PortfolioAssets 
-                        portfolio={portfolio} 
-                        setPortfolio={setPortfolio} 
-                        count={count} 
-                        setCount={setCount} 
                         referenceData={referenceData}
                         setReferenceData={setReferenceData}
                     />}
@@ -58,6 +52,15 @@ const Collection = (props) => {
                     path='/listings/*'
                     element={
                         <Listings 
+                            referenceData={referenceData} 
+                            setReferenceData={setReferenceData} 
+                        />
+                    }
+                />
+                <Route 
+                    path='/vendors/*'
+                    element={
+                        <Vendors 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />

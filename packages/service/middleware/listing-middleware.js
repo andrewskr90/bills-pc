@@ -1,4 +1,5 @@
 const Listing = require('../models/Listing')
+const SKU = require('../models/SKU')
 const CollectedItem = require('../models/CollectedItem')
 const BulkSplit = require('../models/BulkSplit')
 const MarketPrice = require('../models/MarketPrice')
@@ -35,34 +36,6 @@ const  formatListings = (listings) => {
     })
 }
 
-const formatItem = (item) => {
-    return {
-        collectedItemId: item.collectedItemId,
-        itemId: item.itemId,
-        name: item.name,
-        tcgpId: item.tcgpId,
-        setId: item.setId,
-        index: item.index,
-        setName: item.setName,
-        printingId: item.printingId,  
-        conditionId: item.appraisals[0][1],
-        appraisals: item.appraisals,
-        marketPrice: item.marketPrice ? parseFloat(item.marketPrice) : undefined,
-        marketPriceDate: item.marketPriceDate
-    }
-}
-
-const formatItems = (items) => {
-    return items.map(lotItem => {
-        if (lotItem.itemId) {
-            return formatItem(lotItem)
-        } else if (lotItem.bulkSplitId) {
-            return lotItem
-        }
-    })
-}
-
-
 const uniqueItemPrintingConditionInListings = (listingItems) => {
     return listingItems.filter(item => item.itemId).map(item => ({
         itemId: item.itemId,
@@ -84,8 +57,7 @@ const tiePricesToItems = (items, itemPrices) => {
     return items.map(item => { 
         if (item.bulkSplitId) return item
 
-        const { itemId, printingId, appraisals } = item
-        const conditionId = appraisals[0][1]
+        const { itemId, printingId, conditionId } = item
         if (priceLib[itemId]) {
             if (priceLib[itemId][printingId]) {
                 if (priceLib[itemId][printingId][conditionId]) {
@@ -93,7 +65,7 @@ const tiePricesToItems = (items, itemPrices) => {
                     return {
                         ...item, 
                         marketPriceDate, 
-                        marketPrice
+                        marketPrice: parseFloat(marketPrice)
                     }
                 }
             }
@@ -125,41 +97,45 @@ const getListingById = async (req, res, next) => {
     try {
         const listing = await Listing.getById(req.params.id)
         const today = new Date()
+        today.setMonth(today.getMonth()-1)
         const yesterday = new Date(today)
         yesterday.setDate(today.getDate()-1)
         if (listing.lotId) {
-            let lotItems = await buildLotFromId(listing.lotId)
-            const lotCollectedItems = lotItems.filter(li => li.collectedItemId)
-            const lotItemsPrices = await MarketPrice.selectByItemIdsBetweenDates(
-                uniqueItemPrintingConditionInListings(lotCollectedItems), 
-                yesterday, 
-                today
-            )
-            const lotItemsWithPrices = tiePricesToItems(lotItems, lotItemsPrices)
-            const formattedLotItems = formatItems(lotItemsWithPrices)
+            const items = await buildLotFromId(listing.lotId)
             const formattedListing = formatListings([listing])[0]
             req.results = {
                 ...formattedListing,
                 lot: {
                     ...formattedListing.lot,
-                    items: formattedLotItems
+                    items
                 }
             }
         } else if (listing.collectedItemId) {
             const formattedListing = formatListings([listing])[0]
-            const collectedItem = await CollectedItem.getById(formattedListing.collectedItem.id)
+            const collectedItem = await CollectedItem.getById(formattedListing.collectedItem.id, req.claims.user_id, new Date().toISOString())
+
             const itemPrices = await MarketPrice.selectByItemIdsBetweenDates(
-                [collectedItem],
+                [{ 
+                    itemId: collectedItem.item.id, 
+                    printingId: collectedItem.printing.id, 
+                    conditionId: collectedItem.appraisal.condition.id 
+                }],
                 yesterday,
                 today
             )
-            const itemWithPrices = tiePricesToItems([collectedItem], itemPrices)[0]
-            const formattedItem = formatItem(itemWithPrices)
+            const itemWithPrices = tiePricesToItems(
+                [{ 
+                    itemId: collectedItem.item.id, 
+                    printingId: collectedItem.printing.id, 
+                    conditionId: collectedItem.appraisal.condition.id 
+                }], 
+                itemPrices
+            )[0]
             req.results = {
                 ...formattedListing,
                 collectedItem: {
                     ...formattedListing.collectedItem,
-                    ...formattedItem,
+                    ...itemWithPrices,
                 }
             }
         } else if (listing.bulkSplitId) {
@@ -176,10 +152,45 @@ const getListingById = async (req, res, next) => {
     next()
 }
 
+const formatCsvItems = async (csvItems) => {
+    const offset = 50
+    let pageSkus = []
+    const formattedCsvItems = []
+    for (let i=0; i<csvItems.length; i++) {
+        pageSkus.push(csvItems[i].sku)
+        if (((i+1)%offset === 0) || i === csvItems.length-1) {
+            const skus = await SKU.findByTcgpIds(pageSkus)
+            const skusWithMultiples = skus.reduce((prev, cur) => {
+                const itemsBySku = []
+                const { quantity } = csvItems.find(item => parseInt(item.sku) === cur.tcgpId)
+                const formattedItem = {
+                    id: cur.itemId,
+                    printing: cur.printingId,
+                    condition: cur.conditionId
+                }
+                for (let l=0; l<quantity; l++) {
+                    itemsBySku.push(formattedItem)
+                }
+                return [...prev, ...itemsBySku]
+            }, [])
+
+            formattedCsvItems.push(...skusWithMultiples)
+            pageSkus = []
+        }
+    }
+    return formattedCsvItems
+}
+
 const createListing = async (req, res, next) => {
     if (req.query.external) {
         try {
-            const listingId = await Listing.createExternal(req.body, req.claims.user_id)
+            const { csvItems } = req.body
+            delete req.body.csvItems
+            const externalListing = req.body
+            if (csvItems.length > 0) {
+                externalListing.items = await formatCsvItems(csvItems)
+            }
+            const listingId = await Listing.createExternal(externalListing, req.claims.user_id)
             req.results = { message: "Created.", data: listingId }
         } catch (err) {
             return next(err)
@@ -193,6 +204,7 @@ const createListing = async (req, res, next) => {
         }        
     } else {
         try {
+        // TODO permissions for item
         const listingId = await Listing.create(req.body)
         req.results = { message: "Created.", date: listingId }
         } catch (err) {

@@ -59,6 +59,13 @@ const QueryFormatters = {
         return query
     },
 
+    bpcQueryObjectsToInsert(objectsArray, tableName, variables) {
+        return { 
+            query: this.objectsToInsert(objectsArray, tableName),
+            variables
+        }
+    },
+
     seperateColumnsValues(object) {
         //takes in a single object of keys and STRINGS,
         //concatinates the keys and values to be used as

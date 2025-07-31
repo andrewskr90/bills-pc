@@ -53,7 +53,7 @@ const getItems = async (req, res, next) => {
         else orderBy += ' ASC'
         orderBy += ', set_v2_name ASC'
     }
-    const groupBy = ' GROUP BY i.name, i.id'
+    const groupBy = ' GROUP BY i.name, i.id, p.printing_id'
     let query = `
         SELECT 
             i.id,

@@ -30,6 +30,9 @@ const Listing = (props) => {
             <p>labels: {labels.length}</p>
         </div>
     }
+    const handleViewLot = () => {
+        navigate(`/gym-leader/collection/assets/lot/${listing.lot.id}`)
+    }
 
     return (
         <Routes>
@@ -40,6 +43,7 @@ const Listing = (props) => {
                         <p>{listing.sellerName}</p>
                         <p>{parseFloat(listing.updatedPrice ? listing.updatedPrice : listing.initialPrice)}</p>
                         <button onClick={handleEditListing}>Edit</button>
+                        <button onClick={handleViewLot}>View Lot</button>
                         <button onClick={handlePurchaseListing}>Purchase</button>
                         {listing.lot.id && (
                             <div>
@@ -67,7 +71,7 @@ const Listing = (props) => {
                                         return <div style={{ marginBottom: '8px' }}>
                                             <p>{item.name}</p>
                                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.conditionId).condition_name}</p>
+                                                <p>{referenceData.bulk.condition.find(c => c.condition_id === item.appraisals[0][1]).condition_name}</p>
                                                 <p>--</p>
                                                 <p>{referenceData.bulk.printing.find(p => p.printing_id === item.printingId).printing_name}</p>
                                                 <p>--</p>

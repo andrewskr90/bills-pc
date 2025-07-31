@@ -9,19 +9,18 @@ import PlusButton from '../../components/buttons/plus-button/index.jsx'
 import './assets/importPurchase.css'
 import Button from '../../components/buttons/text-button/index.jsx'
 import BulkEditor from '../../components/bulk-editor/index.jsx'
-import InputSelect from '../../components/input-select/index.jsx'
+import SearchAndSelect from '../../components/search-and-select/index.jsx'
 
 const ImportPurchase = (props) => {
     const [purchaseValues, setPurchaseValues] = useState(initialPurchaseValues)
     const { 
         referenceData, 
-        setReferenceData,
-        createdProxyUsers,
-        setCreatedProxyUsers
+        setReferenceData
     } = props
     const [addItemOrBulk, setAddItemOrBulk] = useState('item')
-    
+    const [vendorName, setVendorName] = useState('')
     const navigate = useNavigate()
+    const [searchedProxyUsers, setSearchedProxyUsers] = useState([])
     const initialEmptyMessage = 'Search for an item to add to your purchase.'
     const updatePurchaseItem = (editedItem, i) => {
         const updatedPurchaseItems = purchaseValues.items.map((item, j) => {
@@ -33,6 +32,17 @@ const ImportPurchase = (props) => {
             ...purchaseValues,
             items: updatedPurchaseItems
         })
+    }
+
+    const handleChangeVendorName = (e) => {
+        clearTimeout(timeoutId)
+        setVendorName(e.target.value)
+        setTimeoutId(setTimeout(async () => {
+            const params = { proxy: true, user_name: e.target.value }
+            await BillsPcService.getUsers({ params })
+                .then(res => setSearchedProxyUsers(res.data.users))
+                .catch(err => console.log(err))
+        }, 500))
     }
 
     const updatePurchaseValues = (e) => {
@@ -136,8 +146,8 @@ const ImportPurchase = (props) => {
 
     const createNewProxyUser = async (newProxyUser) => {
         try {
-            const { data: { id } } = await BillsPcService.postUser({ data: newProxyUser, params: { proxy: true } })
-            setCreatedProxyUsers([...createdProxyUsers, { ...newProxyUser, user_id: id }])
+            const { data: { id } } = await BillsPcService.postUser({ data: { user_name: newProxyUser }, params: { proxy: true } })
+            setSearchedProxyUsers([...searchedProxyUsers, { user_name: newProxyUser, user_id: id }])
             setPurchaseValues({ ...purchaseValues, sellerId: id })
         } catch (err) {
             console.log(err)
@@ -147,11 +157,14 @@ const ImportPurchase = (props) => {
     const ProxyUserSelector = () => {
         return (
             purchaseValues.sellerId ? (
-                <p>{createdProxyUsers.find(user => user.user_id === purchaseValues.sellerId).user_name}</p>
+                <p>{searchedProxyUsers.find(user => user.user_id === purchaseValues.sellerId).user_name}</p>
                 ) : (
-                <InputSelect 
-                    searchKey="user_name" 
-                    items={createdProxyUsers} 
+                <SearchAndSelect 
+                    selected={searchedProxyUsers.find(user => user.user_id === purchaseValues.sellerId)}
+                    value={vendorName}
+                    handleChange={handleChangeVendorName}
+                    searched={searchedProxyUsers} 
+                    displayKey="user_name" 
                     handleSelect={((selectedProxyUser) => {
                         setPurchaseValues({
                             ...purchaseValues,
@@ -159,6 +172,7 @@ const ImportPurchase = (props) => {
                         })
 
                     })} 
+                    label="Vendor"
                     handleCreateNew={(user_name => createNewProxyUser({ user_name }))}
                     createNewText="Create New Seller"
                 />

@@ -30,7 +30,6 @@ const formatPortfolioItems = (req, res, next) => {
     req.results.items = req.results.items.reduce((acc, cur) => {
         const {
             collectedItemId,
-            bulkSplitId,
             itemId,
             setName,
             name,
@@ -42,13 +41,7 @@ const formatPortfolioItems = (req, res, next) => {
             acceptedOfferPrice,
             quantity
         } = cur
-        const foundItem = acc.find(item => {
-            if (cur.itemId) {
-                return item.itemId === cur.itemId
-            } else if (cur.bulkSplitId) {
-                return item.bulkSplitId === cur.bulkSplitId
-            }
-        })
+        const foundItem = acc.find(item => item.itemId === cur.itemId)
         if (foundItem) {
             return acc.map(item => {
                 if (item.itemId === foundItem.itemId) {
@@ -72,7 +65,6 @@ const formatPortfolioItems = (req, res, next) => {
         }
         const newItem = {
             itemId,
-            bulkSplitId,
             name,
             setName,
             setName,

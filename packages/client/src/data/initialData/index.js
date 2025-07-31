@@ -48,6 +48,26 @@ export const initialReferenceDataValues = {
             },
         }
     },
+    transactionSort: {
+        value: 'date',
+        direction: 'desc',
+        values: {
+            date: {
+                defaultDirection: 'desc',
+                formatted: 'Date'
+            },
+        }
+    },
+    vendorSort: {
+        value: 'user_name',
+        direction: 'asc',
+        values: {
+            ['user_name']: {
+                defaultDirection: 'asc',
+                formatted: 'Name'
+            },
+        }
+    },
     filter: {
         market: null
     }
@@ -203,7 +223,8 @@ export const initialExternalListing = {
     sellerId: undefined,
     price: undefined,
     items: [],
-    bulkSplits: []
+    bulkSplits: [],
+    csvItems: []
 }
 
 export const initialListingValues = {

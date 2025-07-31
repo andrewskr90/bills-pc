@@ -90,6 +90,13 @@ const BillsPcService = {
             params: params
         })
     },
+    getTransactions(params) {
+        return axios({
+            ...options,
+            url: '/api/v1/transactions',
+            params: params
+        })
+    },
     postType(config) {
         const { data } = config
         return axios({
@@ -231,6 +238,13 @@ const BillsPcService = {
             params
         })
     },
+    getLotById(id, params) {
+        return axios({
+            ...options,
+            url: `/api/v1/lots/${id}`,
+            params
+        })
+    },
     getListingById(id) {
         return axios({
             ...options,
@@ -283,7 +297,15 @@ const BillsPcService = {
             data,
             method: 'post'
         })
-    }
+    },
+    createAppraisal({ data }) {
+        return axios({
+            ...options,
+            url: `/api/v1/appraisals`,
+            data,
+            method: 'post'
+        })
+    },
 }
 
 
