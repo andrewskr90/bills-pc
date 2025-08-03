@@ -60,8 +60,8 @@ const select = async () => {
 
 const patchByTcgpId = async (tcgpId, values) => {
     const query = `UPDATE Item SET ${Object.keys(values).map((value, idx) => {
-        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''} WHERE tcgpId = ?`
-    })}`
+        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''}`
+    })} WHERE tcgpId = ?`
     const req = { queryQueue: [{ query, variables: [tcgpId] }] }
     const res = {}
     await executeQueries(req, res, (err) => {
