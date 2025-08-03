@@ -164,7 +164,7 @@ export const postItemsBillsPc = async (data, cookies) => {
             url: '/api/v1/items',
             data,
             headers: { Cookie: cookies },
-        })        
+        })
         return billsPcItems.data
     } catch (err) {
         throw err
@@ -177,7 +177,8 @@ export const getAllItemsInExpansionBillsPc = async (expansionid, cookies) => {
     let page = 1
     while (moreItems) {
         try {
-            const currentPageItems = await getItemsBillsPc(cookies, { page, expansionid })
+            const params = { page, expansionid }
+            const currentPageItems = await getItemsBillsPc(params, cookies)
             items.push(...currentPageItems.items)
             if (currentPageItems.items.length > 0) {
                 page += 1
@@ -191,7 +192,7 @@ export const getAllItemsInExpansionBillsPc = async (expansionid, cookies) => {
     return items
 }
 
-export const getItemsBillsPc = async (cookies, params) => {
+export const getItemsBillsPc = async (params, cookies) => {
     try {
         const billsPcItems = await axios({
             baseURL: baseurl,
