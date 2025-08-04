@@ -566,15 +566,15 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 on lp.listingId = l.id
                 and lp.time < '${time}'
             left join V3_ListingPrice laterLp
-                on lp.listingId = l.id
-                and lp.time < '${time}'
+                on laterLp.listingId = l.id
+                and laterLp.time < '${time}'
                 and laterLp.time > lp.time
             left join V3_ListingRemoval listR
                 on listR.listingId = l.id
                 and listR.time < '${time}'
             left join V3_ListingRemoval laterListR
-                on listR.listingId = l.id
-                and listR.time < '${time}'
+                on laterListR.listingId = l.id
+                and laterListR.time < '${time}'
                 and laterListR.time > listR.time
             left join V3_ListingPrice relistP
                 on relistP.listingId = listR.listingId
@@ -587,6 +587,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
             where laterLp.id is null
                 and laterListR.id is null
                 and betweenRelistP.id is null
+                and l.time < '${time}'
         ),
         saleCTE as (
             select
@@ -739,6 +740,9 @@ const buildGetPortfolioExperimental = (userId, time) => {
             on (
                 unsoldLot.collectedItemId = purchase.collectedItemId
                 or unsoldLot.collectedItemId = immediateRemoval.collectedItemId
+                or (
+                    purchase.id is null and unsoldLot.collectedItemId = i.collectedItemId
+                )
             ) and unsoldLot.removalEditId is null
         left join insertAndRemovalCTE laterUnsoldLot
             on (
