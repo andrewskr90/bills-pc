@@ -305,7 +305,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
             'purchaser', ${purchaser}
         )
     `
-    const creditJson = (appraisal, lot, sale, listing, imp) => `
+    const creditJson = (appraisal, lot, listing, sale, imp) => `
         json_object(
             'appraisal', ${appraisal},
             'lot', ${lot},
@@ -680,9 +680,11 @@ const buildGetPortfolioExperimental = (userId, time) => {
             and laterPurchase.time > purchase.time
         left join appraisalCTE purchaseAppraisal
             on purchaseAppraisal.collectedItemId = purchase.collectedItemId
-        left join appraisalCTE earlierPurchaseAppraisal
-            on earlierPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
-            and earlierPurchaseAppraisal.time < purchaseAppraisal.time
+            and purchaseAppraisal.time < purchase.time
+        left join appraisalCTE betweenPurchaseAppraisal
+            on betweenPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
+            and betweenPurchaseAppraisal.time < purchase.time
+            and betweenPurchaseAppraisal.time > purchaseAppraisal.time
         right join V3_Import i
             on i.collectedItemId = purchase.collectedItemId
         left join appraisalCTE importAppraisal
@@ -775,7 +777,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 purchase.id is not null
                 or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')
             ) 
-            and earlierPurchaseAppraisal.id is null
+            and betweenPurchaseAppraisal.id is null
             and earlierImportAppraisal.id is null
             and betweenSale.id is null
             and laterUnsoldListing.id is null

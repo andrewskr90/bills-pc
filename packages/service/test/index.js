@@ -493,11 +493,11 @@ class BPCT {
         if (listing.collectedItemId) {
             const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
             const methods = this.contextualizeItemMethods(listing.collectedItemId, listingRemoval.time)
-            return { listingRemoval, collectedItem, ...methods }
+            return { listingRemoval, collectedItem, listing, ...methods }
         } else {
             const lot = this.lo.find(lo => lo.id === listing.lotId)
             const methods = this.contextualizeLotMethods(listing.lotId, listingRemoval.time)
-            return { listingRemoval, lot, ...methods }
+            return { listingRemoval, lot, listing, ...methods }
         }
     }
     sale(listingId, purchaserId) {
@@ -518,11 +518,11 @@ class BPCT {
         if (listing.collectedItemId) {
             const methods = this.contextualizeItemMethods(listing.collectedItemId, sale.time)
             const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
-            return { sale, collectedItem, ...methods }
+            return { sale, listing, collectedItem, ...methods }
         } else {
             const methods = this.contextualizeLotMethods(listing.lotId, sale.time)
             const lot = this.lo.find(lo => lo.id === listing.lotId)
-            return { sale, lot, ...methods }
+            return { sale, listing, lot, ...methods }
         }
     }
     createLot(insertCollectedItemIds) {
