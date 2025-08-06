@@ -10,7 +10,8 @@ import {
     postSkusBillsPc,
     postPricesBillsPc,
     patchItemByFilterBillsPc,
-    getAllItemsInExpansionBillsPc
+    getAllItemsInExpansionBillsPc,
+    getItemsBillsPc
 } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
 import dotenv from 'dotenv'
@@ -159,18 +160,42 @@ const catalogueSync = async () => {
                                         }
                                     }
                                 } catch (err) {
-                                    if (err.response.status === 422) {
+                                    const { status } = err.response
+                                    const DUPLICATE = 422
+                                    if (status === DUPLICATE) {
                                         if (err.response.data.message.includes('Item.tcgpId')) {
-                                            const duplicateId = parseInt(err.response.data.message
-                                                .split(`Duplicate entry '`)[1].split(`' for key 'Item.tcgpId'`)[0])
-                                            try {
-                                                const itemToUpdate = pageNewItems.find(item => item.tcgpId === duplicateId)
-                                                await patchItemByFilterBillsPc({ tcgpId: duplicateId }, { setId: itemToUpdate.setId }, cookies)
-                                                updatedItemCount += 1
-                                            } catch (err) {
-                                                console.log(err)
-                                                // remove item to stop further errors
-                                                currentPageItems = currentPageItems.filter(item => item.productId !== duplicateId)
+                                            // narrow down stale items within page's new or updated items
+                                            const newOrUpdatedTcgpIds = pageNewItems
+                                                .map(newItem => newItem.tcgpId)
+                                                .join(',')
+                                            const bpcStaleItemsRes = await getItemsBillsPc(
+                                                { tcgpIds: newOrUpdatedTcgpIds }, 
+                                                cookies
+                                            )
+                                            const bpcStaleItems = bpcStaleItemsRes.items
+                                            // update the values for those items
+                                            for (let i=0; i<bpcStaleItems.length; i++) {
+                                                const bpcStaleItem = bpcStaleItems[i]
+                                                try {
+                                                    const updatedItem = pageNewItems.find(itemToUpdate => {
+                                                        return itemToUpdate.tcgpId === bpcStaleItem.tcgpId
+                                                    })
+                                                    const setId = updatedItem.setId
+                                                    const name = updatedItem.name
+                                                    const updatedData = { setId, name }
+                                                    await patchItemByFilterBillsPc(
+                                                        { tcgpId: updatedItem.tcgpId }, 
+                                                        updatedData, 
+                                                        cookies
+                                                    )
+                                                    updatedItemCount += 1
+                                                } catch (err) {
+                                                    console.log(err)
+                                                    // remove item to stop further errors
+                                                    currentPageItems = currentPageItems.filter(item => {
+                                                        return item.productId !== bpcStaleItem.tcgpId
+                                                    })
+                                                }
                                             }
                                         }
                                     }
