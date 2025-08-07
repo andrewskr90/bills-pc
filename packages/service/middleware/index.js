@@ -26,6 +26,7 @@ const formatPrintingsFromSkus = (skus) => {
     if (!skus) return []
     const visitedPrintings = {}
     return skus.filter(sku => {
+        if (!sku) return false
         if (!visitedPrintings[sku[0]]) {
             visitedPrintings[sku[0]] = 1
             return true
