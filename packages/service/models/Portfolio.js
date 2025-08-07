@@ -305,7 +305,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
             'purchaser', ${purchaser}
         )
     `
-    const creditJson = (appraisal, lot, sale, listing, imp) => `
+    const creditJson = (appraisal, lot, listing, sale, imp) => `
         json_object(
             'appraisal', ${appraisal},
             'lot', ${lot},
@@ -566,15 +566,15 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 on lp.listingId = l.id
                 and lp.time < '${time}'
             left join V3_ListingPrice laterLp
-                on lp.listingId = l.id
-                and lp.time < '${time}'
+                on laterLp.listingId = l.id
+                and laterLp.time < '${time}'
                 and laterLp.time > lp.time
             left join V3_ListingRemoval listR
                 on listR.listingId = l.id
                 and listR.time < '${time}'
             left join V3_ListingRemoval laterListR
-                on listR.listingId = l.id
-                and listR.time < '${time}'
+                on laterListR.listingId = l.id
+                and laterListR.time < '${time}'
                 and laterListR.time > listR.time
             left join V3_ListingPrice relistP
                 on relistP.listingId = listR.listingId
@@ -587,6 +587,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
             where laterLp.id is null
                 and laterListR.id is null
                 and betweenRelistP.id is null
+                and l.time < '${time}'
         ),
         saleCTE as (
             select
@@ -679,9 +680,11 @@ const buildGetPortfolioExperimental = (userId, time) => {
             and laterPurchase.time > purchase.time
         left join appraisalCTE purchaseAppraisal
             on purchaseAppraisal.collectedItemId = purchase.collectedItemId
-        left join appraisalCTE earlierPurchaseAppraisal
-            on earlierPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
-            and earlierPurchaseAppraisal.time < purchaseAppraisal.time
+            and purchaseAppraisal.time < purchase.time
+        left join appraisalCTE betweenPurchaseAppraisal
+            on betweenPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
+            and betweenPurchaseAppraisal.time < purchase.time
+            and betweenPurchaseAppraisal.time > purchaseAppraisal.time
         right join V3_Import i
             on i.collectedItemId = purchase.collectedItemId
         left join appraisalCTE importAppraisal
@@ -739,6 +742,9 @@ const buildGetPortfolioExperimental = (userId, time) => {
             on (
                 unsoldLot.collectedItemId = purchase.collectedItemId
                 or unsoldLot.collectedItemId = immediateRemoval.collectedItemId
+                or (
+                    purchase.id is null and unsoldLot.collectedItemId = i.collectedItemId
+                )
             ) and unsoldLot.removalEditId is null
         left join insertAndRemovalCTE laterUnsoldLot
             on (
@@ -771,7 +777,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 purchase.id is not null
                 or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')
             ) 
-            and earlierPurchaseAppraisal.id is null
+            and betweenPurchaseAppraisal.id is null
             and earlierImportAppraisal.id is null
             and betweenSale.id is null
             and laterUnsoldListing.id is null

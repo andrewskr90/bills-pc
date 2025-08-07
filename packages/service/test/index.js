@@ -21,10 +21,14 @@ const tableIds = {
 }
 
 const testSets = [
-    { set_v2_id: '0', set_v2_name: 'Test Set 0', set_v2_tcgplayer_set_id: '0' }
+    { set_v2_id: '0', set_v2_name: 'Test Set 0', set_v2_tcgplayer_set_id: '0' },
+    { set_v2_id: '1', set_v2_name: 'Test Set 1', set_v2_tcgplayer_set_id: '1' }
 ]
 const testItems = [
-    { id: '0', name: 'Test Item 0', setId: testSets[0].set_v2_id, tcgpId: '0' }
+    { id: '0', name: 'Test Item 0', setId: testSets[0].set_v2_id, tcgpId: '0' },
+    { id: '1', name: 'Test Item 1', setId: testSets[0].set_v2_id, tcgpId: '1' },
+    { id: '2', name: 'Test Item 2', setId: testSets[1].set_v2_id, tcgpId: '2' },
+    { id: '3', name: 'Test Item 3', setId: testSets[1].set_v2_id, tcgpId: '3' }
 ]
 const testPrintings = [
     { printing_id: '0', printing_name: 'Test Printing 0', printing_tcgp_printing_id: '0' },
@@ -472,11 +476,13 @@ class BPCT {
         const listingPrice = { id, listingId, price, time: this.addDay() }
         this.lp = [...this.lp, listingPrice]
         if (listing.collectedItemId) {
-            const methods = this.contextualizeItemMethods(listing.collectedItemId, listingPrice.time)
-            return { listingPrice, ...methods }
-        } else {
-            const methods = this.contextualizeLotMethods(listing.lotId, listingPrice.time)
-            return { listingPrice, ...methods }
+            const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
+            const methods = this.contextualizeItemMethods(collectedItem.id, listingPrice.time)
+            return { collectedItem, listing, listingPrice, ...methods }
+        } else if (listing.lotId) {
+            const lot = this.lo.find(lo => lo.id === listing.lotId)
+            const methods = this.contextualizeLotMethods(lot.id, listingPrice.time)
+            return { lot, listing, listingPrice, ...methods }
         }
     }
     removeListing(listingId) {
@@ -487,10 +493,11 @@ class BPCT {
         if (listing.collectedItemId) {
             const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
             const methods = this.contextualizeItemMethods(listing.collectedItemId, listingRemoval.time)
-            return { listingRemoval, collectedItem, ...methods }
+            return { listingRemoval, collectedItem, listing, ...methods }
         } else {
+            const lot = this.lo.find(lo => lo.id === listing.lotId)
             const methods = this.contextualizeLotMethods(listing.lotId, listingRemoval.time)
-            return { listingRemoval, ...methods }
+            return { listingRemoval, lot, listing, ...methods }
         }
     }
     sale(listingId, purchaserId) {
@@ -511,11 +518,11 @@ class BPCT {
         if (listing.collectedItemId) {
             const methods = this.contextualizeItemMethods(listing.collectedItemId, sale.time)
             const collectedItem = this.ci.find(ci => ci.id === listing.collectedItemId)
-            return { sale, collectedItem, ...methods }
+            return { sale, listing, collectedItem, ...methods }
         } else {
             const methods = this.contextualizeLotMethods(listing.lotId, sale.time)
             const lot = this.lo.find(lo => lo.id === listing.lotId)
-            return { sale, lot, ...methods }
+            return { sale, listing, lot, ...methods }
         }
     }
     createLot(insertCollectedItemIds) {

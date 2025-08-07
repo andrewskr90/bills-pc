@@ -40,6 +40,16 @@ const getItems = async (req, res, next) => {
             whereStatement += `AND ${itemTypeWhereWithOr} `
         } else whereStatement += `WHERE ${itemTypeWhereWithOr} `
     }
+    if (req.query.tcgpIds) {
+        if (whereStatement) whereStatement += ' AND '
+        else whereStatement += 'WHERE '
+        whereStatement += '('
+        req.query.tcgpIds.split(',').forEach((tcgpId, idx) => {
+            if (idx !== 0) whereStatement += 'OR '
+            whereStatement += `i.tcgpId = '${tcgpId}' `
+        })
+        whereStatement += ')'
+    }
     const direction = req.query.direction ? req.query.direction.toLowerCase() : undefined 
     const attribute = req.query.attribute ? req.query.attribute.toLowerCase() : undefined
     let orderBy = ``
@@ -96,6 +106,7 @@ const getItems = async (req, res, next) => {
 const patchItem = async (req, res, next) => {
     if (req.query.tcgpId) {
         req.results = await Item.patchByTcgpId(req.query.tcgpId, req.body)
+        next()
     } else {
         next({ status: 500, message: 'tcgpId param is not present.' })
     }
