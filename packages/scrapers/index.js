@@ -3,9 +3,6 @@ import {
     getSetsBillsPc,
     postSetsBillsPc,
     postItemsBillsPc,
-    getLanguagesBillsPc,
-    getPrintingsBillsPc,
-    getConditionsBillsPc,
     getSkusBillsPc,
     postSkusBillsPc,
     postPricesBillsPc,
@@ -15,26 +12,72 @@ import {
 } from './api/index.js'
 import TCGPAPI from './api/tcgp.js'
 import dotenv from 'dotenv'
+import { buildTCGPReferenceData, intArraysMatch } from './utils/index.js'
 dotenv.config()
 
-const intArraysMatch = (array1, array2) => {
-    const array1Sorted = array1.sort()
-    const array2Sorted = array2.sort()
-    if (array1Sorted.length !== array2Sorted.length) return false
-    let matching = true
-    for (let i=0; i< array1Sorted.length; i++) {
-        if (array1[i] !== array2[i]) {
-            matching = false
-            break
-        }
+const processUnexpectedItems = async (unexpectedItems, cookies) => {
+
+    const processNewItems = async (items) => {
+        const ids = await postItemsBillsPc(items, cookies)
+        const newItemsWithIds = items.map((item, idx) => {
+            const id = ids[idx]
+            return { id, ...item }
+        })
+        return newItemsWithIds
     }
-    return matching
+
+    try {
+        const newItems = await processNewItems(unexpectedItems, cookies)
+        return { newItems, updatedItems: [] }
+    } catch (err) {
+        const { status } = err.response
+        const DUPLICATE = 422
+        if (status === DUPLICATE) {
+            if (err.response.data.message.includes('Item.tcgpId')) {
+                const updatedItems = []
+                // narrow down stale items within page's new or updated items
+                const newOrStaleTcgpIds = unexpectedItems
+                    .map(newItem => newItem.tcgpId)
+                    .join(',')
+                const bpcExistingItemsRes = await getItemsBillsPc(
+                    { tcgpIds: newOrStaleTcgpIds }, 
+                    cookies
+                )
+                const bpcExistingItems = bpcExistingItemsRes.items
+                const formattedItemsToPatch = bpcExistingItems.map(existingItem => {
+                    const updatedValues = unexpectedItems.find(updatedItem => {
+                        return updatedItem.tcgpId === existingItem.tcgpId
+                    })
+                    return { id: existingItem.id, tcgpId: existingItem.tcgpId, setId: updatedValues.setId, name: updatedValues.name }
+                })
+                const newItemsToCreate = unexpectedItems.filter(item => {
+                    return !bpcExistingItems.map(item => item.tcgpId).includes(item.tcgpId)
+                })
+                for (let i=0; i<formattedItemsToPatch.length; i++) {
+                    const formattedItemToPatch = formattedItemsToPatch[i]
+                    try {
+                        await patchItemByFilterBillsPc(
+                            { tcgpId: formattedItemToPatch.tcgpId }, 
+                            formattedItemToPatch, 
+                            cookies
+                        )
+                        updatedItems.push(formattedItemToPatch)
+                    } catch (err) {
+                        throw new Error(`unable to update item values with tcgpId ${formattedItemToPatch.tcgpId}`)
+                    }
+                }
+                const newItems = await processNewItems(newItemsToCreate)
+                return { newItems, updatedItems }
+            }
+        }
+        throw new Error(`unable to create new or update existing items. tcgpIds: ${unexpectedItems.map(item => item.tcgpId).join(',')}`)
+    }
 }
 
-const pokemonCategoryIds = [
-    3, // english
+const tcgpCategoryIds = [
+    3, // english pokemon
     50, // storage albums
-    85 // japanese
+    85 // japanese pokemon
 ]
 
 const catalogueSync = async () => {
@@ -44,58 +87,19 @@ const catalogueSync = async () => {
     const apiToken = await TCGPAPI.authenticate()
 
 
-    for (let i=0; i<pokemonCategoryIds.length; i++) {
-        const curCategoryid = pokemonCategoryIds[i]
-        const buildTCGPReferenceData = async () => {
-            const tcgp_languages = await TCGPAPI.languages(apiToken, curCategoryid)
-            const tcgp_printings = await TCGPAPI.printings(apiToken, curCategoryid)
-            const tcgp_conditions = await TCGPAPI.conditions(apiToken, curCategoryid)
-            const bpc_languages = await getLanguagesBillsPc(cookies)  
-            const bpc_printings = await getPrintingsBillsPc(cookies)  
-            const bpc_conditions = await getConditionsBillsPc(cookies)  
-            const referenceData = {
-                tcgp: { languages: {}, printings: {}, conditions: {} },
-                bpc: { languages: {}, printings: {}, conditions: {} }
-            } 
-            tcgp_languages.forEach(l => {
-                referenceData.tcgp.languages[l.languageId] = { 
-                    bpcId: bpc_languages.find(bpc_l => bpc_l.tcgpId === l.languageId).id,
-                    ...l 
-                }
-            })
-            tcgp_printings.forEach(p => {
-                referenceData.tcgp.printings[p.printingId] = { 
-                    bpcId: bpc_printings.find(bpc_p => {
-                        if (bpc_p.printing_tcgp_printing_id === p.printingId) return true
-                        // TODO update printings to include japanese tcgp ids. Automate printing updates in bpc db
-                        // if (bpc_p.printing_tcgp_printing_id === p.printingId) return true
-                        if (bpc_p.printing_name === p.name) return true
-                    }).printing_id,
-                    ...p
-                }
-            })
-            tcgp_conditions.forEach(c => {
-                referenceData.tcgp.conditions[c.conditionId] = { 
-                    bpcId: bpc_conditions.find(bpc_c => bpc_c.condition_tcgp_condition_id === c.conditionId).condition_id,
-                    ...c
-                }
-            })
-            bpc_languages.forEach(x => referenceData.bpc.languages[x.id] = { ...x })
-            bpc_printings.forEach(x => referenceData.bpc.printings[x.printing_id] = { ...x })
-            bpc_conditions.forEach(x => referenceData.bpc.conditions[x.condition_id] = { ...x })
-            return referenceData
-        }
-        const referenceData = await buildTCGPReferenceData()
+    for (let i=0; i<tcgpCategoryIds.length; i++) {
+        const tcgpCategoryId = tcgpCategoryIds[i]
+        const referenceData = await buildTCGPReferenceData(cookies, apiToken, tcgpCategoryId)
         let moreGroups = true
         let expOffset = 0
         while (moreGroups) {
             try {
-                const fetchedPageGroups = await TCGPAPI.groups(apiToken, expOffset, curCategoryid)
+                const fetchedPageGroups = await TCGPAPI.groups(apiToken, expOffset, tcgpCategoryId)
                 if (fetchedPageGroups.length === 0) {
                     moreGroups = false
                 }
                 let currentPageGroups = fetchedPageGroups
-                if (curCategoryid === 50) {
+                if (tcgpCategoryId === 50) {
                     currentPageGroups = currentPageGroups.filter(group => group.name === 'Pokemon International Storage Albums')
                 }
                 for (let i=0; i<currentPageGroups.length; i++) {
@@ -134,85 +138,50 @@ const catalogueSync = async () => {
                     let updatedItemCount = 0
 
                     while (moreItems) {
-                        const pageNewItems = []
+                        const unexpectedItems = []
                         try {
-                            let currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
+                            const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
                             if (currentPageItems.length === 0) {
                                 moreItems = false
                                 continue
                             }
-                            for (let i=0; i<currentPageItems.length; i++) {
-                                const curItem = currentPageItems[i]
-                                if (!bpc_curSetItemLookup.items[curItem.productId]) {
-                                    const newItem = { setId: bpc_curExpansion.set_v2_id, name: curItem.name, tcgpId: curItem.productId }
-                                    pageNewItems.push(newItem)
+                            const formattedPageItems = currentPageItems.map(item => { 
+                                return {
+                                    name: item.name, 
+                                    setId: bpc_curExpansion.set_v2_id, 
+                                    tcgpId: item.productId
+                                } 
+                            })
+                            for (let i=0; i<formattedPageItems.length; i++) {
+                                const curItem = formattedPageItems[i]
+                                if (!bpc_curSetItemLookup.items[curItem.tcgpId]) {
+                                    unexpectedItems.push(curItem)
                                 }
                             }
-                            if (pageNewItems.length > 0) {
-                                try {
-                                    const ids = await postItemsBillsPc(pageNewItems, cookies)
-                                    newItemCount += pageNewItems.length
-                                    // update lookup with new items
-                                    for (let i=0; i<pageNewItems.length; i++) {
-                                        bpc_curSetItemLookup.items[pageNewItems[i].tcgpId] = {
-                                            id: ids[i],
-                                            ...pageNewItems[i]
-                                        }
-                                    }
-                                } catch (err) {
-                                    const { status } = err.response
-                                    const DUPLICATE = 422
-                                    if (status === DUPLICATE) {
-                                        if (err.response.data.message.includes('Item.tcgpId')) {
-                                            // narrow down stale items within page's new or updated items
-                                            const newOrUpdatedTcgpIds = pageNewItems
-                                                .map(newItem => newItem.tcgpId)
-                                                .join(',')
-                                            const bpcStaleItemsRes = await getItemsBillsPc(
-                                                { tcgpIds: newOrUpdatedTcgpIds }, 
-                                                cookies
-                                            )
-                                            const bpcStaleItems = bpcStaleItemsRes.items
-                                            // update the values for those items
-                                            for (let i=0; i<bpcStaleItems.length; i++) {
-                                                const bpcStaleItem = bpcStaleItems[i]
-                                                try {
-                                                    const updatedItem = pageNewItems.find(itemToUpdate => {
-                                                        return itemToUpdate.tcgpId === bpcStaleItem.tcgpId
-                                                    })
-                                                    const setId = updatedItem.setId
-                                                    const name = updatedItem.name
-                                                    const updatedData = { setId, name }
-                                                    await patchItemByFilterBillsPc(
-                                                        { tcgpId: updatedItem.tcgpId }, 
-                                                        updatedData, 
-                                                        cookies
-                                                    )
-                                                    updatedItemCount += 1
-                                                } catch (err) {
-                                                    console.log(err)
-                                                    // remove item to stop further errors
-                                                    currentPageItems = currentPageItems.filter(item => {
-                                                        return item.productId !== bpcStaleItem.tcgpId
-                                                    })
-                                                }
-                                            }
-                                        }
-                                    }
+                            if (unexpectedItems.length > 0) {
+                                const { newItems, updatedItems } = await processUnexpectedItems(unexpectedItems, cookies)
+                                newItemCount += newItems.length
+                                updatedItemCount += updatedItems.length
+                                // update lookup with new and updated items
+                                for (let i=0; i<newItems.length; i++) {
+                                    bpc_curSetItemLookup.items[newItems[i].tcgpId] = newItems[i]
+                                }
+                                for (let i=0; i<updatedItems.length; i++) {
+                                    bpc_curSetItemLookup.items[updatedItems[i].tcgpId] = updatedItems[i]
                                 }
                             }
                             let currentPageSkus = ''
 
                             const bpc_curSetItemPageSkuLookup = {}
-                            for (let i=0; i<currentPageItems.length; i++) {
+                            for (let i=0; i<formattedPageItems.length; i++) {
                                 const itemNewSkus = []
-                                const curItem = currentPageItems[i]
-                                const bpcItem = bpc_curSetItemLookup.items[curItem.productId]
+                                const curItem = formattedPageItems[i]
+                                const bpcItem = bpc_curSetItemLookup.items[curItem.tcgpId]
                                 const bpcItemId = bpcItem.id
                                 const bpc_itemSkus = await getSkusBillsPc({ itemId: bpcItemId }, cookies)
                                 bpc_itemSkus.forEach(sku => bpc_curSetItemPageSkuLookup[sku.tcgpId] = sku)
                                 const justTCGPSkuFromBpc = bpc_itemSkus.map(skuObj => skuObj.tcgpId)
-                                const tcgp_itemSkus = await TCGPAPI.skus(apiToken, curItem.productId)
+                                const tcgp_itemSkus = await TCGPAPI.skus(apiToken, curItem.tcgpId)
                                 const justTCGPSkuFromTCGP = tcgp_itemSkus.map(skuObj => skuObj.skuId)
                                 if (!intArraysMatch(justTCGPSkuFromBpc, justTCGPSkuFromTCGP)) {
                                     console.log(`${bpcItem.name} not synced with tcgp. id = ${bpcItem.id}`)
