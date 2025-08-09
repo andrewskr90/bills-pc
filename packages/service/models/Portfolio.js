@@ -789,8 +789,113 @@ const buildGetPortfolioExperimental = (userId, time) => {
     return { query, variables: [] }
 }
 
-const getPortfolio = async (userId) => {
+const buildGetPortfolioIndexTest = (userId, time, reqQuery) => {
+    const query = `
+        with insertEditCTE as (
+            select
+                le.lotId,
+                le.time,
+                li.collectedItemId
+            from V3_LotEdit le
+            left join V3_LotInsert li on li.lotEditId = le.id
+            where le.time < '${time}'
+        ),
+        removalEditCTE as (
+            select
+                le.lotId,
+                le.time,
+                lr.collectedItemId
+            from V3_LotEdit le
+            left join V3_LotRemoval lr on lr.lotEditId = le.id
+            where le.time < '${time}'
+        ),
+        insertAndRemovalCTE as (
+            select
+                insertEdit.lotId,
+                insertEdit.time insertTime,
+                insertEdit.collectedItemId,
+                removalEdit.time lotRemovalTime
+            from insertEditCTE insertEdit
+            left join removalEditCTE removalEdit
+                on removalEdit.lotId = insertEdit.lotId
+                and removalEdit.collectedItemId = insertEdit.collectedItemId
+                and removalEdit.time > insertEdit.time
+            left join removalEditCTE betweenRemovalEdit
+                on betweenRemovalEdit.lotId = insertEdit.lotId
+                and betweenRemovalEdit.collectedItemId = insertEdit.collectedItemId
+                and betweenRemovalEdit.time > insertEdit.time
+                and betweenRemovalEdit.time < removalEdit.time
+            where betweenRemovalEdit.lotId is null
+        ),
+        listingCTE as (
+            select
+                l.collectedItemId,
+                l.lotId,
+                l.saleId,
+                l.time
+            from V3_Listing l
+            where l.time < '${time}'
+        ),
+        saleCTE as (
+            select
+                s.id,
+                s.purchaserId,
+                s.time,
+                (CASE WHEN l.collectedItemId is not null
+                    THEN l.collectedItemId
+                    ELSE insertAndRemoval.collectedItemId
+                END) collectedItemId
+            from V3_Sale s
+            left join listingCTE l on l.saleId = s.id
+            left join insertAndRemovalCTE insertAndRemoval
+                on insertAndRemoval.lotId = l.lotId
+                and insertAndRemoval.insertTime < s.time
+                and (
+                    insertAndRemoval.lotRemovalTime is null
+                    or insertAndRemoval.lotRemovalTime > s.time
+                )
+            where s.time < '${time}'
+        ),
+        purchaseCTE as (
+            select
+                s.id,
+                s.time,
+                s.purchaserId,
+                s.collectedItemId
+            from saleCTE s
+            where s.purchaserId = '${userId}'
+        )
+        select
+            *
+        from purchaseCTE purchase
+        left join purchaseCTE laterPurchase
+            on laterPurchase.collectedItemId = purchase.collectedItemId
+            and laterPurchase.time > purchase.time
+        right join V3_Import i
+            on i.collectedItemId = purchase.collectedItemId
+        where laterPurchase.id is null
+            and (
+                purchase.id is not null
+                or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')
+            ) 
+            order by purchase.time
+            limit 10
+    `
 
+    return { query, variables: [] }
 }
 
-module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioExperimental }
+const getPortfolio = async (userId, time, reqQuery) => {
+    const getPortfolioQuery = buildGetPortfolioIndexTest(userId, time, reqQuery)
+    const queryQueue = [getPortfolioQuery]
+    const req = { queryQueue }
+    const res = {}
+    let portfolio
+    await executeQueries(req, res, (err) => {
+        if (err) throw err
+        portfolio = req.results
+    })
+    return portfolio
+}
+
+module.exports = { getItemsByUserId, getBulkSplitsByUserId, buildGetPortfolioExperimental, getPortfolio }

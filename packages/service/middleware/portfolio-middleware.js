@@ -2,9 +2,13 @@ const Portfolio = require('../models/Portfolio')
 
 const getPortfolioItems = async (req, res, next) => {
     const userId = req.claims.user_id
+    let time = req.query.time
+    if (!time) {
+        const today = new Date()
+        time = today.toISOString()
+    }
     try {
-        const portfolio = await Portfolio.getItemsByUserId(userId, req.query)
-        
+        const portfolio = await Portfolio.getPortfolio(userId, time, req.query)
         let count = 0
         let countedCollectedItems = false
         req.results = {}
