@@ -427,59 +427,49 @@ const buildGetPortfolioExperimental = (userId, time) => {
     `
     const creditSelect = `
         ${creditJson(
-            `CASE WHEN purchase.id is null
-                THEN ${appraisalJson(
-                    'importAppraisal.id',
-                    'importAppraisal.time',
-                    conditionJson(
-                        'importAppraisal.conditionId',
-                        'importAppraisal.conditionName'
-                    )                 
-                )}
-                ELSE ${appraisalJson(
-                    'purchaseAppraisal.id',
-                    'purchaseAppraisal.time',
-                    conditionJson(
-                        'purchaseAppraisal.conditionId',
-                        'purchaseAppraisal.conditionName'
-                    )  
-                )}
-            END`,
+            appraisalJson(
+                'credit.appraisalId',
+                'credit.appraisalTime',
+                conditionJson(
+                    'credit.conditionId',
+                    'credit.conditionName'
+                )                 
+            ),
             lotJson(
-                'purchase.lotId', 
+                'credit.lotId', 
                 editJson(
-                    'purchase.insertEditId', 
-                    'purchase.insertTime', 
-                    idJson('purchase.lotInsertId')
+                    'credit.insertEditId', 
+                    'credit.insertTime', 
+                    idJson('credit.lotInsertId')
                 )
             ),
             listingJson(
-                'purchase.listingId',
-                'purchase.time',
-                `(CASE WHEN purchase.relistedPrice is null
-                    THEN purchase.price
-                    ELSE purchase.relistedPrice
+                'credit.listingId',
+                'credit.listingTime',
+                `(CASE WHEN credit.relistedPrice is null
+                    THEN credit.price
+                    ELSE credit.relistedPrice
                 END)`,
-                idJson('purchase.relistedId'),
-                `CASE WHEN purchase.relistedId is null
-                    THEN ${updatedPriceJson('purchase.updatedPriceId', 'purchase.updatedPrice')}
-                    ELSE (CASE WHEN purchase.relistedId != purchase.updatedPriceId
-                        THEN ${updatedPriceJson('purchase.updatedPriceId', 'purchase.updatedPrice')}
+                idJson('credit.relistedId'),
+                `CASE WHEN credit.relistedId is null
+                    THEN ${updatedPriceJson('credit.updatedPriceId', 'credit.updatedPrice')}
+                    ELSE (CASE WHEN credit.relistedId != credit.updatedPriceId
+                        THEN ${updatedPriceJson('credit.updatedPriceId', 'credit.updatedPrice')}
                         ELSE ${updatedPriceJson('null', 'null')}
                     END)
                 END`,
                 idJson('null')
             ),
             saleJson(
-                'purchase.id',
-                'purchase.time',
-                `(CASE WHEN purchase.id is not null
+                'credit.purchaseId',
+                'credit.time',
+                `(CASE WHEN credit.purchaseId is not null
                     THEN ${userJson('u.user_id', 'u.user_name')}
                     ELSE ${userJson('null', 'null')}
                 END)`
             ),
-            `(CASE WHEN purchase.id is null
-                THEN ${importJson('i.id', 'i.time', userJson('u.user_id', 'u.user_name'))}
+            `(CASE WHEN credit.purchaseId is null
+                THEN ${importJson('credit.importId', 'credit.time', userJson('u.user_id', 'u.user_name'))}
                 ELSE ${importJson('null', 'null', userJson('null', 'null'))}
             END)`
         )} credit
@@ -674,87 +664,117 @@ const buildGetPortfolioExperimental = (userId, time) => {
         )
         select
             ${selectValues}
-        from purchaseCTE purchase
-        left join purchaseCTE laterPurchase
-            on laterPurchase.collectedItemId = purchase.collectedItemId
-            and laterPurchase.time > purchase.time
-        left join appraisalCTE purchaseAppraisal
-            on purchaseAppraisal.collectedItemId = purchase.collectedItemId
-            and purchaseAppraisal.time < purchase.time
-        left join appraisalCTE betweenPurchaseAppraisal
-            on betweenPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
-            and betweenPurchaseAppraisal.time < purchase.time
-            and betweenPurchaseAppraisal.time > purchaseAppraisal.time
-        right join V3_Import i
-            on i.collectedItemId = purchase.collectedItemId
-        left join appraisalCTE importAppraisal
-            on importAppraisal.collectedItemId = i.collectedItemId
-        left join appraisalCTE earlierImportAppraisal
-            on earlierImportAppraisal.collectedItemId = importAppraisal.collectedItemId
-            and earlierImportAppraisal.time < importAppraisal.time
-        left join saleCTE sale
-            on (
-                sale.collectedItemId = purchase.collectedItemId
-                and sale.time > purchase.time
-            ) or (
-                purchase.id is null 
-                and sale.collectedItemId = i.collectedItemId
-
-            )
-        left join saleCTE betweenSale
-            on (
-                (
-                    betweenSale.collectedItemId = purchase.collectedItemId
-                    and betweenSale.time > purchase.time
-                ) or (
-                    purchase.id is null 
-                    and betweenSale.collectedItemId = i.collectedItemId
+        from (
+            select
+                purchase.id purchaseId,
+                null as importId,
+                purchase.collectedItemId,
+                purchase.lotId,
+                purchase.insertEditId,
+                purchase.insertTime,
+                purchase.lotInsertId,
+                purchase.listingId,
+                purchase.listingTime,
+                purchase.price,
+                purchase.relistedId,
+                purchase.relistedPrice,
+                purchase.updatedPriceId,
+                purchase.updatedPrice,
+                purchase.time,
+                purchase.purchaserId acquirerId,
+                purchaseAppraisal.id appraisalId,
+                purchaseAppraisal.time appraisalTime,
+                purchaseAppraisal.conditionId conditionId,
+                purchaseAppraisal.conditionName conditionName,
+                immediateRemoval.collectedItemId immediateRemovalCollectedItemId
+            from purchaseCTE purchase
+            left join purchaseCTE laterPurchase
+                on laterPurchase.collectedItemId = purchase.collectedItemId
+                and laterPurchase.time > purchase.time
+            left join appraisalCTE purchaseAppraisal
+                on purchaseAppraisal.collectedItemId = purchase.collectedItemId
+                and purchaseAppraisal.time < purchase.time
+            left join appraisalCTE betweenPurchaseAppraisal
+                on betweenPurchaseAppraisal.collectedItemId = purchaseAppraisal.collectedItemId
+                and betweenPurchaseAppraisal.time < purchase.time
+                and betweenPurchaseAppraisal.time > purchaseAppraisal.time
+            left join removalEditCTE immediateRemoval 
+                on immediateRemoval.collectedItemId = purchase.collectedItemId
+                and purchase.lotId is not null
+                and immediateRemoval.time > purchase.time
+            left join removalEditCTE betweenImmediateRemoval 
+                on betweenImmediateRemoval.collectedItemId = purchase.collectedItemId
+                and purchase.lotId is not null
+                and betweenImmediateRemoval.time > purchase.time
+                and betweenImmediateRemoval.time < immediateRemoval.time
+            where laterPurchase.id is null
+                and betweenPurchaseAppraisal.id is null
+                and betweenImmediateRemoval.id is null
+            union
+            select
+                null as purchaseId,
+                i.id importId,
+                i.collectedItemId,
+                null as lotId,
+                null as insertEditId,
+                null as insertTime,
+                null as lotInsertId,
+                null as listingId,
+                null as listingTime,
+                null as price,
+                null as relistedId,
+                null as relistedPrice,
+                null as updatedPriceId,
+                null as updatedPrice,
+                i.time,
+                i.importerId acquirerId,
+                importAppraisal.id appraisalId,
+                importAppraisal.time appraisalTime,
+                importAppraisal.conditionId conditionId,
+                importAppraisal.conditionName conditionName,
+                null as immediateRemovalCollectedItemId
+            from V3_Import i
+            left join appraisalCTE importAppraisal
+                on importAppraisal.collectedItemId = i.collectedItemId
+            left join appraisalCTE earlierImportAppraisal
+                on earlierImportAppraisal.collectedItemId = importAppraisal.collectedItemId
+                and earlierImportAppraisal.time < importAppraisal.time
+            where i.importerId = '${userId}'
+                and i.time < '${time}'
+                and earlierImportAppraisal.id is null
+                and not exists (
+                    select * from purchaseCTE purchase
+                    where purchase.purchaserId = '${userId}'
+                        and purchase.time < '${time}'
+                        and purchase.collectedItemId = i.collectedItemId
                 )
-            )
+        ) credit
+        left join saleCTE sale
+            on sale.collectedItemId = credit.collectedItemId
+            and sale.time > credit.time
+        left join saleCTE betweenSale
+            on betweenSale.collectedItemId = credit.collectedItemId
+            and betweenSale.time > credit.time
             and betweenSale.time < sale.time
         left join unsoldListingCTE unsoldListing
-            on (
-                unsoldListing.collectedItemId = purchase.collectedItemId
-                or (
-                    purchase.id is null 
-                    and unsoldListing.collectedItemId = i.collectedItemId
-                )
-            )
+            on unsoldListing.collectedItemId = credit.collectedItemId
         left join unsoldListingCTE laterUnsoldListing
-            on (
-                laterUnsoldListing.collectedItemId = purchase.collectedItemId
-                or (
-                    purchase.id is null 
-                    and laterUnsoldListing.collectedItemId = i.collectedItemId
-                )
-            ) and laterUnsoldListing.time > unsoldListing.time
+            on laterUnsoldListing.collectedItemId = credit.collectedItemId
+            and laterUnsoldListing.time > unsoldListing.time
         -- latest lot status
-        left join removalEditCTE immediateRemoval 
-            on immediateRemoval.collectedItemId = purchase.collectedItemId
-            and purchase.lotId is not null
-            and immediateRemoval.time > purchase.time
-        left join removalEditCTE betweenImmediateRemoval 
-            on betweenImmediateRemoval.collectedItemId = purchase.collectedItemId
-            and purchase.lotId is not null
-            and betweenImmediateRemoval.time > purchase.time
-            and betweenImmediateRemoval.time < immediateRemoval.time
         left join insertAndRemovalCTE unsoldLot
             on (
-                unsoldLot.collectedItemId = purchase.collectedItemId
-                or unsoldLot.collectedItemId = immediateRemoval.collectedItemId
-                or (
-                    purchase.id is null and unsoldLot.collectedItemId = i.collectedItemId
-                )
+                unsoldLot.collectedItemId = credit.collectedItemId
+                or unsoldLot.collectedItemId = credit.immediateRemovalCollectedItemId
             ) and unsoldLot.removalEditId is null
         left join insertAndRemovalCTE laterUnsoldLot
             on (
-                laterUnsoldLot.collectedItemId = purchase.collectedItemId
-                or laterUnsoldLot.collectedItemId = immediateRemoval.collectedItemId
+                laterUnsoldLot.collectedItemId = credit.collectedItemId
+                or laterUnsoldLot.collectedItemId = credit.immediateRemovalCollectedItemId
             ) and laterUnsoldLot.removalEditId is null
             and laterUnsoldLot.insertTime > unsoldLot.insertTime
         left join V3_CollectedItem ci 
-            on ci.id = purchase.collectedItemId 
-            or ci.id = i.collectedItemId
+            on ci.id = credit.collectedItemId 
         left join Item it on it.id = ci.itemId
         left join sets_v2 se on se.set_v2_id = it.setId
         left join V3_Appraisal a
@@ -767,126 +787,23 @@ const buildGetPortfolioExperimental = (userId, time) => {
         left join conditions c on c.condition_id = a.conditionId
         left join printings p on p.printing_id = ci.printingId
         left join users u 
-            on u.user_id = purchase.purchaserId
-            or (purchase.id is null and u.user_id = i.importerId)
+            on u.user_id = credit.acquirerId
         left join users salePurchaser
             on salePurchaser.user_id = sale.purchaserId
         where sale.id is null
-            and laterPurchase.id is null
-            and (
-                purchase.id is not null
-                or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')
-            ) 
-            and betweenPurchaseAppraisal.id is null
-            and earlierImportAppraisal.id is null
             and betweenSale.id is null
             and laterUnsoldListing.id is null
-            and betweenImmediateRemoval.id is null
             and laterUnsoldLot.lotId is null
             and laterA.id is null
-    `
-
-    return { query, variables: [] }
-}
-
-const buildGetPortfolioIndexTest = (userId, time, reqQuery) => {
-    const query = `
-        with insertEditCTE as (
-            select
-                le.lotId,
-                le.time,
-                li.collectedItemId
-            from V3_LotEdit le
-            left join V3_LotInsert li on li.lotEditId = le.id
-            where le.time < '${time}'
-        ),
-        removalEditCTE as (
-            select
-                le.lotId,
-                le.time,
-                lr.collectedItemId
-            from V3_LotEdit le
-            left join V3_LotRemoval lr on lr.lotEditId = le.id
-            where le.time < '${time}'
-        ),
-        insertAndRemovalCTE as (
-            select
-                insertEdit.lotId,
-                insertEdit.time insertTime,
-                insertEdit.collectedItemId,
-                removalEdit.time lotRemovalTime
-            from insertEditCTE insertEdit
-            left join removalEditCTE removalEdit
-                on removalEdit.lotId = insertEdit.lotId
-                and removalEdit.collectedItemId = insertEdit.collectedItemId
-                and removalEdit.time > insertEdit.time
-            left join removalEditCTE betweenRemovalEdit
-                on betweenRemovalEdit.lotId = insertEdit.lotId
-                and betweenRemovalEdit.collectedItemId = insertEdit.collectedItemId
-                and betweenRemovalEdit.time > insertEdit.time
-                and betweenRemovalEdit.time < removalEdit.time
-            where betweenRemovalEdit.lotId is null
-        ),
-        listingCTE as (
-            select
-                l.collectedItemId,
-                l.lotId,
-                l.saleId,
-                l.time
-            from V3_Listing l
-            where l.time < '${time}'
-        ),
-        saleCTE as (
-            select
-                s.id,
-                s.purchaserId,
-                s.time,
-                (CASE WHEN l.collectedItemId is not null
-                    THEN l.collectedItemId
-                    ELSE insertAndRemoval.collectedItemId
-                END) collectedItemId
-            from V3_Sale s
-            left join listingCTE l on l.saleId = s.id
-            left join insertAndRemovalCTE insertAndRemoval
-                on insertAndRemoval.lotId = l.lotId
-                and insertAndRemoval.insertTime < s.time
-                and (
-                    insertAndRemoval.lotRemovalTime is null
-                    or insertAndRemoval.lotRemovalTime > s.time
-                )
-            where s.time < '${time}'
-        ),
-        purchaseCTE as (
-            select
-                s.id,
-                s.time,
-                s.purchaserId,
-                s.collectedItemId
-            from saleCTE s
-            where s.purchaserId = '${userId}'
-        )
-        select
-            *
-        from purchaseCTE purchase
-        left join purchaseCTE laterPurchase
-            on laterPurchase.collectedItemId = purchase.collectedItemId
-            and laterPurchase.time > purchase.time
-        right join V3_Import i
-            on i.collectedItemId = purchase.collectedItemId
-        where laterPurchase.id is null
-            and (
-                purchase.id is not null
-                or (purchase.id is null and i.importerId = '${userId}' and i.time < '${time}')
-            ) 
-            order by purchase.time
-            limit 10
+        -- order by credit.time
+        -- limit 10
     `
 
     return { query, variables: [] }
 }
 
 const getPortfolio = async (userId, time, reqQuery) => {
-    const getPortfolioQuery = buildGetPortfolioIndexTest(userId, time, reqQuery)
+    const getPortfolioQuery = buildGetPortfolioExperimental(userId, time)
     const queryQueue = [getPortfolioQuery]
     const req = { queryQueue }
     const res = {}
