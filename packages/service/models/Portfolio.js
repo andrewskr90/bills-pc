@@ -480,6 +480,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
         ${printingSelect},
         ${appraisalSelect},
         ${lotSelect},
+        ${listingSelect},
         ${saleSelect},
         ${creditSelect}
     `
@@ -634,32 +635,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
                 s.collectedItemId
             from saleCTE s
             where s.purchaserId = '${userId}'
-        ),
-        unsoldListingCTE as (
-            select
-                l.id,
-                l.time,
-                l.price,
-                l.lotId,
-                l.updatedPriceId,
-                l.updatedPrice,
-                l.listingRemovalId,
-                l.relistedId,
-                l.relistedPrice,
-                insertAndRemoval.insertEditId,
-                insertAndRemoval.insertTime,
-                insertAndRemoval.removalEditId,
-                insertAndRemoval.lotRemovalTime,
-                (CASE WHEN l.collectedItemId is not null
-                    THEN l.collectedItemId
-                    ELSE insertAndRemoval.collectedItemId
-                END) collectedItemId
-            from listingCTE l
-            left join insertAndRemovalCTE insertAndRemoval
-                on insertAndRemoval.lotId = l.lotId
-                and insertAndRemoval.lotRemovalTime is null
-            where l.saleId is null
-                and l.time < '${time}'
         )
         select
             ${selectValues}
@@ -755,11 +730,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
             on betweenSale.collectedItemId = credit.collectedItemId
             and betweenSale.time > credit.time
             and betweenSale.time < sale.time
-        -- left join unsoldListingCTE unsoldListing
-            -- on unsoldListing.collectedItemId = credit.collectedItemId
-        -- left join unsoldListingCTE laterUnsoldListing
-            -- on laterUnsoldListing.collectedItemId = credit.collectedItemId
-            -- and laterUnsoldListing.time > unsoldListing.time
         -- latest lot status
         left join (
             select 
@@ -790,6 +760,56 @@ const buildGetPortfolioExperimental = (userId, time) => {
                         and lr.collectedItemId = unsoldLi.collectedItemId
                 )
         ) unsoldLot on unsoldLot.collectedItemId = credit.collectedItemId
+        left join (
+            select
+                unsoldListing.id,
+                unsoldListing.time,
+                unsoldListing.price,
+                unsoldListing.collectedItemId,
+                unsoldListing.lotId,
+                unsoldLp.id updatedPriceId,
+                unsoldLp.price updatedPrice,
+                unsoldListR.id listingRemovalId,
+                unsoldRelistP.id relistedId,
+                unsoldRelistP.price relistedPrice
+            from V3_Listing unsoldListing
+            left join V3_ListingPrice unsoldLp
+                on unsoldLp.listingId = unsoldListing.id
+                and unsoldLp.time < '${time}'
+            left join V3_ListingPrice unsoldLaterLp
+                on unsoldLaterLp.listingId = unsoldListing.id
+                and unsoldLaterLp.time < '${time}'
+                and unsoldLaterLp.time > unsoldLp.time
+            left join V3_ListingRemoval unsoldListR
+                on unsoldListR.listingId = unsoldListing.id
+                and unsoldListR.time < '${time}'
+            left join V3_ListingRemoval unsoldLaterListR
+                on unsoldLaterListR.listingId = unsoldListing.id
+                and unsoldLaterListR.time < '${time}'
+                and unsoldLaterListR.time > unsoldListR.time
+            left join V3_ListingPrice unsoldRelistP
+                on unsoldRelistP.listingId = unsoldListR.listingId
+                    and unsoldRelistP.time > unsoldListR.time
+                    and unsoldRelistP.time < '${time}'
+            left join V3_ListingPrice unsoldBetweenRelistP
+                on unsoldBetweenRelistP.listingId = unsoldListR.listingId
+                    and unsoldBetweenRelistP.time < unsoldRelistP.time
+                    and unsoldBetweenRelistP.time > unsoldListR.time
+            where unsoldListing.saleId is null
+                and unsoldLaterLp.id is null
+                and unsoldLaterListR.id is null
+                and unsoldBetweenRelistP.id is null
+                and unsoldListing.time < '${time}'
+                and not exists (
+                    select * from V3_Listing laterL
+                    where (
+                        laterL.collectedItemId = unsoldListing.collectedItemId
+                        or laterL.lotId = unsoldListing.lotId
+                    ) and laterL.time > unsoldListing.time
+                )
+        ) unsoldListing
+            on unsoldListing.collectedItemId = credit.collectedItemId
+                or unsoldListing.lotId = unsoldLot.lotId
         left join V3_CollectedItem ci 
             on ci.id = credit.collectedItemId 
         left join Item it on it.id = ci.itemId
