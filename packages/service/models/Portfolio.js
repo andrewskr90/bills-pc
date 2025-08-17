@@ -480,7 +480,6 @@ const buildGetPortfolioExperimental = (userId, time) => {
         ${printingSelect},
         ${appraisalSelect},
         ${lotSelect},
-        ${listingSelect},
         ${saleSelect},
         ${creditSelect}
     `
@@ -756,23 +755,41 @@ const buildGetPortfolioExperimental = (userId, time) => {
             on betweenSale.collectedItemId = credit.collectedItemId
             and betweenSale.time > credit.time
             and betweenSale.time < sale.time
-        left join unsoldListingCTE unsoldListing
-            on unsoldListing.collectedItemId = credit.collectedItemId
-        left join unsoldListingCTE laterUnsoldListing
-            on laterUnsoldListing.collectedItemId = credit.collectedItemId
-            and laterUnsoldListing.time > unsoldListing.time
+        -- left join unsoldListingCTE unsoldListing
+            -- on unsoldListing.collectedItemId = credit.collectedItemId
+        -- left join unsoldListingCTE laterUnsoldListing
+            -- on laterUnsoldListing.collectedItemId = credit.collectedItemId
+            -- and laterUnsoldListing.time > unsoldListing.time
         -- latest lot status
-        left join insertAndRemovalCTE unsoldLot
-            on (
-                unsoldLot.collectedItemId = credit.collectedItemId
-                or unsoldLot.collectedItemId = credit.immediateRemovalCollectedItemId
-            ) and unsoldLot.removalEditId is null
-        left join insertAndRemovalCTE laterUnsoldLot
-            on (
-                laterUnsoldLot.collectedItemId = credit.collectedItemId
-                or laterUnsoldLot.collectedItemId = credit.immediateRemovalCollectedItemId
-            ) and laterUnsoldLot.removalEditId is null
-            and laterUnsoldLot.insertTime > unsoldLot.insertTime
+        left join (
+            select 
+                unsoldLi.collectedItemId,
+                unsoldLi.id lotInsertId,
+                unsoldLe.id insertEditId,
+                unsoldLe.lotId,
+                unsoldLe.time insertTime
+            from V3_LotInsert unsoldLi
+            left join V3_LotEdit unsoldLe on unsoldLe.id = unsoldLi.lotEditId
+            left join (
+                select 
+                    unsoldLi.collectedItemId,
+                    unsoldLe.lotId,
+                    unsoldLe.time
+                from V3_LotInsert unsoldLi
+                left join V3_LotEdit unsoldLe on unsoldLe.id = unsoldLi.lotEditId
+            ) laterInsert
+                on laterInsert.lotId = unsoldLe.lotId
+                and laterInsert.collectedItemId = unsoldLi.collectedItemId
+                and laterInsert.time > unsoldLe.time
+            where laterInsert.lotId is null
+                and not exists (
+                    select * from V3_LotRemoval lr
+                    left join V3_LotEdit le on le.id = lr.lotEditId
+                    where le.lotId = unsoldLe.lotId
+                        and le.time > unsoldLe.time
+                        and lr.collectedItemId = unsoldLi.collectedItemId
+                )
+        ) unsoldLot on unsoldLot.collectedItemId = credit.collectedItemId
         left join V3_CollectedItem ci 
             on ci.id = credit.collectedItemId 
         left join Item it on it.id = ci.itemId
@@ -792,8 +809,7 @@ const buildGetPortfolioExperimental = (userId, time) => {
             on salePurchaser.user_id = sale.purchaserId
         where sale.id is null
             and betweenSale.id is null
-            and laterUnsoldListing.id is null
-            and laterUnsoldLot.lotId is null
+            -- and laterUnsoldListing.id is null
             and laterA.id is null
         -- order by credit.time
         -- limit 10

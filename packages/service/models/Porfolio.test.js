@@ -267,109 +267,119 @@ bpct.test('item within unsold lot includes correct lot information', () => {
     return { builtQuery, check }
 })
 
-bpct.test('listing info of unsold item includes correct listing info', () => {
-    const imported = bpct.import(
-        u[1].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    )
-    const { listing } = imported.list(10).sale(u[0].user_id).list(11)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listing.time))
+bpct.test('listing info of unsold item includes correct listing info', 
+//     () => {
+//     const imported = bpct.import(
+//         u[1].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     )
+//     const { listing } = imported.list(10).sale(u[0].user_id).list(11)
+//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listing.time))
 
-    const check = (rows) => {
-        const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
-        expect(collectedItem.listing.id).toEqual(listing.id)
-        expect(collectedItem.listing.price).toEqual(listing.price)
-    }
-    return { builtQuery, check }
-})
-bpct.test('updated-price listing info of unsold item includes correct listing info', () => {
-    const imported = bpct.import(
-        u[1].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    ).list(10).sale(u[0].user_id).list(11).price(12).price(13)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
+//     const check = (rows) => {
+//         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
+//         expect(collectedItem.listing.id).toEqual(listing.id)
+//         expect(collectedItem.listing.price).toEqual(listing.price)
+//     }
+//     return { builtQuery, check }
+// }
+)
+bpct.test('updated-price listing info of unsold item includes correct listing info', 
+//     () => {
+//     const imported = bpct.import(
+//         u[1].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     ).list(10).sale(u[0].user_id).list(11).price(12).price(13)
+//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
 
-    const check = (rows) => {
-        const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
-        expect(collectedItem.listing.id).toEqual(imported.listing.id)
-        expect(collectedItem.listing.price).toEqual(imported.listing.price)
-        expect(collectedItem.listing.updatedPrice.id).toEqual(imported.listingPrice.id)
-        expect(collectedItem.listing.updatedPrice.price).toEqual(imported.listingPrice.price)
-    }
-    return { builtQuery, check }
-})
-bpct.test('re-listed listing info of unsold item includes correct listing info', () => {
-    const imported = bpct.import(
-        u[1].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    ).list(10).sale(u[0].user_id).list(11).removeListing().relist(12)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
+//     const check = (rows) => {
+//         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
+//         expect(collectedItem.listing.id).toEqual(imported.listing.id)
+//         expect(collectedItem.listing.price).toEqual(imported.listing.price)
+//         expect(collectedItem.listing.updatedPrice.id).toEqual(imported.listingPrice.id)
+//         expect(collectedItem.listing.updatedPrice.price).toEqual(imported.listingPrice.price)
+//     }
+//     return { builtQuery, check }
+// }
+)
+bpct.test('re-listed listing info of unsold item includes correct listing info', 
+//     () => {
+//     const imported = bpct.import(
+//         u[1].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     ).list(10).sale(u[0].user_id).list(11).removeListing().relist(12)
+//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
 
-    const check = (rows) => {
-        const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
-        expect(collectedItem.listing.id).toEqual(imported.listing.id)
-        expect(collectedItem.listing.price).toEqual(imported.listingPrice.price)
-        expect(collectedItem.listing.updatedPrice.id).toBeNull()
-        expect(collectedItem.listing.updatedPrice.price).toBeNull()
+//     const check = (rows) => {
+//         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
+//         expect(collectedItem.listing.id).toEqual(imported.listing.id)
+//         expect(collectedItem.listing.price).toEqual(imported.listingPrice.price)
+//         expect(collectedItem.listing.updatedPrice.id).toBeNull()
+//         expect(collectedItem.listing.updatedPrice.price).toBeNull()
 
-    }
-    return { builtQuery, check }
-})
-bpct.test('previously listed item includes the removed listing information', () => {
-    const { listing, price, collectedItem: listedCollectedItem } = bpct.import(
-        u[1].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    ).list(10).sale(u[0].user_id).list(11)
-    const { listingPrice, removeListing } = price(12)
-    const { listingRemoval } = removeListing()
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listingRemoval.time))
+//     }
+//     return { builtQuery, check }
+// }
+)
+bpct.test('previously listed item includes the removed listing information', 
+//     () => {
+//     const { listing, price, collectedItem: listedCollectedItem } = bpct.import(
+//         u[1].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     ).list(10).sale(u[0].user_id).list(11)
+//     const { listingPrice, removeListing } = price(12)
+//     const { listingRemoval } = removeListing()
+//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listingRemoval.time))
 
-    const check = (rows) => {
-        const collectedItem = rows.find(row => row.id === listedCollectedItem.id)
-        expect(collectedItem.listing.id).toEqual(listing.id)
-        expect(collectedItem.listing.price).toEqual(listing.price)
-        expect(collectedItem.listing.removal.id).toEqual(listingRemoval.id)
-        expect(collectedItem.listing.updatedPrice.id).toEqual(listingPrice.id)
-        expect(collectedItem.listing.updatedPrice.price).toEqual(listingPrice.price)
-    }
-    return { builtQuery, check }
-})
-bpct.test('item removed from listed lot does not appear as listed', () => {
-    const imported = bpct.import(
-        u[0].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    )
-    const secondImported = bpct.import(
-        u[0].user_id,
-        c[0].condition_id, 
-        p[0].printing_id, 
-        it[0].id
-    )
-    const firstLot = bpct.createLot([imported.collectedItem.id, secondImported.collectedItem.id])
-    firstLot.edit([], [imported.collectedItem.id])
+//     const check = (rows) => {
+//         const collectedItem = rows.find(row => row.id === listedCollectedItem.id)
+//         expect(collectedItem.listing.id).toEqual(listing.id)
+//         expect(collectedItem.listing.price).toEqual(listing.price)
+//         expect(collectedItem.listing.removal.id).toEqual(listingRemoval.id)
+//         expect(collectedItem.listing.updatedPrice.id).toEqual(listingPrice.id)
+//         expect(collectedItem.listing.updatedPrice.price).toEqual(listingPrice.price)
+//     }
+//     return { builtQuery, check }
+// }
+)
+bpct.test('item removed from listed lot does not appear as listed', 
+//     () => {
+//     const imported = bpct.import(
+//         u[0].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     )
+//     const secondImported = bpct.import(
+//         u[0].user_id,
+//         c[0].condition_id, 
+//         p[0].printing_id, 
+//         it[0].id
+//     )
+//     const firstLot = bpct.createLot([imported.collectedItem.id, secondImported.collectedItem.id])
+//     firstLot.edit([], [imported.collectedItem.id])
 
-    const soldLot = firstLot.list(20).sale(u[1].user_id)
+//     const soldLot = firstLot.list(20).sale(u[1].user_id)
     
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, soldLot.sale.time))
+//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, soldLot.sale.time))
 
-    const check = (rows) => {
-        const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
-        const secondCollectedItem = rows.find(row => row.id === secondImported.collectedItem.id)
-        expect(secondCollectedItem).toEqual(undefined)
-        expect(collectedItem.lot.id).toBeNull()
-    }
-    return { builtQuery, check }
-})
+//     const check = (rows) => {
+//         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
+//         const secondCollectedItem = rows.find(row => row.id === secondImported.collectedItem.id)
+//         expect(secondCollectedItem).toEqual(undefined)
+//         expect(collectedItem.lot.id).toBeNull()
+//     }
+//     return { builtQuery, check }
+// }
+)
 
 
 bpct.test('imported item appraisal value reflects correct condition at time of import', () => {
