@@ -34,32 +34,34 @@ const Assets = (props) => {
     const handleSelectAsset = (slug) => {
         navigate(slug)
     }
-    return portfolio.length > 0 ?
-        <>
-            <Search setLoading={setLoading} />
-            <Toolbar
-                sortKey={sortKey}
-                referenceData={referenceData}
-                setReferenceData={setReferenceData}
-                defaultSortDirection='asc'
-                defaultAttribute='name'
-            />
-            <PageSelection location={location} count={count} />
-            <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
-                {/* <h3>Bulk</h3>
-                {portfolio.inventory.bulkSplits.map(split => {
-                    return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
-                })} */}
-                {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`item/${id}`)} />)}
+    return <>
+        <Search setLoading={setLoading} />
+        <Toolbar
+            sortKey={sortKey}
+            referenceData={referenceData}
+            setReferenceData={setReferenceData}
+            defaultSortDirection='asc'
+            defaultAttribute='name'
+        />
+        {portfolio.length > 0 ?
+            <>
                 <PageSelection location={location} count={count} />
-            </ItemContainer>
-        </> : <div className='emptyCollection'>
-            <p>No items in your collection!</p>
-            <p>Update your collection with a purchase.</p>
-            <Link to='update/purchase'>
-                <button>Update Collection</button>
-            </Link>
-        </div>
+                <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
+                    {/* <h3>Bulk</h3>
+                    {portfolio.inventory.bulkSplits.map(split => {
+                        return <BulkSplit selectBulkSplit={selectBulkSplit} bulkSplit={split}/>
+                    })} */}
+                    {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`collected-item/${id}`)} />)}
+                    <PageSelection location={location} count={count} />
+                </ItemContainer>
+            </> : <div className='emptyCollection'>
+                <p>No items in your collection!</p>
+                <p>Update your collection with a purchase.</p>
+                <Link to='update/purchase'>
+                    <button>Update Collection</button>
+                </Link>
+            </div>}
+    </>
 }
 
 export default Assets;

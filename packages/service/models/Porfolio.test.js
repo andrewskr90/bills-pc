@@ -1,4 +1,4 @@
-const { buildGetPortfolioExperimental } = require('./Portfolio')
+const { buildGetPortfolio } = require('./Portfolio')
 const { BPCT, uniqueCollectedItem, daysAfterStart } = require('../test')
 
 const bpct = new BPCT() // init user
@@ -12,7 +12,7 @@ bpct.test('imported item that is not sold is present in portfolio', () => {
     // create data
     const { collectedItem, createdImport } = bpct.import()
     // build query
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, createdImport.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, createdImport.time))
     // write check
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
@@ -26,7 +26,7 @@ bpct.test('two imported items, added to lot, that are not sold are present in po
     const { collectedItem: collectedItemB } = bpct.import()
     const { lotEdit } = bpct.createLot([collectedItemA.id, collectedItemB.id])
 
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
     const check = (rows) => {
         const filteredByCiId = rows.filter(row => {
             return row.id === collectedItemA.id
@@ -43,7 +43,7 @@ bpct.test('purchasing previously imported item yeilds one instance of that item'
     .list(9).sale(u[2].user_id)
     .list(7).sale(u[0].user_id)
 
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -55,7 +55,7 @@ bpct.test('purchasing lot containing previously imported item yeilds one instanc
     const { collectedItem } = bpct.import().list(5).sale(u[1].user_id)
     const { sale } = bpct.createLot([collectedItem.id])
         .list(4).sale(u[0].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -66,7 +66,7 @@ bpct.test('purchasing previously purchased item yeilds one instance of that item
         .list(5).sale(u[1].user_id)
         .list(6).sale(u[2].user_id)
         .list(7).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -78,7 +78,7 @@ bpct.test('purchasing lot containing previously purchased item yeilds one instan
         .list(6).sale(u[2].user_id)
     const { sale } = bpct.createLot([collectedItem.id])
         .list(7).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -91,7 +91,7 @@ bpct.test('purchasing previously purchased lot item yeilds one instance of that 
         .list(6).sale(u[2].user_id)
     bpct.createLotEdit(lot.id, [], [collectedItem.id])
     const { sale } = bpct.listItem(collectedItem.id, 10).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -107,7 +107,7 @@ bpct.test('purchasing lot containing previously purchased lot item yeilds one in
     const { sale } = bpct.createLot([collectedItem.id])
         .list(5).sale(u[1].user_id)
 
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         expect(uniqueCollectedItem(rows, collectedItem.id)).toBeTruthy()
     }
@@ -141,7 +141,7 @@ bpct.test(
             collectedItemC.id
         ]).list(20).sale(u[0].user_id)
 
-        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+        const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
         const check = (rows) => {
             expect(uniqueCollectedItem(rows, collectedItemA.id)).toBeTruthy()
             expect(uniqueCollectedItem(rows, collectedItemB.id)).toBeTruthy()
@@ -155,7 +155,7 @@ bpct.test(
 bpct.test('imported item that is sold is not present in portfolio', 
     () => {
         const { collectedItem, sale } = bpct.import().list(13).sale(u[1].user_id)
-        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+        const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
         const check = (rows) => {
             const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
             expect(filteredByCiId.length).toEqual(0)
@@ -167,7 +167,7 @@ bpct.test('imported item that is sold is not present in portfolio',
 bpct.test('imported item, added to lot, that is sold is not present in portfolio', () => {
     const { collectedItem } = bpct.import()
     const { sale } = bpct.createLot([collectedItem.id]).list(200).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
         expect(filteredByCiId.length).toEqual(0)
@@ -181,7 +181,7 @@ bpct.test('imported item, added to lot, removed from lot, is still in portfolio 
     const lot = bpct.createLot([collectedItem.id, collectedItemB.id])
     lot.edit([], [collectedItem.id])
     const { sale } = lot.list(200).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, sale.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, sale.time))
     const check = (rows) => {
         const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
         expect(filteredByCiId.length).toEqual(1)
@@ -194,7 +194,7 @@ bpct.test('item sold within lot, which is removed after the sale, is not present
         const { collectedItem } = bpct.import()
         const soldLot = bpct.createLot([collectedItem.id]).list(200).sale(u[1].user_id)
         const { lotEdit } = soldLot.edit([], [collectedItem.id])
-        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
+        const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, lotEdit.time))
         
         const check = (rows) => {
             const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
@@ -216,7 +216,7 @@ bpct.test(`purchased lot item, removed from lot, added to another lot which sell
         soldLot.edit([], [collectedItem.id])
         const soldAnotherLot = bpct.createLot([collectedItem.id]).list(3).sale(u[2].user_id)
         const { lotEdit: lotEditAgain } = soldAnotherLot.edit([], [collectedItem.id])
-        const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, lotEditAgain.time))
+        const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, lotEditAgain.time))
 
         const check = (rows) => {
             const filteredByCiId = rows.filter(row => row.id === collectedItem.id)
@@ -235,7 +235,7 @@ bpct.test('appraisal value reflects correct condition at time of query', () => {
     const { appraisal } = imported.appraise(c[1].condition_id, u[1].user_id)
         .appraise(c[2].condition_id, u[1].user_id)
 
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, appraisal.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, appraisal.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -255,7 +255,7 @@ bpct.test('item within unsold lot includes correct lot information', () => {
     firstLot.edit([], [imported.collectedItem.id])
     const secondLot = bpct.createLot([imported.collectedItem.id])
     
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, secondLot.lotEdit.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, secondLot.lotEdit.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -275,7 +275,7 @@ bpct.test('listing info of unsold item includes correct listing info', () => {
         it[0].id
     )
     const { listing } = imported.list(10).sale(u[0].user_id).list(11)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listing.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, listing.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -291,7 +291,7 @@ bpct.test('updated-price listing info of unsold item includes correct listing in
         p[0].printing_id, 
         it[0].id
     ).list(10).sale(u[0].user_id).list(11).price(12).price(13)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -309,7 +309,7 @@ bpct.test('re-listed listing info of unsold item includes correct listing info',
         p[0].printing_id, 
         it[0].id
     ).list(10).sale(u[0].user_id).list(11).removeListing().relist(12)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, imported.listingPrice.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -330,7 +330,7 @@ bpct.test('previously listed item includes the removed listing information', () 
     ).list(10).sale(u[0].user_id).list(11)
     const { listingPrice, removeListing } = price(12)
     const { listingRemoval } = removeListing()
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, listingRemoval.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, listingRemoval.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === listedCollectedItem.id)
@@ -360,7 +360,7 @@ bpct.test('item removed from listed lot does not appear as listed', () => {
 
     const soldLot = firstLot.list(20).sale(u[1].user_id)
     
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, soldLot.sale.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, soldLot.sale.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -380,7 +380,7 @@ bpct.test('imported item appraisal value reflects correct condition at time of i
         it[0].id
     )
     const appraised = imported.appraise(c[1].condition_id, u[0].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, appraised.appraisal.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, appraised.appraisal.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -400,7 +400,7 @@ bpct.test('purchased item appraisal value reflects correct condition at time of 
         it[0].id
     ).appraise(c[1].condition_id, u[1].user_id)
     const purchased = appraised.list(40).sale(u[0].user_id).appraise(c[2].condition_id, u[0].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, purchased.appraisal.time))
+    const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, purchased.appraisal.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === purchased.collectedItem.id)
@@ -418,7 +418,7 @@ bpct.test('purchased item shows correct credit lot information', () => {
         p[0].printing_id, 
         it[0].id
     ).list(45).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, imported.sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, imported.sale.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -435,7 +435,7 @@ bpct.test('purchased lot item shows correct credit lot information', () => {
     )
     const createdLot = bpct.createLot([imported.collectedItem.id])
     const soldLot = createdLot.list(45).sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, soldLot.sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, soldLot.sale.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)
@@ -455,7 +455,7 @@ bpct.test('purchased item which was relisted shows correct credit listing inform
     ).list(7).removeListing()
     const relistedItem = removedListing.relist(6)
     const purchasedItem = relistedItem.sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, purchasedItem.sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, purchasedItem.sale.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === purchasedItem.collectedItem.id)
@@ -475,7 +475,7 @@ bpct.test('purchased item listing with price update shows correct credit listing
         it[0].id
     ).list(7).price(5)
     const purchasedItem = updatedPrice.sale(u[1].user_id)
-    const builtQuery = buildGetPortfolioExperimental(u[1].user_id, daysAfterStart(0.5, purchasedItem.sale.time))
+    const builtQuery = buildGetPortfolio(u[1].user_id, daysAfterStart(0.5, purchasedItem.sale.time))
 
     const check = (rows) => {
         const collectedItem = rows.find(row => row.id === purchasedItem.collectedItem.id)
@@ -504,7 +504,7 @@ bpct.test('purchased item listing with price update shows correct credit listing
 //     firstLot.edit([], [imported.collectedItem.id])
 //     const secondLot = bpct.createLot([imported.collectedItem.id])
     
-//     const builtQuery = buildGetPortfolioExperimental(u[0].user_id, daysAfterStart(0.5, secondLot.lotEdit.time))
+//     const builtQuery = buildGetPortfolio(u[0].user_id, daysAfterStart(0.5, secondLot.lotEdit.time))
 
 //     const check = (rows) => {
 //         const collectedItem = rows.find(row => row.id === imported.collectedItem.id)

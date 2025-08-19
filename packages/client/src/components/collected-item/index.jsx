@@ -14,16 +14,15 @@ const CollectedItem = (props) => {
                 ?
                 <img 
                     className='max-h-[95%] max-w-[90%] rounded-lg'
-                    src={`https://product-images.tcgplayer.com/fit-in/656x656/${collectedItem.tcgpId}.jpg`} 
+                    src={`https://product-images.tcgplayer.com/fit-in/656x656/${collectedItem.item.tcgpId}.jpg`} 
                     onError={handleImageError} 
                 />
                 :
-                <p className='flex items-center h-[85%] w-[90%] bg-[#ececec] text-[12px] p-[2px] text-center rounded-[5px] m-1'>{collectedItem.name}</p>
+                <p className='flex items-center h-[85%] w-[90%] bg-[#ececec] text-[12px] p-[2px] text-center rounded-[5px] m-1'>{collectedItem.item.name}</p>
                 }
             </div>
             <div className='text-blue mt-1 w-2/5 h-[90%] flex flex-col justify-center items-center'>
-                <p>x {collectedItem.quantity}</p>
-                <button className='rounded-full border-blue bb-white border-2 w-1/2' style={{ borderRadius: '50%', backgroundColor: 'white', color: '#6065cb', borderColor: '#6065cb' }} onClick={() => handleSelectItem(collectedItem.itemId)}>i</button>
+                <button className='rounded-full border-blue bb-white border-2 w-1/2' style={{ borderRadius: '50%', backgroundColor: 'white', color: '#6065cb', borderColor: '#6065cb' }} onClick={() => handleSelectItem(collectedItem.id)}>i</button>
             </div>
         </div>
     </div>)
