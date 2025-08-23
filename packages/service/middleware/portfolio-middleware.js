@@ -1,13 +1,21 @@
 const Portfolio = require('../models/Portfolio')
+const User = require('../models/User')
 
 const getPortfolioItems = async (req, res, next) => {
-    const userId = req.claims.user_id
+    let userId = req.claims.user_id
+    if (req.query.proxyUserId) {
+        const proxyUser = await User.findProxyByCreatorId(req)
+        if (proxyUser.length === 1) {
+            userId = proxyUser[0].user_id
+        }
+    }
     let time = req.query.time
     if (!time) {
         const today = new Date()
         time = today.toISOString()
     }
     try {
+        // TODO add proxy user as param for getPortfolio
         const portfolio = await Portfolio.getPortfolio(userId, time, req.query)
         let count = 0
         let countedCollectedItems = false

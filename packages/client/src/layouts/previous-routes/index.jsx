@@ -57,11 +57,11 @@ const PreviousRoutes = (props) => {
                     path: '/gym-leader/collection/assets'
                 }
             }]
-        } else if (location.pathname.includes('/gym-leader/collection/vendors')) {
+        } else if (location.pathname.includes('/gym-leader/vendors')) {
             return [{
                 ['vendors']: {
                     formatted: 'Vendors',
-                    path: '/gym-leader/collection/vendors'
+                    path: '/gym-leader/vendors'
                 }
             }]
         }

@@ -11,6 +11,8 @@ import SupportUs from './pages/SupportUs.jsx'
 import Collection from './features/collection/index.jsx'
 import GymLeader from './pages/gym-leader/index.jsx'
 import GymLeaderOnly from './utils/auth/GymLeaderOnly.jsx'
+import NewNavBar from './layouts/NewNavBar.jsx'
+import VendorManager from './features/vendor-manager/index.jsx'
 
 let initialData = false
 
@@ -142,6 +144,17 @@ const App = () => {
                             />
                     </GymLeaderOnly>} />
                     <Route 
+                        path='/gym-leader/vendors/*' 
+                        element={<GymLeaderOnly
+                            userClaims={userClaims}
+                            setUserClaims={setUserClaims}
+                        >
+                            <VendorManager
+                                referenceData={referenceData} 
+                                setReferenceData={setReferenceData} 
+                            />
+                    </GymLeaderOnly>} />
+                    <Route 
                         path='/gym-leader/*' 
                         element={<GymLeaderOnly
                             userClaims={userClaims}
@@ -153,7 +166,11 @@ const App = () => {
                     <Route path='/login' element={<Login setUserClaims={setUserClaims} />} />
                     <Route path='/support-us' element={<SupportUs />} />
                 </Routes>
-                <NavBar />
+                {userClaims?.user_role !== 'GymLeader'
+                ? <NavBar />
+                : <NewNavBar />
+                }
+                
             </div>
             :
             <div className='appLoading h-full flex flex-col justify-center items-center'>

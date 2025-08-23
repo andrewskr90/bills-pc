@@ -7,7 +7,6 @@ import CategorySelector from '../../components/category-selector/index.jsx'
 import Transactions from './features/transactions/index.jsx'
 import PortfolioAssets from './features/portfolio-assets/index.jsx'
 import Listings from './features/watching/index.jsx'
-import Vendors from './features/vendors/index.jsx'
 
 const Collection = (props) => {
     const { userClaims, setUserClaims, referenceData, setReferenceData } = props
@@ -25,7 +24,7 @@ const Collection = (props) => {
             <>
                 <CategorySelector
                     basePage="collection"
-                    categories={['assets', 'transactions', 'listings', 'vendors']} 
+                    categories={['assets', 'transactions', 'listings']} 
                     selectCategory={(category) => navigate(category)} 
                 />
             </>
@@ -52,15 +51,6 @@ const Collection = (props) => {
                     path='/listings/*'
                     element={
                         <Listings 
-                            referenceData={referenceData} 
-                            setReferenceData={setReferenceData} 
-                        />
-                    }
-                />
-                <Route 
-                    path='/vendors/*'
-                    element={
-                        <Vendors 
                             referenceData={referenceData} 
                             setReferenceData={setReferenceData} 
                         />

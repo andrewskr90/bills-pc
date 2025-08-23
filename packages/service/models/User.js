@@ -15,6 +15,9 @@ const findProxyByCreatorId = async (req) => {
             ${req.query.user_name ? `
                 and u.user_name LIKE '%${req.query.user_name}%'
             ` : ''}
+            ${req.query.proxyUserId ? `
+                and u.user_id = '${req.query.proxyUserId}'
+            ` : ''}
         ) as vendors
     `
     const variables = []

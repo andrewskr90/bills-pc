@@ -14,7 +14,7 @@ const Assets = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
     const [loading, setLoading] = useState(false)
-    const [portfolio, setPortfolio] = useState(initialPortfolioValues)
+    const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
     useEffect(() => {
         (async () => {

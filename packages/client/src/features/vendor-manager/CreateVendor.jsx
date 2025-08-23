@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import BillsPcService from '../../../../api/bills-pc'
-import PreviousRoutes from '../../../../layouts/previous-routes'
-import Button from '../../../../components/buttons/text-button'
+import BillsPcService from '../../api/bills-pc'
+import PreviousRoutes from '../../layouts/previous-routes'
+import Button from '../../components/buttons/text-button'
 
 const initialVendorValues = { user_name: '' }
 
