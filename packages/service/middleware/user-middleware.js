@@ -22,7 +22,9 @@ const createUser = async (req, res, next) => {
 
 const selectUsers = async (req, res, next) => {
     if (req.query.proxy) {
-        const users = await User.findProxyByCreatorId({ claims: req.claims, query: req.query })
+        const { user_id } = req.claims
+        const { proxyUserId, user_name, page, direction } = req.query
+        const users = await User.findProxyByCreatorId(user_id, proxyUserId, user_name, page, direction)
         req.results = {
             count: users.length === 0 ? 0 : users[0].count,
             users: users.map(user => {
