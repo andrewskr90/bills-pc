@@ -12,7 +12,7 @@ const VendorInfo = ({ managing, setManaging }) => {
     const urlParams = useParams()
     const navigate = useNavigate()
     const proxyUserId = urlParams['id']
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
 
@@ -34,6 +34,7 @@ const VendorInfo = ({ managing, setManaging }) => {
                 const params = buildParams(location)
                 params.direction = params.direction ? params.direction : undefined
                 params.proxyUserId = proxyUserId
+                setLoading(true)
                 await BillsPcService.getPortfolio(params)
                     .then(res => {
                         setCount(res.data.count)
@@ -55,20 +56,21 @@ const VendorInfo = ({ managing, setManaging }) => {
     
     return (<>
         <PreviousRoutes location={location} />
-        {portfolio.length > 0 ?
+        {portfolio.length === 0 && !loading ?
+            <div className='emptyCollection'>
+                <p>No items in your collection!</p>
+                <p>Update your collection with a purchase.</p>
+                <Link to='import'>
+                    <button>Update Collection</button>
+                </Link>
+            </div> :
             <>
                 <PageSelection location={location} count={count} />
                 <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
                     {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`collected-item/${id}`)} />)}
                     <PageSelection location={location} count={count} />
                 </ItemContainer>
-            </> : <div className='emptyCollection'>
-                <p>No items in your collection!</p>
-                <p>Update your collection with a purchase.</p>
-                <Link to='import'>
-                    <button>Update Collection</button>
-                </Link>
-            </div>}
+            </>}
     </>)
 }
 

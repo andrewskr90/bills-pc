@@ -13,13 +13,14 @@ const Assets = (props) => {
     const { referenceData, setReferenceData} = props
     const navigate = useNavigate()
     const location = useLocation()
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
     useEffect(() => {
         (async () => {
             const params = buildParams(location)
             params.direction = params.direction ? params.direction : undefined
+            setLoading(true)
             await BillsPcService.getPortfolio(params)
             .then(res => {
                 setCount(res.data.count)
@@ -43,7 +44,14 @@ const Assets = (props) => {
             defaultSortDirection='asc'
             defaultAttribute='name'
         />
-        {portfolio.length > 0 ?
+        {portfolio.length === 0 && !loading ?
+            <div className='emptyCollection'>
+                <p>No items in your collection!</p>
+                <p>Update your collection with a purchase.</p>
+                <Link to='update/purchase'>
+                    <button>Update Collection</button>
+                </Link>
+            </div> :
             <>
                 <PageSelection location={location} count={count} />
                 <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
@@ -54,13 +62,7 @@ const Assets = (props) => {
                     {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`collected-item/${id}`)} />)}
                     <PageSelection location={location} count={count} />
                 </ItemContainer>
-            </> : <div className='emptyCollection'>
-                <p>No items in your collection!</p>
-                <p>Update your collection with a purchase.</p>
-                <Link to='update/purchase'>
-                    <button>Update Collection</button>
-                </Link>
-            </div>}
+            </>}
     </>
 }
 
