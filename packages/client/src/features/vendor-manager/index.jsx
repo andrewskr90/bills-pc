@@ -22,8 +22,13 @@ const VendorManager = ({ referenceData, setReferenceData }) => {
                 />}
             />
             <Route 
-                path='/:id'
-                element={<VendorInfo managing={managing} setManaging={setManaging} />}
+                path='/:id/*'
+                element={<VendorInfo 
+                    managing={managing} 
+                    setManaging={setManaging} 
+                    referenceData={referenceData}
+                    setReferenceData={setReferenceData}
+                />}
             />
         </Routes>
     </div>

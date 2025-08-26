@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import PreviousRoutes from '../../layouts/previous-routes'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import BillsPcService from '../../api/bills-pc'
 import PageSelection from '../../components/page-selection'
 import ItemContainer from '../../components/item-container'
 import CollectedItem from '../../components/collected-item'
 import { buildParams } from '../../utils/location'
+import SelectItems from '../../components/select-items'
+import PlusButton from '../../components/buttons/plus-button'
 
-const VendorInfo = ({ managing, setManaging }) => {
+const VendorInfo = ({ managing, setManaging, referenceData, setReferenceData }) => {
     const location = useLocation()
     const urlParams = useParams()
     const navigate = useNavigate()
@@ -15,6 +17,19 @@ const VendorInfo = ({ managing, setManaging }) => {
     const [loading, setLoading] = useState(true)
     const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
+
+    const handleSelectItems = async (items) => {
+        console.log(items)
+        // await BillsPcService.createImports({ data: items })
+        //     .then(res => {
+        //         console.log(res)
+        //         navigate(`/gym-leader/vendors/${proxyUserId}`)
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //     })
+
+    }
 
     useEffect(() => {
         (async () => {
@@ -54,24 +69,44 @@ const VendorInfo = ({ managing, setManaging }) => {
         }
     }, [])
     
-    return (<>
-        <PreviousRoutes location={location} />
-        {portfolio.length === 0 && !loading ?
-            <div className='emptyCollection'>
-                <p>No items in your collection!</p>
-                <p>Update your collection with a purchase.</p>
-                <Link to='import'>
-                    <button>Update Collection</button>
-                </Link>
-            </div> :
-            <>
-                <PageSelection location={location} count={count} />
-                <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
-                    {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`collected-item/${id}`)} />)}
-                    <PageSelection location={location} count={count} />
-                </ItemContainer>
-            </>}
-    </>)
+    return (<Routes>
+        <Route 
+            path='/' 
+            element={<>
+                <PreviousRoutes location={location} />
+                <div className='flex justify-center items-center w-full my-3'>
+                    <p className='mr-2'>Import Items</p>
+                    <PlusButton handleClick={() => navigate('import')} />
+                </div>
+                {portfolio.length === 0 && !loading ?
+                    <div className='emptyCollection'>
+                        <p>No items in your collection!</p>
+                        <p>Update your collection with a purchase.</p>
+                        <Link to='import'>
+                            <button>Update Collection</button>
+                        </Link>
+                    </div> :
+                    <>
+                        <PageSelection location={location} count={count} />
+                        <ItemContainer emptyMessage={'Query yielded no items'} loading={loading} >
+                            {portfolio.map(collectedItem => <CollectedItem collectedItem={collectedItem} handleSelectItem={(id) => handleSelectAsset(`collected-item/${id}`)} />)}
+                            <PageSelection location={location} count={count} />
+                        </ItemContainer>
+                    </>}
+            </>} 
+        />
+        <Route 
+            path='/import/*'
+            element={<SelectItems
+                referenceData={referenceData}
+                setReferenceData={setReferenceData}
+                handleSelectItems={handleSelectItems}
+                initialEmptyMessage={"Search for items to import."}
+                actionTitle='Import Items'
+            />}
+        />
+    </Routes>
+    )
 }
 
 export default VendorInfo

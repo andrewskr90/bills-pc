@@ -128,13 +128,14 @@ const EditWatchedListing = (props) => {
                     ...loading
                 </>
             } />
-                <Route 
+            <Route 
                 path='/add-lot/*'
                 element={<SelectItems
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}
                     handleSelectItems={handleSelectItems}
                     initialEmptyMessage={"Search for items to add to lot."}
+                    actionTitle='Add Lot'
                 />}
             />
         </Routes>

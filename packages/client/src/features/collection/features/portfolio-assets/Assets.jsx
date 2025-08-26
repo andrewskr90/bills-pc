@@ -4,7 +4,6 @@ import Toolbar from '../../../../layouts/toolbar';
 import PageSelection from '../../../../components/page-selection';
 import ItemContainer from '../../../../components/item-container';
 import CollectedItem from '../../../../components/collected-item';
-import { initialPortfolioValues } from '../../../../data/initialData';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { buildParams } from '../../../../utils/location';
 import BillsPcService from '../../../../api/bills-pc';

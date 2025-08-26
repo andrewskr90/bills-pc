@@ -12,6 +12,7 @@ const SelectItems = (props) => {
         setReferenceData,
         handleSelectItems,
         initialEmptyMessage,
+        actionTitle
     } = props
     const [lotItemCounts, setLotItemCounts] = useState({})
     const navigate = useNavigate()
@@ -107,7 +108,7 @@ const SelectItems = (props) => {
     }
 
     return (<div className='selectItems page'>
-        <Banner titleText={'Add Lot'} handleClickBackArrow={handleClickBackArrow} />
+        <Banner titleText={actionTitle} handleClickBackArrow={handleClickBackArrow} />
         <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
             if (lotItemCounts[itemId].count) {
                 return Object.keys(lotItemCounts[itemId].count).reduce((prev, printingId) => {
@@ -116,7 +117,7 @@ const SelectItems = (props) => {
             }
             return prev
         }, 0)}</p>
-        <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>
+        <button onClick={() => handleSelectItems(convertToItemArray())}>{actionTitle}</button>
         <div className='itemFinder'>
             <div style={{ display: 'flex' }}>
                 <button onClick={() => navigate('search')}>Search</button>

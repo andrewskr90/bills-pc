@@ -270,6 +270,7 @@ const ImportListing = (props) => {
                     setReferenceData={setReferenceData}
                     handleSelectItems={handleSelectItems}
                     initialEmptyMessage={initialEmptyItemsMessage}
+                    actionTitle='Add Lot'
                 />}
             />
             <Route 
