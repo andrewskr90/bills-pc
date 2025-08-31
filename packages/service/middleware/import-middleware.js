@@ -1,7 +1,7 @@
 const { v4: uuidV4 } = require('uuid')
 const Import = require('../models/Import')
 
-const createImports = async (req, res, next) => {
+const createImportsConvertedFromGifts = async (req, res, next) => {
     try {
         const formattedImports = req.body.map(importToFormat => ({ id: uuidV4(), ...importToFormat }))
         req.ids = await Import.create(formattedImports)
@@ -11,4 +11,4 @@ const createImports = async (req, res, next) => {
     }
 }
 
-module.exports = { createImports }
+module.exports = { createImportsConvertedFromGifts }

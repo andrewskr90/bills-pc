@@ -35,7 +35,7 @@ export const getPortfolioBillsPc = async (cookies) => {
 export const getWatchedListings = async (cookies) => {
     try {
         const watchedListingRes = await axios({
-            baseURL, baseurl,
+            baseURL: baseurl,
             url: '/api/v1/listings',
             params: { watching: true },
             headers: { Cookie: cookies }
@@ -367,12 +367,12 @@ export const getLotEditsByFilter = async (params, cookies) => {
     }
 }
 
-export const createImports = async (data, cookies) => {
+export const createImportsConvertedFromGifts = async (data, cookies) => {
     try {
         const createImportRes = await axios({
             baseURL: baseurl,
             method: 'post',
-            url: '/api/v1/imports',
+            url: '/api/v1/imports/converted-gifts',
             data,
             headers: { Cookie: cookies },
         })        
