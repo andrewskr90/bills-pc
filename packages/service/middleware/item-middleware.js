@@ -61,9 +61,9 @@ const getItems = async (req, res, next) => {
         orderBy =  ' ORDER BY name'
         if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
         else orderBy += ' ASC'
-        orderBy += ', set_v2_name ASC'
+        // orderBy += ', set_v2_name ASC'
     }
-    const groupBy = ' GROUP BY i.name, i.id, p.printing_id'
+    const groupBy = ' GROUP BY i.name, i.id'
     let query = `
         SELECT 
             i.id,
@@ -76,9 +76,11 @@ const getItems = async (req, res, next) => {
             s.set_v2_series,
             count(*) OVER () as count, 
             GROUP_CONCAT(
-                    '[', '"', p.printing_id, '"', ',', '"', p.printing_name, '"', ']' 
-                    ORDER BY p.printing_tcgp_printing_id SEPARATOR ','
-                ) as printings
+                DISTINCT p.printing_id ORDER BY p.printing_tcgp_printing_id SEPARATOR ','
+            ) as printings,
+            GROUP_CONCAT(
+                DISTINCT c.condition_id ORDER BY c.condition_tcgp_condition_id SEPARATOR ','
+            ) as conditions
         FROM Item as i
         LEFT JOIN sets_v2 as s
             ON  s.set_v2_id = i.setId
