@@ -306,6 +306,14 @@ const BillsPcService = {
             method: 'post'
         })
     },
+    createImports({ data }) {
+        return axios({
+            ...options,
+            url: `/api/v1/imports`,
+            data,
+            method: 'post'
+        })
+    },
 }
 
 

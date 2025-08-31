@@ -39,11 +39,8 @@ const ImportListing = (props) => {
         setExternalListing({
             ...externalListing,
             items: items.map(item => ({ 
-                ...item, note: '', 
-                condition: item.sealed 
-                    ? referenceData.bulk.condition.find(cond => cond.condition_name === 'Unopened').condition_id 
-                    : referenceData.bulk.condition.find(cond => cond.condition_name === 'Near Mint').condition_id,
-                printing: item.printing
+                ...item, 
+                note: '',
             })),
             csvItems: []
         })
@@ -134,8 +131,6 @@ const ImportListing = (props) => {
         })
     }
 
-    const { condition } = referenceData.bulk
-
     const handleUploadFile = async (e) => {
         const text = await e.target.files[0].text()
         const csvItems = []
@@ -221,17 +216,17 @@ const ImportListing = (props) => {
                                         <p>{item.name}</p>
                                         <p>{item.set.name}</p>
                                         <select name='condition' onChange={(e) => handleChange(e, idx)} value={item.condition}>
-                                            {item.sealed ? <>
-                                                <option value={'7e464ec6-0b23-11ef-b8b9-0efd996651a9'}>{condition.find(c => c.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9').condition_name}</option>
-                                            </> : <>
-                                                {condition.filter(c => c.condition_id !== '7e464ec6-0b23-11ef-b8b9-0efd996651a9').map(c => {
-                                                    return <option value={c.condition_id}>{c.condition_name}</option>
-                                                })}
-                                            </>}
+                                            {item.conditions.map(condition => {
+                                                const referenceCondition = item.conditions.find(c => c.condition_id === condition.id)
+                                                const conditionName = referenceCondition ? referenceCondition.condition_name : ''
+                                                return <option value={condition.id}>{conditionName}</option>
+                                            })}
                                         </select>
                                         <select name='printing' onChange={(e) => handleChange(e, idx)} value={item.printing}>
-                                            {item.printings.map(p => {
-                                                return <option value={p.id}>{p.name}</option>
+                                            {item.printings.map(printing => {
+                                                const referencePrinting = item.printings.find(p => p.printing_id === printing.id)
+                                                const printingName = referencePrinting ? referencePrinting.printing_name : ''
+                                                return <option value={printing.id}>{printingName}</option>
                                             })}
                                         </select>
                                         <button onClick={() => handleEditItem('item', idx)}>Add Note</button>
