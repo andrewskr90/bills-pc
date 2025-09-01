@@ -8,6 +8,7 @@ import CollectedItem from '../../components/collected-item'
 import { buildParams } from '../../utils/location'
 import SelectItems from '../../components/select-items'
 import PlusButton from '../../components/buttons/plus-button'
+import { formatDateToInput } from '../../utils/date'
 
 const VendorInfo = ({ managing, setManaging, referenceData, setReferenceData }) => {
     const location = useLocation()
@@ -17,10 +18,15 @@ const VendorInfo = ({ managing, setManaging, referenceData, setReferenceData }) 
     const [loading, setLoading] = useState(true)
     const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
+    const [importTime, setImportTime] = useState(formatDateToInput(new Date()))
 
     const handleSelectItems = async (items) => {
-        console.log(items)
-        // await BillsPcService.createImports({ data: items })
+        const data = { 
+            time: new Date(importTime).toISOString(), 
+            items 
+        }
+        console.log(data)
+        // await BillsPcService.createImports({ data })
         //     .then(res => {
         //         console.log(res)
         //         navigate(`/gym-leader/vendors/${proxyUserId}`)
@@ -103,6 +109,8 @@ const VendorInfo = ({ managing, setManaging, referenceData, setReferenceData }) 
                 handleSelectItems={handleSelectItems}
                 initialEmptyMessage={"Search for items to import."}
                 actionTitle='Import Items'
+                importTime={importTime}
+                setImportTime={setImportTime}
             />}
         />
     </Routes>

@@ -454,71 +454,94 @@ const prepZuluForDB = (local) => {
         local.getMilliseconds().toString().padStart(3, '0')}`
 }
 
+const formatCollectedItem = (id, itemId, printingId) => {
+    return {
+        id,
+        itemId,
+        printingId
+    }
+}
+
+const formatAppraisal = (id, collectedItemId, conditionId, appraiserId, time) => {
+    return {
+        id,
+        collectedItemId,
+        conditionId,
+        appraiserId,
+        time
+    }
+}
+
+const formatCollectedItemNote = (id, collectedItemId, takerId, note, time) => {
+    return {
+        id, 
+        collectedItemId, 
+        takerId,
+        note,
+        time
+    }
+}
+
+const formatImport = (id, importerId, collectedItemId, bulkSplitId, time) => {
+    return {
+        id,
+        importerId,
+        collectedItemId,
+        bulkSplitId,
+        time
+    }
+}
+
+const createItemImportQueries = (items, importerId, time, noteTakerId) => {
+    const queries = []
+    const collectedItemIds = []
+    const collectedItemsToInsert = []
+    const importsToInsert = []
+    const appraisalsToInsert = []
+    const collectedItemNotesToInsert = []
+    items.forEach((item) => {
+        const collectedItemId = uuidV4()
+        const formattedCollectedItem = formatCollectedItem(collectedItemId, item.id, item.printingId)
+        // TODO after listing created, user can create their own appraisal
+        const formattedAppraisal = formatAppraisal(uuidV4(), collectedItemId, item.conditionId, importerId, time)
+        const formattedImport = formatImport(uuidV4(), importerId, collectedItemId, null, time)
+        if (item.note) {
+            // all notes are taken by the proxyCreator
+            const formattedCollectedItemNote = formatCollectedItemNote(uuidV4(), collectedItemId, noteTakerId, item.note, time)
+            collectedItemNotesToInsert.push(formattedCollectedItemNote)
+        }
+        collectedItemIds.push(collectedItemId)
+        collectedItemsToInsert.push(formattedCollectedItem)
+        appraisalsToInsert.push(formattedAppraisal)
+        importsToInsert.push(formattedImport)
+    })
+    queries.push({ query: `${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`, variables: [] })
+    queries.push({ query: `${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`, variables: [] })
+    queries.push({ query: `${objectsToInsert(importsToInsert, 'V3_Import')};`, variables: [] })
+    if (collectedItemNotesToInsert.length > 0) {
+        queries.push({ query: `${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`, variables: [] })
+    }
+    return { collectedItemIds, queries }
+}
+
 const createExternal = async (listing, watcherId) => {
+    const createdCollectedItemIds = []
     const queryQueue = []
     if ((listing.items.length + listing.bulkSplits.length) === 0) {
         throw new Error("No item(s) specified within listing.")
     }
-    const formattedImports = []
     // create collected items
     const isLot = listing.items.length + listing.bulkSplits.length > 1
     let importTime = adjustISOHours(listing.time, -1)
     if (isLot) importTime = adjustISOHours(listing.time, -2)
     if (listing.items.length > 0) {
-        const collectedItemsToInsert = []
-        const appraisalsToInsert = []
-        const collectedItemNotesToInsert = []
-        listing.items.forEach((item, idx) => {
-            const collectedItemId = uuidV4()
-            const formattedItem = {
-                id: collectedItemId,
-                itemId: item.id,
-                printingId: item.printing
-            }
-            const appraisalId = uuidV4()
-            // after listing created, user can create their own appraisal
-            const formattedAppraisal = {
-                id: appraisalId,
-                collectedItemId,
-                conditionId: item.condition,
-                appraiserId: listing.sellerId,
-                time: importTime
-            }
-            if (item.note) {
-                const itemNoteId = uuidV4()
-                // all notes are taken by the proxyCreator
-                const formattedCollectedItemNote = {
-                    id: itemNoteId, 
-                    collectedItemId, 
-                    takerId: watcherId,
-                    note: item.note,
-                    time: importTime
-                }
-
-                collectedItemNotesToInsert.push(formattedCollectedItemNote)
-            }
-            collectedItemsToInsert.push(formattedItem)
-            appraisalsToInsert.push(formattedAppraisal)
-            listing.items[idx] = { ...item, collectedItemId }
-            // create import for item
-            const importId = uuidV4();
-            const formattedImport = {
-                id: importId,
-                importerId: listing.sellerId,
-                collectedItemId,
-                bulkSplitId: null,
-                time: importTime
-            }
-            formattedImports.push(formattedImport)
-        })
-        queryQueue.push({ query: `${objectsToInsert(collectedItemsToInsert, 'V3_CollectedItem')};`, variables: [] })
-        queryQueue.push({ query: `${objectsToInsert(appraisalsToInsert, 'V3_Appraisal')};`, variables: [] })
-        if (collectedItemNotesToInsert.length > 0) {
-            queryQueue.push({ query: `${objectsToInsert(collectedItemNotesToInsert, 'V3_CollectedItemNote')};`, variables: [] })
-        }
+        const { collectedItemIds, queries } = createItemImportQueries(listing.items, listing.sellerId, importTime, watcherId)
+        createdCollectedItemIds.push(...collectedItemIds)
+        queryQueue.push(...queries)
     }
     if (listing.bulkSplits.length > 0) {
         // bulk splits
+        const importsToInsert = []
         const bulkSplitsToInsert = []
         const bulkSplitLabelsToInsert = []
         const bulkSplitNotesToInsert = []
@@ -553,9 +576,10 @@ const createExternal = async (listing, watcherId) => {
                 bulkSplitId,
                 time: importTime
             }
-            formattedImports.push(formattedImport)
+            importsToInsert.push(formattedImport)
         }
         queryQueue.push({ query: `${objectsToInsert(bulkSplitsToInsert, 'V3_BulkSplit')};`, variables: [] })
+        queryQueue.push({ query: `${objectsToInsert(importsToInsert, 'V3_Import')};`, variables: [] })
         if (bulkSplitLabelsToInsert.length > 0) {
             queryQueue.push({ query: `${objectsToInsert(bulkSplitLabelsToInsert, 'V3_BulkSplitLabel')};`, variables: [] })  
         }
@@ -563,7 +587,6 @@ const createExternal = async (listing, watcherId) => {
             queryQueue.push({ query: `${objectsToInsert(bulkSplitNotesToInsert, 'V3_BulkSplitNote')};`, variables: [] })  
         }
     }
-    queryQueue.push({ query: `${objectsToInsert(formattedImports, 'V3_Import')};`, variables: [] })
 
     let collectedItemId = undefined
     let bulkSplitId = undefined
@@ -581,8 +604,7 @@ const createExternal = async (listing, watcherId) => {
             lotId,
             time: lotEditTime
         }
-        listing.items.forEach((item, index) => {
-            const { collectedItemId } = item
+        createdCollectedItemIds.forEach((collectedItemId, index) => {
             const lotInsertId = uuidV4()
             const formattedLotInsert = {
                 id: lotInsertId,

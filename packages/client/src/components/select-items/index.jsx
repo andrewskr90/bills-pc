@@ -12,7 +12,9 @@ const SelectItems = (props) => {
         setReferenceData,
         handleSelectItems,
         initialEmptyMessage,
-        actionTitle
+        actionTitle,
+        importTime,
+        setImportTime
     } = props
     const [lotItemCounts, setLotItemCounts] = useState({})
     const navigate = useNavigate()
@@ -104,7 +106,7 @@ const SelectItems = (props) => {
                         if (cur.count[printingId][conditionId]) {
                             const eachDuplicateOfPrintingAndCondition = []
                             for (let i=0; i<cur.count[printingId][conditionId]; i++) {
-                                eachDuplicateOfPrintingAndCondition.push({ ...cur, printing: printingId, condition: conditionId })
+                                eachDuplicateOfPrintingAndCondition.push({ ...cur, printingId, conditionId })
                             }
                             return [...prev, ...eachDuplicateOfPrintingAndCondition]
                         } else {
@@ -151,9 +153,13 @@ const SelectItems = (props) => {
             }
             return prev
         }, 0)}</p>
+        {importTime && <label style={{ display: 'flex', flexDirection: 'column' }}>
+            Import Time
+            <input type="datetime-local" value={importTime} onChange={(e) => setImportTime(e.target.value)} />
+        </label>}
         <button onClick={() => handleSelectItems(convertToItemArray())}>{actionTitle}</button>
         <div className='itemFinder'>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', paddingTop: '12px' }}>
                 <button onClick={() => navigate('search')}>Search</button>
                 <button onClick={() => navigate('expansion')}>Expansion</button>
             </div>

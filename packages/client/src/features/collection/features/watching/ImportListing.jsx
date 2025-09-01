@@ -52,11 +52,11 @@ const ImportListing = (props) => {
             ...listing,
             time: new Date(listing.time).toISOString(),
             items: listing.items.map(item => { 
-                const { id, printing, condition, note } = item
+                const { id, printingId, conditionId, note } = item
                 return {
                     id, 
-                    printing,
-                    condition,
+                    printingId,
+                    conditionId,
                     note
                 }
             }),
@@ -215,16 +215,16 @@ const ImportListing = (props) => {
                                     <div className="flex flex-col w-4/5">
                                         <p>{item.name}</p>
                                         <p>{item.set.name}</p>
-                                        <select name='condition' onChange={(e) => handleChange(e, idx)} value={item.condition}>
+                                        <select name='conditionId' onChange={(e) => handleChange(e, idx)} value={item.conditionId}>
                                             {item.conditions.map(condition => {
-                                                const referenceCondition = item.conditions.find(c => c.condition_id === condition.id)
+                                                const referenceCondition = referenceData.bulk.condition.find(c => c.condition_id === condition.id)
                                                 const conditionName = referenceCondition ? referenceCondition.condition_name : ''
                                                 return <option value={condition.id}>{conditionName}</option>
                                             })}
                                         </select>
-                                        <select name='printing' onChange={(e) => handleChange(e, idx)} value={item.printing}>
+                                        <select name='printingId' onChange={(e) => handleChange(e, idx)} value={item.printingId}>
                                             {item.printings.map(printing => {
-                                                const referencePrinting = item.printings.find(p => p.printing_id === printing.id)
+                                                const referencePrinting = referenceData.bulk.printing.find(p => p.printing_id === printing.id)
                                                 const printingName = referencePrinting ? referencePrinting.printing_name : ''
                                                 return <option value={printing.id}>{printingName}</option>
                                             })}
