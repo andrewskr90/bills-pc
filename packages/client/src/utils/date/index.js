@@ -36,3 +36,14 @@ export const convertLocalToUTC = (local) => {
     const utcDate = new Date(local)
     return utcDate.toISOString()
 }
+
+const padIntTwoPlacesWithZero = (int) => int.toString().padStart(2, '0')
+
+export const formatDateToInput = (date) => {
+    const year = date.getFullYear()
+    const month = padIntTwoPlacesWithZero(date.getMonth() + 1)
+    const day = padIntTwoPlacesWithZero(date.getDay())
+    const hours = padIntTwoPlacesWithZero(date.getHours())
+    const minutes = padIntTwoPlacesWithZero(date.getMinutes())
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+}

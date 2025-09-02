@@ -12,44 +12,83 @@ const SelectItems = (props) => {
         setReferenceData,
         handleSelectItems,
         initialEmptyMessage,
+        actionTitle,
+        importTime,
+        setImportTime
     } = props
     const [lotItemCounts, setLotItemCounts] = useState({})
     const navigate = useNavigate()
     const location = useLocation()
 
-    const handleAddItem = (item, printingId) => {
-        setLotItemCounts({
-            ...lotItemCounts,
-            [item.id]: lotItemCounts[item.id] ? lotItemCounts[item.id].count ? {
-                ...lotItemCounts[item.id],
-                count: {
-                    ...lotItemCounts[item.id].count,
-                    [printingId]: lotItemCounts[item.id].count[printingId] ? lotItemCounts[item.id].count[printingId] + 1 : 1
-                }
-            } : {
-                ...lotItemCounts[item.id],
-                count: { [printingId]: 1 }
-            } : {
-                ...item,
-                count: { [printingId]: 1 },
-                activePrinting: printingId
-            }
-        })
+    const handleAddItem = (item, printingId, conditionId) => {
+        if (!lotItemCounts[item.id]) {
+            setLotItemCounts({ 
+                ...lotItemCounts, 
+                [item.id]: { 
+                    ...item, 
+                    count: { [printingId]: { [conditionId]: 1 } } 
+                } 
+            })
+        } else if (!lotItemCounts[item.id].count[printingId]) {
+            setLotItemCounts({ 
+                ...lotItemCounts, 
+                [item.id]: { 
+                    ...lotItemCounts[item.id], 
+                    count: { 
+                        ...lotItemCounts[item.id].count,
+                        [printingId]: { [conditionId]: 1 } 
+                    } 
+                } 
+            })
+        } else if (!lotItemCounts[item.id].count[printingId][conditionId]) {
+            setLotItemCounts({ 
+                ...lotItemCounts, 
+                [item.id]: { 
+                    ...lotItemCounts[item.id], 
+                    count: { 
+                        ...lotItemCounts[item.id].count,
+                        [printingId]: { 
+                            ...lotItemCounts[item.id].count[printingId],
+                            [conditionId]: 1 
+                        } 
+                    } 
+                } 
+            })
+        } else {
+            setLotItemCounts({ 
+                ...lotItemCounts, 
+                [item.id]: { 
+                    ...lotItemCounts[item.id], 
+                    count: { 
+                        ...lotItemCounts[item.id].count,
+                        [printingId]: { 
+                            ...lotItemCounts[item.id].count[printingId],
+                            [conditionId]: lotItemCounts[item.id].count[printingId][conditionId] + 1
+                        } 
+                    } 
+                } 
+            })
+        }
     }
-    const handleSubtractItem = (item, printingId) => {
+    const handleSubtractItem = (item, printingId, conditionId) => {
         if (lotItemCounts[item.id]) {
             if (lotItemCounts[item.id].count) {
                 if (lotItemCounts[item.id].count[printingId]) {
-                    setLotItemCounts({ 
-                        ...lotItemCounts, 
-                        [item.id]: { 
-                            ...lotItemCounts[item.id], 
-                            count: {
-                                ...lotItemCounts[item.id].count,
-                                [printingId]: lotItemCounts[item.id].count[printingId] - 1 
-                            }
-                        } 
-                    })
+                    if (lotItemCounts[item.id].count[printingId][conditionId]) {
+                        setLotItemCounts({ 
+                            ...lotItemCounts, 
+                            [item.id]: { 
+                                ...lotItemCounts[item.id], 
+                                count: {
+                                    ...lotItemCounts[item.id].count,
+                                    [printingId]: {
+                                        ...lotItemCounts[item.id].count[printingId],
+                                        [conditionId]: lotItemCounts[item.id].count[printingId][conditionId] - 1 
+                                    }
+                                }
+                            } 
+                        })
+                    }
                 }
             }
         } 
@@ -59,66 +98,68 @@ const SelectItems = (props) => {
         navigate(buildPreviousRoute(location))
     }
     const convertToItemArray = () => {
-        return Object.keys(lotItemCounts).reduce((prev, itemId) => {
+        const items = Object.keys(lotItemCounts).reduce((prev, itemId) => {
             const cur = lotItemCounts[itemId]
-            return [
-                ...prev,
-                ...cur.count ? Object.keys(cur.count).reduce((prev, printingId) => {
-                    if (cur.count[printingId]) {
-                        const items = []
-                        for (let i=0; i<cur.count[printingId]; i++) {
-                            items.push({ ...cur, printing: printingId })
+            if (cur.count) {
+                const eachPrintingOfItem = Object.keys(cur.count).reduce((prev, printingId) => {
+                    const eachConditionOfPrinting = Object.keys(cur.count[printingId]).reduce((prev, conditionId) => {
+                        if (cur.count[printingId][conditionId]) {
+                            const eachDuplicateOfPrintingAndCondition = []
+                            for (let i=0; i<cur.count[printingId][conditionId]; i++) {
+                                eachDuplicateOfPrintingAndCondition.push({ ...cur, printingId, conditionId })
+                            }
+                            return [...prev, ...eachDuplicateOfPrintingAndCondition]
+                        } else {
+                            return [...prev]
                         }
-                        return [...prev, ...items]
-                    } else {
-                        return [...prev]
-                    }
-                }, []) : []
-            ]
+
+                    }, [])
+                    return [...prev, ...eachConditionOfPrinting]
+                }, [])
+                return [...prev, ...eachPrintingOfItem]
+            }
+            return prev
         }, [])
+        return items
     }
 
-    const handleFindCount = (item_id, selectedPrintingId) => {
+    const handleFindCount = (item_id, selectedPrintingId, selectedConditionId) => {
         return lotItemCounts[item_id] 
             ? lotItemCounts[item_id].count
                 ? lotItemCounts[item_id].count[selectedPrintingId] 
-                    ? lotItemCounts[item_id].count[selectedPrintingId] 
+                    ? lotItemCounts[item_id].count[selectedPrintingId][selectedConditionId]
+                        ? lotItemCounts[item_id].count[selectedPrintingId][selectedConditionId]
+                        : undefined
                     : undefined 
                 : undefined
             : undefined
-    }
-
-    const handleChangePrinting = (item, printingId) => {
-        setLotItemCounts({
-            ...lotItemCounts,
-            [item.id]: {
-                ...item,
-                ...lotItemCounts[item.id],
-                activePrinting: printingId
-            }
-        })
     }
    
     const countConfig = {
         handleAddItem,
         handleSubtractItem,
-        handleChangePrinting,
         handleFindCount,
     }
 
     return (<div className='selectItems page'>
-        <Banner titleText={'Add Lot'} handleClickBackArrow={handleClickBackArrow} />
+        <Banner titleText={actionTitle} handleClickBackArrow={handleClickBackArrow} />
         <p>item count: {Object.keys(lotItemCounts).reduce((prev, itemId) => {
             if (lotItemCounts[itemId].count) {
                 return Object.keys(lotItemCounts[itemId].count).reduce((prev, printingId) => {
-                    return lotItemCounts[itemId].count[printingId] + prev
+                    return Object.keys(lotItemCounts[itemId].count[printingId]).reduce((prev, conditionId) => {
+                        return lotItemCounts[itemId].count[printingId][conditionId] + prev
+                    }, 0) + prev
                 }, 0) + prev
             }
             return prev
         }, 0)}</p>
-        <button onClick={() => handleSelectItems(convertToItemArray())}> Add Lot</button>
+        {importTime && <label style={{ display: 'flex', flexDirection: 'column' }}>
+            Import Time
+            <input type="datetime-local" value={importTime} onChange={(e) => setImportTime(e.target.value)} />
+        </label>}
+        <button onClick={() => handleSelectItems(convertToItemArray())}>{actionTitle}</button>
         <div className='itemFinder'>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', paddingTop: '12px' }}>
                 <button onClick={() => navigate('search')}>Search</button>
                 <button onClick={() => navigate('expansion')}>Expansion</button>
             </div>

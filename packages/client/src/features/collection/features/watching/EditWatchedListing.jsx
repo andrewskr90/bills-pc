@@ -71,9 +71,7 @@ const EditWatchedListing = (props) => {
                 name: item.name,
                 itemId: item.id, 
                 printingId: item.printing,
-                conditionId: item.sealed 
-                    ? referenceData.bulk.condition.find(cond => cond.condition_name === 'Unopened').condition_id 
-                    : referenceData.bulk.condition.find(cond => cond.condition_name === 'Near Mint').condition_id,
+                conditionId: item.condition,
                 sealed: item.sealed,
                 index: maxIndex+ 1 + idx,
                 note: ''
@@ -128,13 +126,14 @@ const EditWatchedListing = (props) => {
                     ...loading
                 </>
             } />
-                <Route 
+            <Route 
                 path='/add-lot/*'
                 element={<SelectItems
                     referenceData={referenceData}
                     setReferenceData={setReferenceData}
                     handleSelectItems={handleSelectItems}
                     initialEmptyMessage={"Search for items to add to lot."}
+                    actionTitle='Add Lot'
                 />}
             />
         </Routes>

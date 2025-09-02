@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { buildParams } from '../../../../utils/location'
-import BillsPcService from '../../../../api/bills-pc'
-import Toolbar from '../../../../layouts/toolbar'
-import PageSelection from '../../../../components/page-selection'
-import ItemContainer from '../../../../components/item-container'
-import Button from '../../../../components/buttons/text-button'
+import { buildParams } from '../../utils/location'
+import BillsPcService from '../../api/bills-pc'
+import Toolbar from '../../layouts/toolbar'
+import PageSelection from '../../components/page-selection'
+import ItemContainer from '../../components/item-container'
+import Button from '../../components/buttons/text-button'
 import CreateVendor from './CreateVendor'
-import VendorInfo from './VendorInfo'
 
 const Vendors = (props) => {
         const {
@@ -66,10 +65,6 @@ const Vendors = (props) => {
                 <Route 
                     path='/create'
                     element={<CreateVendor />}
-                />
-                <Route 
-                    path='/:id'
-                    element={<VendorInfo />}
                 />
             </Routes>) : (<>
                 <p>You aren't tracking any vendors, create a vendor to begin managing their inventory.</p>

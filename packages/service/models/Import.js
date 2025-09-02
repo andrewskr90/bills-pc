@@ -1,7 +1,29 @@
 const { executeQueries } = require("../db")
+const { createItemImportQueries } = require("../utils/imports")
 const QueryFormatters = require("../utils/queryFormatters")
+const User = require('../models/User')
 
-const create = async (imports) => {
+const create = async (importData, proxyCreatorId) => {
+    const { items, importerId, time } = importData
+    if (items.length === 0) throw new Error('No items provided to import')
+    const proxyUsers = await User.findProxyByCreatorId(proxyCreatorId, importerId)
+    if (proxyUsers.length === 0) throw new Error('Vendor does not exist')
+    if (proxyUsers[0].user_id !== importerId) throw new Error('Vendor does not exist')
+
+    try {
+        const { collectedItemIds, queries: queryQueue } = createItemImportQueries(items, importerId, time)
+        const req = { queryQueue }
+        const res = {}
+        await executeQueries(req, res, (err) => {
+            if (err) throw err
+        })
+        return collectedItemIds
+    } catch (err) {
+        throw err
+    }
+}
+
+const createConvertedFromGift = async (imports) => {
     const queryQueue = []
     const query = QueryFormatters.objectsToInsert(imports, 'V3_Import')
     queryQueue.push({ query, variables: [] })
@@ -38,4 +60,4 @@ const getById = async (id) => {
     return imp[0]
 }
 
-module.exports = { create, getById }
+module.exports = { createConvertedFromGift, getById, create }

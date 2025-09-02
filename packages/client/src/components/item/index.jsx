@@ -2,15 +2,18 @@ import React, { useState } from 'react'
 import './assets/item.css'
 
 const Item = (props) => {
-    const { item, referenceData, handleSelectItem, countConfig, isGrid, allowSelectPrinting } = props
+    const { item, referenceData, handleSelectItem, countConfig, isGrid, allowSelectPrinting, allowSelectCondition } = props
     const [loadImage, setLoadImage] = useState(true)
     const [selectedPrinting, setSelectedPrinting] = useState(allowSelectPrinting ? item.printings[0].id : undefined)
+    const [selectedCondition, setSelectedCondition] = useState(allowSelectCondition ? item.conditions[0].id : undefined)
     const handleImageError = () => {
         setLoadImage(false)
     }
     const handleChangePrinting = (e) => {
         setSelectedPrinting(e.target.value)
-        if (countConfig) countConfig.handleChangePrinting(item, e.target.value)    
+    }
+    const handleChangeCondition = (e) => {
+        setSelectedCondition(e.target.value)
     }
 
     const MoreInfo = () => {
@@ -61,19 +64,28 @@ const Item = (props) => {
                         <p className='unavailable'>Market Price Unavailable</p>}
                     </div> */}
                 </div>
-                <div style={{ width: '100%', display: 'flex', padding: '4px' }}>
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', padding: '4px' }}>
+                    {allowSelectCondition && <select style={{ width: '80%' }} value={selectedCondition} onChange={handleChangeCondition}>
+                        {item.conditions.map(condition => {
+                            const referenceCondition = referenceData.bulk.condition.find(c => c.condition_id === condition.id)
+                            const conditionName = referenceCondition ? referenceCondition.condition_name : ''
+                            return <option value={condition.id}>{conditionName}</option>
+                        })}
+                    </select>}
                     {allowSelectPrinting && <select style={{ width: '80%' }} value={selectedPrinting} onChange={handleChangePrinting}>
                         {item.printings.map(printing => {
-                            return <option value={printing.id}>{printing.name}</option>
+                            const referencePrinting = referenceData.bulk.printing.find(p => p.printing_id === printing.id)
+                            const printingName = referencePrinting ? referencePrinting.printing_name : ''
+                            return <option value={printing.id}>{printingName}</option>
                         })}
                     </select>}
                     {allowSelectPrinting && handleSelectItem && <MoreInfo />}
                 </div>
                 {countConfig !== undefined && (
                     <div className='count'>
-                        <button onClick={() => countConfig.handleSubtractItem(item, selectedPrinting)}>-</button>
-                        <div>{countConfig.handleFindCount(item.id, selectedPrinting) ? countConfig.handleFindCount(item.id, selectedPrinting) : ''}</div>
-                        <button onClick={() => countConfig.handleAddItem(item, selectedPrinting)}>+</button>
+                        <button onClick={() => countConfig.handleSubtractItem(item, selectedPrinting, selectedCondition)}>-</button>
+                        <div>{countConfig.handleFindCount(item.id, selectedPrinting, selectedCondition) ? countConfig.handleFindCount(item.id, selectedPrinting, selectedCondition) : ''}</div>
+                        <button onClick={() => countConfig.handleAddItem(item, selectedPrinting, selectedCondition)}>+</button>
                     </div>
                 )}
             </div>

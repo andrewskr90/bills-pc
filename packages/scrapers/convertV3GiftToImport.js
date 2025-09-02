@@ -2,7 +2,7 @@ import {
     getGiftByFilter, 
     getWatchedListings, 
     loginBillsPc,
-    createImports,
+    createImportsConvertedFromGifts,
     deleteGiftById,
     getLotInsertsByFilter,
     getLotEditsByFilter
@@ -33,7 +33,7 @@ for (let i=0; i<v3watchedListings.length; i++) {
                 time: adjustedTime.toISOString()
             }
             try {
-                await createImports([createdImport], cookies)
+                await createImportsConvertedFromGifts([createdImport],  cookies)
                 await deleteGiftById(giftId, cookies)
             } catch (err) {
                 console.log(err)
@@ -73,7 +73,7 @@ for (let i=0; i<v3watchedListings.length; i++) {
                     importerId
                 }
             })
-            const postedImportRes = await createImports(formattedImports, cookies)
+            const postedImportRes = await createImportsConvertedFromGifts(formattedImports, cookies)
             console.log(postedImportRes)
             const deletedGiftRes = await deleteGiftById(giftId, cookies)
             console.log(deletedGiftRes)

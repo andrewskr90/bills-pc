@@ -1,7 +1,14 @@
 const Portfolio = require('../models/Portfolio')
+const User = require('../models/User')
 
 const getPortfolioItems = async (req, res, next) => {
-    const userId = req.claims.user_id
+    let userId = req.claims.user_id
+    if (req.query.proxyUserId) {
+        const proxyUser = await User.findProxyByCreatorId(req.claims.user_id, req.query.proxyUserId)
+        if (proxyUser.length === 1) {
+            userId = proxyUser[0].user_id
+        }
+    }
     let time = req.query.time
     if (!time) {
         const today = new Date()

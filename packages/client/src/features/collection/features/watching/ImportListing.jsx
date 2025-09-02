@@ -39,11 +39,8 @@ const ImportListing = (props) => {
         setExternalListing({
             ...externalListing,
             items: items.map(item => ({ 
-                ...item, note: '', 
-                condition: item.sealed 
-                    ? referenceData.bulk.condition.find(cond => cond.condition_name === 'Unopened').condition_id 
-                    : referenceData.bulk.condition.find(cond => cond.condition_name === 'Near Mint').condition_id,
-                printing: item.printing
+                ...item, 
+                note: '',
             })),
             csvItems: []
         })
@@ -54,15 +51,7 @@ const ImportListing = (props) => {
         return {
             ...listing,
             time: new Date(listing.time).toISOString(),
-            items: listing.items.map(item => { 
-                const { id, printing, condition, note } = item
-                return {
-                    id, 
-                    printing,
-                    condition,
-                    note
-                }
-            }),
+            items: listing.items
         }
     }
     const handleCreateExternalListing = async () => {
@@ -133,8 +122,6 @@ const ImportListing = (props) => {
             })
         })
     }
-
-    const { condition } = referenceData.bulk
 
     const handleUploadFile = async (e) => {
         const text = await e.target.files[0].text()
@@ -220,18 +207,18 @@ const ImportListing = (props) => {
                                     <div className="flex flex-col w-4/5">
                                         <p>{item.name}</p>
                                         <p>{item.set.name}</p>
-                                        <select name='condition' onChange={(e) => handleChange(e, idx)} value={item.condition}>
-                                            {item.sealed ? <>
-                                                <option value={'7e464ec6-0b23-11ef-b8b9-0efd996651a9'}>{condition.find(c => c.condition_id === '7e464ec6-0b23-11ef-b8b9-0efd996651a9').condition_name}</option>
-                                            </> : <>
-                                                {condition.filter(c => c.condition_id !== '7e464ec6-0b23-11ef-b8b9-0efd996651a9').map(c => {
-                                                    return <option value={c.condition_id}>{c.condition_name}</option>
-                                                })}
-                                            </>}
+                                        <select name='conditionId' onChange={(e) => handleChange(e, idx)} value={item.conditionId}>
+                                            {item.conditions.map(condition => {
+                                                const referenceCondition = referenceData.bulk.condition.find(c => c.condition_id === condition.id)
+                                                const conditionName = referenceCondition ? referenceCondition.condition_name : ''
+                                                return <option value={condition.id}>{conditionName}</option>
+                                            })}
                                         </select>
-                                        <select name='printing' onChange={(e) => handleChange(e, idx)} value={item.printing}>
-                                            {item.printings.map(p => {
-                                                return <option value={p.id}>{p.name}</option>
+                                        <select name='printingId' onChange={(e) => handleChange(e, idx)} value={item.printingId}>
+                                            {item.printings.map(printing => {
+                                                const referencePrinting = referenceData.bulk.printing.find(p => p.printing_id === printing.id)
+                                                const printingName = referencePrinting ? referencePrinting.printing_name : ''
+                                                return <option value={printing.id}>{printingName}</option>
                                             })}
                                         </select>
                                         <button onClick={() => handleEditItem('item', idx)}>Add Note</button>
@@ -270,6 +257,7 @@ const ImportListing = (props) => {
                     setReferenceData={setReferenceData}
                     handleSelectItems={handleSelectItems}
                     initialEmptyMessage={initialEmptyItemsMessage}
+                    actionTitle='Add Lot'
                 />}
             />
             <Route 

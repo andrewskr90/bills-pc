@@ -80,7 +80,7 @@ const CollectedItemInfo = () => {
                             <p className='flex items-center h-[85%] w-[90%] bg-[#ececec] text-[12px] p-[2px] text-center rounded-[5px] m-1'>{collectedItem.item.name}</p>
                             }
                             <div className='w-2/3'>
-                                <p className='font-bold text-lg'>{collectedItem.item.name}</p>
+                                <p onClick={() => navigate(`/gym-leader/collection/assets/item/${collectedItem.item.id}`)} className='font-bold text-lg text-blue underline'>{collectedItem.item.name}</p>
                                 <p>{collectedItem.item.setName}</p>
                                 <p>{collectedItem.appraisal.condition.name} - {collectedItem.printing.name}</p>
                                 {collectedItem.transactions[0].actions.map(action => {

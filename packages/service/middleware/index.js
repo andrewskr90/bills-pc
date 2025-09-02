@@ -60,7 +60,8 @@ const formatItems = (req, res, next) => {
                 tcgpId: item.tcgpId,
                 printings: req.printingsAlreadyFormatted 
                     ? item.printings 
-                    : formatPrintingsFromSkus(parseGroupConcat(item.printings)),
+                    : item.printings.split(',').map(id => ({ id })),
+                conditions: item.conditions.split(',').map(id => ({ id })),
                 sealed: item.sealed,
                 set: {
                     id: item.set_v2_id,

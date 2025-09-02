@@ -58,6 +58,7 @@ const AddItemSearch = (props) => {
                         countConfig={countConfig} 
                         isGrid={true}
                         allowSelectPrinting={true}
+                        allowSelectCondition={true}
                     />
                 })}
             <PageSelection location={location} count={count} />

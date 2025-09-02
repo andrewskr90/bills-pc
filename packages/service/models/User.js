@@ -1,7 +1,6 @@
 const { executeQueries } = require("../db")
-const { v4: uuidV4 } = require('uuid')
 
-const findProxyByCreatorId = async (req) => {
+const findProxyByCreatorId = async (userId, proxyUserId, userName, page, direction) => {
     let query = `
         SELECT
             *,
@@ -11,19 +10,21 @@ const findProxyByCreatorId = async (req) => {
                 u.user_id,
                 u.user_name
             FROM users u
-            WHERE u.proxyCreatorId = '${req.claims.user_id}'
-            ${req.query.user_name ? `
-                and u.user_name LIKE '%${req.query.user_name}%'
+            WHERE u.proxyCreatorId = '${userId}'
+            ${userName ? `
+                and u.user_name LIKE '%${userName}%'
+            ` : ''}
+            ${proxyUserId ? `
+                and u.user_id = '${proxyUserId}'
             ` : ''}
         ) as vendors
     `
     const variables = []
-    const direction = req.query.direction ? req.query.direction.toLowerCase() : undefined 
     let orderBy = `ORDER BY user_name`
     if (direction && direction.toLowerCase() === 'desc') orderBy += ' DESC'
     else orderBy += ' ASC'
     query += orderBy
-    const pageInt = parseInt(req.query.page)
+    const pageInt = parseInt(page)
     if (pageInt && pageInt > 0) {
         variables.push((pageInt-1)*20)
         query += ` LIMIT ?,20;`
