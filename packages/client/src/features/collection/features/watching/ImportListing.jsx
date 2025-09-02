@@ -51,15 +51,7 @@ const ImportListing = (props) => {
         return {
             ...listing,
             time: new Date(listing.time).toISOString(),
-            items: listing.items.map(item => { 
-                const { id, printingId, conditionId, note } = item
-                return {
-                    id, 
-                    printingId,
-                    conditionId,
-                    note
-                }
-            }),
+            items: listing.items
         }
     }
     const handleCreateExternalListing = async () => {

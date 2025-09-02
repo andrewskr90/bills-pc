@@ -23,17 +23,16 @@ const VendorInfo = ({ managing, setManaging, referenceData, setReferenceData }) 
     const handleSelectItems = async (items) => {
         const data = { 
             time: new Date(importTime).toISOString(), 
+            importerId: proxyUserId,
             items 
         }
-        console.log(data)
-        // await BillsPcService.createImports({ data })
-        //     .then(res => {
-        //         console.log(res)
-        //         navigate(`/gym-leader/vendors/${proxyUserId}`)
-        //     })
-        //     .catch(err => {
-        //         console.log(err)
-        //     })
+        await BillsPcService.createImports({ data })
+            .then(res => {
+                navigate(`/gym-leader/vendors/${proxyUserId}`)
+            })
+            .catch(err => {
+                console.log(err)
+            })
 
     }
 
