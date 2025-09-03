@@ -100,25 +100,22 @@ const SelectItems = (props) => {
     const convertToItemArray = () => {
         const items = Object.keys(lotItemCounts).reduce((prev, itemId) => {
             const cur = lotItemCounts[itemId]
-            if (cur.count) {
-                const eachPrintingOfItem = Object.keys(cur.count).reduce((prev, printingId) => {
-                    const eachConditionOfPrinting = Object.keys(cur.count[printingId]).reduce((prev, conditionId) => {
-                        if (cur.count[printingId][conditionId]) {
-                            const eachDuplicateOfPrintingAndCondition = []
-                            for (let i=0; i<cur.count[printingId][conditionId]; i++) {
-                                eachDuplicateOfPrintingAndCondition.push({ ...cur, printingId, conditionId })
-                            }
-                            return [...prev, ...eachDuplicateOfPrintingAndCondition]
-                        } else {
-                            return [...prev]
+            const eachPrintingOfItem = Object.keys(cur.count).reduce((prev, printingId) => {
+                const eachConditionOfPrinting = Object.keys(cur.count[printingId]).reduce((prev, conditionId) => {
+                    if (cur.count[printingId][conditionId]) {
+                        const eachDuplicateOfPrintingAndCondition = []
+                        for (let i=0; i<cur.count[printingId][conditionId]; i++) {
+                            eachDuplicateOfPrintingAndCondition.push({ ...cur, printingId, conditionId })
                         }
+                        return [...prev, ...eachDuplicateOfPrintingAndCondition]
+                    } else {
+                        return [...prev]
+                    }
 
-                    }, [])
-                    return [...prev, ...eachConditionOfPrinting]
                 }, [])
-                return [...prev, ...eachPrintingOfItem]
-            }
-            return prev
+                return [...prev, ...eachConditionOfPrinting]
+            }, [])
+            return [...prev, ...eachPrintingOfItem]
         }, [])
         return items
     }
@@ -153,7 +150,7 @@ const SelectItems = (props) => {
             }
             return prev
         }, 0)}</p>
-        {importTime && <label style={{ display: 'flex', flexDirection: 'column' }}>
+        {setImportTime && <label style={{ display: 'flex', flexDirection: 'column' }}>
             Import Time
             <input type="datetime-local" value={importTime} onChange={(e) => setImportTime(e.target.value)} />
         </label>}
