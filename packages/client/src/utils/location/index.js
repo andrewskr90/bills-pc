@@ -33,19 +33,19 @@ export const buildPreviousRoute = (location, optionalNumber) => {
     return previousRoute
 }
 
-export const buildParams = (location) => {
-    const builtParams = {}
+export const buildQueryParams = (location) => {
+    const builtSearchQuery = {}
     const splitSearch = location.search.split('?')
     if (splitSearch.length > 1) {
-        const splitParams = splitSearch[1].split('&')
-        splitParams.forEach(param => {
-            const splitParam = param.split('=')
-            if (splitParam.length > 1) {
-                builtParams[splitParam[0].toLowerCase()] = decodeURIComponent(splitParam[1])
+        const splitQueryParams = splitSearch[1].split('&')
+        splitQueryParams.forEach(queryParam => {
+            const splitQueryParam = queryParam.split('=')
+            if (splitQueryParam.length > 1) {
+                builtSearchQuery[splitQueryParam[0].toLowerCase()] = decodeURIComponent(splitQueryParam[1])
             }
         })
     }
-    return builtParams
+    return builtSearchQuery
 }
 
 export const buildParamString = (params) => {

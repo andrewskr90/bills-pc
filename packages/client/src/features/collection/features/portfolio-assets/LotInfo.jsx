@@ -3,7 +3,7 @@ import BillsPcService from '../../../../api/bills-pc'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CollectedItem from '../../../../components/collected-item'
 import PageSelection from '../../../../components/page-selection'
-import { buildParams } from '../../../../utils/location'
+import { buildQueryParams } from '../../../../utils/location'
 
 const LotInfo = () => {
     const [lot, setLot] = useState()
@@ -13,6 +13,7 @@ const LotInfo = () => {
     const [loadImage, setLoadImage] = useState(true)
     const navigate = useNavigate()
     const location = useLocation()
+    const queryParams = buildQueryParams(location)
     const handleImageError = () => {
         setLoadImage(false)
     }
@@ -22,14 +23,12 @@ const LotInfo = () => {
 
     useEffect(() => {
         (async () => {
-            const params = buildParams(location)
-            params.direction = params.direction ? params.direction : undefined
-            await BillsPcService.getLotById(id, params)
+            await BillsPcService.getLotById(id, queryParams)
                 .then(res => {
                     setLot(res.data)
                 }).catch(err => setError(err.response.data.message))
         })()
-    }, [location.search])
+    }, [queryParams.page, queryParams.direction])
     
     return <div className='flex flex-col items-start'>
         <p>Lot Info</p>

@@ -1,32 +1,32 @@
 import React from 'react'
 import { camelCaseToCapitalized } from '../../utils/string'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { buildParams, buildParamString } from '../../utils/location'
+import { buildQueryParams, buildParamString } from '../../utils/location'
 import { checkIfFilterIsActive } from './utils'
 
 const FilterModal = (props) => {
     const { showFilterModal, setShowFilterModal, filterConfig } = props
     const location = useLocation()
-    const params = buildParams(location)
+    const queryParams = buildQueryParams(location)
     const navigate = useNavigate()
 
     const toggleFilter = (filterType, filter) => {
         const conditionedFilterType = filterType.toLowerCase()
         const conditionedFilter = filter.toLowerCase()
-        if (params[`filter-${conditionedFilterType}`]) {
-            if (params[`filter-${conditionedFilterType}`].includes(conditionedFilter)) {
-                params[`filter-${conditionedFilterType}`] = 
-                    params[`filter-${conditionedFilterType}`]
+        if (queryParams[`filter-${conditionedFilterType}`]) {
+            if (queryParams[`filter-${conditionedFilterType}`].includes(conditionedFilter)) {
+                queryParams[`filter-${conditionedFilterType}`] = 
+                    queryParams[`filter-${conditionedFilterType}`]
                         .split(',')
                         .filter(existingFilter => existingFilter !== conditionedFilter)
                         .join(',')
             } else {
-                params[`filter-${conditionedFilterType}`] += `,${conditionedFilter.toLowerCase()}`
+                queryParams[`filter-${conditionedFilterType}`] += `,${conditionedFilter.toLowerCase()}`
             }
         } else {
-            params[`filter-${conditionedFilterType}`] = conditionedFilter.toLowerCase()
+            queryParams[`filter-${conditionedFilterType}`] = conditionedFilter.toLowerCase()
         }
-        navigate(location.pathname + buildParamString(params))
+        navigate(location.pathname + buildParamString(queryParams))
     }
 
     return (<div className={showFilterModal ? 'modalBackground' : 'hidden'}>
@@ -37,7 +37,7 @@ const FilterModal = (props) => {
                     <p>{camelCaseToCapitalized(filterType)}</p>
                     <div className='filterBubbles'>
                         {filterConfig[filterType].map(filter => {
-                            return <div className={`filterBubble ${checkIfFilterIsActive(filterType, filter, params) ? 'active' : ''}`} onClick={() => toggleFilter(filterType, filter)}>
+                            return <div className={`filterBubble ${checkIfFilterIsActive(filterType, filter, queryParams) ? 'active' : ''}`} onClick={() => toggleFilter(filterType, filter)}>
                                 {/* filter keys are already formatted */}
                                 <p>{filter}</p>
                             </div>

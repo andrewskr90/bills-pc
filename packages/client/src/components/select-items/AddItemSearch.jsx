@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { buildParams, buildParamString } from "../../utils/location"
+import { buildQueryParams, buildParamString } from "../../utils/location"
 import { useLocation, useNavigate } from "react-router-dom"
 import Search from "../../features/search"
 import Toolbar from "../../layouts/toolbar"
@@ -11,7 +11,7 @@ import { searchForItems } from "../../utils/search"
 const AddItemSearch = (props) => {
     const { initialEmptyMessage, referenceData, setReferenceData, countConfig } = props
     const location = useLocation()
-    const params = buildParams(location)
+    const queryParams = buildQueryParams(location)
     const [searchedItems, setSearchedItems] = useState([])
     const [emptyMessage, setEmptyMessage] = useState(initialEmptyMessage)
     const [loading, setLoading] = useState(false)
@@ -21,9 +21,9 @@ const AddItemSearch = (props) => {
 
     useEffect(() => {
         (async () => {
-            const relayedSearch = params.searchvalue
+            const relayedSearch = queryParams.searchvalue
             if (relayedSearch) {
-                await searchForItems(relayedSearch, params)
+                await searchForItems(relayedSearch, queryParams)
                     .then(res => {
                         setEmptyMessage('No results found.')
                         setSearchedItems(res.data.items)
@@ -36,7 +36,7 @@ const AddItemSearch = (props) => {
                     })
             }
         })()
-    }, [location.search])
+    }, [queryParams.searchvalue, queryParams.page, queryParams.direction])
 
     return (
         <>
@@ -47,6 +47,7 @@ const AddItemSearch = (props) => {
                 setReferenceData={setReferenceData}
                 sortKey={sortKey}
                 defaultSortDirection={'asc'}
+                viewToggleRowGrid={true}
             />
             <PageSelection location={location} count={count} />
             <ItemContainer emptyMessage={emptyMessage} loading={loading}>
@@ -56,7 +57,6 @@ const AddItemSearch = (props) => {
                         item={item} 
                         referenceData={referenceData} 
                         countConfig={countConfig} 
-                        isGrid={true}
                         allowSelectPrinting={true}
                         allowSelectCondition={true}
                     />

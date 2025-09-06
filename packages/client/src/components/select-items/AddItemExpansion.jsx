@@ -1,38 +1,40 @@
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { buildParams, buildParamString } from '../../utils/location'
+import { buildQueryParams, buildParamString } from '../../utils/location'
 import ExpansionsMarketplace from '../../features/marketplace/ExpansionsMarketplace'
 import ExpansionItems from '../../features/marketplace/ExpansionItems'
 
 const AddItemExpansion = (props) => {
     const { referenceData, setReferenceData, countConfig } = props
     const location = useLocation()
-    const params = buildParams(location)
+    const queryParams = buildQueryParams(location)
     const navigate = useNavigate()
 
-    const [selectedExpansion, setSelectedExpansion] = useState(undefined)
-
     return (
-        !params.expansionid ? (
+        !queryParams.expansionid ? (
             <ExpansionsMarketplace
                 handleSelectSet={(id) => {
-                    params.expansionid = id
-                    params.page = '1'
-                    navigate(location.pathname + buildParamString(params))
-                    setSelectedExpansion(id)
+                    queryParams.expansionid = id
+                    queryParams.page = '1'
+                    navigate(location.pathname + buildParamString(queryParams))
                 }}
                 referenceData={referenceData}
                 setReferenceData={setReferenceData}
             />
         ) : (
             <>
-                <button onClick={() => setSelectedExpansion(undefined)}>clear set</button>
+                <button onClick={() => {
+                    delete queryParams.expansionid
+                    delete queryParams.page
+                    navigate(location.pathname + buildParamString(queryParams))
+                }}>clear set</button>
                 <ExpansionItems
-                    selectedSetId={selectedExpansion}
+                    selectedSetId={queryParams.expansionid}
                     referenceData={referenceData} 
                     setReferenceData={setReferenceData}
                     countConfig={countConfig} 
                     allowSelectPrinting={true}
+                    allowSelectCondition={true}
                 />
             </>
         )

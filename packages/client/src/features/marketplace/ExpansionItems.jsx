@@ -4,33 +4,29 @@ import ItemContainer from '../../components/item-container/index.jsx'
 import Item from '../../components/item/index.jsx'
 import BillsPcService from '../../api/bills-pc'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { buildParams } from '../../utils/location/index.js'
+import { buildQueryParams } from '../../utils/location/index.js'
 import PageSelection from '../../components/page-selection/index.jsx'
 
 const ExpansionItems = (props) => {
-    const { referenceData, setReferenceData, selectedSetId, handleSelectItem, countConfig, allowSelectPrinting } = props
+    const { referenceData, setReferenceData, selectedSetId, handleSelectItem, countConfig, allowSelectPrinting, allowSelectCondition } = props
     const [items, setItems] = useState([])
     const [expansion, setExpansion] = useState()
-    const [isGrid, setIsGrid] = useState(false)
     const [count, setCount] = useState()
     const filterConfig = { itemType: ['card', 'product'] }
 
     const sortKey = 'itemSort'
     const location = useLocation()
     const navigate = useNavigate()
-    
+    const queryParams = buildQueryParams(location)
+
     useEffect(() => {
         (async () => {
-            let expansionid
             await BillsPcService.getSetsV2({ params: { set_v2_id: selectedSetId } })
                 .then(res => {
-                    expansionid = res.data.expansions[0].set_v2_id
                     setExpansion(res.data.expansions[0])
                 })
                 .catch(err => console.log(err))
-            const params = buildParams(location)
-            const direction = params.direction ? params.direction : undefined
-            await BillsPcService.getItems({ params: { ...params, expansionid, direction } })
+            await BillsPcService.getItems({ params: { ...queryParams } })
                 .then(res => {
                     setCount(res.data.count)
                     setItems(res.data.items)
@@ -38,7 +34,7 @@ const ExpansionItems = (props) => {
                 })
                 .catch(err => console.log(err))
         })()
-    }, [location.search])
+    }, [queryParams.expansionid, queryParams.page, queryParams.direction])
 
     return (
         <>
@@ -48,11 +44,9 @@ const ExpansionItems = (props) => {
             </div>
             <Toolbar
                 sortKey={sortKey}
-                viewToggleRowGrid={true}
                 referenceData={referenceData}
                 setReferenceData={setReferenceData}
-                isGrid={isGrid}
-                setIsGrid={setIsGrid}
+                viewToggleRowGrid={true}
                 defaultSortDirection='asc'
                 filterConfig={filterConfig}
             />
@@ -68,8 +62,8 @@ const ExpansionItems = (props) => {
                                 item={item} 
                                 handleSelectItem={handleSelectItem} 
                                 countConfig={countConfig} 
-                                isGrid={isGrid}
                                 allowSelectPrinting={allowSelectPrinting}
+                                allowSelectCondition={allowSelectCondition}
                             />
                         })
                     }

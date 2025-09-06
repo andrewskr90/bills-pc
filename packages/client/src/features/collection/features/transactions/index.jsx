@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Transaction from './components/Transaction.jsx'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import ListingInfo from './ListingInfo.jsx'
-import { buildParams } from '../../../../utils/location/index.js'
+import { buildQueryParams } from '../../../../utils/location/index.js'
 import BillsPcService from '../../../../api/bills-pc/index.js'
 import Toolbar from '../../../../layouts/toolbar/index.jsx'
 import ItemContainer from '../../../../components/item-container/index.jsx'
@@ -20,13 +19,12 @@ const Transactions = (props) => {
     } = props
     const navigate = useNavigate()
     const location = useLocation()
+    const queryParams = buildQueryParams(location)
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         (async () => {
-            const params = buildParams(location)
-            params.direction = params.direction ? params.direction : undefined
-            await BillsPcService.getTransactions(params)
+            await BillsPcService.getTransactions(queryParams)
             .then(res => {
                 setTransactionCount(res.data.count)
                 setTransactions(res.data.transactions)
@@ -34,7 +32,7 @@ const Transactions = (props) => {
             })
             .catch(err => console.log(err))
         })()
-    }, [location.search])
+    }, [queryParams.direction, queryParams.page])
     const sortKey = 'transactionSort'
 
     return (

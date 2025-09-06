@@ -5,22 +5,21 @@ import PageSelection from '../../../../components/page-selection';
 import ItemContainer from '../../../../components/item-container';
 import CollectedItem from '../../../../components/collected-item';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { buildParams } from '../../../../utils/location';
+import { buildQueryParams } from '../../../../utils/location';
 import BillsPcService from '../../../../api/bills-pc';
 
 const Assets = (props) => {
     const { referenceData, setReferenceData} = props
     const navigate = useNavigate()
     const location = useLocation()
+    const queryParams = buildQueryParams(location)
     const [loading, setLoading] = useState(true)
     const [portfolio, setPortfolio] = useState([])
     const [count, setCount] = useState()
     useEffect(() => {
         (async () => {
-            const params = buildParams(location)
-            params.direction = params.direction ? params.direction : undefined
             setLoading(true)
-            await BillsPcService.getPortfolio(params)
+            await BillsPcService.getPortfolio(queryParams)
             .then(res => {
                 setCount(res.data.count)
                 setPortfolio(res.data.items)
@@ -28,7 +27,7 @@ const Assets = (props) => {
             })
             .catch(err => console.log(err))
         })()
-    }, [location.search])
+    }, [queryParams.searchvalue, queryParams.page, queryParams.direction])
     const sortKey = 'portfolioItemSort'
 
     const handleSelectAsset = (slug) => {
