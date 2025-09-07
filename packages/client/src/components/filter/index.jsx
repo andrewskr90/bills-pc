@@ -2,15 +2,15 @@ import React, { useState } from 'react'
 import FilterModal from './FilterModal.jsx'
 import './assets/filter.css'
 import { useLocation } from 'react-router-dom'
-import { buildParams } from '../../utils/location/index.js'
+import { buildQueryParams } from '../../utils/location/index.js'
 import { countFilters } from './utils/index.js'
 
 const Filter = (props) => {
     const { filterConfig } = props
     const [showFilterModal, setShowFilterModal] = useState(false)
     const location = useLocation()
-    const params = buildParams(location)
-    const filterCount = countFilters(filterConfig, params)
+    const queryParams = buildQueryParams(location)
+    const filterCount = countFilters(filterConfig, queryParams)
 
     const openFilterModal = () => {
         setShowFilterModal(true)

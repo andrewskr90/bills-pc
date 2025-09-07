@@ -15,6 +15,23 @@ import dotenv from 'dotenv'
 import { buildTCGPReferenceData, intArraysMatch } from './utils/index.js'
 dotenv.config()
 
+const updateItems = async (items, cookies) => {
+    const updatedItems = []
+    for (let i=0; i<items.length; i++) {
+        try {
+            await patchItemByFilterBillsPc(
+                { tcgpId: items[i].tcgpId }, 
+                items[i], 
+                cookies
+            )
+            updatedItems.push(items[i])
+        } catch (err) {
+            throw new Error(`unable to update item values with tcgpId ${items[i].tcgpId}`)
+        }
+    }
+    return updatedItems
+}
+
 const processUnexpectedItems = async (unexpectedItems, cookies) => {
 
     const processNewItems = async (items) => {
@@ -34,7 +51,6 @@ const processUnexpectedItems = async (unexpectedItems, cookies) => {
         const DUPLICATE = 422
         if (status === DUPLICATE) {
             if (err.response.data.message.includes('Item.tcgpId')) {
-                const updatedItems = []
                 // narrow down stale items within page's new or updated items
                 const newOrStaleTcgpIds = unexpectedItems
                     .map(newItem => newItem.tcgpId)
@@ -53,19 +69,7 @@ const processUnexpectedItems = async (unexpectedItems, cookies) => {
                 const newItemsToCreate = unexpectedItems.filter(item => {
                     return !bpcExistingItems.map(item => item.tcgpId).includes(item.tcgpId)
                 })
-                for (let i=0; i<formattedItemsToPatch.length; i++) {
-                    const formattedItemToPatch = formattedItemsToPatch[i]
-                    try {
-                        await patchItemByFilterBillsPc(
-                            { tcgpId: formattedItemToPatch.tcgpId }, 
-                            formattedItemToPatch, 
-                            cookies
-                        )
-                        updatedItems.push(formattedItemToPatch)
-                    } catch (err) {
-                        throw new Error(`unable to update item values with tcgpId ${formattedItemToPatch.tcgpId}`)
-                    }
-                }
+                const updatedItems = await updateItems(formattedItemsToPatch, cookies)
                 const newItems = await processNewItems(newItemsToCreate)
                 return { newItems, updatedItems }
             }
@@ -139,6 +143,7 @@ const catalogueSync = async () => {
 
                     while (moreItems) {
                         const unexpectedItems = []
+                        const pageItemsToUpdate = []
                         try {
                             const currentPageItems = await TCGPAPI.items(apiToken, tcgp_curGroup.groupId, itemOffset)
                             if (currentPageItems.length === 0) {
@@ -154,8 +159,14 @@ const catalogueSync = async () => {
                             })
                             for (let i=0; i<formattedPageItems.length; i++) {
                                 const curItem = formattedPageItems[i]
-                                if (!bpc_curSetItemLookup.items[curItem.tcgpId]) {
+                                const curBpcItem = bpc_curSetItemLookup.items[curItem.tcgpId]
+                                if (!curBpcItem) {
                                     unexpectedItems.push(curItem)
+                                } else if (curBpcItem.name !== curItem.name) {
+                                    const { id, tcgpId, set } = curBpcItem
+                                    const { id: setId } = set
+                                    const { name } = curItem
+                                    pageItemsToUpdate.push({ id, setId, tcgpId, name })
                                 }
                             }
                             if (unexpectedItems.length > 0) {
@@ -166,6 +177,14 @@ const catalogueSync = async () => {
                                 for (let i=0; i<newItems.length; i++) {
                                     bpc_curSetItemLookup.items[newItems[i].tcgpId] = newItems[i]
                                 }
+                                for (let i=0; i<updatedItems.length; i++) {
+                                    bpc_curSetItemLookup.items[updatedItems[i].tcgpId] = updatedItems[i]
+                                }
+                            }
+                            // TODO combine processUnexpectedItems with item name updates
+                            if (pageItemsToUpdate.length > 0) {
+                                const updatedItems = await updateItems(pageItemsToUpdate, cookies)
+                                updatedItemCount += updatedItems.length
                                 for (let i=0; i<updatedItems.length; i++) {
                                     bpc_curSetItemLookup.items[updatedItems[i].tcgpId] = updatedItems[i]
                                 }

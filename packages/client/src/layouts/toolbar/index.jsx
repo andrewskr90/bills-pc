@@ -8,12 +8,10 @@ import ToggleRowOrGrid from '../../components/row-or-grid/index.jsx'
 const Toolbar = (props) => {
     const { 
         viewRangeSelector, 
-        viewToggleRowGrid,
         referenceData, 
         setReferenceData,
         sortKey,
-        isGrid,
-        setIsGrid,
+        viewToggleRowGrid,
         defaultSortDirection,
         defaultAttribute,
         filterConfig
@@ -31,7 +29,7 @@ const Toolbar = (props) => {
             />
         ) : <></>}
         {viewRangeSelector ? <RangeSelector referenceData={referenceData} setReferenceData={setReferenceData} /> : <></>}
-        {viewToggleRowGrid ? <ToggleRowOrGrid isGrid={isGrid} setIsGrid={setIsGrid} /> : <></>}
+        {viewToggleRowGrid ? <ToggleRowOrGrid /> : <></>}
     </div>)
 }
 

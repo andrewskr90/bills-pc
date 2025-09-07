@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import './assets/item.css'
+import { buildQueryParams } from '../../utils/location'
+import { useLocation } from 'react-router-dom'
 
 const MoreInfo = ({ handleSelectItem, item }) => {
     return <button 
@@ -102,10 +104,11 @@ const GridVersion = ({ item, allowSelectPrinting, allowSelectCondition, handleSe
 }
 
 const Item = (props) => {
-    const { item, referenceData, handleSelectItem, countConfig, isGrid, allowSelectPrinting, allowSelectCondition } = props
-
+    const { item, referenceData, handleSelectItem, countConfig, allowSelectPrinting, allowSelectCondition } = props
+    const location = useLocation()
+    const queryParams = buildQueryParams(location)
     return (
-        isGrid ? (
+        queryParams.isgrid ? (
             <GridVersion 
                 item={item} 
                 allowSelectPrinting={allowSelectPrinting} 

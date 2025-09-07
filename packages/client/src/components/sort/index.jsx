@@ -1,6 +1,6 @@
 import React from 'react'
 import './assets/sort.css'
-import { buildParams, buildParamString } from '../../utils/location'
+import { buildQueryParams, buildParamString } from '../../utils/location'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const Sort = (props) => {
@@ -8,24 +8,24 @@ const Sort = (props) => {
     const location = useLocation()
     const navigate = useNavigate()
 
-    const params = buildParams(location)
+    const queryParams = buildQueryParams(location)
 
     const handleChangeValue = (e) => {
-        params.attribute = e.target.value
-        navigate(location.pathname + buildParamString(params))
+        queryParams.attribute = e.target.value
+        navigate(location.pathname + buildParamString(queryParams))
     }
 
     const toggleDirection = (e) => {
         if (e.currentTarget.value === 'asc') {
-            params.direction = 'desc'
+            queryParams.direction = 'desc'
         } else {
-            params.direction = 'asc'
+            queryParams.direction = 'asc'
         }
-        navigate(location.pathname + buildParamString(params))
+        navigate(location.pathname + buildParamString(queryParams))
     }
 
-    const directionValue = params.direction ? params.direction.toLowerCase() : defaultSortDirection
-    const attributeValue = params.attribute ? params.attribute.toLowerCase() : defaultAttribute
+    const directionValue = queryParams.direction ? queryParams.direction.toLowerCase() : defaultSortDirection
+    const attributeValue = queryParams.attribute ? queryParams.attribute.toLowerCase() : defaultAttribute
     return (<div className='sort'>
         <button className='direction' value={directionValue} onClick={toggleDirection}>
             {directionValue === 'asc'

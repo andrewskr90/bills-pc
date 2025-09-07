@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { buildParams } from '../../utils/location'
+import { buildQueryParams } from '../../utils/location'
 import BillsPcService from '../../api/bills-pc'
 import Toolbar from '../../layouts/toolbar'
 import PageSelection from '../../components/page-selection'
@@ -15,14 +15,14 @@ const Vendors = (props) => {
     } = props
     const navigate = useNavigate()
     const location = useLocation()
+    const queryParams = buildQueryParams(location)
     const [vendors, setVendors] = useState([])
     const [vendorCount, setVendorCount] = useState()
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         (async () => {
-            const params = buildParams(location)
-            params.proxy = true
+            const params = { ...queryParams, proxy: true }
             await BillsPcService.getUsers({ params })
                 .then(res => {
                     setVendorCount(res.data.count)
@@ -31,7 +31,7 @@ const Vendors = (props) => {
                 })
                 .catch(err => console.log(err))
         })()
-    }, [location.search])
+    }, [queryParams.page, queryParams.direction])
     
     const handleViewVendor = (id, navigate) => {
         navigate(id)

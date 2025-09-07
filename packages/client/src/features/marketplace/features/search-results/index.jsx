@@ -7,7 +7,7 @@ import Toolbar from '../../../../layouts/toolbar/index.jsx'
 import ItemContainer from '../../../../components/item-container/index.jsx'
 import { conditionSearchString } from '../../../../utils/search'
 import PageSelection from '../../../../components/page-selection'
-import { buildParams } from '../../../../utils/location/index.js'
+import { buildQueryParams } from '../../../../utils/location/index.js'
 import BillsPcService from '../../../../api/bills-pc/index.js'
 
 const SearchResults = (props) => {
@@ -15,19 +15,18 @@ const SearchResults = (props) => {
     const [value, setValue] = useState('')
     const [count, setCount] = useState()
     const location = useLocation()
+    const queryParams = buildQueryParams(location)
     const sortKey = 'itemSort'
     const navigate = useNavigate()
-    const [isGrid, setIsGrid] = useState(false)
     const [marketSearchResults, setMarketSearchResults] = useState([])
     const filterConfig = { itemType: ['card', 'product'] }
 
     useEffect(() => {
         (async () => {
-            const params = buildParams(location)
-            params.searchvalue = conditionSearchString(params.searchvalue)
-            if (params.searchvalue) {
-                setValue(params.searchvalue)
-                await BillsPcService.getItems({ params })
+            queryParams.searchvalue = conditionSearchString(queryParams.searchvalue)
+            if (queryParams.searchvalue) {
+                setValue(queryParams.searchvalue)
+                await BillsPcService.getItems({ params: queryParams })
                         .then(res => {
                             setMarketSearchResults(res.data.items)
                             setCount(res.data.count)
@@ -36,7 +35,7 @@ const SearchResults = (props) => {
                         .catch(err => console.log(err))
             }
         })()
-    }, [location.search])
+    }, [queryParams.searchvalue, queryParams.page, queryParams.direction])
 
     const handleSelectItem = (item) => {
         navigate(`/market/expansion/${item.set.id}/item/${item.id}`)
@@ -52,8 +51,6 @@ const SearchResults = (props) => {
             referenceData={referenceData}
             setReferenceData={setReferenceData}
             viewToggleRowGrid={true}
-            isGrid={isGrid}
-            setIsGrid={setIsGrid}
             defaultSortDirection='asc'
             filterConfig={filterConfig}
         />
@@ -68,7 +65,6 @@ const SearchResults = (props) => {
                         referenceData={referenceData} 
                         item={result} 
                         handleSelectItem={handleSelectItem} 
-                        isGrid={isGrid} 
                     />
                 })}
                 <PageSelection location={location} count={count} />

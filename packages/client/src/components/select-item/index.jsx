@@ -26,13 +26,12 @@ const SelectItem = (props) => {
     const sortKey = 'itemSort'
     const navigate = useNavigate()
     const [count, setCount] = useState()
-    const [isGrid, setIsGrid] = useState(false)
     const location = useLocation()
 
     const submitSearch = (value) => {
         if (value !== params.searchvalue) {
             setLoading(true)
-            const params = buildParams(location)
+            const queryParams = buildQueryParams(location)
             // TODO match this function to other `submitSearch` implimentations
             // searchForItems(value, params)
             //     .then(res => {
@@ -73,7 +72,6 @@ const SelectItem = (props) => {
                         item={item} 
                         referenceData={referenceData} 
                         handleSelectItem={handleSelectItem} 
-                        isGrid={isGrid} 
                     />
                 })}
                 <PageSelection location={location} count={count} />
