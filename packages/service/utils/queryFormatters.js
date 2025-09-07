@@ -1,3 +1,5 @@
+const { conditionValueForDb } = require(".")
+
 const QueryFormatters = {
     //takes in array of objects to be inserted
     //into sql table
@@ -23,26 +25,8 @@ const QueryFormatters = {
         objectsArray.forEach((obj, i) => {
             let values = "("
             keys.forEach((key, j) => {      
-                let value
-                if (obj[key] === null) {
-                    value = null
-                } else if (obj[key] === undefined) {
-                    value = null
-                }else if (typeof obj[key] === 'string') {
-                    //remove accents
-                    let accentsRemoved = obj[key].normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                    //escape apostrophes
-                    let escapedApostrophe = accentsRemoved.replace(/'/g, "''")
-                    value = `'${escapedApostrophe}'`
-                } else if (typeof obj[key] === 'number') {
-                    value = obj[key]
-                } else if (typeof obj[key] === 'boolean') {
-                    if (obj[key]) {
-                        value = 1
-                    } else {
-                        value = 0
-                    }
-                }                 
+                const value = conditionValueForDb(obj[key])
+                              
                 if (j !== keys.length -1) {
                     values += `${value}, `
                 } else {
@@ -106,17 +90,7 @@ const QueryFormatters = {
         let stringForSetStatement = ''
         const keys = Object.keys(object)
         keys.forEach((key, index) => {
-            let value
-            if (object[key] === null) value = null
-            else if (typeof object[key] ==='string') {
-                //remove accents
-                let accentsRemoved = object[key].normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                //escape apostrophes
-                let escapedApostrophe = accentsRemoved.replace(/'/g, "''")
-                value = `'${escapedApostrophe}'`
-            } else {
-                value = object[key]
-            }
+            const value = conditionValueForDb(object[key])
             if (index === keys.length -1) {
                 stringForSetStatement += `${key}=${value}`
             } else {

@@ -1,4 +1,5 @@
 const { executeQueries } = require("../db")
+const { conditionValueForDb } = require("../utils")
 const QueryFormatters = require("../utils/queryFormatters")
 const { v4: uuidV4 } = require('uuid')
 
@@ -60,7 +61,7 @@ const select = async () => {
 
 const patchByTcgpId = async (tcgpId, values) => {
     const query = `UPDATE Item SET ${Object.keys(values).map((value, idx) => {
-        return `${value} = '${values[value]}'${idx < values.length-1 ? ', ' : ''}`
+        return `${value} = ${conditionValueForDb(values[value])}${idx < values.length-1 ? ', ' : ''}`
     })} WHERE tcgpId = ?`
     const req = { queryQueue: [{ query, variables: [tcgpId] }] }
     const res = {}
